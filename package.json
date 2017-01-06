@@ -1,0 +1,14 @@
+{
+    "name": "fib-orm",
+    "version": "1.0.0",
+    "description": "",
+    "main": "lib/index.js",
+    "author": "Liu Hu <lion@9465.net>",
+    "license": "MIT",
+    "scripts": {
+        "test": "fibjs test/main.js"
+    },
+    "dependencies": {
+        "orm": "^3.2.2"
+    }
+}
