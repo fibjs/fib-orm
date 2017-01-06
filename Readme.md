@@ -30,7 +30,7 @@ An example:
 ```js
 var orm = require("fib-orm");
 
-var db = orm.connectSync("mysql://username:password@host/database"
+var db = orm.connectSync("mysql://username:password@host/database");
 var Person = db.define("person", {
 	name      : String,
 	surname   : String,
