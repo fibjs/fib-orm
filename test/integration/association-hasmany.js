@@ -72,7 +72,7 @@ describe("hasMany", function() {
             };
         };
 
-        xdescribe("getAccessor", function() {
+        describe("getAccessor", function() {
             before(setup());
 
             it("should allow to specify order as string", function() {
@@ -93,7 +93,7 @@ describe("hasMany", function() {
                 assert.equal(pets[0].model(), Pet);
             });
 
-            it("should allow to specify order as Array", function(done) {
+            it("should allow to specify order as Array", function() {
                 var people = Person.findSync({ name: "John" });
 
                 var pets = people[0].getPetsSync(["name", "Z"]);
@@ -146,7 +146,7 @@ describe("hasMany", function() {
             });
         });
 
-        xdescribe("hasAccessor", function() {
+        describe("hasAccessor", function() {
             before(setup());
 
             it("should return true if instance has associated item", function() {
@@ -169,14 +169,14 @@ describe("hasMany", function() {
                 assert.ok(has_pets);
             });
 
-            it("should return false if any passed instances are not associated", function(done) {
+            it("should return false if any passed instances are not associated", function() {
                 var pets = Pet.findSync();
                 var Jane = Person.find({ name: "Jane" }).firstSync();
                 var has_pets = Jane.hasPetsSync(pets);
                 assert.notOk(has_pets);
             });
 
-            xit("should return true if join table has duplicate entries", function() {
+            it("should return true if join table has duplicate entries", function() {
                 var pets = Pet.findSync({ name: ["Mutt", "Deco"] });
 
                 assert.equal(pets.length, 2);
@@ -187,23 +187,15 @@ describe("hasMany", function() {
 
                 assert.equal(hasPets, true);
 
-                db.driver.execQuery(
-                    "INSERT INTO person_pets (person_id, pets_id) VALUES (?,?), (?,?)", [John.id, pets[0].id, John.id, pets[1].id],
-                    function(err) {
-                        assert.notExist(err);
+                db.driver.execQuerySync(
+                    "INSERT INTO person_pets (person_id, pets_id) VALUES (?,?), (?,?)", [John.id, pets[0].id, John.id, pets[1].id]);
 
-                        John.hasPets(pets, function(err, hasPets) {
-                            assert.equal(err, null);
-                            assert.equal(hasPets, true);
-
-                            done()
-                        });
-                    }
-                );
+                var hasPets = John.hasPetsSync(pets);
+                assert.equal(hasPets, true);
             });
         });
 
-        xdescribe("delAccessor", function() {
+        describe("delAccessor", function() {
             before(setup());
 
             it("should remove specific associations if passed", function() {
@@ -303,7 +295,7 @@ describe("hasMany", function() {
             });
         });
 
-        xdescribe("setAccessor", function() {
+        describe("setAccessor", function() {
             before(setup());
 
             it("should accept several arguments as associations", function() {
@@ -362,7 +354,7 @@ describe("hasMany", function() {
             });
         });
 
-        xdescribe("with autoFetch turned on", function() {
+        describe("with autoFetch turned on", function() {
             before(setup({
                 autoFetchPets: true
             }));
@@ -424,11 +416,11 @@ describe("hasMany", function() {
         });
     });
 
-    xdescribe("with non-standard keys", function() {
+    describe("with non-standard keys", function() {
         var Email;
         var Account;
 
-        setup = function(opts) {
+        var setup = function(opts) {
             Email = db.define('email', {
                 text: { type: 'text', key: true, required: true },
                 bounced: Boolean
@@ -443,119 +435,69 @@ describe("hasMany", function() {
             helper.dropSync([Email, Account]);
         };
 
-        xit("should place ids in the right place", function(done) {
-            setup({}, function(err) {
-                assert.notExist(err);
+        it("should place ids in the right place", function() {
+            setup({});
+            var emails = Email.createSync([{ bounced: true, text: 'a@test.com' }, { bounced: false, text: 'z@test.com' }]);
 
-                Email.create([{ bounced: true, text: 'a@test.com' }, { bounced: false, text: 'z@test.com' }], function(err, emails) {
-                    assert.notExist(err);
+            var account = Account.createSync({ name: "Stuff" });
 
-                    Account.create({ name: "Stuff" }, function(err, account) {
-                        assert.notExist(err);
+            account.addEmailsSync(emails[1]);
 
-                        account.addEmails(emails[1], function(err) {
-                            assert.notExist(err);
+            var data = db.driver.execQuerySync("SELECT * FROM account_emails");
 
-                            db.driver.execQuery("SELECT * FROM account_emails", function(err, data) {
-                                assert.notExist(err);
-
-                                assert.equal(data[0].account_id, 1);
-                                assert.equal(data[0].emails_text, 'z@test.com');
-
-                                done();
-                            });
-                        });
-                    });
-                });
-            });
+            assert.equal(data[0].account_id, 1);
+            assert.equal(data[0].emails_text, 'z@test.com');
         });
 
-        xit("should generate correct tables", function(done) {
-            setup({}, function(err) {
-                assert.notExist(err);
+        it("should generate correct tables", function() {
+            setup({});
 
-                var sql;
+            var protocol = db.driver.db.conn.type;
+            var sql;
 
-                if (protocol == 'sqlite') {
-                    sql = "PRAGMA table_info(?)";
-                } else {
-                    sql = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ? ORDER BY data_type";
-                }
+            if (protocol == 'SQLite') {
+                sql = "PRAGMA table_info(?)";
+            } else {
+                sql = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ? ORDER BY data_type";
+            }
 
-                db.driver.execQuery(sql, ['account_emails'], function(err, cols) {
-                    assert.notExist(err);
+            var cols = db.driver.execQuerySync(sql, ['account_emails']);
 
-                    if (protocol == 'sqlite') {
-                        assert.equal(cols[0].name, 'account_id');
-                        assert.equal(cols[0].type, 'INTEGER');
-                        assert.equal(cols[1].name, 'emails_text');
-                        assert.equal(cols[1].type, 'TEXT');
-                    } else if (protocol == 'mysql') {
-                        assert.equal(cols[0].column_name, 'account_id');
-                        assert.equal(cols[0].data_type, 'int');
-                        assert.equal(cols[1].column_name, 'emails_text');
-                        assert.equal(cols[1].data_type, 'varchar');
-                    } else if (protocol == 'postgres') {
-                        assert.equal(cols[0].column_name, 'account_id');
-                        assert.equal(cols[0].data_type, 'integer');
-                        assert.equal(cols[1].column_name, 'emails_text');
-                        assert.equal(cols[1].data_type, 'text');
-                    }
-
-                    done();
-                });
-            });
+            if (protocol == 'SQLite') {
+                assert.equal(cols[0].name, 'account_id');
+                assert.equal(cols[0].type, 'INTEGER');
+                assert.equal(cols[1].name, 'emails_text');
+                assert.equal(cols[1].type, 'TEXT');
+            } else if (protocol == 'mysql') {
+                assert.equal(cols[0].column_name, 'account_id');
+                assert.equal(cols[0].data_type, 'int');
+                assert.equal(cols[1].column_name, 'emails_text');
+                assert.equal(cols[1].data_type, 'varchar');
+            }
         });
 
-        xit("should add a composite key to the join table if requested", function(done) {
-            setup({ key: true }, function(err) {
-                assert.notExist(err);
-                var sql;
+        it("should add a composite key to the join table if requested", function() {
+            setup({ key: true });
 
-                if (protocol == 'postgres' || protocol === 'redshift') {
-                    sql = "" +
-                        "SELECT c.column_name, c.data_type " +
-                        "FROM  information_schema.table_constraints tc " +
-                        "JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) " +
-                        "JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name " +
-                        "WHERE constraint_type = ? AND tc.table_name = ? " +
-                        "ORDER BY column_name";
+            var protocol = db.driver.db.conn.type;
+            var sql;
 
-                    db.driver.execQuery(sql, ['PRIMARY KEY', 'account_emails'], function(err, data) {
-                        assert.notExist(err);
+            if (protocol == 'mysql') {
+                var data = db.driver.execQuerySync("SHOW KEYS FROM ?? WHERE Key_name = ?", ['account_emails', 'PRIMARY']);
 
-                        assert.equal(data.length, 2);
-                        assert.equal(data[0].column_name, 'account_id');
-                        assert.equal(data[1].column_name, 'emails_text');
-
-                        done()
-                    });
-                } else if (protocol == 'mysql') {
-                    db.driver.execQuery("SHOW KEYS FROM ?? WHERE Key_name = ?", ['account_emails', 'PRIMARY'], function(err, data) {
-                        assert.notExist(err);
-
-                        assert.equal(data.length, 2);
-                        assert.equal(data[0].Column_name, 'account_id');
-                        assert.equal(data[0].Key_name, 'PRIMARY');
-                        assert.equal(data[1].Column_name, 'emails_text');
-                        assert.equal(data[1].Key_name, 'PRIMARY');
-
-                        done();
-                    });
-                } else if (protocol == 'sqlite') {
-                    db.driver.execQuery("pragma table_info(??)", ['account_emails'], function(err, data) {
-                        assert.notExist(err);
-
-                        assert.equal(data.length, 2);
-                        assert.equal(data[0].name, 'account_id');
-                        assert.equal(data[0].pk, 1);
-                        assert.equal(data[1].name, 'emails_text');
-                        assert.equal(data[1].pk, 2);
-
-                        done();
-                    });
-                }
-            });
+                assert.equal(data.length, 2);
+                assert.equal(data[0].Column_name, 'account_id');
+                assert.equal(data[0].Key_name, 'PRIMARY');
+                assert.equal(data[1].Column_name, 'emails_text');
+                assert.equal(data[1].Key_name, 'PRIMARY');
+            } else if (protocol == 'SQLite') {
+                var data = db.driver.execQuerySync("pragma table_info(??)", ['account_emails']);
+                assert.equal(data.length, 2);
+                assert.equal(data[0].name, 'account_id');
+                assert.equal(data[0].pk, 1);
+                assert.equal(data[1].name, 'emails_text');
+                assert.equal(data[1].pk, 2);
+            }
         });
     });
 });

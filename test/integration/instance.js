@@ -45,7 +45,7 @@ describe("Model instance", function() {
     describe("#save", function() {
         var main_item, item;
 
-        before(function(done) {
+        before(function() {
             main_item = db.define("main_item", {
                 name: String
             }, {
@@ -82,39 +82,33 @@ describe("Model instance", function() {
         });
     });
 
-    xdescribe("#isInstance", function() {
-        it("should always return true for instances", function(done) {
-            should.equal((new Person).isInstance, true);
-            should.equal((Person(4)).isInstance, true);
+    describe("#isInstance", function() {
+        it("should always return true for instances", function() {
+            assert.equal((new Person).isInstance, true);
+            assert.equal((Person(4)).isInstance, true);
 
-            Person.find().first(function(err, item) {
-                should.not.exist(err);
-                should.equal(item.isInstance, true);
-                return done();
-            });
+            var item = Person.find().firstSync();
+            assert.equal(item.isInstance, true);
         });
 
         it("should be false for all other objects", function() {
-            should.notEqual({}.isInstance, true);
-            should.notEqual([].isInstance, true);
+            assert.notEqual({}.isInstance, true);
+            assert.notEqual([].isInstance, true);
         });
     });
 
-    xdescribe("#isPersisted", function() {
-        it("should return true for persisted instances", function(done) {
-            Person.find().first(function(err, item) {
-                should.not.exist(err);
-                should.equal(item.isPersisted(), true);
-                return done();
-            });
+    describe("#isPersisted", function() {
+        it("should return true for persisted instances", function() {
+            var item = Person.find().firstSync();
+            assert.equal(item.isPersisted(), true);
         });
 
         it("should return true for shell instances", function() {
-            should.equal(Person(4).isPersisted(), true);
+            assert.equal(Person(4).isPersisted(), true);
         });
 
         it("should return false for new instances", function() {
-            should.equal((new Person).isPersisted(), false);
+            assert.equal((new Person).isPersisted(), false);
         });
 
         it("should be writable for mocking", function() {
@@ -124,11 +118,11 @@ describe("Model instance", function() {
                 triggered = true;
             };
             person.isPersisted()
-            triggered.should.be.true;
+            assert.isTrue(triggered);
         });
     });
 
-    xdescribe("#set", function() {
+    describe("#set", function() {
         var person = null;
         var data = null;
 
@@ -136,7 +130,7 @@ describe("Model instance", function() {
             return JSON.parse(JSON.stringify(obj))
         };
 
-        beforeEach(function(done) {
+        beforeEach(function() {
             data = {
                 a: {
                     b: {
@@ -146,223 +140,188 @@ describe("Model instance", function() {
                 },
                 e: 5
             };
-            Person.create({ name: 'Dilbert', data: data }, function(err, p) {
-                if (err) return done(err);
-
-                person = p;
-                done();
-            });
+            var p = Person.createSync({ name: 'Dilbert', data: data });
+            person = p;
         });
 
         it("should do nothing with flat paths when setting to same value", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set('name', 'Dilbert');
-            should.equal(person.name, 'Dilbert');
-            should.equal(person.saved(), true);
+            assert.equal(person.name, 'Dilbert');
+            assert.equal(person.saved(), true);
         });
 
         it("should mark as dirty with flat paths when setting to different value", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set('name', 'Dogbert');
-            should.equal(person.name, 'Dogbert');
-            should.equal(person.saved(), false);
-            should.equal(person.__opts.changes.join(','), 'name');
+            assert.equal(person.name, 'Dogbert');
+            assert.equal(person.saved(), false);
+            assert.equal(person.__opts.changes.join(','), 'name');
         });
 
         it("should do nothin with deep paths when setting to same value", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set('data.e', 5);
 
             var expected = clone(data);
             expected.e = 5;
 
-            should.equal(JSON.stringify(person.data), JSON.stringify(expected));
-            should.equal(person.saved(), true);
+            assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
+            assert.equal(person.saved(), true);
         });
 
         it("should mark as dirty with deep paths when setting to different value", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set('data.e', 6);
 
             var expected = clone(data);
             expected.e = 6;
 
-            should.equal(JSON.stringify(person.data), JSON.stringify(expected));
-            should.equal(person.saved(), false);
-            should.equal(person.__opts.changes.join(','), 'data');
+            assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
+            assert.equal(person.saved(), false);
+            assert.equal(person.__opts.changes.join(','), 'data');
         });
 
         it("should do nothing with deeper paths when setting to same value", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set('data.a.b.d', 4);
 
             var expected = clone(data);
             expected.a.b.d = 4;
 
-            should.equal(JSON.stringify(person.data), JSON.stringify(expected));
-            should.equal(person.saved(), true);
+            assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
+            assert.equal(person.saved(), true);
         });
 
         it("should mark as dirty with deeper paths when setting to different value", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set('data.a.b.d', 6);
 
             var expected = clone(data);
             expected.a.b.d = 6;
 
-            should.equal(JSON.stringify(person.data), JSON.stringify(expected));
-            should.equal(person.saved(), false);
-            should.equal(person.__opts.changes.join(','), 'data');
+            assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
+            assert.equal(person.saved(), false);
+            assert.equal(person.__opts.changes.join(','), 'data');
         });
 
         it("should mark as dirty with array path when setting to different value", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set(['data', 'a', 'b', 'd'], 6);
 
             var expected = clone(data);
             expected.a.b.d = 6;
 
-            should.equal(JSON.stringify(person.data), JSON.stringify(expected));
-            should.equal(person.saved(), false);
-            should.equal(person.__opts.changes.join(','), 'data');
+            assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
+            assert.equal(person.saved(), false);
+            assert.equal(person.__opts.changes.join(','), 'data');
         });
 
         it("should do nothing with invalid paths", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.set('data.a.b.d.y.z', 1);
             person.set('data.y.z', 1);
             person.set('z', 1);
             person.set(4, 1);
             person.set(null, 1);
             person.set(undefined, 1);
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
         });
     });
 
-    xdescribe("#markAsDirty", function() {
+    describe("#markAsDirty", function() {
         var person = null;
 
-        beforeEach(function(done) {
-            Person.create({ name: 'John', age: 44, data: { a: 1 } }, function(err, p) {
-                if (err) return cb(err);
-
-                person = p;
-                done();
-            });
+        beforeEach(function() {
+            var p = Person.createSync({ name: 'John', age: 44, data: { a: 1 } });
+            person = p;
         });
 
         it("should mark individual properties as dirty", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.markAsDirty('name');
-            should.equal(person.saved(), false);
-            should.equal(person.__opts.changes.join(','), 'name');
+            assert.equal(person.saved(), false);
+            assert.equal(person.__opts.changes.join(','), 'name');
             person.markAsDirty('data');
-            should.equal(person.__opts.changes.join(','), 'name,data');
+            assert.equal(person.__opts.changes.join(','), 'name,data');
         });
     });
 
-    xdescribe("#dirtyProperties", function() {
+    describe("#dirtyProperties", function() {
         var person = null;
 
-        beforeEach(function(done) {
-            Person.create({ name: 'John', age: 44, data: { a: 1 } }, function(err, p) {
-                if (err) return cb(err);
-
-                person = p;
-                done();
-            });
+        beforeEach(function() {
+            var p = Person.createSync({ name: 'John', age: 44, data: { a: 1 } });
+            person = p;
         });
 
         it("should mark individual properties as dirty", function() {
-            should.equal(person.saved(), true);
+            assert.equal(person.saved(), true);
             person.markAsDirty('name');
             person.markAsDirty('data');
-            should.equal(person.saved(), false);
-            should.equal(person.dirtyProperties.join(','), 'name,data');
+            assert.equal(person.saved(), false);
+            assert.equal(person.dirtyProperties.join(','), 'name,data');
         });
     });
 
-    xdescribe("#isShell", function() {
+    describe("#isShell", function() {
         it("should return true for shell models", function() {
-            should.equal(Person(4).isShell(), true);
+            assert.equal(Person(4).isShell(), true);
         });
 
         it("should return false for new models", function() {
-            should.equal((new Person).isShell(), false);
+            assert.equal((new Person).isShell(), false);
         });
 
-        it("should return false for existing models", function(done) {
-            Person.find().first(function(err, item) {
-                should.not.exist(err);
-                should.equal(item.isShell(), false);
-                return done();
-            });
+        it("should return false for existing models", function() {
+            var item = Person.find().firstSync();
+            assert.equal(item.isShell(), false);
         });
     });
 
-    xdescribe("#validate", function() {
-        it("should return validation errors if invalid", function(done) {
+    describe("#validate", function() {
+        it("should return validation errors if invalid", function() {
             var person = new Person({ age: -1 });
 
-            person.validate(function(err, validationErrors) {
-                should.not.exist(err);
-                should.equal(Array.isArray(validationErrors), true);
-
-                return done();
-            });
+            var validationErrors = person.validateSync();
+            assert.equal(Array.isArray(validationErrors), true);
         });
 
-        it("should return false if valid", function(done) {
+        it("should return false if valid", function() {
             var person = new Person({ name: 'Janette' });
 
-            person.validate(function(err, validationErrors) {
-                should.not.exist(err);
-                should.equal(validationErrors, false);
-
-                return done();
-            });
+            var validationErrors = person.validateSync();
+            assert.equal(validationErrors, false);
         });
     });
 
-    xdescribe("properties", function() {
-        xdescribe("Number", function() {
-            it("should be saved for valid numbers, using both save & create", function(done) {
+    describe("properties", function() {
+        describe("Number", function() {
+            it("should be saved for valid numbers, using both save & create", function() {
                 var person1 = new Person({ height: 190 });
 
-                person1.save(function(err) {
-                    should.not.exist(err);
+                person1.saveSync();
 
-                    Person.create({ height: 170 }, function(err, person2) {
-                        should.not.exist(err);
+                var person2 = Person.createSync({ height: 170 });
 
-                        Person.get(person1[Person.id], function(err, item) {
-                            should.not.exist(err);
-                            should.equal(item.height, 190);
+                var item = Person.getSync(person1[Person.id]);
 
-                            Person.get(person2[Person.id], function(err, item) {
-                                should.not.exist(err);
-                                should.equal(item.height, 170);
-                                done();
-                            });
-                        });
-                    });
-                });
+                assert.equal(item.height, 190);
+
+                item = Person.getSync(person2[Person.id]);
+                assert.equal(item.height, 170);
             });
         });
 
-        xdescribe("Enumerable", function() {
-            it("should not stringify properties marked as not enumerable", function(done) {
-                Person.create({ name: 'Dilbert', secret: 'dogbert', weight: 100, data: { data: 3 } }, function(err, p) {
-                    if (err) return done(err);
+        describe("Enumerable", function() {
+            it("should not stringify properties marked as not enumerable", function() {
+                var p = Person.createSync({ name: 'Dilbert', secret: 'dogbert', weight: 100, data: { data: 3 } });
 
-                    var result = JSON.parse(JSON.stringify(p));
-                    should.not.exist(result.secret);
-                    should.exist(result.weight);
-                    should.exist(result.data);
-                    should.exist(result.name);
-
-                    done();
-                });
+                var result = JSON.parse(JSON.stringify(p));
+                assert.notExist(result.secret);
+                assert.exist(result.weight);
+                assert.exist(result.data);
+                assert.exist(result.name);
             });
         });
     });

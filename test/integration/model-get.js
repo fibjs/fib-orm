@@ -42,26 +42,24 @@ describe("Model.get()", function() {
         return db.closeSync();
     });
 
-    xdescribe("mapsTo", function() {
+    describe("mapsTo", function() {
         before(setup(true));
 
-        it("should create the table with a different column name than property name", function(done) {
+        it("should create the table with a different column name than property name", function() {
             var sql;
+            var protocol = db.driver.db.conn.type;
 
-            if (protocol == 'sqlite') {
+            if (protocol == 'SQLite') {
                 sql = "PRAGMA table_info(?)";
             } else {
                 sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ?";
             }
 
-            db.driver.execQuery(sql, [Person.table], function(err, data) {
-                var names = _.map(data, protocol == 'sqlite' ? 'name' : 'column_name')
+            var data = db.driver.execQuerySync(sql, [Person.table]);
+            var names = _.map(data, protocol == 'SQLite' ? 'name' : 'column_name')
 
-                assert.equal(typeof Person.properties.name, 'object');
-                assert.notEqual(names.indexOf('fullname'), -1);
-
-                done();
-            });
+            assert.equal(typeof Person.properties.name, 'object');
+            assert.notEqual(names.indexOf('fullname'), -1);
         });
     });
 

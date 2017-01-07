@@ -267,42 +267,35 @@ describe("Model.find() chaining", function() {
         assert.equal(items.length, 1);
     });
 
-    xdescribe("finders should be chainable & interchangeable including", function() {
+    describe("finders should be chainable & interchangeable including", function() {
         before(setup());
 
         before(function(done) {
-            Person.create([
+            Person.createSync([
                 { name: "Mel", surname: "Gabbs", age: 12 },
                 { name: "Mel", surname: "Gibbs", age: 22 },
                 { name: "Mel", surname: "Gobbs", age: 32 }
-            ], function(err, items) {
-                should.not.exist(err);
-                done()
-            });
+            ]);
         });
 
         ['find', 'where', 'all'].forEach(function(func) {
             it("." + func + "()", function(done) {
-                Person[func]({ name: "Mel" })[func]({ age: ORM.gt(20) })[func](function(err, items) {
-                    should.not.exist(err);
-                    assert.equal(items.length, 2);
+                var items = Person[func]({ name: "Mel" })[func]({ age: ORM.gt(20) })[func + 'Sync']();
 
-                    assert.equal(items[0].surname, "Gibbs");
-                    assert.equal(items[1].surname, "Gobbs");
-                    done();
-                });
-            });
-        });
-
-        it("a mix", function(done) {
-            Person.all({ name: "Mel" }).where({ age: ORM.gt(20) }).find(function(err, items) {
-                should.not.exist(err);
                 assert.equal(items.length, 2);
 
                 assert.equal(items[0].surname, "Gibbs");
                 assert.equal(items[1].surname, "Gobbs");
-                done();
             });
+        });
+
+        it("a mix", function(done) {
+            var items = Person.all({ name: "Mel" }).where({ age: ORM.gt(20) }).findSync();
+
+            assert.equal(items.length, 2);
+
+            assert.equal(items[0].surname, "Gibbs");
+            assert.equal(items[1].surname, "Gobbs");
         });
     });
 
@@ -439,27 +432,20 @@ describe("Model.find() chaining", function() {
         xdescribe(".hasAccessor() for hasOne associations", function() {
             it("should be chainable", function() {
                 var John = Person.findSync({ name: "John" });
-                assert.equal(err, null);
 
                 var Justin = new Person({
                     name: "Justin",
                     age: 45
                 });
 
-                John[0].setParents([Justin], function(err) {
-                    assert.equal(err, null);
+                John[0].setParentsSync([Justin]);
 
-                    Person.find().hasParents(Justin).all(function(err, people) {
-                        assert.equal(err, null);
+                var people = Person.find().hasParents(Justin).allSync();
 
-                        assert.ok(Array.isArray(people));
+                assert.ok(Array.isArray(people));
 
-                        assert.equal(people.length, 1);
-                        assert.equal(people[0].name, "John");
-
-                        return done();
-                    });
-                });
+                assert.equal(people.length, 1);
+                assert.equal(people[0].name, "John");
             });
         });
     });

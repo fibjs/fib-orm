@@ -142,7 +142,7 @@ describe("hasOne", function() {
                     assert.equal(fetchedLeaf.treeId, leaf.treeId);
                 });
 
-                it("should work when calling Instance.save after initially setting parentId to null", function(done) {
+                it("should work when calling Instance.save after initially setting parentId to null", function() {
                     var leaf = new Leaf({ size: 4, treeId: null });
                     leaf.treeId = tree[Tree.id];
                     leaf.saveSync();
@@ -203,7 +203,7 @@ describe("hasOne", function() {
     });
 
     describe("if not passing another Model", function() {
-        it("should use same model", function(done) {
+        it("should use same model", function() {
             db.settings.set('instance.identityCache', false);
             db.settings.set('instance.returnAllErrors', true);
 
@@ -256,7 +256,7 @@ describe("hasOne", function() {
             });
         });
 
-        it("should lookup in Model based on associated model properties", function(done) {
+        it("should lookup in Model based on associated model properties", function() {
             var leafs = Leaf.findByTreeSync({
                 type: "pine"
             });
@@ -275,82 +275,68 @@ describe("hasOne", function() {
     });
 
 
-    xdescribe("mapsTo", function() {
-        xdescribe("with `mapsTo` set via `hasOne`", function() {
+    describe("mapsTo", function() {
+        describe("with `mapsTo` set via `hasOne`", function() {
             var leaf = null;
 
             before(setup());
 
-            before(function(done) {
-                Leaf.create({ size: 444, stalkId: stalkId, holeId: holeId }, function(err, lf) {
-                    leaf = lf;
-                    done();
-                });
+            before(function() {
+                var lf = Leaf.createSync({ size: 444, stalkId: stalkId, holeId: holeId });
+                leaf = lf;
             });
 
-            it("should have correct fields in the DB", function(done) {
+            it("should have correct fields in the DB", function() {
                 var sql = db.driver.query.select()
                     .from('leaf')
                     .select('size', 'stalk_id')
                     .where({ size: 444 })
                     .build();
 
-                db.driver.execQuery(sql, function(err, rows) {
+                var rows = db.driver.execQuerySync(sql);
 
-                    assert.equal(rows[0].size, 444);
-                    assert.equal(rows[0].stalk_id, 1);
-
-                    done();
-                });
+                assert.equal(rows[0].size, 444);
+                assert.equal(rows[0].stalk_id, 1);
             });
 
-            it("should get parent", function(done) {
-                leaf.getStalk(function(err, stalk) {
+            it("should get parent", function() {
+                var stalk = leaf.getStalkSync();
 
-                    assert.exist(stalk);
-                    assert.equal(stalk.id, stalkId);
-                    assert.equal(stalk.length, 20);
-                    done();
-                });
+                assert.exist(stalk);
+                assert.equal(stalk.id, stalkId);
+                assert.equal(stalk.length, 20);
             });
         });
 
-        xdescribe("with `mapsTo` set via property definition", function() {
+        describe("with `mapsTo` set via property definition", function() {
             var leaf = null;
 
             before(setup());
 
-            before(function(done) {
-                Leaf.create({ size: 444, stalkId: stalkId, holeId: holeId }, function(err, lf) {
-                    leaf = lf;
-                    done();
-                });
+            before(function() {
+                var lf = Leaf.createSync({ size: 444, stalkId: stalkId, holeId: holeId });
+                leaf = lf;
             });
 
-            it("should have correct fields in the DB", function(done) {
+            it("should have correct fields in the DB", function() {
                 var sql = db.driver.query.select()
                     .from('leaf')
                     .select('size', 'hole_id')
                     .where({ size: 444 })
                     .build();
 
-                db.driver.execQuery(sql, function(err, rows) {
+                var rows = db.driver.execQuerySync(sql);
 
-                    assert.equal(rows[0].size, 444);
-                    assert.equal(rows[0].hole_id, 1);
-
-                    done();
-                });
+                assert.equal(rows[0].size, 444);
+                assert.equal(rows[0].hole_id, 1);
             });
 
-            it("should get parent", function(done) {
-                leaf.getHole(function(err, hole) {
+            it("should get parent", function() {
+                var hole = leaf.getHoleSync();
 
-                    assert.exist(hole);
-                    assert.equal(hole.id, stalkId);
-                    assert.equal(hole.width, 3);
-                    done();
-                });
+                assert.exist(hole);
+                assert.equal(hole.id, stalkId);
+                assert.equal(hole.width, 3);
             });
         });
     });
