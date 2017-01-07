@@ -454,26 +454,22 @@ a few examples to describe it:
 { col1: orm.not_in([1, 4, 8]) } // `col1` NOT IN (1, 4, 8)
 ```
 
-#### Raw queries [NO SYNC VERSION]
+#### Raw queries
 
 ```js
-db.driver.execQuery("SELECT id, email FROM user", function (err, data) { ... })
+var data = db.driver.execQuerySync("SELECT id, email FROM user")
 
 // You can escape identifiers and values.
 // For identifier substitution use: ??
 // For value substitution use: ?
-db.driver.execQuery(
+var data = db.driver.execQuerySync(
   "SELECT user.??, user.?? FROM user WHERE user.?? LIKE ? AND user.?? > ?",
-  ['id', 'name', 'name', 'john', 'id', 55],
-  function (err, data) { ... }
-)
+  ['id', 'name', 'name', 'john', 'id', 55])
 
 // Identifiers don't need to be scaped most of the time
-db.driver.execQuery(
+var data = db.driver.execQuerySync(
   "SELECT user.id, user.name FROM user WHERE user.name LIKE ? AND user.id > ?",
-  ['john', 55],
-  function (err, data) { ... }
-)
+  ['john', 55])
 ```
 
 ### Identity pattern
