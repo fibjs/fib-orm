@@ -8,9 +8,16 @@
     "homepage": "https://github.com/xicilion/fib-orm",
     "license": "MIT",
     "scripts": {
-        "test": "fibjs test/main.js"
+        "ci": "fibjs test/main.js"
     },
     "dependencies": {
         "orm": "^3.2.2"
+    },
+    "devDependencies": {
+        "@fibjs/ci": "^1.0.0",
+        "lodash": "^4.17.4"
+    },
+    "ci": {
+        "type": "travis"
     }
 }
