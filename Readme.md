@@ -11,7 +11,7 @@ npm install fib-orm
 ## Test
 
 ```sh
-npm test
+npm run ci
 ```
 
 ## DBMS Support
