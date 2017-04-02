@@ -3,9 +3,9 @@
     "version": "1.0.3",
     "description": "Object Relational Mapping for fibjs",
     "main": "lib/index.js",
-    "repository": "git://github.com/xicilion/fib-orm.git",
+    "repository": "git://github.com/fibjs/fib-orm.git",
     "author": "Liu Hu <lion@9465.net>",
-    "homepage": "https://github.com/xicilion/fib-orm",
+    "homepage": "https://github.com/fibjs/fib-orm",
     "license": "MIT",
     "keywords": [
         "orm",
