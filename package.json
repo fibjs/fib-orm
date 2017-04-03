@@ -1,6 +1,6 @@
 {
     "name": "fib-orm",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Object Relational Mapping for fibjs",
     "main": "lib/index.js",
     "repository": "git://github.com/fibjs/fib-orm.git",
