@@ -1,6 +1,6 @@
 ## Object Relational Mapping for fibjs
 
-[![Build Status](https://travis-ci.org/xicilion/fib-orm.svg)](https://travis-ci.org/xicilion/fib-orm)
+[![Build Status](https://travis-ci.org/fibjs/fib-orm.svg)](https://travis-ci.org/fibjs/fib-orm)
 
 ## Install
 
