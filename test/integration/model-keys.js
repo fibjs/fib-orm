@@ -1,21 +1,21 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model keys option", function() {
+describe("Model keys option", function () {
     var db = null;
 
-    before(function() {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("if model id is a property", function() {
+    describe("if model id is a property", function () {
         var Person = null;
 
-        before(function(done) {
+        before(function () {
             Person = db.define("person", {
                 uid: String,
                 name: String,
@@ -27,7 +27,7 @@ describe("Model keys option", function() {
             return helper.dropSync(Person);
         });
 
-        it("should not auto increment IDs", function() {
+        it("should not auto increment IDs", function () {
             var JohnDoe = Person.createSync({
                 uid: "john-doe",
                 name: "John",
@@ -39,29 +39,46 @@ describe("Model keys option", function() {
         });
     });
 
-    describe("if model defines several keys", function() {
+    describe("if model defines several keys", function () {
         var DoorAccessHistory = null;
 
-        before(function() {
+        before(function () {
             DoorAccessHistory = db.define("door_access_history", {
-                year: { type: 'integer' },
-                month: { type: 'integer' },
-                day: { type: 'integer' },
+                year: {
+                    type: 'integer'
+                },
+                month: {
+                    type: 'integer'
+                },
+                day: {
+                    type: 'integer'
+                },
                 user: String,
                 action: ["in", "out"]
             }, {
                 id: ["year", "month", "day"]
             });
 
-            return helper.dropSync(DoorAccessHistory, function() {
-                DoorAccessHistory.createSync([
-                    { year: 2013, month: 7, day: 11, user: "dresende", action: "in" },
-                    { year: 2013, month: 7, day: 12, user: "dresende", action: "out" }
+            return helper.dropSync(DoorAccessHistory, function () {
+                DoorAccessHistory.createSync([{
+                        year: 2013,
+                        month: 7,
+                        day: 11,
+                        user: "dresende",
+                        action: "in"
+                    },
+                    {
+                        year: 2013,
+                        month: 7,
+                        day: 12,
+                        user: "dresende",
+                        action: "out"
+                    }
                 ]);
             });
         });
 
-        it("should make possible to get instances based on all keys", function() {
+        it("should make possible to get instances based on all keys", function () {
             var HistoryItem = DoorAccessHistory.getSync(2013, 7, 11);
 
             assert.equal(HistoryItem.year, 2013);
@@ -71,7 +88,7 @@ describe("Model keys option", function() {
             assert.equal(HistoryItem.action, "in");
         });
 
-        it("should make possible to remove instances based on all keys", function() {
+        it("should make possible to remove instances based on all keys", function () {
             var HistoryItem = DoorAccessHistory.getSync(2013, 7, 12);
 
             HistoryItem.removeSync();

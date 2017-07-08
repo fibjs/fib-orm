@@ -1,11 +1,11 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.findSync()", function() {
+describe("Model.findSync()", function () {
     var db = null;
     var Person = null;
 
-    var setup = function() {
+    var setup = function () {
         Person = db.define("person", {
             name: String,
             surname: String,
@@ -13,7 +13,7 @@ describe("Model.findSync()", function() {
             male: Boolean
         });
 
-        return helper.dropSync(Person, function() {
+        return helper.dropSync(Person, function () {
             Person.createSync([{
                 name: "John",
                 surname: "Doe",
@@ -43,18 +43,18 @@ describe("Model.findSync()", function() {
         });
     };
 
-    before(function() {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("without arguments", function() {
+    describe("without arguments", function () {
         before(setup);
 
-        it("should return all items", function() {
+        it("should return all items", function () {
             var people = Person.findSync();
 
             assert.isObject(people);
@@ -62,10 +62,10 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("with a number as argument", function() {
+    describe("with a number as argument", function () {
         before(setup);
 
-        it("should use it as limit", function() {
+        it("should use it as limit", function () {
             var people = Person.findSync(2);
 
             assert.isObject(people);
@@ -73,10 +73,10 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("with a string argument", function() {
+    describe("with a string argument", function () {
         before(setup);
 
-        it("should use it as property ascending order", function() {
+        it("should use it as property ascending order", function () {
             var people = Person.findSync("age");
 
             assert.isObject(people);
@@ -85,7 +85,7 @@ describe("Model.findSync()", function() {
             assert.equal(people[4].age, 20);
         });
 
-        it("should use it as property descending order if starting with '-'", function() {
+        it("should use it as property descending order if starting with '-'", function () {
             var people = Person.findSync("-age");
 
             assert.isObject(people);
@@ -95,10 +95,10 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("with an Array as argument", function() {
+    describe("with an Array as argument", function () {
         before(setup);
 
-        it("should use it as property ascending order", function() {
+        it("should use it as property ascending order", function () {
             var people = Person.findSync(["age"]);
 
             assert.isObject(people);
@@ -107,7 +107,7 @@ describe("Model.findSync()", function() {
             assert.equal(people[4].age, 20);
         });
 
-        it("should use it as property descending order if starting with '-'", function() {
+        it("should use it as property descending order if starting with '-'", function () {
             var people = Person.findSync(["-age"]);
 
             assert.isObject(people);
@@ -116,7 +116,7 @@ describe("Model.findSync()", function() {
             assert.equal(people[4].age, 16);
         });
 
-        it("should use it as property descending order if element is 'Z'", function() {
+        it("should use it as property descending order if element is 'Z'", function () {
             var people = Person.findSync(["age", "Z"]);
 
             assert.isObject(people);
@@ -125,7 +125,7 @@ describe("Model.findSync()", function() {
             assert.equal(people[4].age, 16);
         });
 
-        it("should accept multiple ordering", function() {
+        it("should accept multiple ordering", function () {
             var people = Person.findSync(["age", "name", "Z"]);
 
             assert.isObject(people);
@@ -134,7 +134,7 @@ describe("Model.findSync()", function() {
             assert.equal(people[4].age, 20);
         });
 
-        it("should accept multiple ordering using '-' instead of 'Z'", function() {
+        it("should accept multiple ordering using '-' instead of 'Z'", function () {
             var people = Person.findSync(["age", "-name"]);
 
             assert.isObject(people);
@@ -144,19 +144,23 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("with an Object as argument", function() {
+    describe("with an Object as argument", function () {
         before(setup);
 
-        it("should use it as conditions", function() {
-            var people = Person.findSync({ age: 16 });
+        it("should use it as conditions", function () {
+            var people = Person.findSync({
+                age: 16
+            });
 
             assert.isObject(people);
             assert.propertyVal(people, "length", 1);
             assert.equal(people[0].age, 16);
         });
 
-        it("should accept comparison objects", function() {
-            var people = Person.findSync({ age: ORM.gt(18) });
+        it("should accept comparison objects", function () {
+            var people = Person.findSync({
+                age: ORM.gt(18)
+            });
 
             assert.isObject(people);
             assert.propertyVal(people, "length", 2);
@@ -164,21 +168,29 @@ describe("Model.findSync()", function() {
             assert.equal(people[1].age, 20);
         });
 
-        describe("with another Object as argument", function() {
+        describe("with another Object as argument", function () {
             before(setup);
 
-            it("should use it as options", function() {
-                var people = Person.findSync({ age: 18 }, 1, { cache: false });
+            it("should use it as options", function () {
+                var people = Person.findSync({
+                    age: 18
+                }, 1, {
+                    cache: false
+                });
                 assert.isObject(people);
                 assert.propertyVal(people, "length", 1);
                 assert.equal(people[0].age, 18);
             });
 
-            describe("if a limit is passed", function() {
+            describe("if a limit is passed", function () {
                 before(setup);
 
-                it("should use it", function() {
-                    var people = Person.findSync({ age: 18 }, { limit: 1 });
+                it("should use it", function () {
+                    var people = Person.findSync({
+                        age: 18
+                    }, {
+                        limit: 1
+                    });
 
                     assert.isObject(people);
                     assert.propertyVal(people, "length", 1);
@@ -186,11 +198,13 @@ describe("Model.findSync()", function() {
                 });
             });
 
-            describe("if an offset is passed", function() {
+            describe("if an offset is passed", function () {
                 before(setup);
 
-                it("should use it", function() {
-                    var people = Person.findSync({}, { offset: 1 }, "age");
+                it("should use it", function () {
+                    var people = Person.findSync({}, {
+                        offset: 1
+                    }, "age");
 
                     assert.isObject(people);
                     assert.propertyVal(people, "length", 4);
@@ -198,19 +212,27 @@ describe("Model.findSync()", function() {
                 });
             });
 
-            describe("if an order is passed", function() {
+            describe("if an order is passed", function () {
                 before(setup);
 
-                it("should use it", function() {
-                    var people = Person.findSync({ surname: "Doe" }, { order: "age" });
+                it("should use it", function () {
+                    var people = Person.findSync({
+                        surname: "Doe"
+                    }, {
+                        order: "age"
+                    });
 
                     assert.isObject(people);
                     assert.propertyVal(people, "length", 3);
                     assert.equal(people[0].age, 16);
                 });
 
-                it("should use it and ignore previously defined order", function() {
-                    var people = Person.findSync({ surname: "Doe" }, "-age", { order: "age" });
+                it("should use it and ignore previously defined order", function () {
+                    var people = Person.findSync({
+                        surname: "Doe"
+                    }, "-age", {
+                        order: "age"
+                    });
 
                     assert.isObject(people);
                     assert.propertyVal(people, "length", 3);
@@ -220,15 +242,19 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("if defined static methods", function() {
+    describe("if defined static methods", function () {
         before(setup);
 
-        it("should be rechainable", function() {
-            Person.over18 = function() {
-                return this.find({ age: ORM.gt(18) });
+        it("should be rechainable", function () {
+            Person.over18 = function () {
+                return this.find({
+                    age: ORM.gt(18)
+                });
             };
-            Person.family = function(family) {
-                return this.find({ surname: family });
+            Person.family = function (family) {
+                return this.find({
+                    surname: family
+                });
             };
 
             var people = Person.over18().family("Doe").runSync();
@@ -240,9 +266,13 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("with identityCache disabled", function() {
-        it("should not return singletons", function() {
-            var people = Person.findSync({ name: "Jasmine" }, { identityCache: false });
+    describe("with identityCache disabled", function () {
+        it("should not return singletons", function () {
+            var people = Person.findSync({
+                name: "Jasmine"
+            }, {
+                identityCache: false
+            });
 
             assert.isObject(people);
             assert.propertyVal(people, "length", 1);
@@ -251,7 +281,11 @@ describe("Model.findSync()", function() {
 
             people[0].surname = "Dux";
 
-            people = Person.findSync({ name: "Jasmine" }, { identityCache: false });
+            people = Person.findSync({
+                name: "Jasmine"
+            }, {
+                identityCache: false
+            });
 
             assert.isObject(people);
             assert.propertyVal(people, "length", 1);
@@ -260,9 +294,11 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("when using Model.all()", function() {
-        it("should work exactly the same", function() {
-            var people = Person.allSync({ surname: "Doe" }, "-age", 1);
+    describe("when using Model.all()", function () {
+        it("should work exactly the same", function () {
+            var people = Person.allSync({
+                surname: "Doe"
+            }, "-age", 1);
 
             assert.isObject(people);
             assert.propertyVal(people, "length", 1);
@@ -271,9 +307,11 @@ describe("Model.findSync()", function() {
         });
     });
 
-    describe("when using Model.where()", function() {
-        it("should work exactly the same", function() {
-            var people = Person.whereSync({ surname: "Doe" }, "-age", 1);
+    describe("when using Model.where()", function () {
+        it("should work exactly the same", function () {
+            var people = Person.whereSync({
+                surname: "Doe"
+            }, "-age", 1);
 
             assert.isObject(people);
             assert.propertyVal(people, "length", 1);

@@ -1,14 +1,14 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.save()", function() {
+describe("Model.save()", function () {
     var db = null;
     var Person = null;
 
-    var setup = function(nameDefinition, opts) {
+    var setup = function (nameDefinition, opts) {
         opts = opts || {};
 
-        return function() {
+        return function () {
             Person = db.define("person", {
                 name: nameDefinition || String
             }, opts || {});
@@ -24,19 +24,22 @@ describe("Model.save()", function() {
         };
     };
 
-    before(function() {
+    before(function () {
         db = helper.connect();
 
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("if properties have default values", function() {
-        before(setup({ type: "text", defaultValue: "John" }));
+    describe("if properties have default values", function () {
+        before(setup({
+            type: "text",
+            defaultValue: "John"
+        }));
 
-        it("should use it if not defined", function() {
+        it("should use it if not defined", function () {
             var John = new Person();
 
             John.saveSync();
@@ -44,10 +47,10 @@ describe("Model.save()", function() {
         });
     });
 
-    describe("with callback", function() {
+    describe("with callback", function () {
         before(setup());
 
-        it("should save item and return id", function() {
+        it("should save item and return id", function () {
             var John = new Person({
                 name: "John"
             });
@@ -62,19 +65,19 @@ describe("Model.save()", function() {
         });
     });
 
-    xdescribe("without callback", function() {
+    xdescribe("without callback", function () {
         before(setup());
 
-        it("should still save item and return id", function() {
+        it("should still save item and return id", function () {
             var John = new Person({
                 name: "John"
             });
             John.save();
-            John.on("save", function(err) {
+            John.on("save", function (err) {
                 assert.equal(err, null);
                 assert.exist(John[Person.id]);
 
-                Person.get(John[Person.id], function(err, JohnCopy) {
+                Person.get(John[Person.id], function (err, JohnCopy) {
                     assert.equal(err, null);
 
                     assert.equal(JohnCopy[Person.id], John[Person.id]);
@@ -86,14 +89,16 @@ describe("Model.save()", function() {
         });
     });
 
-    describe("with properties object", function() {
+    describe("with properties object", function () {
         before(setup());
 
-        it("should update properties, save item and return id", function() {
+        it("should update properties, save item and return id", function () {
             var John = new Person({
                 name: "Jane"
             });
-            John.saveSync({ name: "John" });
+            John.saveSync({
+                name: "John"
+            });
 
             assert.exist(John[Person.id]);
             assert.equal(John.name, "John");
@@ -105,24 +110,24 @@ describe("Model.save()", function() {
         });
     });
 
-    describe("with unknown argument type", function() {
+    describe("with unknown argument type", function () {
         before(setup());
 
-        it("should should throw", function() {
+        it("should should throw", function () {
             var John = new Person({
                 name: "Jane"
             });
 
-            assert.throws(function() {
+            assert.throws(function () {
                 John.saveSync("will-fail");
             });
         });
     });
 
-    describe("if passed an association instance", function() {
+    describe("if passed an association instance", function () {
         before(setup());
 
-        it("should save association first and then save item and return id", function() {
+        it("should save association first and then save item and return id", function () {
             var Jane = new Person({
                 name: "Jane"
             });
@@ -140,10 +145,10 @@ describe("Model.save()", function() {
         });
     });
 
-    describe("if passed an association object", function() {
+    describe("if passed an association object", function () {
         before(setup());
 
-        it("should save association first and then save item and return id", function() {
+        it("should save association first and then save item and return id", function () {
             var John = new Person({
                 name: "John",
                 parent: {
@@ -161,17 +166,19 @@ describe("Model.save()", function() {
         });
     });
 
-    xdescribe("if autoSave is on", function() {
-        before(setup(null, { autoSave: true }));
+    xdescribe("if autoSave is on", function () {
+        before(setup(null, {
+            autoSave: true
+        }));
 
-        it("should save the instance as soon as a property is changed", function() {
+        it("should save the instance as soon as a property is changed", function () {
             var John = new Person({
                 name: "Jhon"
             });
-            John.save(function(err) {
+            John.save(function (err) {
                 assert.equal(err, null);
 
-                John.on("save", function() {
+                John.on("save", function () {
                     return done();
                 });
 
@@ -180,36 +187,55 @@ describe("Model.save()", function() {
         });
     });
 
-    describe("with saveAssociations", function() {
+    describe("with saveAssociations", function () {
         var afterSaveCalled = false;
 
-        describe("default on in settings", function() {
-            beforeEach(function(done) {
+        describe("default on in settings", function () {
+            beforeEach(function () {
                 function afterSave() {
                     afterSaveCalled = true;
                 }
-                var hooks = { afterSave: afterSave };
+                var hooks = {
+                    afterSave: afterSave
+                };
 
-                setup(null, { hooks: hooks, cache: false, hasOneOpts: { autoFetch: true } })();
-                var olga = Person.createSync({ name: 'Olga' });
+                setup(null, {
+                    hooks: hooks,
+                    cache: false,
+                    hasOneOpts: {
+                        autoFetch: true
+                    }
+                })();
+                var olga = Person.createSync({
+                    name: 'Olga'
+                });
 
                 assert.exist(olga);
-                var hagar = Person.createSync({ name: 'Hagar', parent_id: olga.id });
+                var hagar = Person.createSync({
+                    name: 'Hagar',
+                    parent_id: olga.id
+                });
                 assert.exist(hagar);
                 afterSaveCalled = false;
             });
 
-            it("should be on", function() {
+            it("should be on", function () {
                 assert.equal(Person.settings.get('instance.saveAssociationsByDefault'), true);
             });
 
-            it("off should not save associations but save itself", function() {
-                var hagar = Person.oneSync({ name: 'Hagar' });
+            it("off should not save associations but save itself", function () {
+                var hagar = Person.oneSync({
+                    name: 'Hagar'
+                });
 
                 assert.exist(hagar.parent);
 
                 hagar.parent.name = 'Olga2';
-                hagar.saveSync({ name: 'Hagar2' }, { saveAssociations: false });
+                hagar.saveSync({
+                    name: 'Hagar2'
+                }, {
+                    saveAssociations: false
+                });
 
                 assert.equal(afterSaveCalled, true);
 
@@ -217,10 +243,14 @@ describe("Model.save()", function() {
                 assert.equal(olga.name, 'Olga');
             });
 
-            it("off should not save associations or itself if there are no changes", function() {
-                var hagar = Person.oneSync({ name: 'Hagar' });
+            it("off should not save associations or itself if there are no changes", function () {
+                var hagar = Person.oneSync({
+                    name: 'Hagar'
+                });
 
-                hagar.saveSync({}, { saveAssociations: false });
+                hagar.saveSync({}, {
+                    saveAssociations: false
+                });
 
                 assert.equal(afterSaveCalled, false);
 
@@ -228,12 +258,16 @@ describe("Model.save()", function() {
                 assert.equal(olga.name, 'Olga');
             });
 
-            it("unspecified should save associations and itself", function() {
-                var hagar = Person.oneSync({ name: 'Hagar' });
+            it("unspecified should save associations and itself", function () {
+                var hagar = Person.oneSync({
+                    name: 'Hagar'
+                });
                 assert.exist(hagar.parent);
 
                 hagar.parent.name = 'Olga2';
-                hagar.saveSync({ name: 'Hagar2' });
+                hagar.saveSync({
+                    name: 'Hagar2'
+                });
 
                 var olga = Person.getSync(hagar.parent.id);
                 assert.equal(olga.name, 'Olga2');
@@ -243,12 +277,18 @@ describe("Model.save()", function() {
                 assert.equal(person.name, 'Hagar2');
             });
 
-            it("on should save associations and itself", function() {
-                var hagar = Person.oneSync({ name: 'Hagar' });
+            it("on should save associations and itself", function () {
+                var hagar = Person.oneSync({
+                    name: 'Hagar'
+                });
                 assert.exist(hagar.parent);
 
                 hagar.parent.name = 'Olga2';
-                hagar.saveSync({ name: 'Hagar2' }, { saveAssociations: true });
+                hagar.saveSync({
+                    name: 'Hagar2'
+                }, {
+                    saveAssociations: true
+                });
 
                 var olga = Person.getSync(hagar.parent.id);
                 assert.equal(olga.name, 'Olga2');
@@ -258,39 +298,52 @@ describe("Model.save()", function() {
             });
         });
 
-        describe("turned off in settings", function() {
-            beforeEach(function() {
+        describe("turned off in settings", function () {
+            beforeEach(function () {
                 function afterSave() {
                     afterSaveCalled = true;
                 }
-                var hooks = { afterSave: afterSave };
+                var hooks = {
+                    afterSave: afterSave
+                };
 
                 setup(null, {
                     hooks: hooks,
                     cache: false,
-                    hasOneOpts: { autoFetch: true },
+                    hasOneOpts: {
+                        autoFetch: true
+                    },
                     saveAssociationsByDefault: false
                 })();
 
-                var olga = Person.createSync({ name: 'Olga' });
+                var olga = Person.createSync({
+                    name: 'Olga'
+                });
 
                 assert.exist(olga);
-                var hagar = Person.createSync({ name: 'Hagar', parent_id: olga.id });
+                var hagar = Person.createSync({
+                    name: 'Hagar',
+                    parent_id: olga.id
+                });
                 assert.exist(hagar);
                 afterSaveCalled = false;
             });
 
-            it("should be off", function() {
+            it("should be off", function () {
                 assert.equal(Person.settings.get('instance.saveAssociationsByDefault'), false);
             });
 
-            it("unspecified should not save associations but save itself", function() {
-                var hagar = Person.oneSync({ name: 'Hagar' });
+            it("unspecified should not save associations but save itself", function () {
+                var hagar = Person.oneSync({
+                    name: 'Hagar'
+                });
 
                 assert.exist(hagar.parent);
 
                 hagar.parent.name = 'Olga2';
-                hagar.saveSync({ name: 'Hagar2' });
+                hagar.saveSync({
+                    name: 'Hagar2'
+                });
 
                 var olga = Person.getSync(hagar.parent.id);
 
@@ -300,26 +353,38 @@ describe("Model.save()", function() {
                 assert.equal(person.name, 'Hagar2');
             });
 
-            it("off should not save associations but save itself", function() {
-                var hagar = Person.oneSync({ name: 'Hagar' });
+            it("off should not save associations but save itself", function () {
+                var hagar = Person.oneSync({
+                    name: 'Hagar'
+                });
 
                 assert.exist(hagar.parent);
 
                 hagar.parent.name = 'Olga2';
-                hagar.saveSync({ name: 'Hagar2' }, { saveAssociations: false });
+                hagar.saveSync({
+                    name: 'Hagar2'
+                }, {
+                    saveAssociations: false
+                });
                 assert.equal(afterSaveCalled, true);
 
                 var olga = Person.getSync(hagar.parent.id);
                 assert.equal(olga.name, 'Olga');
             });
 
-            it("on should save associations and itself", function() {
-                var hagar = Person.oneSync({ name: 'Hagar' });
+            it("on should save associations and itself", function () {
+                var hagar = Person.oneSync({
+                    name: 'Hagar'
+                });
 
                 assert.exist(hagar.parent);
 
                 hagar.parent.name = 'Olga2';
-                hagar.saveSync({ name: 'Hagar2' }, { saveAssociations: true });
+                hagar.saveSync({
+                    name: 'Hagar2'
+                }, {
+                    saveAssociations: true
+                });
 
                 var olga = Person.getSync(hagar.parent.id);
                 assert.equal(olga.name, 'Olga2');
@@ -330,15 +395,20 @@ describe("Model.save()", function() {
         });
     });
 
-    xdescribe("with a point property", function() {
-        if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
+    xdescribe("with a point property", function () {
+        // if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
 
-        it("should save the instance as a geospatial point", function(done) {
-            setup({ type: "point" }, null)(function() {
+        it("should save the instance as a geospatial point", function () {
+            setup({
+                type: "point"
+            }, null)(function () {
                 var John = new Person({
-                    name: { x: 51.5177, y: -0.0968 }
+                    name: {
+                        x: 51.5177,
+                        y: -0.0968
+                    }
                 });
-                John.save(function(err) {
+                John.save(function (err) {
                     assert.equal(err, null);
 
                     John.name.should.be.an.instanceOf(Object);
@@ -350,30 +420,30 @@ describe("Model.save()", function() {
         });
     });
 
-    xdescribe("mockable", function() {
+    xdescribe("mockable", function () {
         before(setup());
 
-        it("save should be writable", function(done) {
+        it("save should be writable", function () {
             var John = new Person({
                 name: "John"
             });
             var saveCalled = false;
-            John.save = function(cb) {
+            John.save = function (cb) {
                 saveCalled = true;
                 cb(null);
             };
-            John.save(function(err) {
+            John.save(function (err) {
                 assert.equal(saveCalled, true);
                 return done();
             });
         });
 
-        it("saved should be writable", function(done) {
+        it("saved should be writable", function () {
             var John = new Person({
                 name: "John"
             });
             var savedCalled = false;
-            John.saved = function() {
+            John.saved = function () {
                 savedCalled = true;
                 return true;
             };

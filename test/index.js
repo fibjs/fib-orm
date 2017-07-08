@@ -44,7 +44,7 @@ function t() {
 
     run('./integration/validation.js');
 
-    test.run(console.DEBUG);
+    test.run();
 }
 
 t();

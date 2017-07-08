@@ -1,12 +1,12 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.pkMapTo.find()", function() {
+describe("Model.pkMapTo.find()", function () {
     var db = null;
     var Person = null;
 
-    var setup = function() {
-        return function() {
+    var setup = function () {
+        return function () {
 
             // The fact that we've applied mapsTo to the key
             // property of the model - will break the cache.
@@ -14,14 +14,18 @@ describe("Model.pkMapTo.find()", function() {
             // Without Stuart's little bugfix, 2nd (and subsequent) calls to find()
             // will return the repeats of the first obect retrieved and placed in the cache.
             Person = db.define("person", {
-                personId: { type: "integer", key: true, mapsTo: "id" },
+                personId: {
+                    type: "integer",
+                    key: true,
+                    mapsTo: "id"
+                },
                 name: String,
                 surname: String,
                 age: Number,
                 male: Boolean
             });
 
-            return helper.dropSync(Person, function() {
+            return helper.dropSync(Person, function () {
                 Person.createSync([{
                     personId: 1001,
                     name: "John",
@@ -57,27 +61,31 @@ describe("Model.pkMapTo.find()", function() {
         };
     };
 
-    before(function(done) {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
 
-    describe("Cache should work with mapped key field", function() {
+    describe("Cache should work with mapped key field", function () {
         before(setup());
 
-        it("1st find should work", function() {
-            var people = Person.findSync({ surname: "Dean" });
+        it("1st find should work", function () {
+            var people = Person.findSync({
+                surname: "Dean"
+            });
             assert.isObject(people);
             assert.propertyVal(people, "length", 2);
             assert.equal(people[0].surname, "Dean");
         });
 
-        it("2nd find should should also work", function() {
-            var people = Person.findSync({ surname: "Doe" });
+        it("2nd find should should also work", function () {
+            var people = Person.findSync({
+                surname: "Doe"
+            });
             assert.isObject(people);
             assert.propertyVal(people, "length", 3);
             assert.equal(people[0].surname, "Doe");

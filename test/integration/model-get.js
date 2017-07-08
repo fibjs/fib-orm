@@ -3,19 +3,22 @@ var helper = require('../support/spec_helper');
 var ORM = require('../../');
 var coroutine = require('coroutine');
 
-describe("Model.get()", function() {
+describe("Model.get()", function () {
     var db = null;
     var Person = null;
     var John;
 
-    var setup = function(identityCache) {
-        return function() {
+    var setup = function (identityCache) {
+        return function () {
             Person = db.define("person", {
-                name: { type: 'text', mapsTo: 'fullname' }
+                name: {
+                    type: 'text',
+                    mapsTo: 'fullname'
+                }
             }, {
                 identityCache: identityCache,
                 methods: {
-                    UID: function() {
+                    UID: function () {
                         return this[Person.id];
                     }
                 }
@@ -23,7 +26,7 @@ describe("Model.get()", function() {
 
             ORM.singleton.clear(); // clear identityCache cache
 
-            return helper.dropSync(Person, function() {
+            return helper.dropSync(Person, function () {
                 var people = Person.createSync([{
                     name: "John Doe"
                 }, {
@@ -34,18 +37,18 @@ describe("Model.get()", function() {
         };
     };
 
-    before(function(done) {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("mapsTo", function() {
+    describe("mapsTo", function () {
         before(setup(true));
 
-        it("should create the table with a different column name than property name", function() {
+        it("should create the table with a different column name than property name", function () {
             var sql;
             var protocol = db.driver.db.conn.type;
 
@@ -63,10 +66,10 @@ describe("Model.get()", function() {
         });
     });
 
-    describe("with identityCache cache", function() {
+    describe("with identityCache cache", function () {
         before(setup(true));
 
-        it("should return item with id 1", function() {
+        it("should return item with id 1", function () {
             var John1 = Person.getSync(John[Person.id]);
 
             assert.isObject(John1);
@@ -74,15 +77,15 @@ describe("Model.get()", function() {
             assert.propertyVal(John1, "name", "John Doe");
         });
 
-        it("should have an UID method", function(done) {
+        it("should have an UID method", function () {
             var John1 = Person.getSync(John[Person.id]);
 
             assert.isFunction(John1.UID);
             assert.equal(John1.UID(), John[Person.id]);
         });
 
-        describe("changing name and getting id 1 again", function() {
-            it("should return the original object with unchanged name", function() {
+        describe("changing name and getting id 1 again", function () {
+            it("should return the original object with unchanged name", function () {
                 var John1 = Person.getSync(John[Person.id]);
 
                 John1.name = "James";
@@ -94,12 +97,12 @@ describe("Model.get()", function() {
             });
         });
 
-        describe("changing instance.identityCacheSaveCheck = false", function() {
-            before(function() {
+        describe("changing instance.identityCacheSaveCheck = false", function () {
+            before(function () {
                 Person.settings.set("instance.identityCacheSaveCheck", false);
             });
 
-            it("should return the same object with the changed name", function() {
+            it("should return the same object with the changed name", function () {
                 var John1 = Person.getSync(John[Person.id]);
 
                 John1.name = "James";
@@ -112,11 +115,11 @@ describe("Model.get()", function() {
         });
     });
 
-    describe("with no identityCache cache", function() {
+    describe("with no identityCache cache", function () {
         before(setup(false));
 
-        describe("fetching several times", function() {
-            it("should return different objects", function() {
+        describe("fetching several times", function () {
+            it("should return different objects", function () {
                 var John1 = Person.getSync(John[Person.id]);
                 var John2 = Person.getSync(John[Person.id]);
 
@@ -126,11 +129,11 @@ describe("Model.get()", function() {
         });
     });
 
-    describe("with identityCache cache = 0.5 secs", function() {
+    describe("with identityCache cache = 0.5 secs", function () {
         before(setup(0.5));
 
-        describe("fetching again after 0.2 secs", function() {
-            it("should return same objects", function() {
+        describe("fetching again after 0.2 secs", function () {
+            it("should return same objects", function () {
                 var John1 = Person.getSync(John[Person.id]);
 
                 coroutine.sleep(200);
@@ -142,8 +145,8 @@ describe("Model.get()", function() {
             });
         });
 
-        describe("fetching again after 0.7 secs", function() {
-            it("should return different objects", function() {
+        describe("fetching again after 0.7 secs", function () {
+            it("should return different objects", function () {
                 var John1 = Person.getSync(John[Person.id]);
 
                 coroutine.sleep(700);
@@ -154,10 +157,10 @@ describe("Model.get()", function() {
         });
     });
 
-    describe("with empty object as options", function() {
+    describe("with empty object as options", function () {
         before(setup());
 
-        it("should return item with id 1 like previously", function() {
+        it("should return item with id 1 like previously", function () {
             var John1 = Person.getSync(John[Person.id], {});
 
             assert.isObject(John1);
@@ -166,10 +169,10 @@ describe("Model.get()", function() {
         });
     });
 
-    describe("when not found", function() {
+    describe("when not found", function () {
         before(setup(true));
 
-        it("should return an error", function() {
+        it("should return an error", function () {
             try {
                 Person.getSync(999);
             } catch (err) {
@@ -178,10 +181,10 @@ describe("Model.get()", function() {
         });
     });
 
-    describe("if passed an Array with ids", function() {
+    describe("if passed an Array with ids", function () {
         before(setup(true));
 
-        it("should accept and try to fetch", function() {
+        it("should accept and try to fetch", function () {
             var John1 = Person.getSync([John[Person.id]]);
 
             assert.isObject(John1);
@@ -190,15 +193,15 @@ describe("Model.get()", function() {
         });
     });
 
-    describe("if primary key name is changed", function() {
-        before(function(done) {
+    describe("if primary key name is changed", function () {
+        before(function () {
             Person = db.define("person", {
                 name: String
             });
 
             ORM.singleton.clear();
 
-            return helper.dropSync(Person, function() {
+            return helper.dropSync(Person, function () {
                 Person.createSync([{
                     name: "John Doe"
                 }, {
@@ -207,7 +210,7 @@ describe("Model.get()", function() {
             });
         });
 
-        it("should search by key name and not 'id'", function() {
+        it("should search by key name and not 'id'", function () {
             db.settings.set('properties.primary_key', 'name');
 
             var OtherPerson = db.define("person", {
@@ -219,24 +222,29 @@ describe("Model.get()", function() {
         });
     });
 
-    xdescribe("with a point property type", function() {
-        if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
+    xdescribe("with a point property type", function () {
+        // if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
 
-        it("should deserialize the point to an array", function(done) {
+        it("should deserialize the point to an array", function () {
             db.settings.set('properties.primary_key', 'id');
 
             Person = db.define("person", {
                 name: String,
-                location: { type: "point" }
+                location: {
+                    type: "point"
+                }
             });
 
             ORM.singleton.clear();
 
-            return helper.dropSync(Person, function() {
+            return helper.dropSync(Person, function () {
                 Person.create({
                     name: "John Doe",
-                    location: { x: 51.5177, y: -0.0968 }
-                }, function(err, person) {
+                    location: {
+                        x: 51.5177,
+                        y: -0.0968
+                    }
+                }, function (err, person) {
                     assert.equal(err, null);
 
                     person.location.should.be.an.instanceOf(Object);

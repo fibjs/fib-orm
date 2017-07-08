@@ -1,54 +1,58 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("custom types", function() {
+describe("custom types", function () {
     var db = null;
 
-    before(function() {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         db.closeSync();
     });
 
-    describe("simple", function() {
+    describe("simple", function () {
         var LottoTicket = null;
 
-        before(function() {
+        before(function () {
             db.defineType('numberArray', {
-                datastoreType: function(prop) {
+                datastoreType: function (prop) {
                     return 'TEXT'
                 },
-                valueToProperty: function(value, prop) {
+                valueToProperty: function (value, prop) {
                     if (Array.isArray(value)) {
                         return value;
                     } else {
                         if (Buffer.isBuffer(value))
                             value = value.toString();
-                        return value.split(',').map(function(v) {
+                        return value.split(',').map(function (v) {
                             return Number(v);
                         });
                     }
                 },
-                propertyToValue: function(value, prop) {
+                propertyToValue: function (value, prop) {
                     return value.join(',')
                 }
             });
 
             LottoTicket = db.define('lotto_ticket', {
-                numbers: { type: 'numberArray' }
+                numbers: {
+                    type: 'numberArray'
+                }
             });
 
             return helper.dropSync(LottoTicket);
         });
 
-        it("should create the table", function() {
+        it("should create the table", function () {
             assert.ok(true);
         });
 
-        it("should store data in the table", function() {
-            var ticket = new LottoTicket({ numbers: [4, 23, 6, 45, 9, 12, 3, 29] });
+        it("should store data in the table", function () {
+            var ticket = new LottoTicket({
+                numbers: [4, 23, 6, 45, 9, 12, 3, 29]
+            });
 
             ticket.saveSync();
 
@@ -59,10 +63,10 @@ describe("custom types", function() {
             assert.deepEqual([4, 23, 6, 45, 9, 12, 3, 29], items[0].numbers);
         });
 
-        describe("hasMany extra properties", function() {
-            it("should work", function() {
+        describe("hasMany extra properties", function () {
+            it("should work", function () {
                 db.defineType('customDate', {
-                    datastoreType: function(prop) {
+                    datastoreType: function (prop) {
                         return 'TEXT';
                     }
                 });
@@ -74,18 +78,28 @@ describe("custom types", function() {
                 var Pet = db.define('pet', {
                     name: String
                 });
-                Person.hasMany('pets', Pet, { date: { type: 'customDate' } }, { autoFetch: true });
+                Person.hasMany('pets', Pet, {
+                    date: {
+                        type: 'customDate'
+                    }
+                }, {
+                    autoFetch: true
+                });
 
-                return helper.dropSync([Person, Pet], function() {
+                return helper.dropSync([Person, Pet], function () {
                     var person = Person.createSync({
                         name: "John",
                         surname: "Doe",
                         age: 20
                     });
 
-                    var pet = Pet.createSync({ name: 'Fido' });
+                    var pet = Pet.createSync({
+                        name: 'Fido'
+                    });
 
-                    person.addPetsSync(pet, { date: '2014-05-20' });
+                    person.addPetsSync(pet, {
+                        date: '2014-05-20'
+                    });
 
                     var freshPerson = Person.getSync(person.id);
                     assert.equal(freshPerson.pets.length, 1);
@@ -95,25 +109,25 @@ describe("custom types", function() {
         });
     });
 
-    describe("complex", function() {
+    describe("complex", function () {
         var WonkyTotal = null;
 
-        before(function() {
+        before(function () {
             db.defineType('wonkyNumber', {
-                datastoreType: function(prop) {
+                datastoreType: function (prop) {
                     return 'INTEGER';
                 },
-                datastoreGet: function(prop, helper) {
+                datastoreGet: function (prop, helper) {
                     return helper.escape('?? - 1', [prop.mapsTo]);
                 },
-                valueToProperty: function(value, prop) {
+                valueToProperty: function (value, prop) {
                     return value + 7;
                 },
-                propertyToValue: function(value, prop) {
+                propertyToValue: function (value, prop) {
                     if (value == null) {
                         return value;
                     } else {
-                        return function(helper) {
+                        return function (helper) {
                             return helper.escape('(? - 2)', [value]);
                         };
                     }
@@ -122,13 +136,16 @@ describe("custom types", function() {
 
             WonkyTotal = db.define('wonky', {
                 name: String,
-                total: { type: 'wonkyNumber', mapsTo: 'blah_total' }
+                total: {
+                    type: 'wonkyNumber',
+                    mapsTo: 'blah_total'
+                }
             });
 
             return helper.dropSync(WonkyTotal);
         });
 
-        it("should store wonky total in a differently named field", function() {
+        it("should store wonky total in a differently named field", function () {
             var item = new WonkyTotal();
 
             item.name = "cabbages";

@@ -1,7 +1,7 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.create()", function() {
+describe("Model.create()", function () {
     var db = null;
     var Pet = null;
     var Person = null;
@@ -24,18 +24,18 @@ describe("Model.create()", function() {
         db.syncSync();
     };
 
-    before(function(done) {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         db.closeSync();
     });
 
-    describe("if passing an object", function() {
+    describe("if passing an object", function () {
         before(setup);
 
-        it("should accept it as the only item to create", function() {
+        it("should accept it as the only item to create", function () {
             var John = Person.createSync({
                 name: "John Doe"
             });
@@ -44,10 +44,10 @@ describe("Model.create()", function() {
         });
     });
 
-    describe("if passing an array", function() {
+    describe("if passing an array", function () {
         before(setup);
 
-        it("should accept it as a list of items to create", function() {
+        it("should accept it as a list of items to create", function () {
             var people = Person.createSync([{
                 name: "John Doe"
             }, {
@@ -62,13 +62,15 @@ describe("Model.create()", function() {
         });
     });
 
-    describe("if element has an association", function() {
+    describe("if element has an association", function () {
         before(setup);
 
-        it("should also create it or save it", function() {
+        it("should also create it or save it", function () {
             var John = Person.createSync({
                 name: "John Doe",
-                pets: [new Pet({ name: "Deco" })]
+                pets: [new Pet({
+                    name: "Deco"
+                })]
             });
 
             assert.propertyVal(John, "name", "John Doe");
@@ -80,10 +82,12 @@ describe("Model.create()", function() {
             assert.ok(John.pets[0].saved());
         });
 
-        it("should also create it or save it even if it's an object and not an instance", function() {
+        it("should also create it or save it even if it's an object and not an instance", function () {
             var John = Person.createSync({
                 name: "John Doe",
-                pets: [{ name: "Deco" }]
+                pets: [{
+                    name: "Deco"
+                }]
             });
 
             assert.propertyVal(John, "name", "John Doe");
@@ -96,10 +100,10 @@ describe("Model.create()", function() {
         });
     });
 
-    describe("when not passing a property", function() {
+    describe("when not passing a property", function () {
         before(setup);
 
-        it("should use defaultValue if defined", function() {
+        it("should use defaultValue if defined", function () {
             var Mutt = Pet.createSync({});
             assert.propertyVal(Mutt, "name", "Mutt");
         });

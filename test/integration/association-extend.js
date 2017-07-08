@@ -1,13 +1,13 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.extendsTo()", function() {
+describe("Model.extendsTo()", function () {
     var db = null;
     var Person = null;
     var PersonAddress = null;
 
-    var setup = function() {
-        return function() {
+    var setup = function () {
+        return function () {
             Person = db.define("person", {
                 name: String
             });
@@ -18,7 +18,7 @@ describe("Model.extendsTo()", function() {
 
             ORM.singleton.clear();
 
-            helper.dropSync([Person, PersonAddress], function() {
+            helper.dropSync([Person, PersonAddress], function () {
                 var person = Person.createSync({
                     name: "John Doe"
                 });
@@ -30,33 +30,33 @@ describe("Model.extendsTo()", function() {
         };
     };
 
-    before(function() {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("when calling hasAccessor", function() {
+    describe("when calling hasAccessor", function () {
         before(setup());
 
-        it("should return true if found", function() {
+        it("should return true if found", function () {
             var John = Person.find().firstSync();
             var hasAddress = John.hasAddressSync();
             assert.equal(hasAddress, true);
         });
 
-        it("should return false if not found", function() {
+        it("should return false if not found", function () {
             var John = Person.find().firstSync();
 
             John.removeAddressSync();
-            assert.throws(function() {
+            assert.throws(function () {
                 John.hasAddressSync();
             })
         });
 
-        it("should return error if instance not with an ID", function() {
+        it("should return error if instance not with an ID", function () {
             var Jane = new Person({
                 name: "Jane"
             });
@@ -69,17 +69,17 @@ describe("Model.extendsTo()", function() {
         });
     });
 
-    describe("when calling getAccessor", function() {
+    describe("when calling getAccessor", function () {
         before(setup());
 
-        it("should return extension if found", function() {
+        it("should return extension if found", function () {
             var John = Person.find().firstSync();
             var Address = John.getAddressSync();
             assert.isObject(Address);
             assert.propertyVal(Address, "street", "Liberty");
         });
 
-        it("should return error if not found", function() {
+        it("should return error if not found", function () {
             var John = Person.find().firstSync();
 
             John.removeAddressSync();
@@ -91,7 +91,7 @@ describe("Model.extendsTo()", function() {
             }
         });
 
-        it("should return error if instance not with an ID", function() {
+        it("should return error if instance not with an ID", function () {
             var Jane = new Person({
                 name: "Jane"
             });
@@ -104,13 +104,15 @@ describe("Model.extendsTo()", function() {
         });
     });
 
-    describe("when calling setAccessor", function() {
+    describe("when calling setAccessor", function () {
         before(setup());
 
-        it("should remove any previous extension", function() {
+        it("should remove any previous extension", function () {
             var John = Person.find().firstSync();
 
-            var c = PersonAddress.find({ number: 123 }).countSync();
+            var c = PersonAddress.find({
+                number: 123
+            }).countSync();
 
             assert.equal(c, 1);
 
@@ -126,19 +128,23 @@ describe("Model.extendsTo()", function() {
             assert.isObject(Address);
             assert.propertyVal(Address, "street", addr.street);
 
-            var c = PersonAddress.find({ number: 123 }).countSync();
+            var c = PersonAddress.find({
+                number: 123
+            }).countSync();
 
             assert.equal(c, 0);
         });
     });
 
-    describe("when calling delAccessor", function() {
+    describe("when calling delAccessor", function () {
         before(setup());
 
-        it("should remove any extension", function() {
+        it("should remove any extension", function () {
             var John = Person.find().firstSync();
 
-            var c = PersonAddress.find({ number: 123 }).countSync();
+            var c = PersonAddress.find({
+                number: 123
+            }).countSync();
             assert.equal(c, 1);
 
             var addr = new PersonAddress({
@@ -148,11 +154,13 @@ describe("Model.extendsTo()", function() {
 
             John.removeAddressSync();
 
-            var c = PersonAddress.find({ number: 123 }).countSync();
+            var c = PersonAddress.find({
+                number: 123
+            }).countSync();
             assert.equal(c, 0);
         });
 
-        it("should return error if instance not with an ID", function() {
+        it("should return error if instance not with an ID", function () {
             var Jane = new Person({
                 name: "Jane"
             });
@@ -164,16 +172,16 @@ describe("Model.extendsTo()", function() {
         });
     });
 
-    describe("findBy()", function() {
+    describe("findBy()", function () {
         before(setup());
 
-        it("should throw if no conditions passed", function() {
-            assert.throws(function() {
+        it("should throw if no conditions passed", function () {
+            assert.throws(function () {
                 Person.findByAddressSync();
             });
         });
 
-        it("should lookup in Model based on associated model properties", function() {
+        it("should lookup in Model based on associated model properties", function () {
             var people = Person.findByAddressSync({
                 number: 123
             });
@@ -182,7 +190,7 @@ describe("Model.extendsTo()", function() {
             assert.ok(people.length == 1);
         });
 
-        it("should return a ChainFind if no callback passed", function() {
+        it("should return a ChainFind if no callback passed", function () {
             var ChainFind = Person.findByAddress({
                 number: 123
             });

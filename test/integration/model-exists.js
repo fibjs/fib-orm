@@ -1,18 +1,18 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.exists()", function() {
+describe("Model.exists()", function () {
     var db = null;
     var Person = null;
     var good_id, bad_id;
 
-    var setup = function() {
-        return function(done) {
+    var setup = function () {
+        return function () {
             Person = db.define("person", {
                 name: String
             });
 
-            return helper.dropSync(Person, function() {
+            return helper.dropSync(Person, function () {
                 var people = Person.createSync([{
                     name: "Jeremy Doe"
                 }, {
@@ -33,52 +33,56 @@ describe("Model.exists()", function() {
         };
     };
 
-    before(function(done) {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         db.closeSync();
     });
 
-    describe("with an id", function() {
+    describe("with an id", function () {
         before(setup());
 
-        it("should return true if found", function() {
+        it("should return true if found", function () {
             var exists = Person.existsSync(good_id);
             assert.ok(exists);
         });
 
-        it("should return false if not found", function() {
+        it("should return false if not found", function () {
             var exists = Person.existsSync(bad_id);
             assert.notOk(exists);
         });
     });
 
-    describe("with a list of ids", function() {
+    describe("with a list of ids", function () {
         before(setup());
 
-        it("should return true if found", function() {
+        it("should return true if found", function () {
             var exists = Person.existsSync([good_id]);
             assert.ok(exists);
         });
 
-        it("should return false if not found", function() {
+        it("should return false if not found", function () {
             var exists = Person.existsSync([bad_id]);
             assert.notOk(exists);
         });
     });
 
-    describe("with a conditions object", function() {
+    describe("with a conditions object", function () {
         before(setup());
 
-        it("should return true if found", function() {
-            var exists = Person.existsSync({ name: "John Doe" });
+        it("should return true if found", function () {
+            var exists = Person.existsSync({
+                name: "John Doe"
+            });
             assert.ok(exists);
         });
 
-        it("should return false if not found", function() {
-            var exists = Person.existsSync({ name: "Jack Doe" });
+        it("should return false if not found", function () {
+            var exists = Person.existsSync({
+                name: "Jack Doe"
+            });
             assert.notOk(exists);
         });
     });

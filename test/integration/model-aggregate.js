@@ -1,17 +1,17 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.aggregate()", function() {
+describe("Model.aggregate()", function () {
     var db = null;
     var Person = null;
 
-    var setup = function() {
-        return function() {
+    var setup = function () {
+        return function () {
             Person = db.define("person", {
                 name: String
             });
 
-            helper.dropSync(Person, function() {
+            helper.dropSync(Person, function () {
                 Person.createSync([{
                     id: 1,
                     name: "John Doe"
@@ -26,19 +26,19 @@ describe("Model.aggregate()", function() {
         };
     };
 
-    before(function() {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    xdescribe("with multiple methods", function() {
+    xdescribe("with multiple methods", function () {
         before(setup());
 
-        it("should return value for everyone of them", function() {
-            Person.aggregate().count('id').min('id').max('id').get(function(err, count, min, max) {
+        it("should return value for everyone of them", function () {
+            Person.aggregate().count('id').min('id').max('id').get(function (err, count, min, max) {
                 assert.equal(err, null);
 
                 assert.equal(count, 3);
@@ -48,21 +48,21 @@ describe("Model.aggregate()", function() {
         });
     });
 
-    describe("with call()", function() {
+    describe("with call()", function () {
         before(setup());
 
-        it("should accept a function", function() {
+        it("should accept a function", function () {
             var count = Person.aggregate().call('COUNT').getSync();
             assert.equal(count, 3);
         });
 
-        it("should accept arguments to the funciton as an Array", function() {
+        it("should accept arguments to the funciton as an Array", function () {
             var count = Person.aggregate().call('COUNT', ['id']).getSync();
             assert.equal(count, 3);
         });
 
-        describe("if function is DISTINCT", function() {
-            it("should work as calling .distinct() directly", function() {
+        describe("if function is DISTINCT", function () {
+            it("should work as calling .distinct() directly", function () {
                 var rows = Person.aggregate().call('DISTINCT', ['name']).as('name').order('name').getSync();
 
                 assert.ok(Array.isArray(rows));
@@ -74,28 +74,28 @@ describe("Model.aggregate()", function() {
         });
     });
 
-    xdescribe("with as() without previous aggregates", function() {
+    xdescribe("with as() without previous aggregates", function () {
         before(setup());
 
-        it("should throw", function() {
+        it("should throw", function () {
             Person.aggregate().as.should.throw();
         });
     });
 
-    xdescribe("with select() without arguments", function() {
+    xdescribe("with select() without arguments", function () {
         before(setup());
 
-        it("should throw", function(done) {
+        it("should throw", function () {
             Person.aggregate().select.should.throw();
 
             return done();
         });
     });
 
-    describe("with select() with arguments", function() {
+    describe("with select() with arguments", function () {
         before(setup());
 
-        it("should use them as properties if 1st argument is Array", function() {
+        it("should use them as properties if 1st argument is Array", function () {
             var people = Person.aggregate().select(['id']).count('id').groupBy('id').getSync();
 
             assert.ok(Array.isArray(people));
@@ -106,7 +106,7 @@ describe("Model.aggregate()", function() {
             assert.notProperty(people[0], "name");
         });
 
-        it("should use them as properties", function() {
+        it("should use them as properties", function () {
             var people = Person.aggregate().select('id').count().groupBy('id').getSync();
             assert.ok(Array.isArray(people));
             assert.greaterThan(people.length, 0);
@@ -117,37 +117,37 @@ describe("Model.aggregate()", function() {
         });
     });
 
-    xdescribe("with get() without callback", function() {
+    xdescribe("with get() without callback", function () {
         before(setup());
 
-        it("should throw", function(done) {
+        it("should throw", function () {
             Person.aggregate().count('id').get.should.throw();
 
             return done();
         });
     });
 
-    describe("with get() without aggregates", function() {
+    describe("with get() without aggregates", function () {
         before(setup());
 
-        it("should throw", function() {
-            assert.throws(function() {
-                Person.aggregate().get(function() {});
+        it("should throw", function () {
+            assert.throws(function () {
+                Person.aggregate().get(function () {});
             });
         });
     });
 
-    describe("with distinct()", function() {
+    describe("with distinct()", function () {
         before(setup());
 
-        it("should return a list of distinct properties", function() {
+        it("should return a list of distinct properties", function () {
             var names = Person.aggregate().distinct('name').getSync();
             assert.isObject(names);
             assert.property(names, "length", 2);
         });
 
-        describe("with limit(1)", function() {
-            it("should return only one value", function() {
+        describe("with limit(1)", function () {
+            it("should return only one value", function () {
                 var names = Person.aggregate().distinct('name').limit(1).order("name").getSync();
                 assert.isObject(names);
                 assert.property(names, "length", 1);
@@ -155,8 +155,8 @@ describe("Model.aggregate()", function() {
             });
         });
 
-        describe("with limit(1, 1)", function() {
-            it("should return only one value", function() {
+        describe("with limit(1, 1)", function () {
+            it("should return only one value", function () {
                 var names = Person.aggregate().distinct('name').limit(1, 1).order("name").getSync();
                 assert.isObject(names);
                 assert.property(names, "length", 1);
@@ -165,10 +165,10 @@ describe("Model.aggregate()", function() {
         });
     });
 
-    describe("with groupBy()", function() {
+    describe("with groupBy()", function () {
         before(setup());
 
-        it("should return items grouped by property", function() {
+        it("should return items grouped by property", function () {
             var rows = Person.aggregate().count().groupBy('name').getSync();
             assert.isObject(rows);
             assert.property(rows, "length", 2);
@@ -176,10 +176,10 @@ describe("Model.aggregate()", function() {
             assert.equal((rows[0].count + rows[1].count), 3); // 1 + 2
         });
 
-        describe("with order()", function() {
+        describe("with order()", function () {
             before(setup());
 
-            it("should order items", function() {
+            it("should order items", function () {
                 var rows = Person.aggregate().count().groupBy('name').order('-count').getSync();
                 assert.isObject(rows);
                 assert.property(rows, "length", 2);
@@ -190,10 +190,10 @@ describe("Model.aggregate()", function() {
         });
     });
 
-    describe("using as()", function() {
+    describe("using as()", function () {
         before(setup());
 
-        it("should use as an alias", function() {
+        it("should use as an alias", function () {
             var people = Person.aggregate().count().as('total').groupBy('name').getSync();
             assert.ok(Array.isArray(people));
             assert.greaterThan(people.length, 0);
@@ -202,8 +202,8 @@ describe("Model.aggregate()", function() {
             assert.property(people[0], "total");
         });
 
-        it("should throw if no aggregates defined", function() {
-            assert.throws(function() {
+        it("should throw if no aggregates defined", function () {
+            assert.throws(function () {
                 Person.aggregate().as('total');
             });
         });

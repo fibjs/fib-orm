@@ -1,15 +1,15 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.find() chaining", function() {
+describe("Model.find() chaining", function () {
     var db = null;
     var Person = null;
     var Dog = null;
 
-    var setup = function(extraOpts) {
+    var setup = function (extraOpts) {
         if (!extraOpts) extraOpts = {};
 
-        return function() {
+        return function () {
             Person = db.define("person", {
                 name: String,
                 surname: String,
@@ -20,7 +20,7 @@ describe("Model.find() chaining", function() {
 
             ORM.singleton.clear(); // clear identityCache cache
 
-            return helper.dropSync(Person, function() {
+            return helper.dropSync(Person, function () {
                 Person.createSync([{
                     name: "John",
                     surname: "Doe",
@@ -41,8 +41,8 @@ describe("Model.find() chaining", function() {
         };
     };
 
-    var setup2 = function() {
-        return function() {
+    var setup2 = function () {
+        return function () {
             Dog = db.define("dog", {
                 name: String,
             });
@@ -51,41 +51,53 @@ describe("Model.find() chaining", function() {
 
             ORM.singleton.clear(); // clear identityCache cache
 
-            return helper.dropSync(Dog, function() {
+            return helper.dropSync(Dog, function () {
                 Dog.createSync([{
                     name: "Fido",
-                    friends: [{ name: "Gunner" }, { name: "Chainsaw" }],
-                    family: [{ name: "Chester" }]
+                    friends: [{
+                        name: "Gunner"
+                    }, {
+                        name: "Chainsaw"
+                    }],
+                    family: [{
+                        name: "Chester"
+                    }]
                 }, {
                     name: "Thumper",
-                    friends: [{ name: "Bambi" }],
-                    family: [{ name: "Princess" }, { name: "Butch" }]
+                    friends: [{
+                        name: "Bambi"
+                    }],
+                    family: [{
+                        name: "Princess"
+                    }, {
+                        name: "Butch"
+                    }]
                 }]);
             });
         };
     };
 
-    before(function(done) {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe(".limit(N)", function() {
+    describe(".limit(N)", function () {
         before(setup());
 
-        it("should limit results to N items", function(done) {
+        it("should limit results to N items", function () {
             var instances = Person.find().limit(2).runSync();
             assert.propertyVal(instances, "length", 2);
         });
     });
 
-    describe(".skip(N)", function() {
+    describe(".skip(N)", function () {
         before(setup());
 
-        it("should skip the first N results", function() {
+        it("should skip the first N results", function () {
             var instances = Person.find().skip(2).order("age").runSync();
 
             assert.propertyVal(instances, "length", 1);
@@ -93,10 +105,10 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe(".offset(N)", function() {
+    describe(".offset(N)", function () {
         before(setup());
 
-        it("should skip the first N results", function() {
+        it("should skip the first N results", function () {
             var instances = Person.find().offset(2).order("age").runSync();
 
             assert.propertyVal(instances, "length", 1);
@@ -104,24 +116,24 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe("order", function() {
+    describe("order", function () {
         before(setup());
 
-        it("('property') should order by that property ascending", function() {
+        it("('property') should order by that property ascending", function () {
             var instances = Person.find().order("age").runSync();
             assert.propertyVal(instances, "length", 3);
             assert.equal(instances[0].age, 18);
             assert.equal(instances[2].age, 20);
         });
 
-        it("('-property') should order by that property descending", function() {
+        it("('-property') should order by that property descending", function () {
             var instances = Person.find().order("-age").runSync();
             assert.propertyVal(instances, "length", 3);
             assert.equal(instances[0].age, 20);
             assert.equal(instances[2].age, 18);
         });
 
-        it("('property', 'Z') should order by that property descending", function() {
+        it("('property', 'Z') should order by that property descending", function () {
             var instances = Person.find().order("age", "Z").runSync();
             assert.propertyVal(instances, "length", 3);
             assert.equal(instances[0].age, 20);
@@ -129,17 +141,17 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe("orderRaw", function() {
+    describe("orderRaw", function () {
         before(setup());
 
-        it("should allow ordering by SQL", function(done) {
+        it("should allow ordering by SQL", function () {
             var instances = Person.find().orderRaw("age DESC").runSync();
             assert.propertyVal(instances, "length", 3);
             assert.equal(instances[0].age, 20);
             assert.equal(instances[2].age, 18);
         });
 
-        it("should allow ordering by SQL with escaping", function() {
+        it("should allow ordering by SQL with escaping", function () {
             var instances = Person.find().orderRaw("?? DESC", ['age']).runSync();
             assert.propertyVal(instances, "length", 3);
             assert.equal(instances[0].age, 20);
@@ -147,10 +159,10 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe("only", function() {
+    describe("only", function () {
         before(setup());
 
-        it("('property', ...) should return only those properties, others null", function() {
+        it("('property', ...) should return only those properties, others null", function () {
             var instances = Person.find().only("age", "surname").order("-age").runSync();
             assert.propertyVal(instances, "length", 3);
             assert.property(instances[0], "age");
@@ -159,10 +171,10 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe("omit", function() {
+    describe("omit", function () {
         before(setup());
 
-        it("('property', ...) should not get these properties", function() {
+        it("('property', ...) should not get these properties", function () {
             var instances = Person.find().omit("age", "surname").order("-age").runSync();
             assert.propertyVal(instances, "length", 3);
             assert.property(instances[0], 'id');
@@ -172,7 +184,7 @@ describe("Model.find() chaining", function() {
             assert.propertyVal(instances[0], "name", "Jane");
         });
 
-        it("(['property', ...]) should not get these properties", function() {
+        it("(['property', ...]) should not get these properties", function () {
             var instances = Person.find().omit(["age", "surname"]).order("-age").runSync();
             assert.propertyVal(instances, "length", 3);
             assert.propertyVal(instances[0], "age", null);
@@ -181,82 +193,98 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe(".count()", function() {
+    describe(".count()", function () {
         before(setup());
 
-        it("should return only the total number of results", function() {
+        it("should return only the total number of results", function () {
             var count = Person.find().countSync();
             assert.equal(count, 3);
         });
     });
 
-    describe(".first()", function() {
+    describe(".first()", function () {
         before(setup());
 
-        it("should return only the first element", function() {
+        it("should return only the first element", function () {
             var JaneDoe = Person.find().order("-age").firstSync();
             assert.equal(JaneDoe.name, "Jane");
             assert.equal(JaneDoe.surname, "Doe");
             assert.equal(JaneDoe.age, 20);
         });
 
-        it("should return null if not found", function() {
-            var Jack = Person.find({ name: "Jack" }).firstSync();
+        it("should return null if not found", function () {
+            var Jack = Person.find({
+                name: "Jack"
+            }).firstSync();
             assert.equal(Jack, null);
         });
     });
 
-    describe(".last()", function() {
+    describe(".last()", function () {
         before(setup());
 
-        it("should return only the last element", function() {
+        it("should return only the last element", function () {
             var JaneDoe = Person.find().order("age").lastSync();
             assert.equal(JaneDoe.name, "Jane");
             assert.equal(JaneDoe.surname, "Doe");
             assert.equal(JaneDoe.age, 20);
         });
 
-        it("should return null if not found", function(done) {
-            var Jack = Person.find({ name: "Jack" }).lastSync();
+        it("should return null if not found", function () {
+            var Jack = Person.find({
+                name: "Jack"
+            }).lastSync();
             assert.equal(Jack, null);
         });
     });
 
-    describe(".find()", function() {
+    describe(".find()", function () {
         before(setup());
 
-        it("should not change find if no arguments", function() {
+        it("should not change find if no arguments", function () {
             var count = Person.find().find().countSync();
             assert.equal(count, 3);
         });
 
-        it("should restrict conditions if passed", function() {
-            var count = Person.find().find({ age: 18 }).countSync();
+        it("should restrict conditions if passed", function () {
+            var count = Person.find().find({
+                age: 18
+            }).countSync();
             assert.equal(count, 2);
         });
     });
 
-    it("should restrict conditions if passed and also be chainable", function() {
-        var count = Person.find().find({ age: 18 }).find({ name: "Jane" }).countSync();
+    it("should restrict conditions if passed and also be chainable", function () {
+        var count = Person.find().find({
+            age: 18
+        }).find({
+            name: "Jane"
+        }).countSync();
         assert.equal(count, 1);
     });
 
-    it("should return results if passed a callback as second argument", function() {
-        var instances = Person.find().findSync({ age: 18 });
+    it("should return results if passed a callback as second argument", function () {
+        var instances = Person.find().findSync({
+            age: 18
+        });
         assert.propertyVal(instances, "length", 2);
     });
 
-    it("should allow sql where conditions", function() {
-        var items = Person.find({ age: 18 }).where("LOWER(surname) LIKE 'dea%'").allSync();
+    it("should allow sql where conditions", function () {
+        var items = Person.find({
+            age: 18
+        }).where("LOWER(surname) LIKE 'dea%'").allSync();
         assert.equal(items.length, 1);
     });
 
-    it("should allow sql where conditions with auto escaping", function() {
-        var items = Person.find({ age: 18 }).where("LOWER(surname) LIKE ?", ['dea%']).allSync();
+    it("should allow sql where conditions with auto escaping", function () {
+        var items = Person.find({
+            age: 18
+        }).where("LOWER(surname) LIKE ?", ['dea%']).allSync();
         assert.equal(items.length, 1);
     });
 
-    it("should append sql where conditions", function() {
+    it("should append sql where conditions", function () {
         var items = Person.find().where("LOWER(surname) LIKE ?", ['do%']).allSync();
         assert.equal(items.length, 2);
 
@@ -267,20 +295,35 @@ describe("Model.find() chaining", function() {
         assert.equal(items.length, 1);
     });
 
-    describe("finders should be chainable & interchangeable including", function() {
+    describe("finders should be chainable & interchangeable including", function () {
         before(setup());
 
-        before(function(done) {
-            Person.createSync([
-                { name: "Mel", surname: "Gabbs", age: 12 },
-                { name: "Mel", surname: "Gibbs", age: 22 },
-                { name: "Mel", surname: "Gobbs", age: 32 }
+        before(function () {
+            Person.createSync([{
+                    name: "Mel",
+                    surname: "Gabbs",
+                    age: 12
+                },
+                {
+                    name: "Mel",
+                    surname: "Gibbs",
+                    age: 22
+                },
+                {
+                    name: "Mel",
+                    surname: "Gobbs",
+                    age: 32
+                }
             ]);
         });
 
-        ['find', 'where', 'all'].forEach(function(func) {
-            it("." + func + "()", function(done) {
-                var items = Person[func]({ name: "Mel" })[func]({ age: ORM.gt(20) })[func + 'Sync']();
+        ['find', 'where', 'all'].forEach(function (func) {
+            it("." + func + "()", function () {
+                var items = Person[func]({
+                    name: "Mel"
+                })[func]({
+                    age: ORM.gt(20)
+                })[func + 'Sync']();
 
                 assert.equal(items.length, 2);
 
@@ -289,8 +332,12 @@ describe("Model.find() chaining", function() {
             });
         });
 
-        it("a mix", function(done) {
-            var items = Person.all({ name: "Mel" }).where({ age: ORM.gt(20) }).findSync();
+        it("a mix", function () {
+            var items = Person.all({
+                name: "Mel"
+            }).where({
+                age: ORM.gt(20)
+            }).findSync();
 
             assert.equal(items.length, 2);
 
@@ -299,10 +346,10 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe(".each()", function() {
+    describe(".each()", function () {
         before(setup());
 
-        it("should return a ChainInstance", function() {
+        it("should return a ChainInstance", function () {
             var chain = Person.find().each();
 
             assert.isFunction(chain.filter);
@@ -311,25 +358,29 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe(".remove()", function() {
+    describe(".remove()", function () {
         var hookFired = false;
 
         before(setup({
             hooks: {
-                beforeRemove: function() {
+                beforeRemove: function () {
                     hookFired = true;
                 }
             }
         }));
 
-        it("should have no problems if no results found", function() {
-            Person.find({ age: 22 }).removeSync();
+        it("should have no problems if no results found", function () {
+            Person.find({
+                age: 22
+            }).removeSync();
             var count = Person.find().countSync();
             assert.equal(count, 3);
         });
 
-        it("should remove results without calling hooks", function() {
-            Person.find({ age: 20 }).removeSync();
+        it("should remove results without calling hooks", function () {
+            Person.find({
+                age: 20
+            }).removeSync();
             assert.equal(hookFired, false);
 
             var count = Person.find().countSync();
@@ -338,19 +389,21 @@ describe("Model.find() chaining", function() {
 
     });
 
-    describe(".each()", function() {
+    describe(".each()", function () {
         var hookFired = false;
 
         before(setup({
             hooks: {
-                beforeRemove: function() {
+                beforeRemove: function () {
                     hookFired = true;
                 }
             }
         }));
 
-        it("should return a ChainFind", function() {
-            var chain = Person.find({ age: 22 }).each();
+        it("should return a ChainFind", function () {
+            var chain = Person.find({
+                age: 22
+            }).each();
 
             assert.isObject(chain);
             assert.isFunction(chain.filter);
@@ -360,11 +413,11 @@ describe("Model.find() chaining", function() {
             assert.isFunction(chain.save);
         });
         //=========================================
-        xdescribe(".count()", function() {
-            it("should return the total filtered items", function() {
-                Person.find().each().filter(function(person) {
+        xdescribe(".count()", function () {
+            it("should return the total filtered items", function () {
+                Person.find().each().filter(function (person) {
                     return (person.age > 18);
-                }).count(function(count) {
+                }).count(function (count) {
                     assert.equal(count, 1);
 
                     return done();
@@ -372,11 +425,11 @@ describe("Model.find() chaining", function() {
             });
         });
 
-        xdescribe(".sort()", function() {
-            it("should return the items sorted using the sorted function", function(done) {
-                Person.find().each().sort(function(first, second) {
+        xdescribe(".sort()", function () {
+            it("should return the items sorted using the sorted function", function () {
+                Person.find().each().sort(function (first, second) {
                     return (first.age < second.age);
-                }).get(function(people) {
+                }).get(function (people) {
                     assert.ok(Array.isArray(people));
 
                     assert.equal(people.length, 3);
@@ -388,13 +441,17 @@ describe("Model.find() chaining", function() {
             });
         });
 
-        xdescribe(".save()", function() {
-            it("should save items after changes", function(done) {
-                Person.find({ surname: "Dean" }).each(function(person) {
+        xdescribe(".save()", function () {
+            it("should save items after changes", function () {
+                Person.find({
+                    surname: "Dean"
+                }).each(function (person) {
                     person.age.should.not.equal(45);
                     person.age = 45;
-                }).save(function() {
-                    Person.find({ surname: "Dean" }, function(err, people) {
+                }).save(function () {
+                    Person.find({
+                        surname: "Dean"
+                    }, function (err, people) {
                         assert.ok(Array.isArray(people));
 
                         assert.equal(people.length, 1);
@@ -406,11 +463,13 @@ describe("Model.find() chaining", function() {
             });
         });
 
-        xdescribe("if passing a callback", function() {
-            it("should use it to .forEach()", function(done) {
-                Person.find({ surname: "Dean" }).each(function(person) {
+        xdescribe("if passing a callback", function () {
+            it("should use it to .forEach()", function () {
+                Person.find({
+                    surname: "Dean"
+                }).each(function (person) {
                     person.fullName = person.name + " " + person.surname;
-                }).get(function(people) {
+                }).get(function (people) {
                     assert.ok(Array.isArray(people));
 
                     assert.equal(people.length, 1);
@@ -422,16 +481,18 @@ describe("Model.find() chaining", function() {
         });
 
         // TODO: Implement
-        xit(".remove() should call hooks", function() {
-            Person.find().each().remove(function(err) {
+        xit(".remove() should call hooks", function () {
+            Person.find().each().remove(function (err) {
                 should.not.exist(err);
                 assert.equal(hookFired, true);
             });
         });
 
-        xdescribe(".hasAccessor() for hasOne associations", function() {
-            it("should be chainable", function() {
-                var John = Person.findSync({ name: "John" });
+        xdescribe(".hasAccessor() for hasOne associations", function () {
+            it("should be chainable", function () {
+                var John = Person.findSync({
+                    name: "John"
+                });
 
                 var Justin = new Person({
                     name: "Justin",
@@ -450,11 +511,13 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    describe(".eager()", function() {
+    describe(".eager()", function () {
         before(setup2());
 
-        it("should fetch all listed associations in a single query", function() {
-            var dogs = Dog.find({ name: ["Fido", "Thumper"] }).eager("friends").allSync();
+        it("should fetch all listed associations in a single query", function () {
+            var dogs = Dog.find({
+                name: ["Fido", "Thumper"]
+            }).eager("friends").allSync();
             assert.ok(Array.isArray(dogs));
 
             assert.equal(dogs.length, 2);
@@ -463,8 +526,10 @@ describe("Model.find() chaining", function() {
             assert.equal(dogs[1].friends.length, 1);
         });
 
-        it("should be able to handle multiple associations", function() {
-            var dogs = Dog.find({ name: ["Fido", "Thumper"] }).eager("friends", "family").allSync();
+        it("should be able to handle multiple associations", function () {
+            var dogs = Dog.find({
+                name: ["Fido", "Thumper"]
+            }).eager("friends", "family").allSync();
             assert.ok(Array.isArray(dogs));
 
             assert.equal(dogs.length, 2);
@@ -475,8 +540,10 @@ describe("Model.find() chaining", function() {
             assert.equal(dogs[1].family.length, 2);
         });
 
-        it("should work with array parameters too", function(done) {
-            var dogs = Dog.find({ name: ["Fido", "Thumper"] }).eager(["friends", "family"]).allSync();
+        it("should work with array parameters too", function () {
+            var dogs = Dog.find({
+                name: ["Fido", "Thumper"]
+            }).eager(["friends", "family"]).allSync();
             assert.ok(Array.isArray(dogs));
 
             assert.equal(dogs.length, 2);
@@ -488,27 +555,27 @@ describe("Model.find() chaining", function() {
         });
     });
 
-    xdescribe(".success()", function() {
+    xdescribe(".success()", function () {
         before(setup());
 
-        it("should return a Promise with .fail() method", function(done) {
-            Person.find().success(function(people) {
+        it("should return a Promise with .fail() method", function () {
+            Person.find().success(function (people) {
                 assert.ok(Array.isArray(people));
 
                 return done();
-            }).fail(function(err) {
+            }).fail(function (err) {
                 // never called..
             });
         });
     });
 
-    xdescribe(".fail()", function() {
+    xdescribe(".fail()", function () {
         before(setup());
 
-        it("should return a Promise with .success() method", function(done) {
-            Person.find().fail(function(err) {
+        it("should return a Promise with .success() method", function () {
+            Person.find().fail(function (err) {
                 // never called..
-            }).success(function(people) {
+            }).success(function (people) {
                 assert.ok(Array.isArray(people));
 
                 return done();

@@ -1,14 +1,14 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("hasMany extra properties", function() {
+describe("hasMany extra properties", function () {
     var db = null;
     var Person = null;
     var Pet = null;
 
-    var setup = function(opts) {
+    var setup = function (opts) {
         opts = opts || {};
-        return function() {
+        return function () {
             db.settings.set('instance.identityCache', false);
 
             Person = db.define('person', {
@@ -26,18 +26,18 @@ describe("hasMany extra properties", function() {
         };
     };
 
-    before(function(done) {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         db.closeSync();
     });
 
-    describe("if passed to addAccessor", function() {
+    describe("if passed to addAccessor", function () {
         before(setup());
 
-        it("should be added to association", function() {
+        it("should be added to association", function () {
             var people = Person.createSync([{
                 name: "John"
             }]);
@@ -48,11 +48,20 @@ describe("hasMany extra properties", function() {
                 name: "Mutt"
             }]);
 
-            var data = { adopted: true };
+            var data = {
+                adopted: true
+            };
 
-            people[0].addPetsSync(pets, { since: new Date(), data: data });
+            people[0].addPetsSync(pets, {
+                since: new Date(),
+                data: data
+            });
 
-            var John = Person.find({ name: "John" }, { autoFetch: true }).firstSync();
+            var John = Person.find({
+                name: "John"
+            }, {
+                autoFetch: true
+            }).firstSync();
 
             assert.property(John, "pets");
             assert.ok(Array.isArray(pets));

@@ -1,48 +1,51 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Event", function() {
+describe("Event", function () {
     var db = null;
     var Person = null;
 
     var triggeredHooks = {};
 
-    var checkHook = function(hook) {
+    var checkHook = function (hook) {
         triggeredHooks[hook] = false;
 
-        return function() {
+        return function () {
             triggeredHooks[hook] = Date.now();
         };
     };
 
-    var setup = function(hooks) {
-        return function() {
+    var setup = function (hooks) {
+        return function () {
             Person = db.define("person", {
-                name: { type: "text", required: true }
+                name: {
+                    type: "text",
+                    required: true
+                }
             });
 
             return helper.dropSync(Person);
         };
     };
 
-    before(function() {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("save", function() {
+    describe("save", function () {
         before(setup());
 
-        it("should trigger when saving an instance", function() {
+        it("should trigger when saving an instance", function () {
             var triggered = false;
             var John = new Person({
                 name: "John Doe"
             });
 
-            John.on("save", function() {
+            John.on("save", function () {
                 triggered = true;
             });
 
@@ -52,11 +55,11 @@ describe("Event", function() {
             assert.isTrue(triggered);
         });
 
-        it("should trigger when saving an instance even if it fails", function() {
+        it("should trigger when saving an instance even if it fails", function () {
             var triggered = false;
             var John = new Person();
 
-            John.on("save", function(err) {
+            John.on("save", function (err) {
                 triggered = true;
 
                 assert.isObject(err);
@@ -65,23 +68,23 @@ describe("Event", function() {
 
             assert.isFalse(triggered);
 
-            assert.throws(function() {
+            assert.throws(function () {
                 John.saveSync();
             })
 
             assert.isTrue(triggered);
         });
 
-        it("should be writable for mocking", function() {
+        it("should be writable for mocking", function () {
             var triggered = false;
             var John = new Person();
 
-            John.on = function(event, cb) {
+            John.on = function (event, cb) {
                 triggered = true;
             };
             assert.isFalse(triggered);
 
-            John.on("mocked", function(err) {});
+            John.on("mocked", function (err) {});
             assert.isTrue(triggered);
         });
     });

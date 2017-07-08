@@ -1,12 +1,12 @@
 var ORM = require('../../');
 var helper = require('../support/spec_helper');
 
-describe("hasOne", function() {
+describe("hasOne", function () {
     var db = null;
     var Person = null;
 
-    var setup = function(required) {
-        return function() {
+    var setup = function (required) {
+        return function () {
             db.settings.set('instance.identityCache', false);
             db.settings.set('instance.returnAllErrors', true);
 
@@ -22,18 +22,18 @@ describe("hasOne", function() {
         };
     };
 
-    before(function() {
+    before(function () {
         db = helper.connect();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("required", function() {
+    describe("required", function () {
         before(setup(true));
 
-        it("should not accept empty association", function() {
+        it("should not accept empty association", function () {
             var John = new Person({
                 name: "John",
                 parentId: null
@@ -48,7 +48,7 @@ describe("hasOne", function() {
             }
         });
 
-        it("should accept association", function() {
+        it("should accept association", function () {
             var John = new Person({
                 name: "John",
                 parentId: 1
@@ -57,17 +57,17 @@ describe("hasOne", function() {
         });
     });
 
-    describe("not required", function() {
+    describe("not required", function () {
         before(setup(false));
 
-        it("should accept empty association", function() {
+        it("should accept empty association", function () {
             var John = new Person({
                 name: "John"
             });
             John.saveSync();
         });
 
-        it("should accept null association", function() {
+        it("should accept null association", function () {
             var John = new Person({
                 name: "John",
                 parent_id: null

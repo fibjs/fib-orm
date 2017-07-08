@@ -1,20 +1,37 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model instance", function() {
+describe("Model instance", function () {
     var db = null;
     var Person = null;
 
-    var setup = function() {
+    var setup = function () {
         db.settings.set('instance.returnAllErrors', true);
 
         Person = db.define("person", {
             name: String,
-            age: { type: 'integer', required: false },
-            height: { type: 'integer', required: false },
-            weight: { type: 'number', required: false, enumerable: true },
-            secret: { type: 'text', required: false, enumerable: false },
-            data: { type: 'object', required: false }
+            age: {
+                type: 'integer',
+                required: false
+            },
+            height: {
+                type: 'integer',
+                required: false
+            },
+            weight: {
+                type: 'number',
+                required: false,
+                enumerable: true
+            },
+            secret: {
+                type: 'text',
+                required: false,
+                enumerable: false
+            },
+            data: {
+                type: 'object',
+                required: false
+            }
         }, {
             identityCache: false,
             validations: {
@@ -22,7 +39,7 @@ describe("Model instance", function() {
             }
         });
 
-        helper.dropSync(Person, function() {
+        helper.dropSync(Person, function () {
             Person.createSync([{
                 name: "Jeremy Doe"
             }, {
@@ -33,19 +50,19 @@ describe("Model instance", function() {
         });
     };
 
-    before(function() {
+    before(function () {
         db = helper.connect();
         setup();
     });
 
-    after(function() {
+    after(function () {
         return db.closeSync();
     });
 
-    describe("#save", function() {
+    describe("#save", function () {
         var main_item, item;
 
-        before(function() {
+        before(function () {
             main_item = db.define("main_item", {
                 name: String
             }, {
@@ -63,7 +80,7 @@ describe("Model instance", function() {
                 autoFetch: true
             });
 
-            helper.dropSync([main_item, item], function() {
+            helper.dropSync([main_item, item], function () {
                 var mainItem = main_item.createSync({
                     name: "Main Item"
                 });
@@ -76,14 +93,18 @@ describe("Model instance", function() {
             });
         });
 
-        it("should have a saving state to avoid loops", function() {
-            var mainItem = main_item.find({ name: "Main Item" }).firstSync();
-            mainItem.saveSync({ name: "new name" });
+        it("should have a saving state to avoid loops", function () {
+            var mainItem = main_item.find({
+                name: "Main Item"
+            }).firstSync();
+            mainItem.saveSync({
+                name: "new name"
+            });
         });
     });
 
-    describe("#isInstance", function() {
-        it("should always return true for instances", function() {
+    describe("#isInstance", function () {
+        it("should always return true for instances", function () {
             assert.equal((new Person).isInstance, true);
             assert.equal((Person(4)).isInstance, true);
 
@@ -91,30 +112,30 @@ describe("Model instance", function() {
             assert.equal(item.isInstance, true);
         });
 
-        it("should be false for all other objects", function() {
+        it("should be false for all other objects", function () {
             assert.notEqual({}.isInstance, true);
             assert.notEqual([].isInstance, true);
         });
     });
 
-    describe("#isPersisted", function() {
-        it("should return true for persisted instances", function() {
+    describe("#isPersisted", function () {
+        it("should return true for persisted instances", function () {
             var item = Person.find().firstSync();
             assert.equal(item.isPersisted(), true);
         });
 
-        it("should return true for shell instances", function() {
+        it("should return true for shell instances", function () {
             assert.equal(Person(4).isPersisted(), true);
         });
 
-        it("should return false for new instances", function() {
+        it("should return false for new instances", function () {
             assert.equal((new Person).isPersisted(), false);
         });
 
-        it("should be writable for mocking", function() {
+        it("should be writable for mocking", function () {
             var person = new Person()
             var triggered = false;
-            person.isPersisted = function() {
+            person.isPersisted = function () {
                 triggered = true;
             };
             person.isPersisted()
@@ -122,7 +143,7 @@ describe("Model instance", function() {
         });
     });
 
-    describe("#set", function() {
+    describe("#set", function () {
         var person = null;
         var data = null;
 
@@ -130,7 +151,7 @@ describe("Model instance", function() {
             return JSON.parse(JSON.stringify(obj))
         };
 
-        beforeEach(function() {
+        beforeEach(function () {
             data = {
                 a: {
                     b: {
@@ -140,18 +161,21 @@ describe("Model instance", function() {
                 },
                 e: 5
             };
-            var p = Person.createSync({ name: 'Dilbert', data: data });
+            var p = Person.createSync({
+                name: 'Dilbert',
+                data: data
+            });
             person = p;
         });
 
-        it("should do nothing with flat paths when setting to same value", function() {
+        it("should do nothing with flat paths when setting to same value", function () {
             assert.equal(person.saved(), true);
             person.set('name', 'Dilbert');
             assert.equal(person.name, 'Dilbert');
             assert.equal(person.saved(), true);
         });
 
-        it("should mark as dirty with flat paths when setting to different value", function() {
+        it("should mark as dirty with flat paths when setting to different value", function () {
             assert.equal(person.saved(), true);
             person.set('name', 'Dogbert');
             assert.equal(person.name, 'Dogbert');
@@ -159,7 +183,7 @@ describe("Model instance", function() {
             assert.equal(person.__opts.changes.join(','), 'name');
         });
 
-        it("should do nothin with deep paths when setting to same value", function() {
+        it("should do nothin with deep paths when setting to same value", function () {
             assert.equal(person.saved(), true);
             person.set('data.e', 5);
 
@@ -170,7 +194,7 @@ describe("Model instance", function() {
             assert.equal(person.saved(), true);
         });
 
-        it("should mark as dirty with deep paths when setting to different value", function() {
+        it("should mark as dirty with deep paths when setting to different value", function () {
             assert.equal(person.saved(), true);
             person.set('data.e', 6);
 
@@ -182,7 +206,7 @@ describe("Model instance", function() {
             assert.equal(person.__opts.changes.join(','), 'data');
         });
 
-        it("should do nothing with deeper paths when setting to same value", function() {
+        it("should do nothing with deeper paths when setting to same value", function () {
             assert.equal(person.saved(), true);
             person.set('data.a.b.d', 4);
 
@@ -193,7 +217,7 @@ describe("Model instance", function() {
             assert.equal(person.saved(), true);
         });
 
-        it("should mark as dirty with deeper paths when setting to different value", function() {
+        it("should mark as dirty with deeper paths when setting to different value", function () {
             assert.equal(person.saved(), true);
             person.set('data.a.b.d', 6);
 
@@ -205,7 +229,7 @@ describe("Model instance", function() {
             assert.equal(person.__opts.changes.join(','), 'data');
         });
 
-        it("should mark as dirty with array path when setting to different value", function() {
+        it("should mark as dirty with array path when setting to different value", function () {
             assert.equal(person.saved(), true);
             person.set(['data', 'a', 'b', 'd'], 6);
 
@@ -217,7 +241,7 @@ describe("Model instance", function() {
             assert.equal(person.__opts.changes.join(','), 'data');
         });
 
-        it("should do nothing with invalid paths", function() {
+        it("should do nothing with invalid paths", function () {
             assert.equal(person.saved(), true);
             person.set('data.a.b.d.y.z', 1);
             person.set('data.y.z', 1);
@@ -229,15 +253,21 @@ describe("Model instance", function() {
         });
     });
 
-    describe("#markAsDirty", function() {
+    describe("#markAsDirty", function () {
         var person = null;
 
-        beforeEach(function() {
-            var p = Person.createSync({ name: 'John', age: 44, data: { a: 1 } });
+        beforeEach(function () {
+            var p = Person.createSync({
+                name: 'John',
+                age: 44,
+                data: {
+                    a: 1
+                }
+            });
             person = p;
         });
 
-        it("should mark individual properties as dirty", function() {
+        it("should mark individual properties as dirty", function () {
             assert.equal(person.saved(), true);
             person.markAsDirty('name');
             assert.equal(person.saved(), false);
@@ -247,15 +277,21 @@ describe("Model instance", function() {
         });
     });
 
-    describe("#dirtyProperties", function() {
+    describe("#dirtyProperties", function () {
         var person = null;
 
-        beforeEach(function() {
-            var p = Person.createSync({ name: 'John', age: 44, data: { a: 1 } });
+        beforeEach(function () {
+            var p = Person.createSync({
+                name: 'John',
+                age: 44,
+                data: {
+                    a: 1
+                }
+            });
             person = p;
         });
 
-        it("should mark individual properties as dirty", function() {
+        it("should mark individual properties as dirty", function () {
             assert.equal(person.saved(), true);
             person.markAsDirty('name');
             person.markAsDirty('data');
@@ -264,45 +300,53 @@ describe("Model instance", function() {
         });
     });
 
-    describe("#isShell", function() {
-        it("should return true for shell models", function() {
+    describe("#isShell", function () {
+        it("should return true for shell models", function () {
             assert.equal(Person(4).isShell(), true);
         });
 
-        it("should return false for new models", function() {
+        it("should return false for new models", function () {
             assert.equal((new Person).isShell(), false);
         });
 
-        it("should return false for existing models", function() {
+        it("should return false for existing models", function () {
             var item = Person.find().firstSync();
             assert.equal(item.isShell(), false);
         });
     });
 
-    describe("#validate", function() {
-        it("should return validation errors if invalid", function() {
-            var person = new Person({ age: -1 });
+    describe("#validate", function () {
+        it("should return validation errors if invalid", function () {
+            var person = new Person({
+                age: -1
+            });
 
             var validationErrors = person.validateSync();
             assert.equal(Array.isArray(validationErrors), true);
         });
 
-        it("should return false if valid", function() {
-            var person = new Person({ name: 'Janette' });
+        it("should return false if valid", function () {
+            var person = new Person({
+                name: 'Janette'
+            });
 
             var validationErrors = person.validateSync();
             assert.equal(validationErrors, false);
         });
     });
 
-    describe("properties", function() {
-        describe("Number", function() {
-            it("should be saved for valid numbers, using both save & create", function() {
-                var person1 = new Person({ height: 190 });
+    describe("properties", function () {
+        describe("Number", function () {
+            it("should be saved for valid numbers, using both save & create", function () {
+                var person1 = new Person({
+                    height: 190
+                });
 
                 person1.saveSync();
 
-                var person2 = Person.createSync({ height: 170 });
+                var person2 = Person.createSync({
+                    height: 170
+                });
 
                 var item = Person.getSync(person1[Person.id]);
 
@@ -313,9 +357,16 @@ describe("Model instance", function() {
             });
         });
 
-        describe("Enumerable", function() {
-            it("should not stringify properties marked as not enumerable", function() {
-                var p = Person.createSync({ name: 'Dilbert', secret: 'dogbert', weight: 100, data: { data: 3 } });
+        describe("Enumerable", function () {
+            it("should not stringify properties marked as not enumerable", function () {
+                var p = Person.createSync({
+                    name: 'Dilbert',
+                    secret: 'dogbert',
+                    weight: 100,
+                    data: {
+                        data: 3
+                    }
+                });
 
                 var result = JSON.parse(JSON.stringify(p));
                 assert.notExist(result.secret);
