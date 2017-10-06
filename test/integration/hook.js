@@ -489,7 +489,7 @@ describe("Hook", function () {
         });
     });
 
-    xdescribe("afterAutoFetch", function () {
+    describe("afterAutoFetch", function () {
         var afterAutoFetch = false;
 
         before(setup({
