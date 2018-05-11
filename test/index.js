@@ -44,6 +44,8 @@ function t() {
 
     run('./integration/validation.js');
 
+    run('./integration/date-type.js');
+
     test.run();
 }
 
