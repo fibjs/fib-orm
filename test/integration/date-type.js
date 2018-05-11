@@ -28,7 +28,7 @@ describe("Date Type", function () {
         return db.closeSync();
     });
 
-    describe("save", function () {
+    describe("opt", function () {
         before(setup());
 
         it("insert", function () {
