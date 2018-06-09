@@ -1,6 +1,7 @@
 ## Object Relational Mapping for fibjs
 
 [![Build Status](https://travis-ci.org/fibjs/fib-orm.svg)](https://travis-ci.org/fibjs/fib-orm)
+[![NPM version](https://img.shields.io/npm/v/fib-orm.svg)](https://www.npmjs.org/package/fib-orm)
 
 ## Install
 
