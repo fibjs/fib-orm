@@ -10,12 +10,19 @@ declare module "orm" {
      * it should be defined in 'orm' but there is not, so we should fix it
      */
     interface ConnInstanceInOrmConnDriverDB {
-        begin: () => any
-        commit: () => any
-        rollback: () => any
-        trans: (func: Function) => any
-        execute: Function;
-        close: Function;
+    	begin(): void;
+        close(): void;
+        commit(): void;
+        rollback(): void;
+        trans(func: Function): boolean
+        execute(sql: string, ...args: any[]): any[];
+    }
+
+    interface SQLiteConnInstanceInOrmConnDriverDB extends ConnInstanceInOrmConnDriverDB, Class_SQLite {
+    }
+    interface MySQLConnInstanceInOrmConnDriverDB extends ConnInstanceInOrmConnDriverDB, Class_MySQL {
+    }
+    interface MSSQLConnInstanceInOrmConnDriverDB extends ConnInstanceInOrmConnDriverDB, Class_MSSQL {
     }
 
     interface DbInstanceInOrmConnDriver {
@@ -43,7 +50,33 @@ declare module "orm" {
     }
     /* Connection About Patch :end */
 
+    export interface FibOrmFixedModelOptions /* extends OrmNS.ModelOptions */ {
+        id?: string[];
+        autoFetch?: boolean;
+        autoFetchLimit?: number;
+        cacheFetch?: boolean;
+        hooks?: OrmNS.Hooks;
+        methods?: { [name: string]: Function };
+
+        [extensibleProperty: string]: any;
+    }
+
     export interface FibORM extends OrmNS.ORM {
+        /* all fixed: start */
+        models: { [key: string]: FibOrmFixedModel };
+        
+        use(plugin: string, options?: any): FibORM;
+        use(plugin: Plugin, options?: any): FibORM;
+
+        define(name: string, properties: { [key: string]: OrigModelPropertyDefinition }, opts?: FibOrmFixedModelOptions): FibOrmFixedModel;
+        ping(callback: (err: Error) => void): FibORM;
+        close(callback: (err: Error) => void): FibORM;
+        load(file: string, callback: (err: Error) => void): any;
+        sync(callback: (err: Error) => void): FibORM;
+        drop(callback: (err: Error) => void): FibORM;
+        /* all fixed: end */
+
+        /* memeber patch: start */
         driver: PatchedOrmConnDriver
         begin: () => any
         commit: () => any
@@ -51,6 +84,9 @@ declare module "orm" {
         trans: (func: Function) => any
 
         syncSync(): void;
+        
+        [extraMember: string]: any;
+        /* memeber patch: end */
     }
     // bad annotation but 'db' is used as like 'orm' ever, so we use 'FibOrmDB' to substitute FibORM
     type FibOrmDB = FibORM
@@ -63,7 +99,7 @@ declare module "orm" {
 
     interface InstanceAssociationItem {
         name: string;
-        field: OrigModelProperty
+        field: OrigDetailedModelProperty
         // funcname = string;
         getAccessor: string;
         setAccessor: string;
@@ -115,25 +151,31 @@ declare module "orm" {
     }
     
     // keep compatible to orig one in 'orm'
-    interface OrigModelProperty extends OrmNS.Property {
+    interface OrigDetailedModelProperty extends OrmNS.Property {
         /**
          * text | number | integer | boolean | date | enum | object | <del>point</del> | binary | serial
          * view details in https://github.com/dresende/node-orm2/wiki/Model-Properties
          */
         type: string
-    }
+        unique?: boolean
+    } 
+    type OrigModelPropertyDefinition = OrigDetailedModelProperty |
+        String | Function | Date | Object | any[]
+
     type OrigAggreteGenerator = (...args: any[]) => OrmNS.IAggregated
     interface OrigHooks extends OrmNS.Hooks {
         afterAutoFetch?: (next?) => void
     }
 
     export interface FibOrmFixedModel extends OrmNS.Model, OrigHooks, PatchedSyncfiedModelOrInstance {
+        (): FibOrmFixedModel;// FibOrmFixedModelInstance;
+        (...ids: any[]): FibOrmFixedModel;// FibOrmFixedModelInstance;
+
         new (): FibOrmFixedModelInstance;
         new (...ids: any[]): FibOrmFixedModelInstance;
         
-        allProperties: {
-            [key: string]: OrigModelProperty
-        }
+        properties: { [property: string]: OrigDetailedModelProperty }
+        allProperties: { [key: string]: OrigDetailedModelProperty }
 
         find(): any /* OrmNS.Model|OrmNS.IChainFind */;
 
@@ -143,6 +185,21 @@ declare module "orm" {
         hasOne: (...args: any[]) => any;
         hasMany: (...args: any[]) => any;
         extendsTo: (...args: any[]) => OrmNS.Model;
+
+        extends: { [extendModel: string]: ExtendModelWrapper };
+
+        [extraProperty: string]: any;
+    }
+
+    export interface ExtendModelWrapper {
+        // 'hasOne', 'hasMany'
+        type: string;
+        reversed?: boolean;
+        model: FibOrmFixedExtendModel;
+    }
+
+    export interface FibOrmFixedExtendModel extends FibOrmFixedModel {
+        model_name: string;
     }
 
     export interface FibOrmFindLikeQueryObject {
@@ -151,24 +208,28 @@ declare module "orm" {
 
     // patch the missing field defined in orm/lib/Instance.js (such as defined by Object.defineProperty)
     export interface FibOrmFixedModelInstance extends OrmNS.Instance {
-        /**
-         * default property but some has been declared in OrmNS.Instance,
-         * so we comment it(e.g. `on: Function`)
-         */
-        /**(defined) on: Function; */
-        /**(defined) save: Function; */
+        /* all fixed: start */
+        on(event: string, callback): FibOrmFixedModelInstance;
+        save(): Instance;
+        save(data: { [property: string]: any; }, callback: (err: Error) => void): FibOrmFixedModelInstance;
+        save(data: { [property: string]: any; }, options: any, callback: (err: Error) => void): FibOrmFixedModelInstance;
         saved: boolean;
-        /**(defined) remove: Function; */
-        set: Function;
-        markAsDirty: Function;
-        dirtyProperties: object;
+        remove(callback: (err: Error) => void): FibOrmFixedModelInstance;
         isInstance: boolean;
         isPersisted: boolean;
         isShell: boolean;
-        /**(defined) validate: Function; */
+        validate(callback: (errors: Error[]) => void);
+        /* all fixed: end */
+        
+        /* missing fix: start */
+        set: Function;
+        markAsDirty: Function;
+        dirtyProperties: object;
         __singleton_uid: string | number;
         __opts?: InstanceOptions;
-        model: OrmNS.Model;
+        model: FibOrmFixedModel;
+
+        /* missing fix: end */
 
         [extraProperty: string]: any;
     }
@@ -185,7 +246,7 @@ declare module "orm" {
     //     | FibOrmPatchedSyncfiedInstantce | PatchedSyncfiedInstanceWithDbWriteOperation | PatchedSyncfiedInstanceWithAssociations
 
     export interface IChainFibORMFind extends PatchedSyncfiedModelOrInstance, SqlQueryNS.SelectQuery {
-        only(args: string[]): IChainFibORMFind;
+        only(args: string|string[]): IChainFibORMFind;
         only(...args: string[]): IChainFibORMFind;
         order(...order: string[]): IChainFibORMFind;
     }
