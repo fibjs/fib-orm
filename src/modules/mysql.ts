@@ -38,7 +38,7 @@ class Database implements DatabaseBase {
     }
 
     end(cb: Function) {
-        this.conn.close(cb);
+        (this.conn as any).close(cb);
     }
 }
 
