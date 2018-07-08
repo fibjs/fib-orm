@@ -158,9 +158,18 @@ declare module "orm" {
          */
         type: string
         unique?: boolean
+        defaultValue?: any
+
+        unsigned?: boolean
+        size?: number
+        values?: any[]
+
+        time?: boolean
+
+        big?: boolean
     } 
     type OrigModelPropertyDefinition = OrigDetailedModelProperty |
-        String | Function | Date | Object | any[]
+        String | Boolean | Number | Date | Object | Buffer | any[]
 
     type OrigAggreteGenerator = (...args: any[]) => OrmNS.IAggregated
     interface OrigHooks extends OrmNS.Hooks {
