@@ -1,12 +1,18 @@
 {
-    "name": "fib-orm",
-    "version": "1.4.2",
+    "name": "@fxjs/orm",
+    "version": "1.4.2-postalpha",
     "description": "Object Relational Mapping for fibjs",
     "main": "lib/index.js",
     "types": "@types/index.d.ts",
-    "repository": "git://github.com/fibjs/fib-orm.git",
+    "repository": "git://github.com/fxjs-modules/orm.git",
     "author": "Liu Hu <lion@9465.net>",
-    "homepage": "https://github.com/fibjs/fib-orm",
+    "contributors": [
+        {
+            "email": "richardo2016@gmail.com",
+            "name": "Richard"
+        }
+    ],
+    "homepage": "https://github.com/fxjs-modules/orm",
     "license": "MIT",
     "keywords": [
         "orm",
@@ -14,8 +20,10 @@
         "fibjs"
     ],
     "scripts": {
-        "ci": "fibjs test",
-        "bundle": "fibjs ./build/bundle"
+        "build": "fib-typify src -o lib",
+        "test": "fibjs test",
+        "ci": "npm run build && npm run test",
+        "prepublishOnly": "npm run build"
     },
     "ci": {
         "type": "travis",
@@ -23,16 +31,24 @@
             "0.21.0",
             "0.22.0",
             "0.23.0",
-            "0.24.0"
+            "0.24.0",
+            "0.25.0",
+            "0.26.0",
+            "0.26.1"
         ]
     },
     "dependencies": {
-        "orm": "^3.2.2"
+        "@fibjs/enforce": "0.0.1",
+        "async": "^2.6.1",
+        "bluebird": "^3.5.2",
+        "hat": "0.0.3",
+        "sql-ddl-sync": "^0.3.14",
+        "sql-query": "^0.1.27"
     },
     "devDependencies": {
-        "@fibjs/ci": "^2.0.0",
-        "@types/fibjs": "github:fibjs/fib-types#v1.0.4",
-        "fib-typify": "^0.1.0",
-        "lodash": "^4.17.4"
+        "@fibjs/ci": "^2.1.0",
+        "@types/fibjs": "^0.26.3",
+        "fib-typify": "^0.3.1",
+        "lodash": "^4.17.11"
     }
 }
