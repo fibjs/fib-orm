@@ -14,8 +14,10 @@
         "fibjs"
     ],
     "scripts": {
-        "ci": "fibjs test",
-        "bundle": "fibjs ./build/bundle"
+        "build": "fib-typify src -o lib",
+        "test": "fibjs test",
+        "ci": "npm run build && npm run test",
+        "prepublishOnly": "npm run build"
     },
     "ci": {
         "type": "travis",
@@ -23,7 +25,10 @@
             "0.21.0",
             "0.22.0",
             "0.23.0",
-            "0.24.0"
+            "0.24.0",
+            "0.25.0",
+            "0.26.0",
+            "0.26.1"
         ]
     },
     "dependencies": {
@@ -31,8 +36,8 @@
     },
     "devDependencies": {
         "@fibjs/ci": "^2.0.0",
-        "@types/fibjs": "github:fibjs/fib-types#v1.0.4",
-        "fib-typify": "^0.1.0",
+        "@types/fibjs": "^0.26.3",
+        "fib-typify": "^0.3.0",
         "lodash": "^4.17.4"
     }
 }
