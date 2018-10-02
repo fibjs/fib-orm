@@ -1,12 +1,12 @@
 ## Object Relational Mapping for fibjs
 
-[![Build Status](https://travis-ci.org/fibjs/fib-orm.svg)](https://travis-ci.org/fibjs/fib-orm)
-[![NPM version](https://img.shields.io/npm/v/fib-orm.svg)](https://www.npmjs.org/package/fib-orm)
+[![Build Status](https://travis-ci.org/fxjs-modules.svg)](https://travis-ci.org/fxjs-modules)
+[![NPM version](https://img.shields.io/npm/v/@fxjs/orm.svg)](https://www.npmjs.org/package/@fxjs/orm)
 
 ## Install
 
 ```sh
-npm install fib-orm
+npm install @fxjs/orm
 ```
 
 ## Test
@@ -22,7 +22,7 @@ npm run ci
 
 ## Features
 
-fib-orm add a set of synchronous version method on node-orm object.
+`@fxjs/orm` add a set of synchronous version methods on node-orm2 object.
 
 ## Introduction
 
@@ -31,7 +31,7 @@ This is a fibjs object relational mapping module.
 An example:
 
 ```js
-var orm = require("fib-orm");
+var orm = require("@fxjs/orm");
 
 var db = orm.connectSync("mysql://username:password@host/database");
 var Person = db.define("person", {

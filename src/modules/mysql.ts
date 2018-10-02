@@ -2,7 +2,7 @@
 /// <reference path="../../@types/index.d.ts" />
 
 import db = require('db');
-import OrmNS from 'orm';
+import OrmNS from '@fxjs/orm';
 
 class Database implements DatabaseBase {
     conn: OrmNS.ConnInstanceInOrmConnDriverDB;

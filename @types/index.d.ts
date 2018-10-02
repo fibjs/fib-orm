@@ -1,9 +1,9 @@
 /// <reference path="./orm_mirror/orm.d.ts" />
 
-import OrmNS = require('orm')
+import OrmNS = require('@fxjs/orm')
 import SqlQueryNS from 'sqlquery'
 
-declare module "orm" {
+declare module "@fxjs/orm" {
     /* Connection About Patch :start */
 
     /**

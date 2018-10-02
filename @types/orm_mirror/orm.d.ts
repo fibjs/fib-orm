@@ -1,7 +1,10 @@
 ﻿/// <reference path="sql-query.d.ts" />
 
-declare module "orm" {
+declare module "events" {
+    export const EventEmitter: typeof Class_EventEmitter
+}
 
+declare module "@fxjs/orm" {
     import events = require('events');
     import sqlquery = require('sqlquery');
 

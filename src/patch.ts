@@ -1,6 +1,6 @@
 /// <reference path="../@types/index.d.ts" />
 
-import OrmNS from 'orm'
+import OrmNS from '@fxjs/orm'
 import SqlQueryNS from 'sqlquery'
 
 import * as util from 'util'

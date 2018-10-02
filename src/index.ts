@@ -6,9 +6,11 @@ const sbox = new vm.SandBox({
     events: require('events'),
     url: require('url'),
     sqlite3: require('./modules/sqlite3'),
-    mysql: require('./modules/mysql')
+    mysql: require('./modules/mysql'),
+
+    enforce: require('@fibjs/enforce')
 });
 
-const orm = sbox.require('orm', __filename);
+const orm = sbox.require('./orm/src/ORM', __dirname);
 
-module.exports = patch(orm);
+export = patch(orm);
