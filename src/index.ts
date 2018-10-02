@@ -11,6 +11,6 @@ const sbox = new vm.SandBox({
     enforce: require('@fibjs/enforce')
 });
 
-const orm = sbox.require('./orm/src/ORM', __dirname);
+const orm = sbox.require('./orm/entry/ORM', __dirname);
 
 export = patch(orm);
