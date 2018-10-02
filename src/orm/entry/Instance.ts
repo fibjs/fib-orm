@@ -1,11 +1,16 @@
-var Utilities = require("./Utilities");
-var Property  = require("./Property");
-var Hook      = require("./Hook");
-var enforce   = require("enforce");
+import { FibOrmFixedModelInstance, ExtensibleError, FibOrmFixedModelInstanceFn, FibOrmFixedModel, FibOrmFixedModelOptions } from "@fxjs/orm";
 
-exports.Instance = Instance;
+import Utilities = require("./Utilities");
+import Hook      = require("./Hook");
+import enforce   = require("@fibjs/enforce");
 
-function Instance(Model, opts) {
+interface EmitEventFunctionInInstance {
+	(state: string, err?: Error, _instance?: any): void
+	(state: string, _instance?: any): void
+}
+
+// export interface Instance extends FibOrmFixedModelInstanceFn {}
+export function Instance (Model: FibOrmFixedModel, opts: FibOrmFixedModelOptions) {
 	opts = opts || {};
 	opts.data = opts.data || {};
 	opts.extra = opts.extra || {};
@@ -17,8 +22,9 @@ function Instance(Model, opts) {
 
 	var instance_saving = false;
 	var events = {};
-	var instance = {};
-	var emitEvent = function () {
+	var instance: FibOrmFixedModelInstance = {} as FibOrmFixedModelInstance;
+
+	var emitEvent: EmitEventFunctionInInstance = function () {
 		var args = Array.prototype.slice.apply(arguments);
 		var event = args.shift();
 
@@ -130,7 +136,7 @@ function Instance(Model, opts) {
 			}
 		});
 	};
-	var runAfterSaveActions = function (cb, create, err) {
+	var runAfterSaveActions = function (cb?: Function, create?: boolean, err?: Error) {
 		instance_saving = false;
 
 		emitEvent("save", err, instance);
@@ -184,7 +190,7 @@ function Instance(Model, opts) {
 	var saveNew = function (saveOptions, data, cb) {
 		var i, prop;
 
-		var finish = function (err) {
+		var finish = function (err?: Error) {
 			runAfterSaveActions(function () {
 				if (err) return cb(err);
 				saveInstanceExtra(cb);
@@ -600,7 +606,7 @@ function Instance(Model, opts) {
 						cb = arg;
 						break;
 					default:
-					    var err = new Error("Unknown parameter type '" + (typeof arg) + "' in Instance.save()");
+					    const err: ExtensibleError = new Error("Unknown parameter type '" + (typeof arg) + "' in Instance.save()");
 					    err.model = Model.table;
 					    throw err;
 				}

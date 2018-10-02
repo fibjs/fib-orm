@@ -1,8 +1,5 @@
 ﻿/// <reference path="sql-query.d.ts" />
-
-declare module "events" {
-    export const EventEmitter: typeof Class_EventEmitter
-}
+/// <reference path="../3rd.d.ts" />
 
 declare module "@fxjs/orm" {
     import events = require('events');
@@ -14,6 +11,36 @@ declare module "@fxjs/orm" {
         * Parameter Type Interfaces
         **/
 
+        interface ModelAssociationMethod__ComputationPayload__Merge {
+            from: {table: string, field: string | string[]}
+            to: {table: string, field: string | string[]}
+            where: [string, ModelMethod__FindConditions]
+            table
+        }
+
+        export interface ModelMethod__FindOptions {
+            limit?: number;
+            order?: any;
+        }
+
+        export interface ModelAssociationMethod__FindOptions extends ModelMethod__FindOptions {
+            __merge?: ModelAssociationMethod__ComputationPayload__Merge;
+            extra?: any[]
+        }
+
+        export interface ModelMethod__FindConditions {
+            [property: string]: any
+        }
+
+
+        export interface ModelMethod__CommonCallback {
+            (err: Error, results: Instance[]): void
+        }
+
+        export interface ModelMethod__CountCallback {
+            (err: Error, count?: number): void
+        }
+
         export interface Model {
             (): Instance;
             (...ids: any[]): Instance;
@@ -24,34 +51,27 @@ declare module "@fxjs/orm" {
             drop(callback?: (err: Error) => void): Model;
             sync(callback?: (err: Error) => void): Model;
             get(...args: any[]): Model;
-            find(conditions: { [property: string]: any }, callback: (err: Error, results: Instance[]) => void): Model;
-            find(conditions: { [property: string]: any }, options: {
-                limit?: number;
-                order?: any;
-            }, callback: (err: Error, results: Instance[]) => void): Model;
-            find(conditions: { [property: string]: any }, limit: number, order: string[], callback: (err: Error, results: Instance[]) => void): Model;
-            find(conditions: { [property: string]: any }): IChainFind;
 
-            all(conditions: { [property: string]: any }, callback: (err: Error, results: Instance[]) => void): Model;
-            all(conditions: { [property: string]: any }, options: {
-                limit?: number;
-                order?: any;
-            }, callback: (err: Error, results: Instance[]) => void): Model;
-            all(conditions: { [property: string]: any }, limit: number, order: string[], callback: (err: Error, results: Instance[]) => void): Model;
+            find(): any /* OrmNS.Model|OrmNS.IChainFind */;
+            find(conditions: ModelMethod__FindConditions, callback?: ModelMethod__CommonCallback): Model;
+            find(conditions: ModelMethod__FindConditions, options: ModelMethod__FindOptions, callback?: ModelMethod__CommonCallback): Model;
+            find(conditions: ModelMethod__FindConditions, limit: number, order: string[], callback?: ModelMethod__CommonCallback): Model;
+            find(conditions: ModelMethod__FindConditions): IChainFind;
 
-            one(conditions: { [property: string]: any }, callback: (err: Error, result: Instance) => void): Model;
-            one(conditions: { [property: string]: any }, options: {
-                limit?: number;
-                order?: any;
-            }, callback: (err: Error, result: Instance) => void): Model;
-            one(conditions: { [property: string]: any }, limit: number, order: string[], callback: (err: Error, result: Instance) => void): Model;
+            all(conditions: ModelMethod__FindConditions, callback?: ModelMethod__CommonCallback): Model;
+            all(conditions: ModelMethod__FindConditions, options: ModelMethod__FindOptions, callback?: ModelMethod__CommonCallback): Model;
+            all(conditions: ModelMethod__FindConditions, limit: number, order: string[], callback?: ModelMethod__CommonCallback): Model;
 
-            count(callback: (err: Error, count: number) => void): Model;
-            count(conditions: { [property: string]: any }, callback: (err: Error, count: number) => void): Model;
+            one(conditions: ModelMethod__FindConditions, callback: (err: Error, result: Instance) => void): Model;
+            one(conditions: ModelMethod__FindConditions, options: ModelMethod__FindOptions, callback: (err: Error, result: Instance) => void): Model;
+            one(conditions: ModelMethod__FindConditions, limit: number, order: string[], callback: (err: Error, result: Instance) => void): Model;
 
-            aggregate(conditions: { [property: string]: any }): IAggregated;
+            count(callback: ModelMethod__CountCallback): Model;
+            count(conditions: ModelMethod__FindConditions, callback: ModelMethod__CountCallback): Model;
+
+            aggregate(conditions: ModelMethod__FindConditions): IAggregated;
             aggregate(properties: string[]): IAggregated;
-            aggregate(conditions: { [property: string]: any }, properties: string[]): IAggregated;
+            aggregate(conditions: ModelMethod__FindConditions, properties: string[]): IAggregated;
 
             exists(id: any, callback: (err: Error, exists: boolean) => void): Model;
             exists(...args: any[]): Model;
@@ -62,7 +82,8 @@ declare module "@fxjs/orm" {
             clear(): Model;
 
             table: string;
-            id: string[];
+            // id: string[];
+            id: string;
 
             [property: string]: any;
         }
@@ -72,10 +93,10 @@ declare module "@fxjs/orm" {
             save(): Instance;
             save(data: { [property: string]: any; }, callback: (err: Error) => void): Instance;
             save(data: { [property: string]: any; }, options: any, callback: (err: Error) => void): Instance;
-            saved: boolean;
+            saved(): boolean;
             remove(callback: (err: Error) => void): Instance;
             isInstance: boolean;
-            isPersisted: boolean;
+            isPersisted(): boolean;
             isShell: boolean;
             validate(callback: (errors: Error[]) => void);
             model: Model;
@@ -129,12 +150,13 @@ declare module "@fxjs/orm" {
         }
 
         export interface IChainFind {
-            find(conditions: { [property: string]: any }): IChainFind;
+            find(conditions: ModelMethod__FindConditions): IChainFind;
+            
             only(...args: string[]): IChainFind;
             limit(limit: number): IChainFind;
             offset(offset: number): IChainFind;
-            run(callback: (err: Error, results: Instance[]) => void): void;
-            count(callback: (err: Error, count: number) => void): void;
+            run(callback?: ModelMethod__CommonCallback): void;
+            count(callback: ModelMethod__CountCallback): void;
             remove(callback: (err: Error) => void): void;
             save(callback: (err: Error) => void): void;
             each(callback: (result: Instance) => void): void;
@@ -142,6 +164,57 @@ declare module "@fxjs/orm" {
             filter(callback: (result: Instance) => boolean): IChainFind;
             sort(callback: (a: Instance, b: Instance) => boolean): IChainFind;
             get(callback: (results: Instance[]) => void): IChainFind;
+
+        }
+
+        export interface ChainFindInstanceType {
+            all(conditions: ModelMethod__FindConditions): IChainFind;
+            where(conditions: ModelMethod__FindConditions): IChainFind;
+            find(conditions: ModelMethod__FindConditions): IChainFind;
+
+            only(...args: string[]): IChainFind;
+            omit(): IChainFind;
+            skip(offset: number): IChainFind;
+            offset(offset: number): IChainFind;
+
+            order(propertyOrderDesc: string, order: string | "Z" | "A" ): IChainFind;
+            orderRaw(str: string, args: any[]): IChainFind;
+            limit(limit: number): IChainFind;
+            count(callback: ModelMethod__CountCallback): void;
+            remove(callback: (err: Error) => void): void;
+            run(callback?: ModelMethod__CommonCallback): void;
+            
+            success(callback?: ModelMethod__CommonCallback): void;
+            fail(callback?: ModelMethod__CommonCallback): void;
+
+            first(callback?: ModelMethod__CommonCallback): void;
+            last(callback?: ModelMethod__CommonCallback): void;
+
+            each(callback: (result: Instance) => void): void;
+            each(): IChainFind;
+            
+            eager(): IChainFind;
+
+            model: FibOrmFixedModel;
+            options: ChainFindOptions
+        }
+
+        export interface ChainFindOptions {
+            conditions
+            properties
+            order
+            driver
+            only
+            table
+            limit
+            merge
+            offset
+            exists
+            __eager
+            keys
+            newInstance
+            keyProperties
+            associations
         }
 
         /*
@@ -190,12 +263,14 @@ declare module "@fxjs/orm" {
         export function unique(message?: string);
         export function unique(opts: { ignoreCase: boolean }, message?: string);
 
+        export interface SingletonOptions {
+            identityCache?: any;
+            saveCheck?: boolean;
+        }
+        
         export class singleton {
             static clear(key?: string): singleton;
-            static get(key, opts: {
-                identityCache?: any;
-                saveCheck?: boolean;
-            }, createCb: Function, returnCb: Function);
+            static get(key, opts: SingletonOptions, createCb: Function, returnCb: Function);
         }
 
         export class Settings {
@@ -227,6 +302,9 @@ declare module "@fxjs/orm" {
 
             constructor(settings: any);
 
+            get: {
+                (key: string, def?: Function): any
+            }
             //[key: string]: {
             //    get: (key, def) => any;
             //    set: (key, value) => Settings;

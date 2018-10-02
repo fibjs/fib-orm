@@ -1,35 +1,44 @@
-var _          = require('lodash');
-var ORMError   = require("../Error");
-var Settings   = require("../Settings");
-var Singleton  = require("../Singleton");
-var util       = require("../Utilities");
+import { InstanceAssociationItem_ExtendTos, FibORM, FibOrmFixedModel, FibOrmFixedModelInstance, ModelAssociationMethod__FindOptions, DbInstanceInOrmConnDriver, ConnInstanceInOrmConnDriverDB, InstanceAutoFetchOptions, InstanceExtendOptions, ModelExtendOptions, ModelAutoFetchOptions } from "@fxjs/orm";
+import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName } from "./_utils";
 
-exports.prepare = function (db, Model, associations) {
+const _          = require('lodash');
+import ORMError   = require("../Error");
+import Singleton  = require("../Singleton");
+import util       = require("../Utilities");
+
+/**
+ * 
+ * @param db orm instance
+ * @param Model model
+ * @param associations association definitions
+ */
+export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: InstanceAssociationItem_ExtendTos[]) {
 	Model.extendsTo = function (name, properties, opts) {
 		opts = opts || {};
 
-		var assocName = opts.name || ucfirst(name);
-		var association = {
+		const assocName = opts.name || ucfirst(name);
+		const association: InstanceAssociationItem_ExtendTos = {
 			name           : name,
-			table          : opts.table || (Model.table + '_' + name),
+			table          : opts.table || defineDefaultExtendsToTableName(Model.table, name),
 			reversed       : opts.reversed,
 			autoFetch      : opts.autoFetch || false,
 			autoFetchLimit : opts.autoFetchLimit || 2,
-			field          : util.wrapFieldObject({
-												 field: opts.field, model: Model, altName: Model.table
-											 }) || util.formatField(Model, Model.table, false, false),
-			getAccessor    : opts.getAccessor || ("get" + assocName),
-			setAccessor    : opts.setAccessor || ("set" + assocName),
-			hasAccessor    : opts.hasAccessor || ("has" + assocName),
-			delAccessor    : opts.delAccessor || ("remove" + assocName)
+			field          : util.wrapFieldObject({ field: opts.field, model: Model, altName: Model.table }) || util.formatField(Model, Model.table, false, false),
+
+			getAccessor    : opts.getAccessor || defineAssociationAccessorMethodName('get', assocName),
+			setAccessor    : opts.setAccessor || defineAssociationAccessorMethodName('set', assocName),
+			hasAccessor    : opts.hasAccessor || defineAssociationAccessorMethodName('has', assocName),
+			delAccessor    : opts.delAccessor || defineAssociationAccessorMethodName('remove', assocName),
+
+			model: null
 		};
 
-		var newproperties = _.cloneDeep(properties);
+		const newProperties = _.cloneDeep(properties);
 		for (var k in association.field) {
-		    newproperties[k] = association.field[k];
+		    newProperties[k] = association.field[k];
 		}
 
-		var modelOpts = _.extend(
+		const modelOpts = _.extend(
 			_.pick(opts, 'identityCache', 'autoSave', 'cascadeRemove', 'hooks', 'methods', 'validations'),
 			{
 				id        : Object.keys(association.field),
@@ -37,13 +46,13 @@ exports.prepare = function (db, Model, associations) {
 			}
 		);
 
-		association.model = db.define(association.table, newproperties, modelOpts);
+		association.model = db.define(association.table, newProperties, modelOpts);
 		association.model.hasOne(Model.table, Model, { extension: true, field: association.field });
 
 		associations.push(association);
 
 		Model["findBy" + assocName] = function () {
-			var cb = null, conditions = null, options = {};
+			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {};
 
 			for (var i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
@@ -72,7 +81,7 @@ exports.prepare = function (db, Model, associations) {
 			};
 			options.extra = [];
 
-			if (typeof cb == "function") {
+			if (typeof cb === "function") {
 				return Model.find({}, options, cb);
 			}
 			return Model.find({}, options);
@@ -82,13 +91,13 @@ exports.prepare = function (db, Model, associations) {
 	};
 };
 
-exports.extend = function (Model, Instance, Driver, associations, opts) {
+export function extend (Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, associations: InstanceAssociationItem_ExtendTos[], opts: ModelExtendOptions) {
 	for (var i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i], opts);
 	}
 };
 
-exports.autoFetch = function (Instance, associations, opts, cb) {
+export function autoFetch (Instance: FibOrmFixedModelInstance, associations: InstanceAssociationItem_ExtendTos[], opts: ModelAutoFetchOptions, cb: Function) {
 	if (associations.length === 0) {
 		return cb();
 	}
@@ -107,7 +116,7 @@ exports.autoFetch = function (Instance, associations, opts, cb) {
 	}
 };
 
-function extendInstance(Model, Instance, Driver, association, opts) {
+function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, association: InstanceAssociationItem_ExtendTos, opts: InstanceExtendOptions) {
 	Object.defineProperty(Instance, association.hasAccessor, {
 		value : function (cb) {
 			if (!Instance[Model.id]) {
@@ -205,7 +214,7 @@ function extendInstance(Model, Instance, Driver, association, opts) {
 	});
 }
 
-function autoFetchInstance(Instance, association, opts, cb) {
+function autoFetchInstance(Instance: FibOrmFixedModelInstance, association: InstanceAssociationItem_ExtendTos, opts: InstanceAutoFetchOptions, cb: Function) {
 	if (!Instance.saved()) {
 		return cb();
 	}
@@ -231,6 +240,6 @@ function autoFetchInstance(Instance, association, opts, cb) {
 	}
 }
 
-function ucfirst(text) {
+function ucfirst(text: string) {
 	return text[0].toUpperCase() + text.substr(1);
 }

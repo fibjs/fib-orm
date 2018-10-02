@@ -1,42 +1,47 @@
-var _          = require("lodash");
-var util       = require("../Utilities");
-var ORMError   = require("../Error");
-var Accessors  = { "get": "get", "set": "set", "has": "has", "del": "remove" };
+import { FibOrmFixedModel, ModelAssociationMethod__FindOptions, InstanceAssociationItem_HasOne, AssociationDefinitionOptions_HasOne } from "@fxjs/orm";
 
-exports.prepare = function (Model, associations) {
-	Model.hasOne = function () {
+const _          = require("lodash");
+import util       = require("../Utilities");
+import ORMError   = require("../Error");
+const Accessors  = {
+	"get": "get",
+	"set": "set",
+	"has": "has",
+	"del": "remove"
+};
+
+export function prepare (Model: FibOrmFixedModel, associations: InstanceAssociationItem_HasOne[]) {
+	Model.hasOne = function (assoc_name: string, ext_model?: any, assoc_options?: any) {
+		if (arguments[1] && !arguments[1].table) {
+			assoc_options = arguments[1] as AssociationDefinitionOptions_HasOne
+			ext_model = arguments[1] = null as FibOrmFixedModel
+		}
+		
 		var assocName;
 		var assocTemplateName;
-		var association = {
-			name           : Model.table,
-			model          : Model,
+		var association: InstanceAssociationItem_HasOne = {
+			name           : assoc_name || Model.table,
+			model          : ext_model || Model,
+
+			field		   : null,
 			reversed       : false,
 			extension      : false,
 			autoFetch      : false,
 			autoFetchLimit : 2,
-			required       : false
-		};
+			required       : false,
 
-		for (var i = 0; i < arguments.length; i++) {
-			switch (typeof arguments[i]) {
-				case "string":
-					association.name = arguments[i];
-					break;
-				case "function":
-					if (arguments[i].table) {
-						association.model = arguments[i];
-					}
-					break;
-				case "object":
-					association = _.extend(association, arguments[i]);
-					break;
-			}
-		}
+			setAccessor	   : null,
+			getAccessor	   : null,
+			hasAccessor    : null,
+			delAccessor    : null
+		};
+		association = _.extend(association, assoc_options || {})
 
 		assocName = ucfirst(association.name);
 		assocTemplateName = association.accessor || assocName;
 
-		if (!association.hasOwnProperty("field")) {
+		// if (!association.hasOwnProperty("field")) {
+		if (!association.field) {
 			association.field = util.formatField(association.model, association.name, association.required, association.reversed);
 		} else if(!association.extension) {
 			association.field = util.wrapFieldObject({
@@ -50,7 +55,8 @@ exports.prepare = function (Model, associations) {
 		});
 
 		for (var k in Accessors) {
-			if (!association.hasOwnProperty(k + "Accessor")) {
+			// if (!association.hasOwnProperty(k + "Accessor")) {
+			if (!association[k + "Accessor"]) {
 				association[k + "Accessor"] = Accessors[k] + assocTemplateName;
 			}
 		}
@@ -80,7 +86,7 @@ exports.prepare = function (Model, associations) {
 		}
 
 		Model["findBy" + assocTemplateName] = function () {
-			var cb = null, conditions = null, options = {};
+			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {};
 
 			for (var i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
@@ -119,13 +125,13 @@ exports.prepare = function (Model, associations) {
 	};
 };
 
-exports.extend = function (Model, Instance, Driver, associations) {
+export function extend (Model, Instance, Driver, associations) {
 	for (var i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i]);
 	}
 };
 
-exports.autoFetch = function (Instance, associations, opts, cb) {
+export function autoFetch (Instance, associations, opts, cb) {
 	if (associations.length === 0) {
 		return cb();
 	}

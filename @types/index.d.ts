@@ -1,10 +1,17 @@
 /// <reference path="./orm_mirror/orm.d.ts" />
+/// <reference path="./3rd.d.ts" />
 
 import OrmNS = require('@fxjs/orm')
 import SqlQueryNS from 'sqlquery'
 
+type Buffer = Class_Buffer
+
 declare module "@fxjs/orm" {
     /* Connection About Patch :start */
+
+    interface ExtensibleError extends Error {
+        [extensibleProperty: string]: any
+    }
 
     /**
      * it should be defined in 'orm' but there is not, so we should fix it
@@ -50,6 +57,10 @@ declare module "@fxjs/orm" {
     }
     /* Connection About Patch :end */
 
+    interface ORMMethod__CommonCallback {
+        (err: Error): void
+    }
+
     export interface FibOrmFixedModelOptions /* extends OrmNS.ModelOptions */ {
         id?: string[];
         autoFetch?: boolean;
@@ -69,11 +80,11 @@ declare module "@fxjs/orm" {
         use(plugin: Plugin, options?: any): FibORM;
 
         define(name: string, properties: { [key: string]: OrigModelPropertyDefinition }, opts?: FibOrmFixedModelOptions): FibOrmFixedModel;
-        ping(callback: (err: Error) => void): FibORM;
-        close(callback: (err: Error) => void): FibORM;
-        load(file: string, callback: (err: Error) => void): any;
-        sync(callback: (err: Error) => void): FibORM;
-        drop(callback: (err: Error) => void): FibORM;
+        ping(callback: ORMMethod__CommonCallback): FibORM;
+        close(callback: ORMMethod__CommonCallback): FibORM;
+        load(file: string, callback: ORMMethod__CommonCallback): any;
+        sync(callback: ORMMethod__CommonCallback): FibORM;
+        drop(callback: ORMMethod__CommonCallback): FibORM;
         /* all fixed: end */
 
         /* memeber patch: start */
@@ -97,15 +108,62 @@ declare module "@fxjs/orm" {
         timezone: string;
     }
 
+    type AssociationKeyComputation = Function | string
+    interface AssociationDefinitionOptions {
+        name?: string;
+        model?: FibOrmFixedModel;
+        field?: OrigDetailedModelProperty
+
+        // is the association is extendsTo
+        extension?: boolean;
+        reversed?: boolean
+        accessor?: string
+        reverseAccessor?: string
+        autoFetch?: boolean
+        autoFetchLimit?: number
+    }
     interface InstanceAssociationItem {
         name: string;
-        field: OrigDetailedModelProperty
-        // funcname = string;
+        // is the association is extendsTo
+        extension?: boolean;
+
         getAccessor: string;
         setAccessor: string;
         hasAccessor: string;
         delAccessor: string;
-        addAccessor: string;
+
+        model: FibOrmFixedModel;
+        reversed: boolean;
+        autoFetch: boolean;
+        autoFetchLimit: number
+    }
+
+    interface AssociationDefinitionOptions_HasOne extends AssociationDefinitionOptions {
+
+    }
+    interface InstanceAssociationItem_ExtendTos extends InstanceAssociationItem {
+        field: OrigDetailedModelProperty;
+        table: string;
+    }
+
+    interface InstanceAssociationItem_HasOne extends InstanceAssociationItem {
+        field?: OrigDetailedModelProperty;
+        reverse?: string;
+        // template name
+        accessor?: string;
+        reverseAccessor?: string;
+
+        required?: boolean;
+        extension?: boolean;
+        mapsTo?: {
+            [key: string]: any;
+        }
+        
+        addAccessor?: string;
+    }
+
+    interface InstanceAssociationItem_HasMany extends InstanceAssociationItem {
+        addAccessor?: string;
     }
 
     interface InstanceOptions extends OrmNS.ModelOptions {
@@ -186,12 +244,14 @@ declare module "@fxjs/orm" {
         properties: { [property: string]: OrigDetailedModelProperty }
         allProperties: { [key: string]: OrigDetailedModelProperty }
 
-        find(): any /* OrmNS.Model|OrmNS.IChainFind */;
-
         /**
          * methods used to add associations
          */
-        hasOne: (...args: any[]) => any;
+        // hasOne: (...args: any[]) => any;
+        hasOne: {
+            (assoc_name: string, ext_model: FibOrmFixedModel, assoc_options?: AssociationDefinitionOptions_HasOne): FibOrmFixedExtendModel
+            (assoc_name: string, assoc_options?: AssociationDefinitionOptions_HasOne): FibOrmFixedExtendModel
+        }
         hasMany: (...args: any[]) => any;
         extendsTo: (...args: any[]) => OrmNS.Model;
 
@@ -219,13 +279,13 @@ declare module "@fxjs/orm" {
     export interface FibOrmFixedModelInstance extends OrmNS.Instance {
         /* all fixed: start */
         on(event: string, callback): FibOrmFixedModelInstance;
-        save(): Instance;
-        save(data: { [property: string]: any; }, callback: (err: Error) => void): FibOrmFixedModelInstance;
-        save(data: { [property: string]: any; }, options: any, callback: (err: Error) => void): FibOrmFixedModelInstance;
-        saved: boolean;
-        remove(callback: (err: Error) => void): FibOrmFixedModelInstance;
+        save(callback?: ORMMethod__CommonCallback): Instance;
+        save(data: { [property: string]: any; }, callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
+        save(data: { [property: string]: any; }, options: any, callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
+        saved(): boolean;
+        remove(callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
         isInstance: boolean;
-        isPersisted: boolean;
+        isPersisted(): boolean;
         isShell: boolean;
         validate(callback: (errors: Error[]) => void);
         /* all fixed: end */
@@ -241,6 +301,11 @@ declare module "@fxjs/orm" {
         /* missing fix: end */
 
         [extraProperty: string]: any;
+    }
+
+    export interface FibOrmFixedModelInstanceFn {
+        (model: FibOrmFixedModel, opts: object): FibOrmFixedModelInstance
+        new (model: FibOrmFixedModel, opts: object): void
     }
 
     export interface FibOrmPatchedSyncfiedInstantce extends PatchedSyncfiedInstanceWithDbWriteOperation, PatchedSyncfiedInstanceWithAssociations {
@@ -260,4 +325,64 @@ declare module "@fxjs/orm" {
         order(...order: string[]): IChainFibORMFind;
     }
     /* Orm About Patch :end */
+
+    /* instance/model computation/transform about :start */
+    export interface ModelAutoFetchOptions {
+        autoFetchLimit?: number
+        autoFetch?: boolean
+    }
+
+    export interface InstanceAutoFetchOptions extends ModelAutoFetchOptions {
+    }
+
+    export interface ModelExtendOptions {
+
+    }
+    export interface InstanceExtendOptions extends ModelExtendOptions {
+        
+    }
+    /* instance/model computation/transform about :end */
+
+    /* query conditions :start */
+    type QueryConditionInTypeType = string | number
+
+    type QueryCondition_SimpleEq = { [key: string]: any }
+
+    type QueryCondition_eq = QueryCondition_SimpleEq | { [key: string]: { "eq": any } }
+    type QueryCondition_ne = { [key: string]: { "ne": any } }
+    type QueryCondition_gt = { [key: string]: { "gt": number } }
+    type QueryCondition_gte = { [key: string]: { "gte": number } }
+    type QueryCondition_lt = { [key: string]: { "lt": number } }
+    type QueryCondition_lte = { [key: string]: { "lte": number } }
+    type QueryCondition_like = { [key: string]: { "like": string } }
+    type QueryCondition_not_like = { [key: string]: { "not_like": string } }
+    type QueryCondition_between = { [key: string]: { "between": [number, number] } }
+    type QueryCondition_not_between = { [key: string]: { "not_between": [number, number] } }
+
+    type QueryCondition_in = { [key: string]: { "in": QueryConditionInTypeType[] } }
+    type QueryCondition_not_in = { [key: string]: { "not_in": QueryConditionInTypeType[] } }
+
+    type QueryConditionAtomicType = 
+        QueryCondition_eq | 
+        QueryCondition_ne | 
+        QueryCondition_gt | 
+        QueryCondition_gte | 
+        QueryCondition_lt | 
+        QueryCondition_lte | 
+        QueryCondition_like | 
+        QueryCondition_not_like | 
+        QueryCondition_between | 
+        QueryCondition_not_between | 
+        QueryCondition_in | 
+        QueryCondition_not_in
+
+    interface QueryConditions {
+        or?: QueryConditionAtomicType[]
+        [query_field: string]: QueryConditionAtomicType
+    }
+    // interface ReqWhere {
+    //     [key: string]: QueryConditionAtomicType
+    //     or?: QueryConditionAtomicType[]
+    // }
+    /* query conditions :end */
 }

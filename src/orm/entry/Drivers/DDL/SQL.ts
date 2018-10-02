@@ -1,10 +1,10 @@
-var _    = require("lodash");
-var Sync = require("sql-ddl-sync").Sync;
+const _    = require("lodash");
+const Sync = require("sql-ddl-sync").Sync;
 
-exports.sync = function (opts, cb) {
+export function sync (opts, cb) {
 	var sync = new Sync({
 		driver  : this,
-		debug   : false//function (text) { console.log(text); }
+		debug   : false //function (text) { console.log(text); }
 	});
 
 	var setIndex = function (p, v, k) {
@@ -37,7 +37,7 @@ exports.sync = function (opts, cb) {
 	return this;
 };
 
-exports.drop = function (opts, cb) {
+export function drop (opts, cb) {
 	var i, queries = [], pending;
 
 	queries.push("DROP TABLE IF EXISTS " + this.query.escapeId(opts.table));

@@ -1,6 +1,8 @@
-var map = {};
+import { SingletonOptions } from "@fxjs/orm";
 
-exports.clear = function (key) {
+let map = {};
+
+export function clear (key?: string) {
 	if (typeof key === "string") {
 		delete map[key];
 	} else {
@@ -9,7 +11,7 @@ exports.clear = function (key) {
 	return this;
 };
 
-exports.get = function (key, opts, createCb, returnCb) {
+export function get (key: string, opts: SingletonOptions, createCb: Function, returnCb: Function) {
 	if (opts && opts.identityCache === false) {
 		return createCb(returnCb);
 	}
@@ -24,7 +26,7 @@ exports.get = function (key, opts, createCb, returnCb) {
 		}
 	}
 
-	createCb(function (err, value) {
+	createCb(function (err: Error, value: any) {
 		if (err) return returnCb(err);
 
 		map[key] = { // object , timeout

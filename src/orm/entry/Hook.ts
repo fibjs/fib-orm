@@ -1,4 +1,7 @@
-exports.trigger = function () {
+import { FibOrmFixedModelInstance } from "@fxjs/orm";
+
+export function trigger(self: FibOrmFixedModelInstance, cb: Function, _: boolean);
+export function trigger () {
 	var args = Array.prototype.slice.apply(arguments);
 	var self = args.shift();
 	var cb   = args.shift();
@@ -8,7 +11,8 @@ exports.trigger = function () {
 	}
 };
 
-exports.wait = function () {
+export function wait(self: FibOrmFixedModelInstance, cb: Function, next: Function);
+export function wait () {
 	var args = Array.prototype.slice.apply(arguments);
 	var self = args.shift();
 	var cb   = args.shift();

@@ -3,7 +3,7 @@ var events         = require("events");
 var url            = require("url");
 var hat            = require("hat");
 var Query          = require("sql-query");
-var enforce        = require("enforce");
+var enforce        = require("@fibjs/enforce");
 var _              = require("lodash");
 
 var Model          = require("./Model").Model;
@@ -267,7 +267,7 @@ ORM.prototype.close = function (cb) {
 };
 ORM.prototype.load = function () {
 	var files = _.flatten(Array.prototype.slice.apply(arguments));
-	var cb    = function () {};
+	var cb    = function (err?: Error) {};
 
 	if (typeof files[files.length - 1] == "function") {
 		cb = files.pop();

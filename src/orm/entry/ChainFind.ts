@@ -1,12 +1,12 @@
+import { QueryConditions, ChainFindInstanceType, FibOrmFixedModel, ChainFindOptions } from "@fxjs/orm";
+
 var _             = require("lodash");
 var async         = require("async");
 var Utilities     = require("./Utilities");
 var ChainInstance = require("./ChainInstance");
 var Promise       = require("./Promise").Promise;
 
-module.exports = ChainFind;
-
-function ChainFind(Model, opts) {
+export = function ChainFind(Model: FibOrmFixedModel, opts: ChainFindOptions) {
 	var prepareConditions = function () {
 		return Utilities.transformPropertyNames(
 			opts.conditions, opts.properties
@@ -90,7 +90,12 @@ function ChainFind(Model, opts) {
 	}
 
 	var promise = null;
-	var chain = {
+	var chain: ChainFindInstanceType = {
+		model: null,
+		options: null,
+		
+		all: null,
+		where: null,
 		find: function () {
 			var cb = null;
 
@@ -189,7 +194,7 @@ function ChainFind(Model, opts) {
 					return cb(null);
 				}
 
-				var ids = [], conditions = {};
+				var ids = [], conditions: QueryConditions = {};
 				var or;
 
 				conditions.or = [];
@@ -216,7 +221,7 @@ function ChainFind(Model, opts) {
 				return cb(err, items && items.length > 0 ? items[items.length - 1] : null);
 			});
 		},
-		each: function (cb) {
+		each: function (cb?) {
 			return new ChainInstance(this, cb);
 		},
 		run: function (cb) {

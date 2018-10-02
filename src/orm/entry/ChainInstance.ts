@@ -1,6 +1,4 @@
-module.exports = ChainInstance;
-
-function ChainInstance(chain, cb) {
+export = function ChainInstance(chain, cb) {
 	var instances = null;
 	var loading   = false;
 	var queue     = [];
@@ -13,8 +11,8 @@ function ChainInstance(chain, cb) {
 			return next();
 		});
 	};
-	var promise = function(hwd, next) {
-		return function () {
+	var promise = function(hwd, next?) {
+		return function (...args: any[]) {
 			if (!loading) {
 				load();
 			}

@@ -1,18 +1,20 @@
-var _                 = require("lodash");
-var async             = require("async");
-var ChainFind         = require("./ChainFind");
-var Instance          = require("./Instance").Instance;
-var LazyLoad          = require("./LazyLoad");
-var ManyAssociation   = require("./Associations/Many");
-var OneAssociation    = require("./Associations/One");
-var ExtendAssociation = require("./Associations/Extend");
-var Property          = require("./Property");
-var Singleton         = require("./Singleton");
-var Utilities         = require("./Utilities");
-var Validators        = require("./Validators");
-var ORMError          = require("./Error");
-var Hook              = require("./Hook");
-var AvailableHooks    = [
+const  _                 = require("lodash");
+import async             = require("async");
+import ChainFind         = require("./ChainFind");
+import { Instance }      from "./Instance";
+import LazyLoad          = require("./LazyLoad");
+import ManyAssociation   = require("./Associations/Many");
+import OneAssociation    = require("./Associations/One");
+import ExtendAssociation = require("./Associations/Extend");
+import Property          = require("./Property");
+import Singleton         = require("./Singleton");
+import Utilities         = require("./Utilities");
+import Validators        = require("./Validators");
+import ORMError          = require("./Error");
+import Hook              = require("./Hook");
+import { ExtensibleError, FibOrmFixedModelInstanceFn, FibOrmFixedModel } from "@fxjs/orm";
+
+const AvailableHooks    = [
 	"beforeCreate", "afterCreate",
 	"beforeSave", "afterSave",
 	"beforeValidation",
@@ -21,12 +23,8 @@ var AvailableHooks    = [
 	"afterAutoFetch"
 ];
 
-exports.Model = Model;
-
-function Model(opts) {
-	opts = _.defaults(opts || {}, {
-		keys: []
-	});
+export function Model(opts) {
+	opts = _.defaults(opts || {}, { keys: [] });
 	opts.keys = Array.isArray(opts.keys) ? opts.keys : [opts.keys];
 
 	var one_associations       = [];
@@ -48,7 +46,7 @@ function Model(opts) {
 			return this;
 		};
 	};
-	var createInstance = function (data, inst_opts, cb) {
+	var createInstance = function (data, inst_opts, cb?: any) {
 		if (!inst_opts) {
 			inst_opts = {};
 		}
@@ -88,13 +86,13 @@ function Model(opts) {
 		};
 
 		var setupAssociations = function (instance) {
-			OneAssociation.extend(model, instance, opts.driver, one_associations, assoc_opts);
+			OneAssociation.extend(model, instance, opts.driver, one_associations);
 			ManyAssociation.extend(model, instance, opts.driver, many_associations, assoc_opts, createInstance);
 			ExtendAssociation.extend(model, instance, opts.driver, extend_associations, assoc_opts);
 		};
 
 		var pending  = 2, create_err = null;
-		var instance = new Instance(model, {
+		var instance = new (Instance as FibOrmFixedModelInstanceFn)(model, {
 			uid                    : inst_opts.uid, // singleton unique id
 			keys                   : opts.keys,
 			is_new                 : inst_opts.is_new || false,
@@ -147,7 +145,7 @@ function Model(opts) {
 		return instance;
 	};
 
-	var model = function () {
+	const model = function () {
 	    var instance, i;
 
 	    var data = arguments.length > 1 ? arguments : arguments[0];
@@ -162,13 +160,12 @@ function Model(opts) {
 	            return createInstance(data2, { isShell: true });
 	        }
 	        else {
-	            var err = new Error('Model requires ' + opts.keys.length + ' keys, only ' + data.length + ' were provided');
+	            const err: ExtensibleError = new Error('Model requires ' + opts.keys.length + ' keys, only ' + data.length + ' were provided');
 	            err.model = opts.table;
 
 	            throw err;
 	        }
-	    }
-	    else if (typeof data === "number" || typeof data === "string") {
+	    } else if (typeof data === "number" || typeof data === "string") {
 	        var data2 = {};
 	        data2[opts.keys[0]] = data;
 
@@ -195,7 +192,7 @@ function Model(opts) {
 	        autoSave: opts.autoSave,
 	        cascadeRemove: opts.cascadeRemove
 	    });
-	};
+	} as FibOrmFixedModel;
 
 	model.allProperties = allProperties;
 	model.properties    = opts.properties;

@@ -1,4 +1,4 @@
-exports.extend = function (Instance, Model, properties) {
+export function extend (Instance, Model, properties) {
 	for (var k in properties) {
 		if (properties[k].lazyload === true) {
 			addLazyLoadProperty(properties[k].lazyname || k, Instance, Model, k);

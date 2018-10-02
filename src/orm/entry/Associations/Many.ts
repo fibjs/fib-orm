@@ -1,27 +1,26 @@
 var _                   = require("lodash");
-var InstanceConstructor = require("../Instance").Instance;
 var Hook                = require("../Hook");
 var Settings            = require("../Settings");
 var Property            = require("../Property");
 var ORMError            = require("../Error");
 var util                = require("../Utilities");
 
-exports.prepare = function (db, Model, associations) {
+export function prepare (db, Model, associations) {
 	Model.hasMany = function () {
-		var name, makeKey, mergeId, mergeAssocId;
-		var OtherModel = Model;
-		var props = null;
-		var opts = {};
+		let name, makeKey, mergeId, mergeAssocId;
+		let OtherModel = Model;
+		let props = null;
+		let opts = {};
 
 		for (var i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
-				case "string":
+				case 'string':
 					name = arguments[i];
 					break;
-				case "function":
+				case 'function':
 					OtherModel = arguments[i];
 					break;
-				case "object":
+				case 'object':
 					if (props === null) {
 						props = arguments[i];
 					} else {
@@ -100,13 +99,13 @@ exports.prepare = function (db, Model, associations) {
 	};
 };
 
-exports.extend = function (Model, Instance, Driver, associations, opts, createInstance) {
+export function extend (Model, Instance, Driver, associations, opts, createInstance) {
 	for (var i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i], opts, createInstance);
 	}
 };
 
-exports.autoFetch = function (Instance, associations, opts, cb) {
+export function autoFetch (Instance, associations, opts, cb) {
 	if (associations.length === 0) {
 		return cb();
 	}
@@ -507,5 +506,4 @@ function ucfirst(text) {
 	});
 }
 
-function noOperation() {
-}
+function noOperation() {}

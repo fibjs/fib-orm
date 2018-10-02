@@ -1,28 +1,25 @@
-var enforce = require("enforce");
-var util    = require("util");
+const enforce = require("@fibjs/enforce");
+const util    = require("util");
 
-var validators = {
-	required       : enforce.required,
-	notEmptyString : enforce.notEmptyString,
+export const required       = enforce.required
+export const notEmptyString = enforce.notEmptyString
 
-	rangeNumber    : enforce.ranges.number,
-	rangeLength    : enforce.ranges.length,
+export const rangeNumber    = enforce.ranges.number
+export const rangeLength    = enforce.ranges.length
 
-	insideList     : enforce.lists.inside,
-	outsideList    : enforce.lists.outside,
+export const insideList     = enforce.lists.inside
+export const outsideList    = enforce.lists.outside
 
-	password       : enforce.security.password,
+export const password       = enforce.security.password
 
-	patterns       : enforce.patterns
-};
-
+export const patterns       = enforce.patterns
 
 /**
  * Check if a value is the same as a value
  * of another property (useful for password
  * checking).
  **/
-validators.equalToProperty = function (name, msg) {
+export function equalToProperty (name, msg) {
 	return function (v, next) {
 		if (v === this[name]) {
 			return next();
@@ -45,9 +42,9 @@ validators.equalToProperty = function (name, msg) {
  *   ignoreCase: for postgres; mysql ignores case by default.
  *   scope: (Array) scope uniqueness to listed properties
  **/
-validators.unique = function () {
+export function unique (opts: {ignoreCase?: boolean, scope?: string[] } = {}) {
 	var arg, k;
-	var msg = null, opts = {};
+	var msg = null;
 
 	for (k in arguments) {
 		arg = arguments[k];
@@ -65,7 +62,7 @@ validators.unique = function () {
 			return next();
 		}
 
-		//Cannot process on database engines which don't support SQL syntax
+		// Cannot process on database engines which don't support SQL syntax
 		if (!ctx.driver.isSql) {
 			return next('not-supported');
 		}
@@ -118,5 +115,3 @@ validators.unique = function () {
 		chain.all(handler);
 	};
 };
-
-module.exports = validators;

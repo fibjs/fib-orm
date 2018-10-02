@@ -1,12 +1,12 @@
-var _        = require('lodash');
-var ORMError = require("./Error");
+const _        = require('lodash');
+import ORMError = require("./Error");
 
 var KNOWN_TYPES = [
-	"text",   "number", "integer", "boolean", "date", "enum", "object",
+	"text", "number", "integer", "boolean", "date", "enum", "object",
 	"binary", "point",  "serial"
 ];
 
-exports.normalize = function (opts) {
+export function normalize (opts) {
 	if (typeof opts.prop === "function") {
 		switch (opts.prop.name) {
 			case "String":

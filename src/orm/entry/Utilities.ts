@@ -1,4 +1,6 @@
-var _ = require('lodash')
+import { QueryConditions, OrigDetailedModelProperty, FibOrmFixedModel, AssociationKeyComputation } from "@fxjs/orm";
+
+const _ = require('lodash')
 
 /**
  * Order should be a String (with the property name assumed ascending)
@@ -17,7 +19,7 @@ var _ = require('lodash')
  * 9. [ 'property1', '-property2' ] (ORDER BY property1 ASC, property2 DESC)
  * ...
  */
-exports.standardizeOrder = function (order) {
+export function standardizeOrder (order: string|string[]) {
 	if (typeof order === "string") {
 		if (order[0] === "-") {
 			return [ [ order.substr(1), "Z" ] ];
@@ -25,7 +27,8 @@ exports.standardizeOrder = function (order) {
 		return [ [ order, "A" ] ];
 	}
 
-	var new_order = [], minus;
+	const new_order = [];
+	let minus;
 
 	for (var i = 0; i < order.length; i++) {
 		minus = (order[i][0] === "-");
@@ -55,7 +58,7 @@ exports.standardizeOrder = function (order) {
  * E) Convert our association fields into an array, indexes are the same as model.id
  * F) Itterate through values for the condition, only accept instances of the same type as the association
  */
-exports.checkConditions = function (conditions, one_associations) {
+export function checkConditions (conditions: QueryConditions, one_associations) {
 	var k, i, j;
 
 	// A)
@@ -110,7 +113,7 @@ exports.checkConditions = function (conditions, one_associations) {
  * Gets all the values within an object or array, optionally
  * using a keys array to get only specific values
  */
-exports.values = function (obj, keys) {
+export function values (obj, keys) {
 	var i, k, vals = [];
 
 	if (keys) {
@@ -134,14 +137,14 @@ exports.values = function (obj, keys) {
 // Qn:       is Zero a valid value for a FK column?
 // Why?      Well I've got a pre-existing database that started all its 'serial' IDs at zero...
 // Answer:   hasValues() is only used in hasOne association, so it's probably ok...
-exports.hasValues = function (obj, keys) {
+export function hasValues (obj, keys) {
 	for (var i = 0; i < keys.length; i++) {
 		if (!obj[keys[i]] && obj[keys[i]] !== 0) return false;  // 0 is also a good value...
 	}
 	return true;
 };
 
-exports.populateConditions = function (model, fields, source, target, overwrite) {
+export function populateConditions (model, fields, source, target, overwrite?) {
 	for (var i = 0; i < model.id.length; i++) {
 		if (typeof target[fields[i]] === 'undefined' || overwrite !== false) {
 			target[fields[i]] = source[model.id[i]];
@@ -153,15 +156,15 @@ exports.populateConditions = function (model, fields, source, target, overwrite)
 	}
 };
 
-exports.getConditions = function (model, fields, from) {
+export function getConditions (model, fields, from) {
 	var conditions = {};
 
-	exports.populateConditions(model, fields, from, conditions);
+	populateConditions(model, fields, from, conditions);
 
 	return conditions;
 };
 
-exports.wrapFieldObject = function (params) {
+export function wrapFieldObject (params) {
 	if (!params.field) {
 		var assoc_key = params.model.settings.get("properties.association_key");
 
@@ -200,10 +203,17 @@ exports.wrapFieldObject = function (params) {
 	return newObj;
 };
 
-exports.formatField = function (model, name, required, reversed) {
-	var fields = {}, field_opts, field_name;
+/**
+ * 
+ * @param model related Model
+ * @param name field name
+ * @param required is field required for relationship
+ * @param reversed is model is reversed in relationship
+ */
+export function formatField (model: FibOrmFixedModel, name: string, required: boolean, reversed: boolean): OrigDetailedModelProperty {
+	let fields = {} as OrigDetailedModelProperty, field_opts, field_name;
 	var keys = model.id;
-	var assoc_key = model.settings.get("properties.association_key");
+	var assoc_key: AssociationKeyComputation = model.settings.get("properties.association_key");
 
 	for (var i = 0; i < keys.length; i++) {
 		if (reversed) {
@@ -248,7 +258,7 @@ exports.formatField = function (model, name, required, reversed) {
 
 // If the parent associations key is `serial`, the join tables
 // key should be changed to `integer`.
-exports.convertPropToJoinKeyProp = function (props, opts) {
+export function convertPropToJoinKeyProp (props, opts) {
 	var prop;
 
 	for (var k in props) {
@@ -269,7 +279,7 @@ exports.convertPropToJoinKeyProp = function (props, opts) {
 	return props;
 }
 
-exports.getRealPath = function (path_str, stack_index) {
+export function getRealPath (path_str, stack_index) {
 	var path = require("path"); // for now, load here (only when needed)
 	var cwd = process.cwd();
 	var err = new Error();
@@ -293,7 +303,7 @@ exports.getRealPath = function (path_str, stack_index) {
 	return path_str;
 };
 
-exports.transformPropertyNames = function (dataIn, properties) {
+export function transformPropertyNames (dataIn, properties) {
 	var k, prop;
 	var dataOut = {};
 
@@ -308,10 +318,10 @@ exports.transformPropertyNames = function (dataIn, properties) {
 	return dataOut;
 };
 
-exports.transformOrderPropertyNames = function (order, properties) {
+export function transformOrderPropertyNames (order, properties) {
 	if (!order) return order;
 
-	var i, item;
+	var item;
 	var newOrder = JSON.parse(JSON.stringify(order));
 
 	// Rename order properties according to mapsTo
@@ -333,7 +343,7 @@ exports.transformOrderPropertyNames = function (order, properties) {
 	return newOrder;
 }
 
-exports.renameDatastoreFieldsToPropertyNames = function (data, fieldToPropertyMap) {
+export function renameDatastoreFieldsToPropertyNames (data, fieldToPropertyMap) {
 	var k, prop;
 
 	for (k in data) {
