@@ -1,6 +1,6 @@
 ## Object Relational Mapping for fibjs
 
-[![Build Status](https://travis-ci.org/fxjs-modules.svg)](https://travis-ci.org/fxjs-modules)
+[![Build Status](https://travis-ci.org/fxjs-modules/orm.svg)](https://travis-ci.org/fxjs-modules/orm)
 [![NPM version](https://img.shields.io/npm/v/@fxjs/orm.svg)](https://www.npmjs.org/package/@fxjs/orm)
 
 ## Install
