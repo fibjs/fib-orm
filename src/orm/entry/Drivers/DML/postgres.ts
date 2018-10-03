@@ -4,8 +4,6 @@ var Query   = require("sql-query").Query;
 var shared  = require("./_shared");
 var DDL     = require("../DDL/SQL");
 
-exports.Driver = Driver;
-
 var switchableFunctions = {
 	pool: {
 		connect: function (cb) {
@@ -69,7 +67,7 @@ var switchableFunctions = {
 	}
 };
 
-function Driver(config, connection, opts) {
+export function Driver(config, connection, opts) {
 	var functions = switchableFunctions.client;
 
 	this.dialect = 'postgresql';
@@ -258,7 +256,7 @@ Driver.prototype.valueToProperty = function (value, property) {
 				var m = value.match(/\((\-?[\d\.]+)[\s,]+(\-?[\d\.]+)\)/);
 
 				if (m) {
-					value = { x : parseFloat(m[1], 10) , y : parseFloat(m[2], 10) };
+					value = { x : parseFloat(m[1]) , y : parseFloat(m[2]) };
 				}
 			}
 			break;
@@ -304,7 +302,7 @@ Driver.prototype.valueToProperty = function (value, property) {
 			customType = this.customTypes[property.type];
 
 			if (customType && 'valueToProperty' in customType) {
-				value = customType.valueToProperty(value);
+				value = customType.valueToProperty(value, property);
 			}
 	}
 	return value;

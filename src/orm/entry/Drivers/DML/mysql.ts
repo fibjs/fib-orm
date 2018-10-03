@@ -4,9 +4,7 @@ var Query   = require("sql-query").Query;
 var shared  = require("./_shared");
 var DDL     = require("../DDL/SQL");
 
-exports.Driver = Driver;
-
-function Driver(config, connection, opts) {
+export function Driver(config, connection, opts) {
 	this.dialect = 'mysql';
 	this.config = config || {};
 	this.opts   = opts || {};
@@ -259,7 +257,7 @@ Driver.prototype.valueToProperty = function (value, property) {
 		default:
 			customType = this.customTypes[property.type];
 			if(customType && 'valueToProperty' in customType) {
-				value = customType.valueToProperty(value);
+				value = customType.valueToProperty(value, property);
 			}
 	}
 	return value;

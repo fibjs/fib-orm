@@ -284,7 +284,7 @@ Driver.prototype.valueToProperty = function (value, property) {
 		default:
 			customType = this.customTypes[property.type];
 			if(customType && 'valueToProperty' in customType) {
-				value = customType.valueToProperty(value);
+				value = customType.valueToProperty(value, property);
 			}
 	}
 	return value;
@@ -306,11 +306,11 @@ Driver.prototype.propertyToValue = function (value, property) {
 			if (this.config.query && this.config.query.strdates) {
 				if (value instanceof Date) {
 					var year = value.getUTCFullYear();
-					var month = value.getUTCMonth() + 1;
+					var month: string | number = value.getUTCMonth() + 1;
 					if (month < 10) {
 						month = '0' + month;
 					}
-					var date = value.getUTCDate();
+					var date: string | number = value.getUTCDate();
 					if (date < 10) {
 						date = '0' + date;
 					}
@@ -320,19 +320,19 @@ Driver.prototype.propertyToValue = function (value, property) {
 						break;
 					}
 
-					var hours = value.getUTCHours();
+					var hours: string | number = value.getUTCHours();
 					if (hours < 10) {
 						hours = '0' + hours;
 					}
-					var minutes = value.getUTCMinutes();
+					var minutes: string | number = value.getUTCMinutes();
 					if (minutes < 10) {
 						minutes = '0' + minutes;
 					}
-					var seconds = value.getUTCSeconds();
+					var seconds: string | number = value.getUTCSeconds();
 					if (seconds < 10) {
 						seconds = '0' + seconds;
 					}
-					var millis = value.getUTCMilliseconds();
+					var millis: string | number = value.getUTCMilliseconds();
 					if (millis < 10) {
 						millis = '0' + millis;
 					}
