@@ -1,16 +1,18 @@
-var _                   = require("lodash");
-var Hook                = require("../Hook");
-var Settings            = require("../Settings");
-var Property            = require("../Property");
-var ORMError            = require("../Error");
-var util                = require("../Utilities");
+import { FibORM, FibOrmFixedModel, InstanceAssociationItem_HasMany, AssociationDefinitionOptions_HasMany, FibOrmFixedModelInstance, ConnInstanceInOrmConnDriverDB } from "@fxjs/orm";
 
-export function prepare (db, Model, associations) {
+const _                   = require("lodash");
+import Hook                = require("../Hook");
+import Settings            = require("../Settings");
+import Property            = require("../Property");
+import ORMError            = require("../Error");
+import util                = require("../Utilities");
+
+export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: InstanceAssociationItem_HasMany[]) {
 	Model.hasMany = function () {
 		let name, makeKey, mergeId, mergeAssocId;
 		let OtherModel = Model;
 		let props = null;
-		let opts = {};
+		let opts: AssociationDefinitionOptions_HasMany = {};
 
 		for (var i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
@@ -60,7 +62,7 @@ export function prepare (db, Model, associations) {
 
 		var assocName = opts.name || ucfirst(name);
 		var assocTemplateName = opts.accessor || assocName;
-		var association = {
+		var association: InstanceAssociationItem_HasMany = {
 			name           : name,
 			model          : OtherModel || Model,
 			props          : props,
@@ -68,10 +70,7 @@ export function prepare (db, Model, associations) {
 			autoFetch      : opts.autoFetch || false,
 			autoFetchLimit : opts.autoFetchLimit || 2,
 			// I'm not sure the next key is used..
-			field          : util.wrapFieldObject({
-				                 field: opts.field, model: OtherModel, altName: Model.table
-				               }) ||
-			                 util.formatField(Model, name, true, opts.reversed),
+			field          : util.wrapFieldObject({ field: opts.field, model: OtherModel, altName: Model.table }) || util.formatField(Model, name, true, opts.reversed),
 			mergeTable     : opts.mergeTable || (Model.table + "_" + name),
 			mergeId        : mergeId,
 			mergeAssocId   : mergeAssocId,
@@ -99,7 +98,7 @@ export function prepare (db, Model, associations) {
 	};
 };
 
-export function extend (Model, Instance, Driver, associations, opts, createInstance) {
+export function extend (Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, associations: InstanceAssociationItem_HasMany[], opts: AssociationDefinitionOptions_HasMany, createInstance: Function) {
 	for (var i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i], opts, createInstance);
 	}
@@ -124,7 +123,7 @@ export function autoFetch (Instance, associations, opts, cb) {
 	}
 };
 
-function extendInstance(Model, Instance, Driver, association, opts, createInstance) {
+function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, association: InstanceAssociationItem_HasMany, opts: AssociationDefinitionOptions_HasMany, createInstance: Function) {
 	if (Model.settings.get("instance.cascadeRemove")) {
 		Instance.on("beforeRemove", function () {
 			Instance[association.delAccessor]();
@@ -477,7 +476,7 @@ function extendInstance(Model, Instance, Driver, association, opts, createInstan
 	});
 }
 
-function autoFetchInstance(Instance, association, opts, cb) {
+function autoFetchInstance(Instance: FibOrmFixedModelInstance, association: FibOrmFixedModelInstance, opts: AssociationDefinitionOptions_HasMany, cb: Function) {
 	if (!Instance.saved()) {
 		return cb();
 	}
@@ -500,7 +499,7 @@ function autoFetchInstance(Instance, association, opts, cb) {
 	});
 }
 
-function ucfirst(text) {
+function ucfirst(text: string) {
 	return text[0].toUpperCase() + text.substr(1).replace(/_([a-z])/, function (m, l) {
 		return l.toUpperCase();
 	});

@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var default_settings = {
+const _ = require('lodash');
+const default_settings = {
 	properties : {
 		primary_key               : "id",
 		association_key           : "{name}_{field}",
@@ -26,8 +26,8 @@ var default_settings = {
 	}
 };
 
-exports.Container = Settings;
-exports.defaults = function () {
+export const Container = Settings;
+export const defaults = function () {
 	return default_settings;
 };
 
@@ -41,7 +41,7 @@ function Settings(settings) {
 			return this;
 		},
 		get: function (key, def) {
-			var v = get(key, def, settings)
+			const v = get(key, def, settings)
 
 			if (v instanceof Function) {
 				return v;
@@ -50,7 +50,7 @@ function Settings(settings) {
 			}
 		},
 		unset: function () {
-			for (var i = 0; i < arguments.length; i++) {
+			for (let i = 0; i < arguments.length; i++) {
 				if (typeof arguments[i] === "string") {
 					unset(arguments[i], settings);
 				}
@@ -62,7 +62,7 @@ function Settings(settings) {
 }
 
 function set(key, value, obj) {
-	var p = key.indexOf(".");
+	const p = key.indexOf(".");
 
 	if (p === -1) {
 		return obj[key] = value;
@@ -76,7 +76,7 @@ function set(key, value, obj) {
 }
 
 function get(key, def, obj) {
-	var p = key.indexOf(".");
+	const p = key.indexOf(".");
 
 	if (p === -1) {
 		if (key === '*') {
@@ -93,7 +93,7 @@ function get(key, def, obj) {
 }
 
 function unset(key, obj) {
-	var p = key.indexOf(".");
+	const p = key.indexOf(".");
 
 	if (p === -1) {
 		if (key === '*') {
