@@ -1,7 +1,17 @@
 
-v1.4.2-postalpha / 2018-10-02
+v1.4.3 / 2018-10-03
 ==================
 
+  * code structure adjust.
+  * fix params passed to driver's customType.valueToProperty
+  * [WIP] normalize type definitions
+  * mv 'src/orm/src' to 'src/orm/entry'
+  * [README.md] little fix.
+
+v1.4.2-postalpha / 2018-10-02
+=============================
+
+  * Release v1.4.2-postalpha
   * migrate from 'fib-orm'
   * upgrade version of 'fib-typify'
   * rename package to '@fxjs/orm'
