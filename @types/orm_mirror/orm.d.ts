@@ -117,11 +117,12 @@ declare module "@fxjs/orm" {
     
             // is the association is extendsTo
             extension?: boolean;
-            reversed?: boolean
-            accessor?: string
-            reverseAccessor?: string
-            autoFetch?: boolean
-            autoFetchLimit?: number
+            required?: boolean;
+            reversed?: boolean;
+            accessor?: string;
+            reverseAccessor?: string;
+            autoFetch?: boolean;
+            autoFetchLimit?: number;
         }
         interface InstanceAssociationItem {
             name: string;
@@ -140,13 +141,14 @@ declare module "@fxjs/orm" {
         }
     
         interface AssociationDefinitionOptions_HasOne extends AssociationDefinitionOptions {
+            reverse?: string;
         }
         interface AssociationDefinitionOptions_HasMany extends AssociationDefinitionOptions {
+            reverse?: string;
             // is association property a primary key
             key?: boolean
             mergeId?: string
             mergeAssocId?: string
-            reverse?: boolean
             reverseAssociation?: boolean
 
             hooks?: Hooks
