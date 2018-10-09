@@ -1,7 +1,13 @@
 
-v1.4.3 / 2018-10-03
+v1.4.3-postalpha.1 / 2018-10-09
 ==================
 
+  * typo fix.
+
+v1.4.3 / 2018-10-03
+===================
+
+  * Release v1.4.3
   * code structure adjust.
   * fix params passed to driver's customType.valueToProperty
   * [WIP] normalize type definitions
