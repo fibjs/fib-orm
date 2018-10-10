@@ -283,7 +283,10 @@ declare module "@fxjs/orm" {
                 (assoc_name: string, ext_model: FibOrmFixedModel, assoc_options?: AssociationDefinitionOptions_HasOne): FibOrmFixedExtendModel
                 (assoc_name: string, assoc_options?: AssociationDefinitionOptions_HasOne): FibOrmFixedExtendModel
             }
-            hasMany: (...args: any[]) => any;
+            hasMany: {
+                (assoc_name: string, ext_model: FibOrmFixedModel, assoc_options?: AssociationDefinitionOptions_HasMany): FibOrmFixedExtendModel
+                (assoc_name: string, ext_model: FibOrmFixedModel, assoc_props?: { [property: string]: OrigDetailedModelProperty }, assoc_options?: AssociationDefinitionOptions_HasMany): FibOrmFixedExtendModel
+            }
             extendsTo: (...args: any[]) => Model;
     
             extends: { [extendModel: string]: ExtendModelWrapper };
