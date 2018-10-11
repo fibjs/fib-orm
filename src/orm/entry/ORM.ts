@@ -373,7 +373,7 @@ ORM.prototype.serial = function () {
 };
 
 function ORM_Error(err, cb) {
-	var Emitter = new events.EventEmitter();
+	var Emitter: any = new events.EventEmitter();
 
 	Emitter.use = Emitter.define = Emitter.sync = Emitter.load = function () {};
 
