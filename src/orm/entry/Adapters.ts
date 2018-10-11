@@ -1,10 +1,9 @@
-var aliases = require('./Drivers/aliases');
+import aliases = require('./Drivers/aliases');
 
-module.exports.add = addAdapter;
-module.exports.get = getAdapter;
+export const add = addAdapter;
+export const get = getAdapter;
 
-
-var adapters = {};
+const adapters = {};
 
 function addAdapter(name, constructor) {
   adapters[name] = constructor;

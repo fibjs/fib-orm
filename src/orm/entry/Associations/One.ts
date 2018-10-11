@@ -86,7 +86,7 @@ export function prepare (Model: FibOrmFixedModel, associations: InstanceAssociat
 		}
 
 		Model["findBy" + assocTemplateName] = function () {
-			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {};
+			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {} as ModelAssociationMethod__FindOptions;
 
 			for (var i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {

@@ -1,3 +1,5 @@
+import { ExtensibleError, FibOrmFixedModelInstanceFn, FibOrmFixedModel, ModelAssociationMethod__GetOptions, ModelAssociationMethod__FindOptions } from "@fxjs/orm";
+
 const  _                 = require("lodash");
 import async             = require("async");
 import ChainFind         = require("./ChainFind");
@@ -12,8 +14,7 @@ import Utilities         = require("./Utilities");
 import Validators        = require("./Validators");
 import ORMError          = require("./Error");
 import Hook              = require("./Hook");
-import { ExtensibleError, FibOrmFixedModelInstanceFn, FibOrmFixedModel } from "@fxjs/orm";
-
+import AggregateFunctions = require("./AggregateFunctions")
 const AvailableHooks    = [
 	"beforeCreate", "afterCreate",
 	"beforeSave", "afterSave",
@@ -23,7 +24,10 @@ const AvailableHooks    = [
 	"afterAutoFetch"
 ];
 
-export function Model(opts) {
+interface ModelType {
+	(opts): void
+}
+export const Model: ModelType = function (opts) {
 	opts = _.defaults(opts || {}, { keys: [] });
 	opts.keys = Array.isArray(opts.keys) ? opts.keys : [opts.keys];
 
@@ -145,7 +149,7 @@ export function Model(opts) {
 		return instance;
 	};
 
-	const model = function () {
+	const model: FibOrmFixedModel = function () {
 	    var instance, i;
 
 	    var data = arguments.length > 1 ? arguments : arguments[0];
@@ -192,7 +196,7 @@ export function Model(opts) {
 	        autoSave: opts.autoSave,
 	        cascadeRemove: opts.cascadeRemove
 	    });
-	} as FibOrmFixedModel;
+	} as any;
 
 	model.allProperties = allProperties;
 	model.properties    = opts.properties;
@@ -247,7 +251,7 @@ export function Model(opts) {
 
 	model.get = function () {
 		var conditions = {};
-		var options    = {};
+		var options    = {} as ModelAssociationMethod__GetOptions;
 		var ids        = Array.prototype.slice.apply(arguments);
 		var cb         = ids.pop();
 		var prop;
@@ -313,7 +317,7 @@ export function Model(opts) {
 	};
 
 	model.find = function () {
-		var options    = {};
+		var options    = {} as ModelAssociationMethod__FindOptions;
 		var conditions = null;
 		var cb         = null;
 		var order      = null;
@@ -510,7 +514,7 @@ export function Model(opts) {
 			conditions = Utilities.checkConditions(conditions, one_associations);
 		}
 
-		return new require("./AggregateFunctions")({
+		return new AggregateFunctions({
 			table        : opts.table,
 			driver_name  : opts.driver_name,
 			driver       : opts.driver,

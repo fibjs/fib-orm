@@ -1,34 +1,27 @@
-var util           = require("util");
-var events         = require("events");
-var url            = require("url");
-var hat            = require("hat");
-var Query          = require("sql-query");
-var enforce        = require("@fibjs/enforce");
-var _              = require("lodash");
+import util           = require("util");
+import events         = require("events");
+import url            = require("url");
+import hat            = require("hat");
+import Query          = require("sql-query");
+import _              = require("lodash");
 
-var Model          = require("./Model").Model;
-var DriverAliases  = require("./Drivers/aliases");
-var adapters       = require("./Adapters");
-var Settings       = require("./Settings");
-var Singleton      = require("./Singleton");
-var ORMError       = require("./Error");
-var Utilities      = require("./Utilities");
+import { Model }      from "./Model";
+import DriverAliases  = require("./Drivers/aliases");
+import adapters       = require("./Adapters");
+import ORMError       = require("./Error");
+import Utilities      = require("./Utilities");
+
+export import enforce   = require("@fibjs/enforce");
+export import Settings       = require("./Settings");
+export import singleton      = require("./Singleton");
 
 // Deprecated, use enforce
-exports.validators = require("./Validators");
+export import validators = require("./Validators");
 
-// specific to ORM, not in enforce for now
-enforce.equalToProperty = exports.validators.equalToProperty;
-enforce.unique          = exports.validators.unique;
+const SettingsInstance = exports.settings = new Settings.Container(Settings.defaults());
 
-exports.enforce    = enforce;
-
-exports.singleton  = Singleton;
-exports.settings   = new Settings.Container(Settings.defaults());
-
-exports.Property   = require("./Property");
-exports.Settings   = Settings;
-exports.ErrorCodes = ORMError.codes;
+export import Property   = require("./Property");
+export const ErrorCodes = ORMError.codes;
 
 exports.Text = Query.Text;
 for (var k in Query.Comparators) {
@@ -50,7 +43,7 @@ exports.use = function (connection, proto, opts, cb) {
 
 	try {
 		var Driver   = adapters.get(proto);
-		var settings = new Settings.Container(exports.settings.get('*'));
+		var settings = new Settings.Container(SettingsInstance.get('*'));
 		var driver   = new Driver(null, connection, {
 			debug    : (opts.query && opts.query.debug === 'true'),
 			settings : settings
@@ -116,7 +109,7 @@ exports.connect = function (opts, cb) {
 
 	try {
 		var Driver   = adapters.get(proto);
-		var settings = new Settings.Container(exports.settings.get('*'));
+		var settings = new Settings.Container(SettingsInstance.get('*'));
 		var driver   = new Driver(opts, null, {
 			debug    : 'debug' in opts.query ? opts.query.debug : settings.get("connection.debug"),
 			pool     : 'pool'  in opts.query ? opts.query.pool  : settings.get("connection.pool"),
@@ -149,7 +142,7 @@ exports.connect = function (opts, cb) {
 exports.addAdapter = adapters.add;
 
 function ORM(driver_name, driver, settings) {
-	this.validators  = exports.validators;
+	this.validators  = validators;
 	this.enforce     = exports.enforce;
 	this.settings    = settings;
 	this.driver_name = driver_name;

@@ -1,5 +1,5 @@
-const enforce = require("@fibjs/enforce");
-const util    = require("util");
+import enforce = require("@fibjs/enforce");
+import util    = require("util");
 
 export const required       = enforce.required
 export const notEmptyString = enforce.notEmptyString

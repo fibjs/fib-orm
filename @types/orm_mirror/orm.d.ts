@@ -1,10 +1,11 @@
 ﻿/// <reference path="sql-query.d.ts" />
 /// <reference path="../3rd.d.ts" />
 
-declare module "@fxjs/orm" {
-    import events = require('events');
-    import sqlquery = require('sqlquery');
-    import SqlQueryNS from 'sqlquery'
+import events = require('events');
+import sqlquery = require('sqlquery');
+import SqlQueryNS from 'sqlquery'
+
+declare namespace orm {
     type Buffer = Class_Buffer
 
     module orm {
@@ -135,6 +136,7 @@ declare module "@fxjs/orm" {
         }
         interface InstanceAssociationItem {
             name: string;
+            field?: OrigDetailedModelProperty;
             // is the association is extendsTo
             extension?: boolean;
     
@@ -183,7 +185,7 @@ declare module "@fxjs/orm" {
             accessor?: string;
             reverseAccessor?: string;
 
-            addAccessor: string;
+            addAccessor?: string;
     
             required?: boolean;
             extension?: boolean;
@@ -195,7 +197,7 @@ declare module "@fxjs/orm" {
         interface InstanceAssociationItem_HasMany extends InstanceAssociationItem {
             props: ModelPropertyDefinitionHash
             hooks: Hooks
-            field: OrigDetailedModelProperty
+            field?: OrigDetailedModelProperty
 
             mergeTable: string
             mergeId: string
@@ -363,15 +365,15 @@ declare module "@fxjs/orm" {
             /**
              * @noenum
              */
-            readonly isInstance: boolean;
+            isInstance(): boolean;
             /**
              * @noenum
              */
-            isPersisted: boolean;
+            isPersisted(): boolean;
             /**
              * @noenum
              */
-            readonly isShell: boolean;
+            isShell(): boolean;
             validate(callback: (errors: Error[]) => void);
             /* all fixed: end */
             
@@ -405,7 +407,7 @@ declare module "@fxjs/orm" {
     
         export interface FibOrmFixedModelInstanceFn {
             (model: FibOrmFixedModel, opts: object): FibOrmFixedModelInstance
-            new (model: FibOrmFixedModel, opts: object): void
+            new (model: FibOrmFixedModel, opts: object): FibOrmFixedModelInstance
         }
     
         export interface FibOrmPatchedSyncfiedInstantce extends PatchedSyncfiedInstanceWithDbWriteOperation, PatchedSyncfiedInstanceWithAssociations {
@@ -500,9 +502,16 @@ declare module "@fxjs/orm" {
         export interface ModelMethod__FindOptions {
             limit?: number;
             order?: any;
+
+            only?
+            offset?: number;
         }
 
         export interface ModelAssociationMethod__Options {
+            autoFetch: boolean
+            cascadeRemove: boolean
+            autoSave: boolean
+            identityCache: boolean
             autoFetchLimit: number
             __merge: ModelAssociationMethod__ComputationPayload__Merge
             extra: ModelPropertyDefinitionHash | any[]
@@ -515,6 +524,7 @@ declare module "@fxjs/orm" {
         }
 
         export interface ModelAssociationMethod__FindOptions extends ModelMethod__FindOptions, ModelAssociationMethod__Options {
+            
         }
 
         export interface ModelAssociationMethod__GetOptions extends ModelMethod__FindOptions, ModelAssociationMethod__Options {
@@ -571,7 +581,7 @@ declare module "@fxjs/orm" {
             create(data: { [property: string]: any; }, callback: (err: Error, instance: Instance) => void): Model;
             create(...args: any[]): Model;
 
-            clear(): Model;
+            clear(...args: any): Model;
 
             table: string;
             // id: string[];
@@ -587,9 +597,9 @@ declare module "@fxjs/orm" {
             save(data: { [property: string]: any; }, options: any, callback: (err: Error) => void): Instance;
             saved(): boolean;
             remove(callback: (err: Error) => void): Instance;
-            isInstance: boolean;
+            isInstance(): boolean;
             isPersisted(): boolean;
-            isShell: boolean;
+            isShell(): boolean;
             validate(callback: (errors: Error[]) => void);
             model: Model;
 
@@ -688,7 +698,7 @@ declare module "@fxjs/orm" {
             eager(): IChainFind;
 
             model: FibOrmFixedModel;
-            options: ChainFindOptions
+            options: ChainFindInstanceOptions
         }
 
         export interface ChainFindOptions {
@@ -701,12 +711,17 @@ declare module "@fxjs/orm" {
             limit
             merge
             offset
-            exists
-            __eager
             keys
             newInstance
             keyProperties
             associations
+
+            /* in instance */
+            exists?
+            __eager?
+        }
+
+        export interface ChainFindInstanceOptions extends ChainFindOptions {
         }
 
         /*
@@ -843,6 +858,4 @@ declare module "@fxjs/orm" {
         export function connect(options: IConnectionOptions): ORM;
         export function connect(options: IConnectionOptions, callback: (err: Error, db: ORM) => void);
     }
-
-    export = orm;
 }

@@ -26,12 +26,14 @@ const default_settings = {
 	}
 };
 
-export const Container = Settings;
 export const defaults = function () {
 	return default_settings;
 };
 
-function Settings(settings) {
+export interface ContainerType {
+	(options: object): void
+}
+export const Container: ContainerType = function (settings) {
 	this.settings = settings;
 
 	return {

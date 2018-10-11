@@ -1,4 +1,4 @@
-import { QueryConditions, ChainFindInstanceType, FibOrmFixedModel, ChainFindOptions } from "@fxjs/orm";
+import { QueryConditions, ChainFindInstanceType, FibOrmFixedModel, ChainFindOptions, ChainFindInstanceOptions } from "@fxjs/orm";
 
 var _             = require("lodash");
 var async         = require("async");
@@ -6,7 +6,11 @@ var Utilities     = require("./Utilities");
 var ChainInstance = require("./ChainInstance");
 var Promise       = require("./Promise").Promise;
 
-export = function ChainFind(Model: FibOrmFixedModel, opts: ChainFindOptions) {
+interface ChainFindType {
+	new (Model: FibOrmFixedModel, opts: ChainFindOptions): ChainFindInstanceType
+	(Model: FibOrmFixedModel, opts: ChainFindOptions): ChainFindInstanceType
+}
+export = function ChainFind (Model: FibOrmFixedModel, opts: ChainFindOptions) {
 	var prepareConditions = function () {
 		return Utilities.transformPropertyNames(
 			opts.conditions, opts.properties
@@ -280,10 +284,10 @@ export = function ChainFind(Model: FibOrmFixedModel, opts: ChainFindOptions) {
 		chain[k] = Model[k];
 	}
 	chain.model   = Model;
-	chain.options = opts;
+	chain.options = opts as ChainFindInstanceOptions;
 
 	return chain;
-}
+} as ChainFindType
 
 function addChainMethod(chain, association, opts) {
 	chain[association.hasAccessor] = function (value) {

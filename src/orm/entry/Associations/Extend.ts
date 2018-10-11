@@ -1,4 +1,4 @@
-import { InstanceAssociationItem_ExtendTos, FibORM, FibOrmFixedModel, FibOrmFixedModelInstance, ModelAssociationMethod__FindOptions, DbInstanceInOrmConnDriver, ConnInstanceInOrmConnDriverDB, InstanceAutoFetchOptions, InstanceExtendOptions, ModelExtendOptions, ModelAutoFetchOptions } from "@fxjs/orm";
+import { InstanceAssociationItem_ExtendTos, FibORM, FibOrmFixedModel, FibOrmFixedModelInstance, ModelAssociationMethod__FindOptions, ConnInstanceInOrmConnDriverDB, InstanceAutoFetchOptions, InstanceExtendOptions, ModelExtendOptions, ModelAutoFetchOptions } from "@fxjs/orm";
 import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName } from "./_utils";
 
 const _          = require('lodash');

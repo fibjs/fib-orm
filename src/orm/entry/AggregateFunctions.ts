@@ -1,9 +1,10 @@
 var ORMError   = require("./Error");
 var Utilities  = require("./Utilities");
 
-module.exports = AggregateFunctions;
-
-function AggregateFunctions(opts) {
+interface AggregateFunctionsType {
+	(opts): void
+}
+export = function AggregateFunctions(opts) {
 	if (typeof opts.driver.getQuery !== "function") {
 		throw new ORMError('NO_SUPPORT', "This driver does not support aggregate functions");
 	}
@@ -160,7 +161,7 @@ function AggregateFunctions(opts) {
 	}
 
 	return proto;
-}
+} as AggregateFunctionsType
 
 function addAggregate(proto, fun, builder) {
 	if (Array.isArray(fun)) {

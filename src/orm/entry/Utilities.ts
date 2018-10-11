@@ -279,7 +279,7 @@ export function convertPropToJoinKeyProp (props, opts) {
 	return props;
 }
 
-export function getRealPath (path_str, stack_index) {
+export function getRealPath (path_str, stack_index?) {
 	var path = require("path"); // for now, load here (only when needed)
 	var cwd = process.cwd();
 	var err = new Error();
