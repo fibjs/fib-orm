@@ -211,9 +211,9 @@ declare module "@fxjs/orm" {
         }
     
         interface InnerInstanceOptions extends ModelOptions {
-            one_associations: InstanceAssociationItem[]
-            many_associations: InstanceAssociationItem[]
-            extend_associations: InstanceAssociationItem[]
+            one_associations: InstanceAssociationItem_HasOne[]
+            many_associations: InstanceAssociationItem_HasMany[]
+            extend_associations: InstanceAssociationItem_ExtendTos[]
             association_properties: any 
             fieldToPropertyMap: any
 
