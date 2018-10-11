@@ -1,7 +1,13 @@
 
-v1.4.3-postalpha.2 / 2018-10-10
+v1.4.3-postalpha.3 / 2018-10-11
 ==================
 
+  * upgrade '@fibjs/enforce', do typo fix.
+
+v1.4.3-postalpha.2 / 2018-10-10
+===============================
+
+  * Release v1.4.3-postalpha.2
   * typo fix
 
 v1.4.3-postalpha.1 / 2018-10-09
