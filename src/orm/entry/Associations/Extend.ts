@@ -52,7 +52,7 @@ export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: Inst
 		associations.push(association);
 
 		Model["findBy" + assocName] = function () {
-			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {};
+			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {} as ModelAssociationMethod__FindOptions;
 
 			for (var i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {

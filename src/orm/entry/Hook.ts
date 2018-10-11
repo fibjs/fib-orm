@@ -11,6 +11,7 @@ export function trigger () {
 	}
 };
 
+export function wait(self: FibOrmFixedModelInstance, cb: Function, saveAssociation: object, opts: object);
 export function wait(self: FibOrmFixedModelInstance, cb: Function, next: Function);
 export function wait () {
 	var args = Array.prototype.slice.apply(arguments);

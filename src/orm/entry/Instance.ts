@@ -1,4 +1,4 @@
-import { FibOrmFixedModelInstance, ExtensibleError, FibOrmFixedModelInstanceFn, FibOrmFixedModel, FibOrmFixedModelOptions } from "@fxjs/orm";
+import { FibOrmFixedModelInstance, ExtensibleError, FibOrmFixedModel, TransformFibOrmModel2InstanceOptions } from "@fxjs/orm";
 
 import Utilities = require("./Utilities");
 import Hook      = require("./Hook");
@@ -9,8 +9,7 @@ interface EmitEventFunctionInInstance {
 	(state: string, _instance?: any): void
 }
 
-// export interface Instance extends FibOrmFixedModelInstanceFn {}
-export function Instance (Model: FibOrmFixedModel, opts: FibOrmFixedModelOptions) {
+export function Instance (Model: FibOrmFixedModel, opts: TransformFibOrmModel2InstanceOptions) {
 	opts = opts || {};
 	opts.data = opts.data || {};
 	opts.extra = opts.extra || {};

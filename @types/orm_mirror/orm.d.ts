@@ -24,6 +24,12 @@ declare module "@fxjs/orm" {
             rollback(): void;
             trans(func: Function): boolean
             execute(sql: string, ...args: any[]): any[];
+
+            hasMany?: Function;
+            remove?: Function;
+
+            propertyToValue?: Function;
+            insert?: Function;
         }
     
         interface SQLiteConnInstanceInOrmConnDriverDB extends ConnInstanceInOrmConnDriverDB, Class_SQLite {
@@ -71,6 +77,9 @@ declare module "@fxjs/orm" {
             methods?: { [name: string]: Function };
     
             [extensibleProperty: string]: any;
+        }
+
+        interface TransformFibOrmModel2InstanceOptions extends FibOrmFixedModelOptions {
         }
     
         export interface FibORM extends ORM {
@@ -135,7 +144,7 @@ declare module "@fxjs/orm" {
             delAccessor: string;
     
             model: FibOrmFixedModel;
-            reversed: boolean;
+            reversed?: boolean;
             autoFetch: boolean;
             autoFetchLimit: number
         }
@@ -149,10 +158,12 @@ declare module "@fxjs/orm" {
             key?: boolean
             mergeId?: string
             mergeAssocId?: string
-            reverseAssociation?: boolean
+            reverseAssociation?: string
 
             hooks?: Hooks
             mergeTable?: string
+
+            association?: string
 
             getAccessor?: string;
             setAccessor?: string;
@@ -171,18 +182,18 @@ declare module "@fxjs/orm" {
             // template name
             accessor?: string;
             reverseAccessor?: string;
+
+            addAccessor: string;
     
             required?: boolean;
             extension?: boolean;
             mapsTo?: {
                 [key: string]: any;
             }
-            
-            addAccessor?: string;
         }
     
         interface InstanceAssociationItem_HasMany extends InstanceAssociationItem {
-            props: object
+            props: ModelPropertyDefinitionHash
             hooks: Hooks
             field: OrigDetailedModelProperty
 
@@ -197,12 +208,22 @@ declare module "@fxjs/orm" {
             addAccessor: string
         }
     
-        interface InstanceOptions extends ModelOptions {
+        interface InnerInstanceOptions extends ModelOptions {
             one_associations: InstanceAssociationItem[]
             many_associations: InstanceAssociationItem[]
             extend_associations: InstanceAssociationItem[]
             association_properties: any 
             fieldToPropertyMap: any
+
+            associations?: InnerInstanceOptionsAssociationInfoItem[]
+        }
+
+        // for compability
+        type InstanceOptions = InnerInstanceOptions
+
+        interface InnerInstanceOptionsAssociationInfoItem {
+            value: any
+            changed: boolean
         }
     
         interface PatchedSyncfiedModelOrInstance {
@@ -239,26 +260,46 @@ declare module "@fxjs/orm" {
             [associationFunc: string]: Function;
         }
         
-        // keep compatible to orig one in 'orm'
-        interface OrigDetailedModelProperty extends Property {
+        interface ModelPropertyDefinition extends Property {
+            // ?
+            name?: string
             /**
              * text | number | integer | boolean | date | enum | object | <del>point</del> | binary | serial
              * view details in https://github.com/dresende/node-orm2/wiki/Model-Properties
              */
             type: string
+            // has unique constrain
             unique?: boolean
+            // is primary key
+            key?: boolean
+            // is required
+            required?: boolean
+
+
             defaultValue?: any
     
             unsigned?: boolean
             size?: number
             values?: any[]
-    
             time?: boolean
-    
             big?: boolean
-        } 
-        type OrigModelPropertyDefinition = OrigDetailedModelProperty |
-            String | Boolean | Number | Date | Object | Buffer | any[]
+
+            mapsTo?: string
+
+            alwaysValidate?: boolean
+            enumerable?: boolean
+        }
+        // for compatibility
+        type OrigDetailedModelProperty = ModelPropertyDefinition
+        
+        type ComplexModelPropertyDefinition = ModelPropertyDefinition |
+            String | Boolean | Number | Date | object | Buffer | any[]
+        // for compatibility
+        type OrigModelPropertyDefinition = ComplexModelPropertyDefinition
+
+        interface ModelPropertyDefinitionHash {
+            [key: string]: ComplexModelPropertyDefinition
+        }
     
         type OrigAggreteGenerator = (...args: any[]) => IAggregated
         interface OrigHooks extends Hooks {
@@ -285,7 +326,7 @@ declare module "@fxjs/orm" {
             }
             hasMany: {
                 (assoc_name: string, ext_model: FibOrmFixedModel, assoc_options?: AssociationDefinitionOptions_HasMany): FibOrmFixedExtendModel
-                (assoc_name: string, ext_model: FibOrmFixedModel, assoc_props?: { [property: string]: OrigDetailedModelProperty }, assoc_options?: AssociationDefinitionOptions_HasMany): FibOrmFixedExtendModel
+                (assoc_name: string, ext_model: FibOrmFixedModel, assoc_props?: ModelPropertyDefinitionHash, assoc_options?: AssociationDefinitionOptions_HasMany): FibOrmFixedExtendModel
             }
             extendsTo: (...args: any[]) => Model;
     
@@ -318,19 +359,44 @@ declare module "@fxjs/orm" {
             save(data: { [property: string]: any; }, options: any, callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
             saved(): boolean;
             remove(callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
-            isInstance: boolean;
-            isPersisted(): boolean;
-            isShell: boolean;
+
+            /**
+             * @noenum
+             */
+            readonly isInstance: boolean;
+            /**
+             * @noenum
+             */
+            isPersisted: boolean;
+            /**
+             * @noenum
+             */
+            readonly isShell: boolean;
             validate(callback: (errors: Error[]) => void);
             /* all fixed: end */
             
             /* missing fix: start */
+            /**
+             * @noenum
+             */
             set: Function;
             markAsDirty: Function;
             dirtyProperties: object;
-            __singleton_uid: string | number;
-            __opts?: InstanceOptions;
-            model: FibOrmFixedModel;
+            
+            /**
+             * @noenum
+             */
+            readonly __singleton_uid: string | number;
+            
+            /**
+             * @noenum
+             */
+            readonly __opts?: InstanceOptions;
+            
+            /**
+             * @noenum
+             */
+            readonly model: FibOrmFixedModel;
     
             /* missing fix: end */
     
@@ -428,7 +494,7 @@ declare module "@fxjs/orm" {
             from: {table: string, field: string | string[]}
             to: {table: string, field: string | string[]}
             where: [string, ModelMethod__FindConditions]
-            table
+            table?: string
         }
 
         export interface ModelMethod__FindOptions {
@@ -436,9 +502,22 @@ declare module "@fxjs/orm" {
             order?: any;
         }
 
-        export interface ModelAssociationMethod__FindOptions extends ModelMethod__FindOptions {
-            __merge?: ModelAssociationMethod__ComputationPayload__Merge;
-            extra?: any[]
+        export interface ModelAssociationMethod__Options {
+            autoFetchLimit: number
+            __merge: ModelAssociationMethod__ComputationPayload__Merge
+            extra: ModelPropertyDefinitionHash | any[]
+            extra_info: {
+                table: string
+                id: any
+                id_prop
+                assoc_prop
+            }
+        }
+
+        export interface ModelAssociationMethod__FindOptions extends ModelMethod__FindOptions, ModelAssociationMethod__Options {
+        }
+
+        export interface ModelAssociationMethod__GetOptions extends ModelMethod__FindOptions, ModelAssociationMethod__Options {
         }
 
         export interface ModelMethod__FindConditions {

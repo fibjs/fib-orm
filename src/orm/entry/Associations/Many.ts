@@ -1,4 +1,4 @@
-import { FibORM, FibOrmFixedModel, InstanceAssociationItem_HasMany, AssociationDefinitionOptions_HasMany, FibOrmFixedModelInstance, ConnInstanceInOrmConnDriverDB } from "@fxjs/orm";
+import { FibORM, FibOrmFixedModel, InstanceAssociationItem_HasMany, AssociationDefinitionOptions_HasMany, FibOrmFixedModelInstance, ConnInstanceInOrmConnDriverDB, ModelAssociationMethod__FindOptions, ModelAssociationMethod__GetOptions } from "@fxjs/orm";
 
 const _                   = require("lodash");
 import Hook                = require("../Hook");
@@ -78,7 +78,7 @@ export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: Inst
 			setAccessor    : opts.setAccessor || ("set" + assocTemplateName),
 			hasAccessor    : opts.hasAccessor || ("has" + assocTemplateName),
 			delAccessor    : opts.delAccessor || ("remove" + assocTemplateName),
-			addAccessor    : opts.addAccessor || ("add" + assocTemplateName)
+			addAccessor    : opts.addAccessor || ("add" + assocTemplateName),
 		};
 		associations.push(association);
 
@@ -145,7 +145,7 @@ function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInsta
 		value: function () {
 			var Instances = Array.prototype.slice.apply(arguments);
 			var cb = Instances.pop();
-			var conditions = {}, options = {};
+			var conditions = {}, options: ModelAssociationMethod__FindOptions = {} as ModelAssociationMethod__FindOptions;
 
 			if (Instances.length) {
 				if (Array.isArray(Instances[0])) {
@@ -204,7 +204,7 @@ function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInsta
 	});
 	Object.defineProperty(Instance, association.getAccessor, {
 		value: function () {
-			var options    = {};
+			var options: ModelAssociationMethod__GetOptions    = {} as ModelAssociationMethod__GetOptions;
 			var conditions = null;
 			var order      = null;
 			var cb         = null;
@@ -505,4 +505,4 @@ function ucfirst(text: string) {
 	});
 }
 
-function noOperation() {}
+function noOperation(...args: any[]) {}
