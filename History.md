@@ -1,7 +1,13 @@
 
-v1.4.3-postalpha.7 / 2018-10-12
+v1.5.0 / 2018-11-03
 ==================
 
+  * upgrade 'fib-typify', clean code.
+
+v1.4.3-postalpha.7 / 2018-10-12
+===============================
+
+  * Release v1.4.3-postalpha.7
   * upgrade '@fibjs/enforce'
 
 v1.4.3-postalpha.6 / 2018-10-12
