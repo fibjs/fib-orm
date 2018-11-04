@@ -846,6 +846,8 @@ declare module "@fxjs/orm" {
         export function lt(value: any): sqlquery.Comparator;
         export function lte(value: any): sqlquery.Comparator;
         export function like(value: string): sqlquery.Comparator;
+        export function not_like(value: string): sqlquery.Comparator;
+        export function not_in(value: string): sqlquery.Comparator;
         export function between(a: number, b: number): sqlquery.Comparator;
         export function not_between(a: number, b: number): sqlquery.Comparator;
         export function express(uri: string, handlers: {
