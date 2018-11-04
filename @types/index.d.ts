@@ -4,7 +4,6 @@
 declare module "@fxjs/orm" {
     import events = require('events');
     import sqlquery = require('sqlquery');
-    import SqlQueryNS from 'sqlquery'
     
     type Buffer = Class_Buffer
 
@@ -58,7 +57,7 @@ declare module "@fxjs/orm" {
          * then we should patch still
          */
         export interface PatchedOrmConnDriver extends OrigOrmConnDriver {
-            execQuerySync: (query: SqlQueryNS.Query, opt: OrigOrmExecQueryOpts) => any
+            execQuerySync: (query: sqlquery.Query, opt: OrigOrmExecQueryOpts) => any
         }
     
         export interface OrmConnectionOpts {
@@ -421,7 +420,7 @@ declare module "@fxjs/orm" {
         //     FibOrmFixedModel | FibOrmFixedModelInstance 
         //     | FibOrmPatchedSyncfiedInstantce | PatchedSyncfiedInstanceWithDbWriteOperation | PatchedSyncfiedInstanceWithAssociations
     
-        export interface IChainFibORMFind extends PatchedSyncfiedModelOrInstance, SqlQueryNS.SelectQuery {
+        export interface IChainFibORMFind extends PatchedSyncfiedModelOrInstance, sqlquery.SelectQuery {
             only(args: string|string[]): IChainFibORMFind;
             only(...args: string[]): IChainFibORMFind;
             order(...order: string[]): IChainFibORMFind;
