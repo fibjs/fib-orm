@@ -11,28 +11,29 @@ import adapters       = require("./Adapters");
 import ORMError       = require("./Error");
 import Utilities      = require("./Utilities");
 
-export import enforce   = require("@fibjs/enforce");
+export import Enforces   = require("@fibjs/enforce");
 export import Settings       = require("./Settings");
 export import singleton      = require("./Singleton");
 
 // Deprecated, use enforce
 export import validators = require("./Validators");
 
-const SettingsInstance = exports.settings = new Settings.Container(Settings.defaults());
+const SettingsInstance = new Settings.Container(Settings.defaults());
+export const settings = SettingsInstance
 
 export import Property   = require("./Property");
 export const ErrorCodes = ORMError.codes;
 
-exports.Text = Query.Text;
+export const Text = Query.Text;
 for (var k in Query.Comparators) {
 	exports[Query.Comparators[k]] = Query[Query.Comparators[k]];
 }
 
-exports.express = function () {
-	return require("./Express").apply(this, arguments);
-};
+// exports.express = function () {
+// 	return require("./Express").apply(this, arguments);
+// };
 
-exports.use = function (connection, proto, opts, cb) {
+export function use (connection, proto, opts, cb) {
 	if (DriverAliases[proto]) {
 		proto = DriverAliases[proto];
 	}
@@ -55,7 +56,7 @@ exports.use = function (connection, proto, opts, cb) {
 	}
 };
 
-exports.connect = function (opts, cb) {
+export function connect (opts, cb) {
 	if (arguments.length === 0 || !opts) {
 		return ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
 	}
@@ -139,11 +140,11 @@ exports.connect = function (opts, cb) {
 	return db;
 };
 
-exports.addAdapter = adapters.add;
+export const addAdapter = adapters.add;
 
 function ORM(driver_name, driver, settings) {
 	this.validators  = validators;
-	this.enforce     = exports.enforce;
+	this.enforce     = Enforces;
 	this.settings    = settings;
 	this.driver_name = driver_name;
 	this.driver      = driver;

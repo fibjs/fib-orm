@@ -702,6 +702,10 @@ declare namespace FxOrmNS {
     export interface ChainFindInstanceOptions extends ChainFindOptions {
     }
 
+    interface Plugin {
+        (connection: FibORM, proto: any, opts: any, cb: Function): any
+    }
+
     /*
      * Classes
     */
