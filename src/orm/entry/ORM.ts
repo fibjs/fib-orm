@@ -11,12 +11,14 @@ import adapters       = require("./Adapters");
 import ORMError       = require("./Error");
 import Utilities      = require("./Utilities");
 
-export import Enforces   = require("@fibjs/enforce");
+import Enforces   = require("@fibjs/enforce");
+export const enforce = Enforces;
+// Deprecated, use enforce
+export import validators = require("./Validators");
+
 export import Settings       = require("./Settings");
 export import singleton      = require("./Singleton");
 
-// Deprecated, use enforce
-export import validators = require("./Validators");
 
 const SettingsInstance = new Settings.Container(Settings.defaults());
 export const settings = SettingsInstance
