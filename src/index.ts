@@ -1,5 +1,5 @@
 import vm = require('vm')
-const patch = require('./patch');
+import patch = require('./patch');
 
 const sbox = new vm.SandBox({
     util: require('util'),
