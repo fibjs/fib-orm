@@ -1,3 +1,5 @@
+/// <reference lib="es2015" />
+
 var _       = require("lodash");
 var pg      = require("pg");
 var Query   = require("sql-query").Query;

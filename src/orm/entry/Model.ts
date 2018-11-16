@@ -1,5 +1,3 @@
-import { ExtensibleError, FibOrmFixedModelInstanceFn, FibOrmFixedModel, ModelAssociationMethod__GetOptions, ModelAssociationMethod__FindOptions } from "@fxjs/orm";
-
 const  _                 = require("lodash");
 import async             = require("async");
 import ChainFind         = require("./ChainFind");
@@ -96,7 +94,7 @@ export const Model: ModelType = function (opts) {
 		};
 
 		var pending  = 2, create_err = null;
-		var instance = new (Instance as FibOrmFixedModelInstanceFn)(model, {
+		var instance = new (Instance as FibOrmNS.FibOrmFixedModelInstanceFn)(model, {
 			uid                    : inst_opts.uid, // singleton unique id
 			keys                   : opts.keys,
 			is_new                 : inst_opts.is_new || false,
@@ -149,7 +147,7 @@ export const Model: ModelType = function (opts) {
 		return instance;
 	};
 
-	const model: FibOrmFixedModel = function () {
+	const model: FibOrmNS.FibOrmFixedModel = function () {
 	    var instance, i;
 
 	    var data = arguments.length > 1 ? arguments : arguments[0];
@@ -164,7 +162,7 @@ export const Model: ModelType = function (opts) {
 	            return createInstance(data2, { isShell: true });
 	        }
 	        else {
-	            const err: ExtensibleError = new Error('Model requires ' + opts.keys.length + ' keys, only ' + data.length + ' were provided');
+	            const err: FibOrmNS.ExtensibleError = new Error('Model requires ' + opts.keys.length + ' keys, only ' + data.length + ' were provided');
 	            err.model = opts.table;
 
 	            throw err;
@@ -251,7 +249,7 @@ export const Model: ModelType = function (opts) {
 
 	model.get = function () {
 		var conditions = {};
-		var options    = {} as ModelAssociationMethod__GetOptions;
+		var options    = {} as FibOrmNS.ModelAssociationMethod__GetOptions;
 		var ids        = Array.prototype.slice.apply(arguments);
 		var cb         = ids.pop();
 		var prop;
@@ -317,7 +315,7 @@ export const Model: ModelType = function (opts) {
 	};
 
 	model.find = function () {
-		var options    = {} as ModelAssociationMethod__FindOptions;
+		var options    = {} as FibOrmNS.ModelAssociationMethod__FindOptions;
 		var conditions = null;
 		var cb         = null;
 		var order      = null;

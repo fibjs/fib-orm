@@ -1,5 +1,3 @@
-import { FibORM, FibOrmFixedModel, InstanceAssociationItem_HasMany, AssociationDefinitionOptions_HasMany, FibOrmFixedModelInstance, ConnInstanceInOrmConnDriverDB, ModelAssociationMethod__FindOptions, ModelAssociationMethod__GetOptions } from "@fxjs/orm";
-
 const _                   = require("lodash");
 import Hook                = require("../Hook");
 import Settings            = require("../Settings");
@@ -7,12 +5,12 @@ import Property            = require("../Property");
 import ORMError            = require("../Error");
 import util                = require("../Utilities");
 
-export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: InstanceAssociationItem_HasMany[]) {
+export function prepare (db: FibOrmNS.FibORM, Model: FibOrmNS.FibOrmFixedModel, associations: FibOrmNS.InstanceAssociationItem_HasMany[]) {
 	Model.hasMany = function () {
 		let name, makeKey, mergeId, mergeAssocId;
 		let OtherModel = Model;
 		let props = null;
-		let opts: AssociationDefinitionOptions_HasMany = {};
+		let opts: FibOrmNS.AssociationDefinitionOptions_HasMany = {};
 
 		for (var i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
@@ -62,7 +60,7 @@ export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: Inst
 
 		var assocName = opts.name || ucfirst(name);
 		var assocTemplateName = opts.accessor || assocName;
-		var association: InstanceAssociationItem_HasMany = {
+		var association: FibOrmNS.InstanceAssociationItem_HasMany = {
 			name           : name,
 			model          : OtherModel || Model,
 			props          : props,
@@ -98,7 +96,7 @@ export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: Inst
 	};
 };
 
-export function extend (Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, associations: InstanceAssociationItem_HasMany[], opts: AssociationDefinitionOptions_HasMany, createInstance: Function) {
+export function extend (Model: FibOrmNS.FibOrmFixedModel, Instance: FibOrmNS.FibOrmFixedModelInstance, Driver: FibOrmNS.ConnInstanceInOrmConnDriverDB, associations: FibOrmNS.InstanceAssociationItem_HasMany[], opts: FibOrmNS.AssociationDefinitionOptions_HasMany, createInstance: Function) {
 	for (var i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i], opts, createInstance);
 	}
@@ -123,7 +121,7 @@ export function autoFetch (Instance, associations, opts, cb) {
 	}
 };
 
-function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, association: InstanceAssociationItem_HasMany, opts: AssociationDefinitionOptions_HasMany, createInstance: Function) {
+function extendInstance(Model: FibOrmNS.FibOrmFixedModel, Instance: FibOrmNS.FibOrmFixedModelInstance, Driver: FibOrmNS.ConnInstanceInOrmConnDriverDB, association: FibOrmNS.InstanceAssociationItem_HasMany, opts: FibOrmNS.AssociationDefinitionOptions_HasMany, createInstance: Function) {
 	if (Model.settings.get("instance.cascadeRemove")) {
 		Instance.on("beforeRemove", function () {
 			Instance[association.delAccessor]();
@@ -145,7 +143,7 @@ function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInsta
 		value: function () {
 			var Instances = Array.prototype.slice.apply(arguments);
 			var cb = Instances.pop();
-			var conditions = {}, options: ModelAssociationMethod__FindOptions = {} as ModelAssociationMethod__FindOptions;
+			var conditions = {}, options: FibOrmNS.ModelAssociationMethod__FindOptions = {} as FibOrmNS.ModelAssociationMethod__FindOptions;
 
 			if (Instances.length) {
 				if (Array.isArray(Instances[0])) {
@@ -204,7 +202,7 @@ function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInsta
 	});
 	Object.defineProperty(Instance, association.getAccessor, {
 		value: function () {
-			var options: ModelAssociationMethod__GetOptions    = {} as ModelAssociationMethod__GetOptions;
+			var options: FibOrmNS.ModelAssociationMethod__GetOptions    = {} as FibOrmNS.ModelAssociationMethod__GetOptions;
 			var conditions = null;
 			var order      = null;
 			var cb         = null;
@@ -476,7 +474,7 @@ function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInsta
 	});
 }
 
-function autoFetchInstance(Instance: FibOrmFixedModelInstance, association: FibOrmFixedModelInstance, opts: AssociationDefinitionOptions_HasMany, cb: Function) {
+function autoFetchInstance(Instance: FibOrmNS.FibOrmFixedModelInstance, association: FibOrmNS.FibOrmFixedModelInstance, opts: FibOrmNS.AssociationDefinitionOptions_HasMany, cb: Function) {
 	if (!Instance.saved()) {
 		return cb();
 	}

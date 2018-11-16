@@ -1,12 +1,10 @@
-/// <reference path="index.d.ts" />
-/// <reference path="../../@types/index.d.ts" />
-
 import db = require('db');
-import OrmNS from '@fxjs/orm';
+
+declare var setImmediate;
 
 class Database implements DatabaseBase {
-    conn: OrmNS.ConnInstanceInOrmConnDriverDB;
-    opts: OrmNS.OrmConnectionOpts;
+    conn: FxOrmNS.ConnInstanceInOrmConnDriverDB;
+    opts: FxOrmNS.OrmConnectionOpts;
     
     constructor(connOpts) {
         this.opts = connOpts;
@@ -22,7 +20,7 @@ class Database implements DatabaseBase {
         const that = this;
         const openMySQL: Function = db.openMySQL
 
-        openMySQL(this.opts, function (e: Error, conn: OrmNS.ConnInstanceInOrmConnDriverDB) {
+        openMySQL(this.opts, function (e: Error, conn: FxOrmNS.ConnInstanceInOrmConnDriverDB) {
             if (!e)
                 that.conn = conn;
             cb(e);
@@ -42,6 +40,6 @@ class Database implements DatabaseBase {
     }
 }
 
-export const createConnection = function (connOpts: OrmNS.OrmConnectionOpts) {
+export const createConnection = function (connOpts: FxOrmNS.OrmConnectionOpts) {
     return new Database(connOpts);
 };

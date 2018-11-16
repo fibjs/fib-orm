@@ -1,11 +1,7 @@
-var Utilities = require("../../Utilities");
 var mongodb   = require("mongodb");
-var util      = require("util");
 var _         = require('lodash');
 
-exports.Driver = Driver;
-
-function Driver(config, connection, opts) {
+export function Driver(config, connection, opts) {
 	this.client = new mongodb.MongoClient();
 	this.db     = null;
 	this.config = config || {};

@@ -1,4 +1,3 @@
-import { InstanceAssociationItem_ExtendTos, FibORM, FibOrmFixedModel, FibOrmFixedModelInstance, ModelAssociationMethod__FindOptions, ConnInstanceInOrmConnDriverDB, InstanceAutoFetchOptions, InstanceExtendOptions, ModelExtendOptions, ModelAutoFetchOptions } from "@fxjs/orm";
 import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName } from "./_utils";
 
 const _          = require('lodash');
@@ -12,12 +11,12 @@ import util       = require("../Utilities");
  * @param Model model
  * @param associations association definitions
  */
-export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: InstanceAssociationItem_ExtendTos[]) {
+export function prepare (db: FibOrmNS.FibORM, Model: FibOrmNS.FibOrmFixedModel, associations: FibOrmNS.InstanceAssociationItem_ExtendTos[]) {
 	Model.extendsTo = function (name, properties, opts) {
 		opts = opts || {};
 
 		const assocName = opts.name || ucfirst(name);
-		const association: InstanceAssociationItem_ExtendTos = {
+		const association: FibOrmNS.InstanceAssociationItem_ExtendTos = {
 			name           : name,
 			table          : opts.table || defineDefaultExtendsToTableName(Model.table, name),
 			reversed       : opts.reversed,
@@ -52,7 +51,7 @@ export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: Inst
 		associations.push(association);
 
 		Model["findBy" + assocName] = function () {
-			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {} as ModelAssociationMethod__FindOptions;
+			var cb = null, conditions = null, options: FibOrmNS.ModelAssociationMethod__FindOptions = {} as FibOrmNS.ModelAssociationMethod__FindOptions;
 
 			for (var i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
@@ -91,13 +90,13 @@ export function prepare (db: FibORM, Model: FibOrmFixedModel, associations: Inst
 	};
 };
 
-export function extend (Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, associations: InstanceAssociationItem_ExtendTos[], opts: ModelExtendOptions) {
+export function extend (Model: FibOrmNS.FibOrmFixedModel, Instance: FibOrmNS.FibOrmFixedModelInstance, Driver: FibOrmNS.ConnInstanceInOrmConnDriverDB, associations: FibOrmNS.InstanceAssociationItem_ExtendTos[], opts: FibOrmNS.ModelExtendOptions) {
 	for (var i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i], opts);
 	}
 };
 
-export function autoFetch (Instance: FibOrmFixedModelInstance, associations: InstanceAssociationItem_ExtendTos[], opts: ModelAutoFetchOptions, cb: Function) {
+export function autoFetch (Instance: FibOrmNS.FibOrmFixedModelInstance, associations: FibOrmNS.InstanceAssociationItem_ExtendTos[], opts: FibOrmNS.ModelAutoFetchOptions, cb: Function) {
 	if (associations.length === 0) {
 		return cb();
 	}
@@ -116,7 +115,7 @@ export function autoFetch (Instance: FibOrmFixedModelInstance, associations: Ins
 	}
 };
 
-function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInstance, Driver: ConnInstanceInOrmConnDriverDB, association: InstanceAssociationItem_ExtendTos, opts: InstanceExtendOptions) {
+function extendInstance(Model: FibOrmNS.FibOrmFixedModel, Instance: FibOrmNS.FibOrmFixedModelInstance, Driver: FibOrmNS.ConnInstanceInOrmConnDriverDB, association: FibOrmNS.InstanceAssociationItem_ExtendTos, opts: FibOrmNS.InstanceExtendOptions) {
 	Object.defineProperty(Instance, association.hasAccessor, {
 		value : function (cb) {
 			if (!Instance[Model.id]) {
@@ -214,7 +213,7 @@ function extendInstance(Model: FibOrmFixedModel, Instance: FibOrmFixedModelInsta
 	});
 }
 
-function autoFetchInstance(Instance: FibOrmFixedModelInstance, association: InstanceAssociationItem_ExtendTos, opts: InstanceAutoFetchOptions, cb: Function) {
+function autoFetchInstance(Instance: FibOrmNS.FibOrmFixedModelInstance, association: FibOrmNS.InstanceAssociationItem_ExtendTos, opts: FibOrmNS.InstanceAutoFetchOptions, cb: Function) {
 	if (!Instance.saved()) {
 		return cb();
 	}

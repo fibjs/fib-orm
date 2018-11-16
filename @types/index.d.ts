@@ -1,5 +1,7 @@
 /// <reference types="fibjs" />
 
+/// <reference path="3rd.d.ts" />
+
 declare namespace FxOrmNS {
     /* Connection About Patch :start */
 
@@ -69,6 +71,8 @@ declare namespace FxOrmNS {
     }
 
     export interface FibORM extends ORM {
+        connectSync(opts: FibORMIConnectionOptions | string): FibORM;
+        connect(opts: FibORMIConnectionOptions | string): (err, orm: FibORM) => any;
         /* all fixed: start */
         models: { [key: string]: FibOrmFixedModel };
 
@@ -97,8 +101,6 @@ declare namespace FxOrmNS {
     }
     // bad annotation but 'db' is used as like 'orm' ever, so we use 'FibOrmDB' to substitute FibORM
     type FibOrmDB = FibORM
-
-    export function connectSync(opts: FibORMIConnectionOptions | string): FibOrmDB;
 
     export interface FibORMIConnectionOptions extends IConnectionOptions {
         timezone: string;
@@ -129,6 +131,7 @@ declare namespace FxOrmNS {
         setAccessor: string;
         hasAccessor: string;
         delAccessor: string;
+        addAccessor?: string;
 
         model: FibOrmFixedModel;
         reversed?: boolean;
@@ -398,14 +401,6 @@ declare namespace FxOrmNS {
     export interface FibOrmPatchedSyncfiedInstantce extends PatchedSyncfiedInstanceWithDbWriteOperation, PatchedSyncfiedInstanceWithAssociations {
     }
 
-    export interface FibOrmPatchedSyncfiedDueToAggregationInstance {
-        /*  function getXxx() */
-    }
-
-    // export type FibOrmObjectToPatch = 
-    //     FibOrmFixedModel | FibOrmFixedModelInstance 
-    //     | FibOrmPatchedSyncfiedInstantce | PatchedSyncfiedInstanceWithDbWriteOperation | PatchedSyncfiedInstanceWithAssociations
-
     export interface IChainFibORMFind extends PatchedSyncfiedModelOrInstance, FxOrmNSSqlQueryNS.SelectQuery {
         only(args: string | string[]): IChainFibORMFind;
         only(...args: string[]): IChainFibORMFind;
@@ -467,10 +462,6 @@ declare namespace FxOrmNS {
         or?: QueryConditionAtomicType[]
         [query_field: string]: QueryConditionAtomicType
     }
-    // interface ReqWhere {
-    //     [key: string]: QueryConditionAtomicType
-    //     or?: QueryConditionAtomicType[]
-    // }
     /* query conditions :end */
 
     /**
@@ -654,19 +645,19 @@ declare namespace FxOrmNS {
 
     }
 
-    export interface ChainFindInstanceType {
-        all(conditions: ModelMethod__FindConditions): IChainFind;
-        where(conditions: ModelMethod__FindConditions): IChainFind;
-        find(conditions: ModelMethod__FindConditions): IChainFind;
+    export interface IChainFindInstance {
+        all(conditions: ModelMethod__FindConditions): IChainFindInstance;
+        where(conditions: ModelMethod__FindConditions): IChainFindInstance;
+        find(conditions: ModelMethod__FindConditions): IChainFindInstance;
+        
+        only(...args: string[]): IChainFindInstance;
+        omit(): IChainFindInstance;
+        skip(offset: number): IChainFindInstance;
+        offset(offset: number): IChainFindInstance;
 
-        only(...args: string[]): IChainFind;
-        omit(): IChainFind;
-        skip(offset: number): IChainFind;
-        offset(offset: number): IChainFind;
-
-        order(propertyOrderDesc: string, order: string | "Z" | "A"): IChainFind;
-        orderRaw(str: string, args: any[]): IChainFind;
-        limit(limit: number): IChainFind;
+        order(propertyOrderDesc: string, order?: string | "Z" | "A"): IChainFindInstance;
+        orderRaw(str: string, args: any[]): IChainFindInstance;
+        limit(limit: number): IChainFindInstance;
         count(callback: ModelMethod__CountCallback): void;
         remove(callback: (err: Error) => void): void;
         run(callback?: ModelMethod__CommonCallback): void;
@@ -678,12 +669,14 @@ declare namespace FxOrmNS {
         last(callback?: ModelMethod__CommonCallback): void;
 
         each(callback: (result: Instance) => void): void;
-        each(): IChainFind;
+        each(): IChainFindInstance;
 
-        eager(): IChainFind;
+        eager(): IChainFindInstance;
 
         model: FibOrmFixedModel;
         options: ChainFindInstanceOptions
+
+        [extraProperty: string]: any;
     }
 
     export interface ChainFindOptions {
@@ -732,6 +725,29 @@ declare namespace FxOrmNS {
         load(file: string, callback: (err: Error) => void): any;
         sync(callback: (err: Error) => void): ORM;
         drop(callback: (err: Error) => void): ORM;
+
+        static equalToProperty(name: string, message?: string);
+        static unique(message?: string);
+        static unique(opts: { ignoreCase: boolean }, message?: string);
+
+        static Text(type: string): FxOrmNSSqlQueryNS.TextQuery;
+        static eq(value: any): FxOrmNSSqlQueryNS.Comparator;
+        static ne(value: any): FxOrmNSSqlQueryNS.Comparator;
+        static gt(value: any): FxOrmNSSqlQueryNS.Comparator;
+        static gte(value: any): FxOrmNSSqlQueryNS.Comparator;
+        static lt(value: any): FxOrmNSSqlQueryNS.Comparator;
+        static lte(value: any): FxOrmNSSqlQueryNS.Comparator;
+        static like(value: string): FxOrmNSSqlQueryNS.Comparator;
+        static not_like(value: string): FxOrmNSSqlQueryNS.Comparator;
+        static not_in(value: string): FxOrmNSSqlQueryNS.Comparator;
+        static between(a: number, b: number): FxOrmNSSqlQueryNS.Comparator;
+        static not_between(a: number, b: number): FxOrmNSSqlQueryNS.Comparator;
+        
+        static use(connection, protocol: string, options, callback: (err: Error, db?: ORM) => void);
+        static connect(uri: string): ORM;
+        static connect(uri: string, callback: (err: Error, db: ORM) => void);
+        static connect(options: IConnectionOptions): ORM;
+        static connect(options: IConnectionOptions, callback: (err: Error, db: ORM) => void);
     }
 
     export class enforce {
@@ -750,11 +766,6 @@ declare namespace FxOrmNS {
         static unique(message?: string);
         static unique(opts: { ignoreCase: boolean }, message?: string);
     }
-
-    export function equalToProperty(name: string, message?: string);
-    export function unique(message?: string);
-    export function unique(opts: { ignoreCase: boolean }, message?: string);
-
     export interface SingletonOptions {
         identityCache?: any;
         saveCheck?: boolean;
@@ -797,12 +808,6 @@ declare namespace FxOrmNS {
         get: {
             (key: string, def?: Function): any
         }
-        //[key: string]: {
-        //    get: (key, def) => any;
-        //    set: (key, value) => Settings;
-        //    unset: (...keys: string[]) => Settings;
-        //}
-
     }
 
     export var settings: Settings;
@@ -823,27 +828,6 @@ declare namespace FxOrmNS {
 
         generateError(code: number, message: string, extra: any): Error;
     }
-
-    export function Text(type: string): FxOrmNSSqlQueryNS.TextQuery;
-    export function eq(value: any): FxOrmNSSqlQueryNS.Comparator;
-    export function ne(value: any): FxOrmNSSqlQueryNS.Comparator;
-    export function gt(value: any): FxOrmNSSqlQueryNS.Comparator;
-    export function gte(value: any): FxOrmNSSqlQueryNS.Comparator;
-    export function lt(value: any): FxOrmNSSqlQueryNS.Comparator;
-    export function lte(value: any): FxOrmNSSqlQueryNS.Comparator;
-    export function like(value: string): FxOrmNSSqlQueryNS.Comparator;
-    export function not_like(value: string): FxOrmNSSqlQueryNS.Comparator;
-    export function not_in(value: string): FxOrmNSSqlQueryNS.Comparator;
-    export function between(a: number, b: number): FxOrmNSSqlQueryNS.Comparator;
-    export function not_between(a: number, b: number): FxOrmNSSqlQueryNS.Comparator;
-    export function express(uri: string, handlers: {
-        define(db: ORM, models: { [key: string]: Model });
-    }): (req, res, next) => void;
-    export function use(connection, protocol: string, options, callback: (err: Error, db?: ORM) => void);
-    export function connect(uri: string): ORM;
-    export function connect(uri: string, callback: (err: Error, db: ORM) => void);
-    export function connect(options: IConnectionOptions): ORM;
-    export function connect(options: IConnectionOptions, callback: (err: Error, db: ORM) => void);
 
 }
 import FibOrmNS = FxOrmNS

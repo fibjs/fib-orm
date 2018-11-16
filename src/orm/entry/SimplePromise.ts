@@ -1,6 +1,4 @@
-exports.Promise = Promise;
-
-function Promise(opts) {
+export function SimplePromise(opts) {
 	opts = opts || {};
 
 	var success_cb = opts.success || null;

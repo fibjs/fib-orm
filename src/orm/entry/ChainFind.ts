@@ -1,16 +1,14 @@
-import { QueryConditions, ChainFindInstanceType, FibOrmFixedModel, ChainFindOptions, ChainFindInstanceOptions } from "@fxjs/orm";
-
 var _             = require("lodash");
 var async         = require("async");
 var Utilities     = require("./Utilities");
 var ChainInstance = require("./ChainInstance");
-var Promise       = require("./Promise").Promise;
+var SimplePromise       = require("./SimplePromise").SimplePromise;
 
 interface ChainFindType {
-	new (Model: FibOrmFixedModel, opts: ChainFindOptions): ChainFindInstanceType
-	(Model: FibOrmFixedModel, opts: ChainFindOptions): ChainFindInstanceType
+	new (Model: FibOrmNS.FibOrmFixedModel, opts: FibOrmNS.ChainFindOptions): FibOrmNS.IChainFindInstance
+	(Model: FibOrmNS.FibOrmFixedModel, opts: FibOrmNS.ChainFindOptions): FibOrmNS.IChainFindInstance
 }
-export = function ChainFind (Model: FibOrmFixedModel, opts: ChainFindOptions) {
+export = function ChainFind (Model: FibOrmNS.FibOrmFixedModel, opts: FibOrmNS.ChainFindOptions) {
 	var prepareConditions = function () {
 		return Utilities.transformPropertyNames(
 			opts.conditions, opts.properties
@@ -94,7 +92,7 @@ export = function ChainFind (Model: FibOrmFixedModel, opts: ChainFindOptions) {
 	}
 
 	var promise = null;
-	var chain: ChainFindInstanceType = {
+	var chain: FibOrmNS.IChainFindInstance = {
 		model: null,
 		options: null,
 		
@@ -198,7 +196,7 @@ export = function ChainFind (Model: FibOrmFixedModel, opts: ChainFindOptions) {
 					return cb(null);
 				}
 
-				var ids = [], conditions: QueryConditions = {};
+				var ids = [], conditions: FibOrmNS.QueryConditions = {};
 				var or;
 
 				conditions.or = [];
@@ -234,14 +232,14 @@ export = function ChainFind (Model: FibOrmFixedModel, opts: ChainFindOptions) {
 		},
 		success: function (cb) {
 			if (!promise) {
-				promise = new Promise();
+				promise = new SimplePromise();
 				promise.handle(this.all);
 			}
 			return promise.success(cb);
 		},
 		fail: function (cb) {
 			if (!promise) {
-				promise = new Promise();
+				promise = new SimplePromise();
 				promise.handle(this.all);
 			}
 			return promise.fail(cb);
@@ -284,7 +282,7 @@ export = function ChainFind (Model: FibOrmFixedModel, opts: ChainFindOptions) {
 		chain[k] = Model[k];
 	}
 	chain.model   = Model;
-	chain.options = opts as ChainFindInstanceOptions;
+	chain.options = opts as FibOrmNS.ChainFindInstanceOptions;
 
 	return chain;
 } as ChainFindType

@@ -1,13 +1,10 @@
 var _       = require("lodash");
-var util    = require("util");
 var sqlite3 = require("sqlite3");
 var Query   = require("sql-query").Query;
 var shared  = require("./_shared");
 var DDL     = require("../DDL/SQL");
 
-exports.Driver = Driver;
-
-function Driver(config, connection, opts) {
+export function Driver(config, connection, opts) {
 	this.dialect = 'sqlite';
 	this.config = config || {};
 	this.opts   = opts || {};

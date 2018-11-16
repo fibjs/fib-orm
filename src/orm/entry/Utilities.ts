@@ -1,5 +1,3 @@
-import { QueryConditions, OrigDetailedModelProperty, FibOrmFixedModel, AssociationKeyComputation } from "@fxjs/orm";
-
 const _ = require('lodash')
 
 /**
@@ -58,7 +56,7 @@ export function standardizeOrder (order: string|string[]) {
  * E) Convert our association fields into an array, indexes are the same as model.id
  * F) Itterate through values for the condition, only accept instances of the same type as the association
  */
-export function checkConditions (conditions: QueryConditions, one_associations) {
+export function checkConditions (conditions: FibOrmNS.QueryConditions, one_associations) {
 	var k, i, j;
 
 	// A)
@@ -210,10 +208,10 @@ export function wrapFieldObject (params) {
  * @param required is field required for relationship
  * @param reversed is model is reversed in relationship
  */
-export function formatField (model: FibOrmFixedModel, name: string, required: boolean, reversed: boolean): OrigDetailedModelProperty {
-	let fields = {} as OrigDetailedModelProperty, field_opts, field_name;
+export function formatField (model: FibOrmNS.FibOrmFixedModel, name: string, required: boolean, reversed: boolean): FibOrmNS.OrigDetailedModelProperty {
+	let fields = {} as FibOrmNS.OrigDetailedModelProperty, field_opts, field_name;
 	var keys = model.id;
-	var assoc_key: AssociationKeyComputation = model.settings.get("properties.association_key");
+	var assoc_key: FibOrmNS.AssociationKeyComputation = model.settings.get("properties.association_key");
 
 	for (var i = 0; i < keys.length; i++) {
 		if (reversed) {

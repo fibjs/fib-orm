@@ -1,5 +1,3 @@
-import { FibOrmFixedModel, ModelAssociationMethod__FindOptions, InstanceAssociationItem_HasOne, AssociationDefinitionOptions_HasOne } from "@fxjs/orm";
-
 const _          = require("lodash");
 import util       = require("../Utilities");
 import ORMError   = require("../Error");
@@ -10,16 +8,16 @@ const Accessors  = {
 	"del": "remove"
 };
 
-export function prepare (Model: FibOrmFixedModel, associations: InstanceAssociationItem_HasOne[]) {
+export function prepare (Model: FibOrmNS.FibOrmFixedModel, associations: FibOrmNS.InstanceAssociationItem_HasOne[]) {
 	Model.hasOne = function (assoc_name: string, ext_model?: any, assoc_options?: any) {
 		if (arguments[1] && !arguments[1].table) {
-			assoc_options = arguments[1] as AssociationDefinitionOptions_HasOne
-			ext_model = arguments[1] = null as FibOrmFixedModel
+			assoc_options = arguments[1] as FibOrmNS.AssociationDefinitionOptions_HasOne
+			ext_model = arguments[1] = null as FibOrmNS.FibOrmFixedModel
 		}
 		
 		var assocName;
 		var assocTemplateName;
-		var association: InstanceAssociationItem_HasOne = {
+		var association: FibOrmNS.InstanceAssociationItem_HasOne = {
 			name           : assoc_name || Model.table,
 			model          : ext_model || Model,
 
@@ -86,7 +84,7 @@ export function prepare (Model: FibOrmFixedModel, associations: InstanceAssociat
 		}
 
 		Model["findBy" + assocTemplateName] = function () {
-			var cb = null, conditions = null, options: ModelAssociationMethod__FindOptions = {} as ModelAssociationMethod__FindOptions;
+			var cb = null, conditions = null, options: FibOrmNS.ModelAssociationMethod__FindOptions = {} as FibOrmNS.ModelAssociationMethod__FindOptions;
 
 			for (var i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {

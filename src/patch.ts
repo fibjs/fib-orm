@@ -1,5 +1,3 @@
-/// <reference path="../@types/index.d.ts" />
-
 import * as util from 'util'
 import * as url from 'url'
 
@@ -262,14 +260,14 @@ function patchDriver(driver: FxOrmNS.OrigOrmConnDriver) {
     }
 }
 
-function execQuerySync(query: SqlQueryNS.Query, opt) {
+function execQuerySync(query: FxOrmNSSqlQueryNS.Query, opt) {
     if (arguments.length == 2)
         query = this.query.escape(query, opt);
 
     return this.db.execute(query);
 }
 
-export = function (orm: typeof FxOrmNS) {
+export = function (orm: FxOrmNS.FibORM) {
     var conn = util.sync(orm.connect);
     orm.connectSync = function (opts: FxOrmNS.FibORMIConnectionOptions) {
         if (typeof opts == 'string')

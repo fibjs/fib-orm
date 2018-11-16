@@ -1,5 +1,3 @@
-import { SingletonOptions } from "@fxjs/orm";
-
 let map = {};
 
 export function clear (key?: string) {
@@ -11,7 +9,7 @@ export function clear (key?: string) {
 	return this;
 };
 
-export function get (key: string, opts: SingletonOptions, createCb: Function, returnCb: Function) {
+export function get (key: string, opts: FibOrmNS.SingletonOptions, createCb: Function, returnCb: Function) {
 	if (opts && opts.identityCache === false) {
 		return createCb(returnCb);
 	}

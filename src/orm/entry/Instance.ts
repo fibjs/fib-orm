@@ -1,5 +1,3 @@
-import { FibOrmFixedModelInstance, ExtensibleError, FibOrmFixedModel, TransformFibOrmModel2InstanceOptions } from "@fxjs/orm";
-
 import Utilities = require("./Utilities");
 import Hook      = require("./Hook");
 import enforce   = require("@fibjs/enforce");
@@ -9,7 +7,7 @@ interface EmitEventFunctionInInstance {
 	(state: string, _instance?: any): void
 }
 
-export function Instance (Model: FibOrmFixedModel, opts: TransformFibOrmModel2InstanceOptions) {
+export function Instance (Model: FibOrmNS.FibOrmFixedModel, opts: FibOrmNS.TransformFibOrmModel2InstanceOptions) {
 	opts = opts || {};
 	opts.data = opts.data || {};
 	opts.extra = opts.extra || {};
@@ -21,7 +19,7 @@ export function Instance (Model: FibOrmFixedModel, opts: TransformFibOrmModel2In
 
 	var instance_saving = false;
 	var events = {};
-	var instance: FibOrmFixedModelInstance = {} as FibOrmFixedModelInstance;
+	var instance: FibOrmNS.FibOrmFixedModelInstance = {} as FibOrmNS.FibOrmFixedModelInstance;
 
 	var emitEvent: EmitEventFunctionInInstance = function () {
 		var args = Array.prototype.slice.apply(arguments);
@@ -605,7 +603,7 @@ export function Instance (Model: FibOrmFixedModel, opts: TransformFibOrmModel2In
 						cb = arg;
 						break;
 					default:
-					    const err: ExtensibleError = new Error("Unknown parameter type '" + (typeof arg) + "' in Instance.save()");
+					    const err: FibOrmNS.ExtensibleError = new Error("Unknown parameter type '" + (typeof arg) + "' in Instance.save()");
 					    err.model = Model.table;
 					    throw err;
 				}
