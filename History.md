@@ -1,7 +1,13 @@
 
-v1.6.5 / 2018-11-30
+v1.6.6 / 2018-11-30
 ==================
 
+  * fix .npmignore
+
+v1.6.5 / 2018-11-30
+===================
+
+  * Release v1.6.5
   * typo fix.
   * add appyeor ci badget.
   * add appveyor ci config.
