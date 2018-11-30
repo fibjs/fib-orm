@@ -1,7 +1,17 @@
 
-v1.6.3 / 2018-11-17
+v1.6.4 / 2018-11-30
 ==================
 
+  * typo clean.
+  * add some test cases.
+  * remove useless chain api, unlock supported features' use cases.
+  * format code, and fix some options.
+  * ts-debugable.
+
+v1.6.3 / 2018-11-17
+===================
+
+  * Release v1.6.3
   * fix lack of export member 'enforce'
 
 v1.6.2 / 2018-11-17
