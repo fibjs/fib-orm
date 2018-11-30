@@ -304,8 +304,8 @@ declare namespace FxOrmNS {
     }
 
     export interface FibOrmFixedModelInstanceFn {
-        (model: Model, opts: object): FibOrmFixedModelInstance
-        new(model: Model, opts: object): FibOrmFixedModelInstance
+        (model: Model, opts: object): Instance
+        new(model: Model, opts: object): Instance
     }
 
     export interface FibOrmPatchedSyncfiedInstantce extends PatchedSyncfiedInstanceWithDbWriteOperation, PatchedSyncfiedInstanceWithAssociations {
@@ -432,6 +432,8 @@ declare namespace FxOrmNS {
     export interface Model extends OrigHooks, PatchedSyncfiedModelOrInstance {
         (): Instance;
         (...ids: any[]): Instance;
+        new(): Instance;
+        new(...ids: any[]): Instance;
 
         properties: { [property: string]: OrigDetailedModelProperty };
         settings: SettingInstance;
@@ -474,12 +476,6 @@ declare namespace FxOrmNS {
         id: string;
 
         /* fix or patch :start */
-        (): Model;
-        (...ids: any[]): Model;
-
-        new(): FibOrmFixedModelInstance;
-        new(...ids: any[]): FibOrmFixedModelInstance;
-
         allProperties: { [key: string]: OrigDetailedModelProperty }
 
         /**
@@ -516,12 +512,12 @@ declare namespace FxOrmNS {
         isShell(): boolean;
         validate(callback: (errors: Error[]) => void);
         /* all fixed: start */
-        on(event: string, callback): FibOrmFixedModelInstance;
+        on(event: string, callback): Instance;
         save(callback?: ORMMethod__CommonCallback): Instance;
-        save(data: { [property: string]: any; }, callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
-        save(data: { [property: string]: any; }, options: any, callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
+        save(data: { [property: string]: any; }, callback?: ORMMethod__CommonCallback): Instance;
+        save(data: { [property: string]: any; }, options: any, callback?: ORMMethod__CommonCallback): Instance;
         saved(): boolean;
-        remove(callback?: ORMMethod__CommonCallback): FibOrmFixedModelInstance;
+        remove(callback?: ORMMethod__CommonCallback): Instance;
 
         /**
          * @noenum
@@ -543,8 +539,8 @@ declare namespace FxOrmNS {
          * @noenum
          */
         set: Function;
-        markAsDirty: Function;
-        dirtyProperties: object;
+        markAsDirty: (propName?) => void;
+        dirtyProperties: {[key: string]: any};
 
         /**
          * @noenum
@@ -559,7 +555,8 @@ declare namespace FxOrmNS {
         /**
          * @noenum
          */
-        model: Model;
+        // model: Model;
+        model(): Model;
 
         /* missing fix: end */
 
