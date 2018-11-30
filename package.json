@@ -26,7 +26,7 @@
         "prepublishOnly": "npm run build"
     },
     "ci": {
-        "type": "travis",
+        "type": "travis, appveyor",
         "version": [
             "0.21.0",
             "0.22.0",
