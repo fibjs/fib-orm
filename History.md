@@ -1,7 +1,15 @@
 
-v1.6.4 / 2018-11-30
+v1.6.5 / 2018-11-30
 ==================
 
+  * typo fix.
+  * add appyeor ci badget.
+  * add appveyor ci config.
+
+v1.6.4 / 2018-11-30
+===================
+
+  * Release v1.6.4
   * typo clean.
   * add some test cases.
   * remove useless chain api, unlock supported features' use cases.
