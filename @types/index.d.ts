@@ -175,7 +175,7 @@ declare namespace FxOrmNS {
     }
 
     interface InstanceAssociationItem_HasMany extends InstanceAssociationItem {
-        props: ModelPropertyDefinitionHash
+        props: ResolvedModelPropertyDefinitionHash
         hooks: Hooks
         field?: OrigDetailedModelProperty
 
@@ -275,12 +275,15 @@ declare namespace FxOrmNS {
     type OrigDetailedModelProperty = ModelPropertyDefinition
 
     type ComplexModelPropertyDefinition = ModelPropertyDefinition |
-        String | Boolean | Number | Date | object | Class_Buffer | any[]
+        String | Boolean | Number | Date | Class_Buffer | any[]
     // for compatibility
     type OrigModelPropertyDefinition = ComplexModelPropertyDefinition
 
     interface ModelPropertyDefinitionHash {
         [key: string]: ComplexModelPropertyDefinition
+    }
+    interface ResolvedModelPropertyDefinitionHash {
+        [key: string]: ModelPropertyDefinition
     }
 
     type OrigAggreteGenerator = (...args: any[]) => IAggregated
