@@ -1,7 +1,14 @@
 
-v1.6.7 / 2018-12-02
+v1.6.8 / 2018-12-03
 ==================
 
+  * add module 'tty' module to entry sandbox.
+  * add TODO.md
+
+v1.6.7 / 2018-12-02
+===================
+
+  * Release v1.6.7
   * typo fix.
 
 v1.6.6 / 2018-11-30
