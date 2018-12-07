@@ -1,4 +1,3 @@
-import vm = require('vm')
 import patch = require('./patch');
 
 import fibTypify = require('fib-typify');
