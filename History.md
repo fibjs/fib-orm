@@ -1,7 +1,13 @@
 
-v1.6.8 / 2018-12-03
+v1.6.9 / 2018-12-07
 ==================
 
+  * fix dependency.
+
+v1.6.8 / 2018-12-03
+===================
+
+  * Release v1.6.8
   * add module 'tty' module to entry sandbox.
   * add TODO.md
 
