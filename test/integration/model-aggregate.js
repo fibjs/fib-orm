@@ -1,5 +1,7 @@
+var test = require("test");
+test.setup();
+
 var helper = require('../support/spec_helper');
-var ORM = require('../../');
 
 describe("Model.aggregate()", function () {
     var db = null;
@@ -34,7 +36,7 @@ describe("Model.aggregate()", function () {
         return db.closeSync();
     });
 
-    xdescribe("with multiple methods", function () {
+    describe("with multiple methods", function () {
         before(setup());
 
         it("should return value for everyone of them", function () {
@@ -74,19 +76,23 @@ describe("Model.aggregate()", function () {
         });
     });
 
-    xdescribe("with as() without previous aggregates", function () {
+    describe("with as() without previous aggregates", function () {
         before(setup());
 
         it("should throw", function () {
-            Person.aggregate().as.should.throw();
+            assert.throws(() =>{
+                Person.aggregate().as()  
+            })
         });
     });
 
-    xdescribe("with select() without arguments", function () {
+    describe("with select() without arguments", function () {
         before(setup());
 
-        it("should throw", function () {
-            Person.aggregate().select.should.throw();
+        it("should throw", function (done) {
+            assert.throws(() =>{
+                Person.aggregate().select()
+            })
 
             return done();
         });
@@ -117,12 +123,14 @@ describe("Model.aggregate()", function () {
         });
     });
 
-    xdescribe("with get() without callback", function () {
+    describe("with get() without callback", function () {
         before(setup());
 
-        it("should throw", function () {
-            Person.aggregate().count('id').get.should.throw();
+        it("should throw", function (done) {
+            assert.throws(() =>{
+                Person.aggregate().count('id').get();
 
+            })
             return done();
         });
     });
@@ -209,3 +217,9 @@ describe("Model.aggregate()", function () {
         });
     });
 });
+
+
+if (require.main === module) {
+    test.run(console.DEBUG)
+    process.exit()
+}
