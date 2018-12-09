@@ -1,5 +1,9 @@
+var test = require("test");
+test.setup();
+
 var _ = require('lodash');
 var helper = require('../support/spec_helper');
+var common = require('../common');
 var ORM = require('../../');
 var coroutine = require('coroutine');
 
@@ -16,13 +20,13 @@ describe("Model.get()", function () {
                     mapsTo: 'fullname'
                 }
             }, {
-                identityCache: identityCache,
-                methods: {
-                    UID: function () {
-                        return this[Person.id];
+                    identityCache: identityCache,
+                    methods: {
+                        UID: function () {
+                            return this[Person.id];
+                        }
                     }
-                }
-            });
+                });
 
             ORM.singleton.clear(); // clear identityCache cache
 
@@ -222,17 +226,15 @@ describe("Model.get()", function () {
         });
     });
 
-    xdescribe("with a point property type", function () {
-        // if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
+    describe("with a point property type", function () {
+        if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
 
-        it("should deserialize the point to an array", function () {
+        it("should deserialize the point to an array", function (done) {
             db.settings.set('properties.primary_key', 'id');
 
             Person = db.define("person", {
                 name: String,
-                location: {
-                    type: "point"
-                }
+                location: { type: "point" }
             });
 
             ORM.singleton.clear();
@@ -240,19 +242,25 @@ describe("Model.get()", function () {
             return helper.dropSync(Person, function () {
                 Person.create({
                     name: "John Doe",
-                    location: {
-                        x: 51.5177,
-                        y: -0.0968
-                    }
+                    location: { x: 51.5177, y: -0.0968 }
                 }, function (err, person) {
                     assert.equal(err, null);
 
-                    person.location.should.be.an.instanceOf(Object);
-                    assert.propertyVal(person.location, 'x', 51.5177);
-                    assert.propertyVal(person.location, 'y', -0.0968);
+                    assert.isTrue(person.location instanceof Object);
+                    
+                    assert.property(person.location, 'x');
+                    assert.equal(person.location.x, 51.5177);
+                    assert.property(person.location, 'y');
+                    assert.equal(person.location.y, -0.0968);
+
                     return done();
                 });
             });
         });
     });
 });
+
+if (require.main === module) {
+    test.run(console.DEBUG)
+    process.exit()
+}
