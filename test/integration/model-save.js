@@ -1,5 +1,8 @@
+var test = require("test");
+test.setup();
+
 var helper = require('../support/spec_helper');
-var ORM = require('../../');
+var common = require('../common');
 
 describe("Model.save()", function () {
     var db = null;
@@ -8,7 +11,7 @@ describe("Model.save()", function () {
     var setup = function (nameDefinition, opts) {
         opts = opts || {};
 
-        return function () {
+        return function (done) {
             Person = db.define("person", {
                 name: nameDefinition || String
             }, opts || {});
@@ -20,13 +23,12 @@ describe("Model.save()", function () {
                 );
             }
 
-            return helper.dropSync(Person);
+            return helper.dropSync(Person, done);
         };
     };
 
     before(function () {
         db = helper.connect();
-
     });
 
     after(function () {
@@ -65,10 +67,10 @@ describe("Model.save()", function () {
         });
     });
 
-    xdescribe("without callback", function () {
+    describe("without callback", function () {
         before(setup());
 
-        it("should still save item and return id", function () {
+        it("should still save item and return id", function (done) {
             var John = new Person({
                 name: "John"
             });
@@ -166,12 +168,12 @@ describe("Model.save()", function () {
         });
     });
 
-    xdescribe("if autoSave is on", function () {
+    describe("if autoSave is on", function () {
         before(setup(null, {
             autoSave: true
         }));
 
-        it("should save the instance as soon as a property is changed", function () {
+        it("should save the instance as soon as a property is changed", function (done) {
             var John = new Person({
                 name: "Jhon"
             });
@@ -234,8 +236,8 @@ describe("Model.save()", function () {
                 hagar.saveSync({
                     name: 'Hagar2'
                 }, {
-                    saveAssociations: false
-                });
+                        saveAssociations: false
+                    });
 
                 assert.equal(afterSaveCalled, true);
 
@@ -287,8 +289,8 @@ describe("Model.save()", function () {
                 hagar.saveSync({
                     name: 'Hagar2'
                 }, {
-                    saveAssociations: true
-                });
+                        saveAssociations: true
+                    });
 
                 var olga = Person.getSync(hagar.parent.id);
                 assert.equal(olga.name, 'Olga2');
@@ -364,8 +366,8 @@ describe("Model.save()", function () {
                 hagar.saveSync({
                     name: 'Hagar2'
                 }, {
-                    saveAssociations: false
-                });
+                        saveAssociations: false
+                    });
                 assert.equal(afterSaveCalled, true);
 
                 var olga = Person.getSync(hagar.parent.id);
@@ -383,8 +385,8 @@ describe("Model.save()", function () {
                 hagar.saveSync({
                     name: 'Hagar2'
                 }, {
-                    saveAssociations: true
-                });
+                        saveAssociations: true
+                    });
 
                 var olga = Person.getSync(hagar.parent.id);
                 assert.equal(olga.name, 'Olga2');
@@ -395,35 +397,34 @@ describe("Model.save()", function () {
         });
     });
 
-    xdescribe("with a point property", function () {
-        // if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
+    describe("with a point property", function () {
+        if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
 
-        it("should save the instance as a geospatial point", function () {
-            setup({
-                type: "point"
-            }, null)(function () {
+        it("should save the instance as a geospatial point", function (done) {
+            setup({ type: "point" }, null)(function () {
                 var John = new Person({
-                    name: {
-                        x: 51.5177,
-                        y: -0.0968
-                    }
+                    name: { x: 51.5177, y: -0.0968 }
                 });
                 John.save(function (err) {
                     assert.equal(err, null);
 
-                    John.name.should.be.an.instanceOf(Object);
-                    assert.property(John.name, 'x', 51.5177);
-                    assert.property(John.name, 'y', -0.0968);
+                    assert.isTrue(John.name instanceof Object);
+                    
+                    assert.property(John.name, 'x');
+                    assert.equal(John.name.x, 51.5177);
+                    assert.property(John.name, 'y');
+                    assert.equal(John.name.y, -0.0968);
+
                     return done();
                 });
             });
         });
     });
 
-    xdescribe("mockable", function () {
+    describe("mockable", function () {
         before(setup());
 
-        it("save should be writable", function () {
+        it("save should be writable", function (done) {
             var John = new Person({
                 name: "John"
             });
@@ -438,7 +439,7 @@ describe("Model.save()", function () {
             });
         });
 
-        it("saved should be writable", function () {
+        it("saved should be writable", function (done) {
             var John = new Person({
                 name: "John"
             });
@@ -454,3 +455,8 @@ describe("Model.save()", function () {
         })
     });
 });
+
+if (require.main === module) {
+    test.run(console.DEBUG)
+    process.exit()
+}

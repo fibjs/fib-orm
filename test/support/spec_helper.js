@@ -1,8 +1,7 @@
 var ORM = require('../../');
 
 module.exports.connect = function () {
-    return ORM.connectSync("sqlite:test.db");
-    // return ORM.connectSync("mysql://root@localhost/test");
+    return ORM.connectSync(require('./conn'));
 };
 
 module.exports.dropSync = function (models, done) {
