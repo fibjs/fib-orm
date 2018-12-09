@@ -1,3 +1,6 @@
+var test = require("test");
+test.setup();
+
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
@@ -556,3 +559,8 @@ describe("Model.find() chaining", function () {
         });
     });
 });
+
+if (require.main === module) {
+    test.run(console.DEBUG)
+    process.exit()
+}
