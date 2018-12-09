@@ -1,7 +1,19 @@
 
-v1.6.9 / 2018-12-07
+v1.6.10 / 2018-12-10
 ==================
 
+  * fix typo.
+  * support test/intergration/model-find-chain.js tested alone.
+  * support test/intergration/association-hasmany.js tested alone.
+  * support test/intergration/model-save.js tested alone.
+  * support test/intergration/model-get.js tested alone.
+  * support test/intergration/association-hasone-reverse.js tested alone.
+  * support test/intergration/model-aggregate.js tested alone.
+
+v1.6.9 / 2018-12-07
+===================
+
+  * Release v1.6.9
   * fix dependency.
 
 v1.6.8 / 2018-12-03
