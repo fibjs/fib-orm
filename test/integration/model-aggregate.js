@@ -218,7 +218,6 @@ describe("Model.aggregate()", function () {
     });
 });
 
-
 if (require.main === module) {
     test.run(console.DEBUG)
     process.exit()

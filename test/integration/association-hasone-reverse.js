@@ -1,5 +1,8 @@
-var ORM = require('../../');
+var test = require("test");
+test.setup();
+
 var helper = require('../support/spec_helper');
+var common = require('../common');
 
 describe("hasOne", function () {
     var db = null;
@@ -91,24 +94,24 @@ describe("hasOne", function () {
             describe("Chain", function () {
                 before(function () {
                     var petParams = [{
-                            name: "Hippo"
-                        },
-                        {
-                            name: "Finch",
-                            owners: [{
-                                name: "Harold"
-                            }, {
-                                name: "Hagar"
-                            }]
-                        },
-                        {
-                            name: "Fox",
-                            owners: [{
-                                name: "Nelly"
-                            }, {
-                                name: "Narnia"
-                            }]
-                        }
+                        name: "Hippo"
+                    },
+                    {
+                        name: "Finch",
+                        owners: [{
+                            name: "Harold"
+                        }, {
+                            name: "Hagar"
+                        }]
+                    },
+                    {
+                        name: "Fox",
+                        owners: [{
+                            name: "Nelly"
+                        }, {
+                            name: "Narnia"
+                        }]
+                    }
                     ];
 
                     var pets = Pet.createSync(petParams);
@@ -197,7 +200,7 @@ describe("hasOne", function () {
 
             it("should throw if no conditions passed", function () {
                 assert.throws(function () {
-                    Pet.findByOwners(function () {});
+                    Pet.findByOwners(function () { });
                 });
             });
 
@@ -217,17 +220,13 @@ describe("hasOne", function () {
         });
     });
 
-    xdescribe("reverse find", function () {
-        it("should be able to find given an association id", function () {
-            common.retry(setup(), function () {
-                Person.find({
-                    name: "John Doe"
-                }).first(function (err, John) {
+    describe("reverse find", function () {
+        it("should be able to find given an association id", function (done) {
+            common.retry(setup(), function (done) {
+                Person.find({ name: "John Doe" }).first(function (err, John) {
                     assert.notExist(err);
                     assert.exist(John);
-                    Pet.find({
-                        name: "Deco"
-                    }).first(function (err, Deco) {
+                    Pet.find({ name: "Deco" }).first(function (err, Deco) {
                         assert.notExist(err);
                         assert.exist(Deco);
                         Deco.hasOwners(function (err, has_owner) {
@@ -237,9 +236,7 @@ describe("hasOne", function () {
                             Deco.setOwners(John, function (err) {
                                 assert.notExist(err);
 
-                                Person.find({
-                                    pet_id: Deco[Pet.id[0]]
-                                }).first(function (err, owner) {
+                                Person.find({ pet_id: Deco[Pet.id[0]] }).first(function (err, owner) {
                                     assert.notExist(err);
                                     assert.exist(owner);
                                     assert.equal(owner.name, John.name);
@@ -250,19 +247,15 @@ describe("hasOne", function () {
                         });
                     });
                 });
-            }, 3);
+            }, 3, done);
         });
 
-        xit("should be able to find given an association instance", function () {
-            common.retry(setup(), function () {
-                Person.find({
-                    name: "John Doe"
-                }).first(function (err, John) {
+        it("should be able to find given an association instance", function (done) {
+            common.retry(setup(), function (done) {
+                Person.find({ name: "John Doe" }).first(function (err, John) {
                     assert.notExist(err);
                     assert.exist(John);
-                    Pet.find({
-                        name: "Deco"
-                    }).first(function (err, Deco) {
+                    Pet.find({ name: "Deco" }).first(function (err, Deco) {
                         assert.notExist(err);
                         assert.exist(Deco);
                         Deco.hasOwners(function (err, has_owner) {
@@ -272,9 +265,7 @@ describe("hasOne", function () {
                             Deco.setOwners(John, function (err) {
                                 assert.notExist(err);
 
-                                Person.find({
-                                    pet: Deco
-                                }).first(function (err, owner) {
+                                Person.find({ pet: Deco }).first(function (err, owner) {
                                     assert.notExist(err);
                                     assert.exist(owner);
                                     assert.equal(owner.name, John.name);
@@ -285,14 +276,12 @@ describe("hasOne", function () {
                         });
                     });
                 });
-            }, 3);
+            }, 3, done);
         });
 
-        xit("should be able to find given a number of association instances with a single primary key", function () {
-            common.retry(setup(), function () {
-                Person.find({
-                    name: "John Doe"
-                }).first(function (err, John) {
+        it("should be able to find given a number of association instances with a single primary key", function (done) {
+            common.retry(setup(), function (done) {
+                Person.find({ name: "John Doe" }).first(function (err, John) {
                     assert.notExist(err);
                     assert.exist(John);
                     Pet.all(function (err, pets) {
@@ -307,9 +296,7 @@ describe("hasOne", function () {
                             pets[0].setOwners(John, function (err) {
                                 assert.notExist(err);
 
-                                Person.find({
-                                    pet: pets
-                                }, function (err, owners) {
+                                Person.find({ pet: pets }, function (err, owners) {
                                     assert.notExist(err);
                                     assert.exist(owners);
                                     assert.equal(owners.length, 1);
@@ -321,7 +308,12 @@ describe("hasOne", function () {
                         });
                     });
                 });
-            }, 3);
+            }, 3, done);
         });
     });
 });
+
+if (require.main === module) {
+    test.run(console.DEBUG)
+    process.exit()
+}
