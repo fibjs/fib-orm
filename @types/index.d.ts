@@ -142,7 +142,7 @@ declare namespace FxOrmNS {
         mergeAssocId?: string
         reverseAssociation?: string
 
-        hooks?: Hooks
+        hooks?: HasManyHooks
         mergeTable?: string
 
         association?: string
@@ -591,6 +591,13 @@ declare namespace FxOrmNS {
         afterAutoFetch?: (next?) => void;
         beforeRemove?: (next?) => void;
         afterRemove?: (success?: boolean) => void;
+    }
+
+    export interface HasManyHooks {
+        beforeSave?: {
+            (next?: Function): void;
+            (extra, next: Function): void;
+        }
     }
 
     export interface IConnectionOptions {
