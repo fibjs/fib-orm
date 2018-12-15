@@ -1,7 +1,17 @@
 
-v1.6.10 / 2018-12-10
+v1.7.0 / 2018-12-15
 ==================
 
+  * remove module patch in package entry, integrate patched module as internal module.
+  * [test/integration/date-type.js] fix mistake when dialect is 'mysql'.
+  * adjust files position about orm-patch
+  * replace 'sql-query' with '@fxjs/sql-query'.
+  * replace 'sql-ddl-sync' with '@fxjs/sql-ddl-sync'
+
+v1.6.10 / 2018-12-10
+====================
+
+  * Release v1.6.10
   * fix typo.
   * support test/intergration/model-find-chain.js tested alone.
   * support test/intergration/association-hasmany.js tested alone.
