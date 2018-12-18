@@ -1,7 +1,16 @@
 
-v1.7.0 / 2018-12-15
+v1.7.1 / 2018-12-18
 ==================
 
+  * remove useless library about asynchronous.
+  * replace async module in Model.ts
+  * replace lodash, async with native module in 'ChainFind.ts', do related typo adjust.
+  * fix type of validator modules.
+
+v1.7.0 / 2018-12-15
+===================
+
+  * Release v1.7.0
   * remove module patch in package entry, integrate patched module as internal module.
   * [test/integration/date-type.js] fix mistake when dialect is 'mysql'.
   * adjust files position about orm-patch
