@@ -1,9 +1,11 @@
+import util = require('util')
+
 import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName } from "./_utils";
 
-const _          = require('lodash');
+const _cloneDeep          = require('lodash.clonedeep');
 import ORMError   = require("../Error");
 import Singleton  = require("../Singleton");
-import util       = require("../Utilities");
+import Utilities       = require("../Utilities");
 
 /**
  * 
@@ -22,7 +24,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FibOrmNS.Model, association
 			reversed       : opts.reversed,
 			autoFetch      : opts.autoFetch || false,
 			autoFetchLimit : opts.autoFetchLimit || 2,
-			field          : util.wrapFieldObject({ field: opts.field, model: Model, altName: Model.table }) || util.formatField(Model, Model.table, false, false),
+			field          : Utilities.wrapFieldObject({ field: opts.field, model: Model, altName: Model.table }) || Utilities.formatField(Model, Model.table, false, false),
 
 			getAccessor    : opts.getAccessor || defineAssociationAccessorMethodName('get', assocName),
 			setAccessor    : opts.setAccessor || defineAssociationAccessorMethodName('set', assocName),
@@ -32,13 +34,13 @@ export function prepare (db: FibOrmNS.FibORM, Model: FibOrmNS.Model, association
 			model: null
 		};
 
-		const newProperties = _.cloneDeep(properties);
+		const newProperties = _cloneDeep(properties);
 		for (var k in association.field) {
 		    newProperties[k] = association.field[k];
 		}
 
-		const modelOpts = _.extend(
-			_.pick(opts, 'identityCache', 'autoSave', 'cascadeRemove', 'hooks', 'methods', 'validations'),
+		const modelOpts = util.extend(
+			util.pick(opts, 'identityCache', 'autoSave', 'cascadeRemove', 'hooks', 'methods', 'validations'),
 			{
 				id        : Object.keys(association.field),
 				extension : true,
@@ -121,7 +123,7 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 			if (!Instance[Model.id]) {
 			    cb(new ORMError("Instance not saved, cannot get extension", 'NOT_DEFINED', { model: Model.table }));
 			} else {
-				association.model.get(util.values(Instance, Model.id), function (err, extension) {
+				association.model.get(Utilities.values(Instance, Model.id), function (err, extension) {
 					return cb(err, !err && extension ? true : false);
 				});
 			}
@@ -139,7 +141,7 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 			if (!Instance[Model.id]) {
 			    cb(new ORMError("Instance not saved, cannot get extension", 'NOT_DEFINED', { model: Model.table }));
 			} else {
-				association.model.get(util.values(Instance, Model.id), opts, cb);
+				association.model.get(Utilities.values(Instance, Model.id), opts, cb);
 			}
 			return this;
 		},

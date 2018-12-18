@@ -1,6 +1,7 @@
 /// <reference lib="es2015" />
 
-var _       = require("lodash");
+import util       = require("util");
+
 var pg      = require("pg");
 var Query   = require("@fxjs/sql-query").Query;
 var shared  = require("./_shared");
@@ -88,9 +89,9 @@ export function Driver(config, connection, opts) {
 	} else {
 		if (this.config.query && this.config.query.ssl) {
 			config.ssl = true;
-			this.config = _.extend(this.config, config);
+			this.config = util.extend(this.config, config);
 		// } else {
-		// 	this.config = _.extend(this.config, config);
+		// 	this.config = util.extend(this.config, config);
 		// 	this.config = config.href || config;
 		}
 
@@ -104,7 +105,7 @@ export function Driver(config, connection, opts) {
 		}
 	}
 
-	_.extend(this.constructor.prototype, functions);
+	util.extend(this.constructor.prototype, functions);
 
 	this.aggregate_functions = [
 		"ABS", "CEIL", "FLOOR", "ROUND",
@@ -117,7 +118,7 @@ export function Driver(config, connection, opts) {
 	];
 }
 
-_.extend(Driver.prototype, shared, DDL);
+util.extend(Driver.prototype, shared, DDL);
 
 Driver.prototype.ping = function (cb) {
 	this.execSimpleQuery("SELECT * FROM pg_stat_activity LIMIT 1", function () {
@@ -263,7 +264,7 @@ Driver.prototype.valueToProperty = function (value, property) {
 			}
 			break;
 		case "date":
-			if (_.isDate(value) && this.config.timezone && this.config.timezone != 'local') {
+			if (util.isDate(value) && this.config.timezone && this.config.timezone != 'local') {
 				var tz = convertTimezone(this.config.timezone);
 
 				// shift local to UTC
@@ -320,7 +321,7 @@ Driver.prototype.propertyToValue = function (value, property) {
 			}
 			break;
 		case "date":
-			if (_.isDate(value) && this.config.timezone && this.config.timezone != 'local') {
+			if (util.isDate(value) && this.config.timezone && this.config.timezone != 'local') {
 				var tz = convertTimezone(this.config.timezone);
 
 				// shift local to UTC

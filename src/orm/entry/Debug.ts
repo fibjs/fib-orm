@@ -1,15 +1,17 @@
-var util = require("util");
-var tty  = require("tty");
+import util = require("util");
+import tty  = require("tty");
 
-exports.sql = function (driver, sql) {
-	var fmt;
+export function sql (driver, sql: string) {
+	var fmt: string;
 
-	if (tty.isatty(process.stdout)) {
+	if (tty.isatty(process.stdout as any)) {
 		fmt = "\033[32;1m(orm/%s) \033[34m%s\033[0m\n";
 		sql = sql.replace(/`(.+?)`/g, function (m) { return "\033[31m" + m + "\033[34m"; });
 	} else {
 		fmt = "[SQL/%s] %s\n";
 	}
 
-	process.stdout.write(util.format(fmt, driver, sql));
+	process.stdout.write(
+		util.format(fmt, driver, sql) as any
+	);
 };

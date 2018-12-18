@@ -4,7 +4,7 @@ import url            = require("url");
 import uuid			  = require('uuid')
 
 import Query          = require("@fxjs/sql-query");
-import _              = require("lodash");
+const _cloneDeep 	  = require('lodash.clonedeep');
 
 import { Model }      from "./Model";
 import DriverAliases  = require("./Drivers/aliases");
@@ -59,7 +59,7 @@ function connect () {
 		}
 		opts = url.parse(opts, true);
 	} else if (typeof opts == 'object') {
-		opts = _.cloneDeep(opts);
+		opts = _cloneDeep(opts);
 	}
 
 	opts.query = opts.query || {};
@@ -247,7 +247,7 @@ ORM.prototype.close = function (cb) {
 	return this;
 };
 ORM.prototype.load = function () {
-	var files = _.flatten(Array.prototype.slice.apply(arguments));
+	var files = util.flatten(Array.prototype.slice.apply(arguments));
 	var cb    = function (err?: Error) {};
 
 	if (typeof files[files.length - 1] == "function") {

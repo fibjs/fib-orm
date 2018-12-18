@@ -1,4 +1,5 @@
-const _    = require("lodash");
+const _merge = require('lodash.merge')
+
 const Sync = require("@fxjs/sql-ddl-sync").Sync;
 
 export function sync (opts, cb) {
@@ -7,11 +8,11 @@ export function sync (opts, cb) {
 		debug   : false //function (text) { console.log(text); }
 	});
 
-	var setIndex = function (p, v, k) {
+	var setIndex = function (p: FxOrmNS.OrigDetailedModelPropertyHash, v: FxOrmNS.OrigDetailedModelProperty, k: string) {
 		v.index = true;
 		p[k] = v;
 	};
-	var props = {};
+	var props: FxOrmNS.OrigDetailedModelPropertyHash = {};
 
 	if (this.customTypes) {
 		for (var k in this.customTypes) {
@@ -24,10 +25,10 @@ export function sync (opts, cb) {
 	for (var i = 0; i < opts.many_associations.length; i++) {
 		props = {};
 
-		_.merge(props, opts.many_associations[i].mergeId);
-		_.merge(props, opts.many_associations[i].mergeAssocId);
-		props = _.transform(props, setIndex);
-		_.merge(props, opts.many_associations[i].props);
+		_merge(props, opts.many_associations[i].mergeId);
+		_merge(props, opts.many_associations[i].mergeAssocId);
+		Object.entries(props).forEach(([k, v]) => setIndex(props, v, k))
+		_merge(props, opts.many_associations[i].props);
 
 		sync.defineCollection(opts.many_associations[i].mergeTable, props);
 	}

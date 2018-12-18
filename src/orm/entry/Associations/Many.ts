@@ -1,9 +1,12 @@
-const _ = require("lodash");
+import util = require('util');
+
+const _flatten = require('lodash.flatten')
+
 import Hook = require("../Hook");
 import Settings = require("../Settings");
 import Property = require("../Property");
 import ORMError = require("../Error");
-import util = require("../Utilities");
+import Utilities = require("../Utilities");
 
 export function prepare(db: FibOrmNS.FibORM, Model: FibOrmNS.Model, associations: FibOrmNS.InstanceAssociationItem_HasMany[]) {
 	Model.hasMany = function () {
@@ -42,19 +45,19 @@ export function prepare(db: FibOrmNS.FibORM, Model: FibOrmNS.Model, associations
 
 		makeKey = opts.key || Settings.defaults().hasMany.key;
 
-		mergeId = util.convertPropToJoinKeyProp(
-			util.wrapFieldObject({
+		mergeId = Utilities.convertPropToJoinKeyProp(
+			Utilities.wrapFieldObject({
 				field: opts.mergeId, model: Model, altName: Model.table
 			}) ||
-			util.formatField(Model, Model.table, true, opts.reversed),
+			Utilities.formatField(Model, Model.table, true, opts.reversed),
 			{ makeKey: makeKey, required: true }
 		);
 
-		mergeAssocId = util.convertPropToJoinKeyProp(
-			util.wrapFieldObject({
+		mergeAssocId = Utilities.convertPropToJoinKeyProp(
+			Utilities.wrapFieldObject({
 				field: opts.mergeAssocId, model: OtherModel, altName: name
 			}) ||
-			util.formatField(OtherModel, name, true, opts.reversed),
+			Utilities.formatField(OtherModel, name, true, opts.reversed),
 			{ makeKey: makeKey, required: true }
 		)
 
@@ -68,7 +71,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FibOrmNS.Model, associations
 			autoFetch: opts.autoFetch || false,
 			autoFetchLimit: opts.autoFetchLimit || 2,
 			// I'm not sure the next key is used..
-			field: util.wrapFieldObject({ field: opts.field, model: OtherModel, altName: Model.table }) || util.formatField(Model, name, true, opts.reversed),
+			field: Utilities.wrapFieldObject({ field: opts.field, model: OtherModel, altName: Model.table }) || Utilities.formatField(Model, name, true, opts.reversed),
 			mergeTable: opts.mergeTable || (Model.table + "_" + name),
 			mergeId: mergeId,
 			mergeAssocId: mergeAssocId,
@@ -167,32 +170,32 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 			options.extra = association.props;
 			options.extra_info = {
 				table: association.mergeTable,
-				id: util.values(Instance, Model.id),
+				id: Utilities.values(Instance, Model.id),
 				id_prop: Object.keys(association.mergeId),
 				assoc_prop: Object.keys(association.mergeAssocId)
 			};
 
-			util.populateConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
+			Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
 
 			for (var i = 0; i < Instances.length; i++) {
-				util.populateConditions(association.model, Object.keys(association.mergeAssocId), Instances[i], options.__merge.where[1], false);
+				Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Instances[i], options.__merge.where[1], false);
 			}
 
 			association.model.find(conditions, options, function (err, foundItems) {
 				if (err) return cb(err);
-				if (_.isEmpty(Instances)) return cb(null, false);
+				if (util.isEmpty(Instances)) return cb(null, false);
 
 				var mapKeysToString = function (item) {
-					return _.map(association.model.keys, function (k) {
+					return util.map(association.model.keys, function (k) {
 						return item[k];
 					}).join(',')
 				}
 
-				var foundItemsIDs = _(foundItems).map(mapKeysToString).uniq().value();
-				var InstancesIDs = _(Instances).map(mapKeysToString).uniq().value();
+				var foundItemsIDs = Array.from( new Set ( foundItems.map(mapKeysToString) ) );
+				var InstancesIDs = Array.from( new Set ( Instances.map(mapKeysToString) ) );
 
 				var sameLength = foundItemsIDs.length == InstancesIDs.length;
-				var sameContents = sameLength && _.isEmpty(_.difference(foundItemsIDs, InstancesIDs));
+				var sameContents = sameLength && util.isEmpty(util.difference(foundItemsIDs, InstancesIDs));
 
 				return cb(null, sameContents);
 			});
@@ -262,12 +265,12 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 			options.extra = association.props;
 			options.extra_info = {
 				table: association.mergeTable,
-				id: util.values(Instance, Model.id),
+				id: Utilities.values(Instance, Model.id),
 				id_prop: Object.keys(association.mergeId),
 				assoc_prop: Object.keys(association.mergeAssocId)
 			};
 
-			util.populateConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
+			Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
 
 			if (cb === null) {
 				return association.model.find(conditions, options);
@@ -282,8 +285,8 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 	});
 	Object.defineProperty(Instance, association.setAccessor, {
 		value: function () {
-			var items = _.flatten(arguments);
-			var cb = _.last(items) instanceof Function ? items.pop() : noOperation;
+			var items = _flatten(arguments);
+			var cb = util.last(items) instanceof Function ? items.pop() : noOperation;
 
 			Instance[association.delAccessor](function (err) {
 				if (err) return cb(err);
@@ -301,20 +304,20 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 		writable: true
 	});
 	Object.defineProperty(Instance, association.delAccessor, {
-		value: function () {
+		value: function (...args: any[]) {
 			var Associations = [];
 			var cb = noOperation;
 
-			for (var i = 0; i < arguments.length; i++) {
-				switch (typeof arguments[i]) {
+			for (var i = 0; i < args.length; i++) {
+				switch (typeof args[i]) {
 					case "function":
-						cb = arguments[i];
+						cb = args[i];
 						break;
 					case "object":
-						if (Array.isArray(arguments[i])) {
-							Associations = Associations.concat(arguments[i]);
-						} else if (arguments[i].isInstance) {
-							Associations.push(arguments[i]);
+						if (Array.isArray(args[i])) {
+							Associations = Associations.concat(args[i]);
+						} else if (args[i].isInstance) {
+							Associations.push(args[i]);
 						}
 						break;
 				}
@@ -330,13 +333,13 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 				}
 
 				for (var i = 0; i < Associations.length; i++) {
-					util.populateConditions(association.model, Object.keys(association.mergeAssocId), Associations[i], conditions, false);
+					Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Associations[i], conditions, false);
 				}
 
 				Driver.remove(association.mergeTable, conditions, cb);
 			};
 
-			util.populateConditions(Model, Object.keys(association.mergeId), Instance, conditions);
+			Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, conditions);
 
 			if (this.saved()) {
 				run();
@@ -400,8 +403,8 @@ function extendInstance(Model: FibOrmNS.Model, Instance: FibOrmNS.FibOrmFixedMod
 								});
 							}
 
-							util.populateConditions(Model, Object.keys(association.mergeId), Instance, data);
-							util.populateConditions(association.model, Object.keys(association.mergeAssocId), Association, data);
+							Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, data);
+							Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Association, data);
 
 							Driver.insert(association.mergeTable, data, null, function (err) {
 								if (err) {

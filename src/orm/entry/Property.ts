@@ -1,4 +1,4 @@
-const _        = require('lodash');
+const _cloneDeep = require('lodash.clonedeep');
 import ORMError = require("./Error");
 
 var KNOWN_TYPES = [
@@ -35,7 +35,7 @@ export function normalize (opts) {
 	} else if (Array.isArray(opts.prop)) {
 		opts.prop = { type: "enum", values: opts.prop };
 	} else {
-		opts.prop = _.cloneDeep(opts.prop);
+		opts.prop = _cloneDeep(opts.prop);
 	}
 
 	if (KNOWN_TYPES.indexOf(opts.prop.type) === -1 && !(opts.prop.type in opts.customTypes)) {

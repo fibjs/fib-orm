@@ -258,8 +258,10 @@ declare namespace FxOrmNS {
         // is primary key
         key?: boolean
         // is required
+        
         required?: boolean
-
+        // whether building index for this field
+        index?: boolean
 
         defaultValue?: any
 
@@ -275,9 +277,10 @@ declare namespace FxOrmNS {
         enumerable?: boolean
     }
 
-    // @deprecated, for compatibility
     type OrigDetailedModelProperty = ModelPropertyDefinition
-
+    interface OrigDetailedModelPropertyHash {
+        [key: string]: OrigDetailedModelProperty
+    }
 
     // TODO: finish that 
     interface InstanceProperty extends ModelPropertyDefinition {
@@ -576,12 +579,16 @@ declare namespace FxOrmNS {
     // patch the missing field defined in orm/lib/Instance.js (such as defined by Object.defineProperty)
     type FibOrmFixedModelInstance = Instance 
 
+    interface ValidationOptionHash {
+        [validation: string]: enforce.IValidator | enforce.IValidator[]
+    }
     export interface ModelOptions {
         id?: string[];
         autoFetch?: boolean;
         autoFetchLimit?: number;
         cacheFetch?: boolean;
         hooks?: Hooks;
+        validations?: ValidationOptionHash
         methods?: { [name: string]: Function };
 
         [extensibleProperty: string]: any;

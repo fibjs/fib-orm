@@ -1,4 +1,5 @@
-const _ = require('lodash');
+const _cloneDeep = require('lodash.clonedeep');
+
 const default_settings = {
 	properties : {
 		primary_key               : "id",
@@ -43,7 +44,7 @@ export const Container: FxOrmNS.SettingsContainerGenerator = function (settings)
 			if (v instanceof Function) {
 				return v;
 			} else {
-				return _.cloneDeep(v);
+				return _cloneDeep(v);
 			}
 		},
 		unset: function () {

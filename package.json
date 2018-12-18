@@ -41,7 +41,10 @@
         "@fibjs/enforce": "0.0.7",
         "@fxjs/sql-ddl-sync": "0.0.1",
         "@fxjs/sql-query": "0.0.2",
-        "fib-typify": "^0.4.1"
+        "fib-typify": "^0.4.1",
+        "lodash.clonedeep": "^4.5.0",
+        "lodash.flatten": "^4.4.0",
+        "lodash.merge": "^4.6.1"
     },
     "devDependencies": {
         "@fibjs/ci": "^2.1.0",

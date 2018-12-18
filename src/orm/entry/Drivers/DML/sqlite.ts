@@ -1,4 +1,5 @@
-var _       = require("lodash");
+import util = require('util')
+
 var sqlite3 = require("../DB/sqlite3");
 var Query   = require("@fxjs/sql-query").Query;
 var shared  = require("./_shared");
@@ -37,7 +38,7 @@ export function Driver(config, connection, opts) {
 	                             "DISTINCT" ];
 }
 
-_.extend(Driver.prototype, shared, DDL);
+util.extend(Driver.prototype, shared, DDL);
 
 Driver.prototype.ping = function (cb) {
 	process.nextTick(cb);

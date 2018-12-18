@@ -1,5 +1,7 @@
-var mongodb   = require("mongodb");
-var _         = require('lodash');
+import util = require('util')
+
+const _merge = require('lodash.merge')
+const mongodb   = require("mongodb");
 
 export function Driver(config, connection, opts) {
 	this.client = new mongodb.MongoClient();
@@ -131,7 +133,7 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb) {
 		for (var i = 0; i < docs.length; i++) {
 			convertFromDB(docs[i], this.config.timezone);
 			if (opts.extra && opts.extra[docs[i]._id]) {
-				docs[i] = _.merge(docs[i], _.omit(opts.extra[docs[i]._id], '_id'));
+				docs[i] = _merge(docs[i], util.omit(opts.extra[docs[i]._id], '_id'));
 			}
 			if (opts.createInstance) {
 				pending += 1;
@@ -315,7 +317,7 @@ Driver.prototype.hasMany = function (Model, association) {
 				var props = {_id: Associations[i][association.model.id]};
 				
 				if (Associations[i].extra !== undefined) {
-					props = _.merge(props, _.pick(Associations[i].extra, _.keys(association.props)));
+					props = _merge(props, util.pick(Associations[i].extra, util.keys(association.props)));
 				}
 				
 				pull[association.name].push(props);

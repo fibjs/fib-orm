@@ -1,4 +1,6 @@
-const _ = require('lodash')
+import util = require('util')
+
+const _cloneDeep = require('lodash.clonedeep')
 
 /**
  * Order should be a String (with the property name assumed ascending)
@@ -188,10 +190,10 @@ export function wrapFieldObject (params) {
 	propFromKey    = params.model.properties[params.model.id[0]];
 	newProp        = { type: 'integer' };
 
-	var prop = _.cloneDeep(propPreDefined || propFromKey || newProp);
+	var prop = _cloneDeep(propPreDefined || propFromKey || newProp);
 
 	if (!propPreDefined) {
-		_.extend(prop, {
+		util.extend(prop, {
 			name: params.field, mapsTo: params.mapsTo || params.field
 		});
 	}

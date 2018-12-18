@@ -1,5 +1,7 @@
-const  _                 = require("lodash");
+/// <reference lib="es2017" />
+
 import coroutine = require('coroutine')
+import util = require('util')
 
 import ChainFind         = require("./ChainFind");
 import { Instance }      from "./Instance";
@@ -26,8 +28,8 @@ const AvailableHooks    = [
 interface ModelType {
 	(opts): void
 }
-export const Model: ModelType = function (opts) {
-	opts = _.defaults(opts || {}, { keys: [] });
+export const Model: ModelType = function (opts: FxOrmNS.ModelOptions) {
+	opts = util.extend(opts || {}, { keys: opts.keys || [] });
 	opts.keys = Array.isArray(opts.keys) ? opts.keys : [opts.keys];
 
 	var one_associations       = [];
@@ -633,9 +635,9 @@ export const Model: ModelType = function (opts) {
 		return this;
 	};
 
-	model.prependValidation = function (key, validation) {
+	model.prependValidation = function (key: string, validation: enforce.IValidator) {
 		if(opts.validations.hasOwnProperty(key)) {
-			opts.validations[key].splice(0, 0, validation);
+			(opts.validations[key] as enforce.IValidator[]).splice(0, 0, validation);
 		} else {
 			opts.validations[key] = [validation];
 		}
@@ -711,12 +713,12 @@ export const Model: ModelType = function (opts) {
 	// Standardize validations
 	for (var k in opts.validations) {
 		if (!Array.isArray(opts.validations[k])) {
-			opts.validations[k] = [ opts.validations[k] ];
+			opts.validations[k] = [ opts.validations[k] ] as enforce.IValidator[];
 		}
 	}
 
 	// If no keys are defined add the default one
-	if (opts.keys.length == 0 && !_.some(opts.properties, { key: true })) {
+	if (opts.keys.length == 0 && !Object.values(opts.properties).some((p: FxOrmNS.ModelPropertyDefinition) => p.key === true)) {
 		opts.properties[opts.settings.get("properties.primary_key")] = {
 			type: 'serial', key: true, required: false, klass: 'primary'
 		};

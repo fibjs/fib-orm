@@ -1,7 +1,8 @@
-const _          = require("lodash");
-import util       = require("../Utilities");
-import ORMError   = require("../Error");
-const Accessors  = {
+import util = require('util')
+
+import Utilities = require("../Utilities");
+import ORMError = require("../Error");
+const Accessors = {
 	"get": "get",
 	"set": "set",
 	"has": "has",
@@ -33,22 +34,22 @@ export function prepare (Model: FibOrmNS.Model, associations: FibOrmNS.InstanceA
 			hasAccessor    : null,
 			delAccessor    : null
 		};
-		association = _.extend(association, assoc_options || {})
+		association = util.extend(association, assoc_options || {})
 
 		assocName = ucfirst(association.name);
 		assocTemplateName = association.accessor || assocName;
 
 		// if (!association.hasOwnProperty("field")) {
 		if (!association.field) {
-			association.field = util.formatField(association.model, association.name, association.required, association.reversed);
+			association.field = Utilities.formatField(association.model, association.name, association.required, association.reversed);
 		} else if(!association.extension) {
-			association.field = util.wrapFieldObject({
+			association.field = Utilities.wrapFieldObject({
 				field: association.field, model: Model, altName: Model.table,
 				mapsTo: association.mapsTo
 			});
 		}
 
-		util.convertPropToJoinKeyProp(association.field, {
+		Utilities.convertPropToJoinKeyProp(association.field, {
 			makeKey: false, required: association.required
 		});
 
@@ -66,7 +67,7 @@ export function prepare (Model: FibOrmNS.Model, associations: FibOrmNS.InstanceA
 			}
 			if (!association.reversed) {
 				Model.addProperty(
-					_.extend({}, association.field[k], { klass: 'hasOne' }),
+					util.extend({}, association.field[k], { klass: 'hasOne' }),
 					false
 				);
 			}
@@ -156,8 +157,8 @@ function extendInstance(Model, Instance, Driver, association) {
 				opts = {};
 			}
 
-			if (util.hasValues(Instance, Object.keys(association.field))) {
-				association.model.get(util.values(Instance, Object.keys(association.field)), opts, function (err, instance) {
+			if (Utilities.hasValues(Instance, Object.keys(association.field))) {
+				association.model.get(Utilities.values(Instance, Object.keys(association.field)), opts, function (err, instance) {
 					return cb(err, instance ? true : false);
 				});
 			} else {
@@ -185,24 +186,24 @@ function extendInstance(Model, Instance, Driver, association) {
 			};
 
 			if (association.reversed) {
-				if (util.hasValues(Instance, Model.id)) {
+				if (Utilities.hasValues(Instance, Model.id)) {
 					if (typeof cb !== "function") {
-						return association.model.find(util.getConditions(Model, Object.keys(association.field), Instance), opts);
+						return association.model.find(Utilities.getConditions(Model, Object.keys(association.field), Instance), opts);
 					}
-					association.model.find(util.getConditions(Model, Object.keys(association.field), Instance), opts, saveAndReturn);
+					association.model.find(Utilities.getConditions(Model, Object.keys(association.field), Instance), opts, saveAndReturn);
 				} else {
 					cb(null);
 				}
 			} else {
 				if (Instance.isShell()) {
-					Model.get(util.values(Instance, Model.id), function (err, instance) {
-						if (err || !util.hasValues(instance, Object.keys(association.field))) {
+					Model.get(Utilities.values(Instance, Model.id), function (err, instance) {
+						if (err || !Utilities.hasValues(instance, Object.keys(association.field))) {
 							return cb(null);
 						}
-						association.model.get(util.values(instance, Object.keys(association.field)), opts, saveAndReturn);
+						association.model.get(Utilities.values(instance, Object.keys(association.field)), opts, saveAndReturn);
 					});
-				} else if (util.hasValues(Instance, Object.keys(association.field))) {
-					association.model.get(util.values(Instance, Object.keys(association.field)), opts, saveAndReturn);
+				} else if (Utilities.hasValues(Instance, Object.keys(association.field))) {
+					association.model.get(Utilities.values(Instance, Object.keys(association.field)), opts, saveAndReturn);
 				} else {
 					cb(null);
 				}
@@ -222,12 +223,12 @@ function extendInstance(Model, Instance, Driver, association) {
 					}
 
 					if (!Array.isArray(OtherInstance)) {
-						util.populateConditions(Model, Object.keys(association.field), Instance, OtherInstance, true);
+						Utilities.populateConditions(Model, Object.keys(association.field), Instance, OtherInstance, true);
 
 						return OtherInstance.save({}, { saveAssociations: false }, cb);
 					}
 
-					var associations = _.clone(OtherInstance);
+					var associations = util.clone(OtherInstance);
 
 					var saveNext = function () {
 						if (!associations.length) {
@@ -236,7 +237,7 @@ function extendInstance(Model, Instance, Driver, association) {
 
 						var other = associations.pop();
 
-						util.populateConditions(Model, Object.keys(association.field), Instance, other, true);
+						Utilities.populateConditions(Model, Object.keys(association.field), Instance, other, true);
 
 						other.save({}, { saveAssociations: false }, function (err) {
 							if (err) {
@@ -257,7 +258,7 @@ function extendInstance(Model, Instance, Driver, association) {
 
 					Instance[association.name] = OtherInstance;
 
-					util.populateConditions(association.model, Object.keys(association.field), OtherInstance, Instance);
+					Utilities.populateConditions(association.model, Object.keys(association.field), OtherInstance, Instance);
 
 					return Instance.save({}, { saveAssociations: false }, cb);
 				});
