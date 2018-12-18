@@ -105,7 +105,7 @@ declare namespace FxOrmNS {
     interface AssociationDefinitionOptions {
         name?: string;
         model?: Model;
-        field?: OrigDetailedModelProperty
+        field?: ModelPropertyDefinitionHash
 
         // is the association is extendsTo
         extension?: boolean;
@@ -118,7 +118,7 @@ declare namespace FxOrmNS {
     }
     interface InstanceAssociationItem {
         name: string;
-        field?: OrigDetailedModelProperty;
+        field?: ModelPropertyDefinitionHash;
         // is the association is extendsTo
         extension?: boolean;
 
@@ -157,12 +157,12 @@ declare namespace FxOrmNS {
         addAccessor?: string;
     }
     interface InstanceAssociationItem_ExtendTos extends InstanceAssociationItem {
-        field: OrigDetailedModelProperty;
+        field: ModelPropertyDefinitionHash;
         table: string;
     }
 
     interface InstanceAssociationItem_HasOne extends InstanceAssociationItem {
-        field?: OrigDetailedModelProperty;
+        field?: ModelPropertyDefinitionHash;
         reverse?: string;
         // template name
         accessor?: string;
@@ -180,7 +180,7 @@ declare namespace FxOrmNS {
     interface InstanceAssociationItem_HasMany extends InstanceAssociationItem {
         props: ResolvedModelPropertyDefinitionHash
         hooks: Hooks
-        field?: OrigDetailedModelProperty
+        field?: ModelPropertyDefinitionHash
 
         mergeTable: string
         mergeId: string

@@ -41,8 +41,7 @@
         "@fibjs/enforce": "0.0.7",
         "@fxjs/sql-ddl-sync": "0.0.1",
         "@fxjs/sql-query": "0.0.2",
-        "fib-typify": "^0.4.1",
-        "hat": "0.0.3"
+        "fib-typify": "^0.4.1"
     },
     "devDependencies": {
         "@fibjs/ci": "^2.1.0",

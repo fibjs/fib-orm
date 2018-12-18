@@ -1,6 +1,5 @@
 const  _                 = require("lodash");
 import coroutine = require('coroutine')
-import util = require('util')
 
 import ChainFind         = require("./ChainFind");
 import { Instance }      from "./Instance";

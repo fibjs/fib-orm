@@ -1,7 +1,8 @@
 import util           = require("util");
 import events         = require("events");
 import url            = require("url");
-import hat            = require("hat");
+import uuid			  = require('uuid')
+
 import Query          = require("@fxjs/sql-query");
 import _              = require("lodash");
 
@@ -132,15 +133,13 @@ function connect () {
 	return db;
 };
 
-const addAdapter = adapters.add;
-
 function ORM(driver_name, driver, settings) {
 	this.validators  = validators;
 	this.enforce     = Enforces;
 	this.settings    = settings;
 	this.driver_name = driver_name;
 	this.driver      = driver;
-	this.driver.uid  = hat();
+	this.driver.uid  = uuid.node().hex();
 	this.tools       = {...Query.comparators};
 	this.models      = {};
 	this.plugins     = [];
