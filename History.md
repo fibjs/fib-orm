@@ -1,7 +1,13 @@
 
-v1.7.2 / 2018-12-18
+v1.7.3 / 2018-12-21
 ==================
 
+  * typo fix.
+
+v1.7.2 / 2018-12-18
+===================
+
+  * Release v1.7.2
   * require 'lodash.*' on demand
   * remove 3rd-party module 'hat'.
 
