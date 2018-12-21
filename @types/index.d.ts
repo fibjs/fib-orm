@@ -1,8 +1,10 @@
 /// <reference types="fibjs" />
 /// <reference types="@fibjs/enforce" />
+/// <reference types="@fxjs/sql-query" />
 
 /// <reference path="3rd.d.ts" />
 /// <reference path="Error.d.ts" />
+/// <reference path="Adapter.d.ts" />
 /// <reference path="Validators.d.ts" />
 
 // fix fibjs types' missing
