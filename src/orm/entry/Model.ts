@@ -635,9 +635,9 @@ export const Model: ModelType = function (opts: FxOrmNS.ModelOptions) {
 		return this;
 	};
 
-	model.prependValidation = function (key: string, validation: enforce.IValidator) {
+	model.prependValidation = function (key: string, validation: enforce.ValidationCallback) {
 		if(opts.validations.hasOwnProperty(key)) {
-			(opts.validations[key] as enforce.IValidator[]).splice(0, 0, validation);
+			(opts.validations[key] as enforce.ValidationCallback[]).splice(0, 0, validation);
 		} else {
 			opts.validations[key] = [validation];
 		}
@@ -713,7 +713,7 @@ export const Model: ModelType = function (opts: FxOrmNS.ModelOptions) {
 	// Standardize validations
 	for (var k in opts.validations) {
 		if (!Array.isArray(opts.validations[k])) {
-			opts.validations[k] = [ opts.validations[k] ] as enforce.IValidator[];
+			opts.validations[k] = [ opts.validations[k] ] as enforce.ValidationCallback[];
 		}
 	}
 

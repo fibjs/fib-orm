@@ -582,7 +582,8 @@ declare namespace FxOrmNS {
     type FibOrmFixedModelInstance = Instance 
 
     interface ValidationOptionHash {
-        [validation: string]: enforce.IValidator | enforce.IValidator[]
+        // [validation: string]: enforce.IValidator | enforce.IValidator[]
+        [validation: string]: enforce.ValidationCallback | enforce.ValidationCallback[]
     }
     export interface ModelOptions {
         id?: string[];

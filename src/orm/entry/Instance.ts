@@ -76,7 +76,7 @@ export function Instance (Model: FibOrmNS.Model, opts: FibOrmNS.TransformFibOrmM
 				if (!alwaysValidate && !required && instance[k] == null) {
 					continue; // avoid validating if property is not required and is "empty"
 				}
-				for (i = 0; i < opts.validations[k].length; i++) {
+				for (i = 0; i < (opts.validations[k] as enforce.ValidationCallback[]).length; i++) {
 					checks.add(k, opts.validations[k][i]);
 				}
 			}
