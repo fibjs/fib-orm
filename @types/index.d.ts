@@ -304,13 +304,6 @@ declare namespace FxOrmNS {
         afterAutoFetch?: (next?) => void
     }
 
-    export interface ExtendModelWrapper {
-        // 'hasOne', 'hasMany'
-        type: string;
-        reversed?: boolean;
-        model: FibOrmFixedExtendModel;
-    }
-
     export interface FibOrmFixedExtendModel extends Model {
         model_name: string;
     }
@@ -508,7 +501,6 @@ declare namespace FxOrmNS {
         }
         extendsTo: (...args: any[]) => Model;
 
-        extends: { [extendModel: string]: ExtendModelWrapper };
         /* fix or patch :end */
 
         [property: string]: any;
