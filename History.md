@@ -1,7 +1,15 @@
 
-v1.8.0 / 2019-01-08
+v1.8.1 / 2019-01-08
 ==================
 
+  * remove `FxOrmModel.ModelFieldItem`, `FxOrmProperty.NormalizedFieldOptions`.
+  * fix ORM.d.ts.
+  * little typo fix.
+
+v1.8.0 / 2019-01-08
+===================
+
+  * Release v1.8.0
   * remove some comments.
   * build next minor version's typo.
   * remove unstandard interface.
