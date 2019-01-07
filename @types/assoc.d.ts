@@ -5,8 +5,7 @@ declare namespace FxOrmAssociation {
     interface AssociationDefinitionOptions {
         name?: string;
         model?: FxOrmModel.Model;
-        // field?: FxOrmModel.ModelPropertyDefinitionHash
-        field?: FxOrmProperty.NormalizedFieldOptionsHash
+        field?: FxOrmProperty.NormalizedPropertyHash
 
         // is the association is extendsTo
         extension?: boolean;
@@ -34,8 +33,8 @@ declare namespace FxOrmAssociation {
         reverse?: string;
         // is association property a primary key
         key?: boolean
-        mergeId?: FxOrmProperty.NormalizedFieldOptionsHash
-        mergeAssocId?: FxOrmProperty.NormalizedFieldOptionsHash
+        mergeId?: FxOrmProperty.NormalizedPropertyHash
+        mergeAssocId?: FxOrmProperty.NormalizedPropertyHash
         reverseAssociation?: string
 
         hooks?: HasManyHooks
@@ -54,12 +53,12 @@ declare namespace FxOrmAssociation {
         name: string
         model: FxOrmModel.Model
         // is the association is extendsTo
-        field: string | FxOrmProperty.NormalizedFieldOptionsHash
+        field: string | FxOrmProperty.NormalizedPropertyHash
         
         extension?: boolean
 
-        mergeId?: FxOrmProperty.NormalizedFieldOptionsHash
-        mergeAssocId?: FxOrmProperty.NormalizedFieldOptionsHash
+        mergeId?: FxOrmProperty.NormalizedPropertyHash
+        mergeAssocId?: FxOrmProperty.NormalizedPropertyHash
         mergeTable?: string
 
         getAccessor: string
@@ -100,8 +99,8 @@ declare namespace FxOrmAssociation {
         hooks: HasManyHooks
 
         mergeTable: string
-        mergeId: FxOrmProperty.NormalizedFieldOptionsHash
-        mergeAssocId: FxOrmProperty.NormalizedFieldOptionsHash
+        mergeId: FxOrmProperty.NormalizedPropertyHash
+        mergeAssocId: FxOrmProperty.NormalizedPropertyHash
 
         getAccessor: string
         setAccessor: string

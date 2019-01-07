@@ -73,7 +73,7 @@ declare namespace FxOrmDMLDriver {
         }
         find: {
             <T=FxOrmDMLDriver.QueryDataPayload[]>(
-                fields: FxOrmModel.ModelFieldItem[],
+                fields: FxSqlQueryColumns.SelectInputArgType[],
                 table: string,
                 conditions: FxSqlQuerySubQuery.SubQueryConditions,
                 opts: DMLDriver_FindOptions,

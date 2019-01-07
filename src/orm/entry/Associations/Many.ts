@@ -12,8 +12,8 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 	Model.hasMany = function () {
 		let name: string,
 			makeKey: boolean,
-			mergeId: FxOrmProperty.NormalizedFieldOptionsHash,
-			mergeAssocId: FxOrmProperty.NormalizedFieldOptionsHash;
+			mergeId: FxOrmProperty.NormalizedPropertyHash,
+			mergeAssocId: FxOrmProperty.NormalizedPropertyHash;
 
 		let OtherModel: FxOrmModel.Model = Model;
 		let props: FxOrmModel.DetailedPropertyDefinitionHash = null;

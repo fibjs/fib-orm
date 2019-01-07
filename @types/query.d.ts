@@ -147,7 +147,7 @@ declare namespace FxOrmQuery {
         properties: FxOrmProperty.NormalizedPropertyHash
         keyProperties: FxOrmProperty.NormalizedProperty[]
         order: [FxSqlQuerySql.SqlFragmentStr?, [...FxSqlQuerySql.SqlAssignmentValues]?]
-        only: string|FxOrmModel.ModelFieldItem[]
+        only: string|FxSqlQueryColumns.SelectInputArgType[]
         limit: number
         offset: number
         merge: FxOrmQuery.ChainFindMergeInfo

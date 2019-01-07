@@ -729,7 +729,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		var asc = opts.one_associations[i];
 
 		if (!asc.reversed && !asc.extension) {
-			for (k in asc.field as FxOrmProperty.NormalizedFieldOptionsHash) {
+			for (k in asc.field as FxOrmProperty.NormalizedPropertyHash) {
 				if (!opts.data.hasOwnProperty(k)) {
 					addInstanceProperty(k);
 				}

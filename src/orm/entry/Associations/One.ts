@@ -52,7 +52,7 @@ export function prepare (
 		}
 
 		Utilities.convertPropToJoinKeyProp(
-			association.field as FxOrmProperty.NormalizedFieldOptionsHash,
+			association.field as FxOrmProperty.NormalizedPropertyHash,
 			{
 				makeKey: false, required: association.required
 			});
@@ -65,7 +65,7 @@ export function prepare (
 		}
 
 		associations.push(association);
-		for (k in association.field as FxOrmProperty.NormalizedFieldOptionsHash) {
+		for (k in association.field as FxOrmProperty.NormalizedPropertyHash) {
 			if (!association.field.hasOwnProperty(k)) {
 				continue;
 			}
@@ -82,7 +82,7 @@ export function prepare (
 				reversed       : true,
 				accessor       : association.reverseAccessor,
 				reverseAccessor: undefined,
-				field          : association.field as FxOrmProperty.NormalizedFieldOptionsHash,
+				field          : association.field as FxOrmProperty.NormalizedPropertyHash,
 				autoFetch      : association.autoFetch,
 				autoFetchLimit : association.autoFetchLimit
 			});
@@ -333,7 +333,7 @@ function extendInstance(
 	if (!association.reversed) {
 		Object.defineProperty(Instance, association.delAccessor, {
 			value: function (cb: FxOrmNS.GenericCallback<void>) {
-				for (var k in association.field as FxOrmProperty.NormalizedFieldOptionsHash) {
+				for (var k in association.field as FxOrmProperty.NormalizedPropertyHash) {
 					if (association.field.hasOwnProperty(k)) {
 						Instance[k] = null;
 					}

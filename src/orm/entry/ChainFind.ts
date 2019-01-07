@@ -31,7 +31,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 		const conditions: FxSqlQuerySubQuery.SubQueryConditions = Utilities.transformPropertyNames(opts.conditions, opts.properties);
 		const order = Utilities.transformOrderPropertyNames(opts.order, opts.properties);
 
-		opts.driver.find(opts.only, opts.table, conditions, {
+		opts.driver.find(opts.only as FxSqlQueryColumns.SelectInputArgType[], opts.table, conditions, {
 			limit  : opts.limit,
 			order  : order,
 			merge  : opts.merge,
@@ -184,7 +184,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			return this;
 		},
 		remove: function (cb) {
-			var keys = opts.keyProperties.map((x: FxOrmProperty.NormalizedFieldOptions) => x.mapsTo); // util.map(opts.keyProperties, 'mapsTo');
+			var keys = opts.keyProperties.map((x: FxOrmProperty.NormalizedProperty) => x.mapsTo); // util.map(opts.keyProperties, 'mapsTo');
 
 			opts.driver.find(keys, opts.table, prepareConditions(opts), {
 				limit  : opts.limit,

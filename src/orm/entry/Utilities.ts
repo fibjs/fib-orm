@@ -179,12 +179,12 @@ export function getConditions (
 
 export function wrapFieldObject (
 	params: {
-		field: string | FxOrmProperty.NormalizedFieldOptionsHash
+		field: string | FxOrmProperty.NormalizedPropertyHash
 		model: FxOrmModel.Model
 		altName: string
 		mapsTo?: FxOrmModel.ModelPropertyDefinition['mapsTo']
 	}
-): FxOrmProperty.NormalizedFieldOptionsHash {
+): FxOrmProperty.NormalizedPropertyHash {
 	if (!params.field) {
 		var assoc_key = params.model.settings.get("properties.association_key");
 
@@ -206,16 +206,16 @@ export function wrapFieldObject (
 
 	const field_str = params.field as string
 
-	var newObj = <FxOrmProperty.NormalizedFieldOptionsHash>{},
-		newProp: FxOrmProperty.NormalizedFieldOptions,
+	var newObj = <FxOrmProperty.NormalizedPropertyHash>{},
+		newProp: FxOrmProperty.NormalizedProperty,
 		propPreDefined: FxOrmProperty.NormalizedProperty,
 		propFromKey: FxOrmProperty.NormalizedProperty;
 
 	propPreDefined = params.model.properties[field_str];
 	propFromKey    = params.model.properties[params.model.id[0]];
-	newProp        = <FxOrmProperty.NormalizedFieldOptions>{ type: 'integer' };
+	newProp        = <FxOrmProperty.NormalizedProperty>{ type: 'integer' };
 
-	var prop: FxOrmProperty.NormalizedFieldOptions = _cloneDeep(propPreDefined || propFromKey || newProp);
+	var prop: FxOrmProperty.NormalizedProperty = _cloneDeep(propPreDefined || propFromKey || newProp);
 
 	if (!propPreDefined) {
 		util.extend(prop, {
@@ -241,9 +241,9 @@ export function formatField (
 	name: string,
 	required: boolean,
 	reversed: boolean
-): FxOrmProperty.NormalizedFieldOptionsHash {
-	let fields = <FxOrmProperty.NormalizedFieldOptionsHash>{},
-		field_opts: FxOrmProperty.NormalizedFieldOptions,
+): FxOrmProperty.NormalizedPropertyHash {
+	let fields = <FxOrmProperty.NormalizedPropertyHash>{},
+		field_opts: FxOrmProperty.NormalizedProperty,
 		field_name: string;
 
 	var keys = model.id;
@@ -262,7 +262,7 @@ export function formatField (
 		if (model.properties.hasOwnProperty(keys[i])) {
 			var p = model.properties[keys[i]];
 
-			field_opts = <FxOrmProperty.NormalizedFieldOptions>{
+			field_opts = <FxOrmProperty.NormalizedProperty>{
 				type     : p.type || "integer",
 				size     : p.size || 4,
 				unsigned : p.unsigned || true,
@@ -274,7 +274,7 @@ export function formatField (
 				mapsTo   : field_name
 			};
 		} else {
-			field_opts = <FxOrmProperty.NormalizedFieldOptions>{
+			field_opts = <FxOrmProperty.NormalizedProperty>{
 				type     : "integer",
 				unsigned : true,
 				size     : 4,
@@ -293,10 +293,10 @@ export function formatField (
 // If the parent associations key is `serial`, the join tables
 // key should be changed to `integer`.
 export function convertPropToJoinKeyProp (
-	props: FxOrmProperty.NormalizedFieldOptionsHash,
+	props: FxOrmProperty.NormalizedPropertyHash,
 	opts: { required: boolean, makeKey: boolean }
-): FxOrmProperty.NormalizedFieldOptionsHash {
-	var prop: FxOrmProperty.NormalizedFieldOptions;
+): FxOrmProperty.NormalizedPropertyHash {
+	var prop: FxOrmProperty.NormalizedProperty;
 
 	for (var k in props) {
 		prop = props[k];

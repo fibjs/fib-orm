@@ -70,8 +70,8 @@ declare namespace FxOrmModel {
         find: {
             (conditions?: ModelQueryConditions__Find): FxOrmQuery.IChainFind
             (conditions: ModelQueryConditions__Find, callback: ModelMethodCallback__Find): Model
-            // (conditions: ModelQueryConditions__Find, id: FxOrmNS.IdType): FxOrmQuery.IChainFind
-            // (conditions: ModelQueryConditions__Find, id: FxOrmNS.IdType, callback: ModelMethodCallback__Get): Model
+            (conditions: ModelQueryConditions__Find, id: FxOrmNS.IdType): FxOrmQuery.IChainFind
+            (conditions: ModelQueryConditions__Find, id: FxOrmNS.IdType, callback: ModelMethodCallback__Get): Model
             (conditions: ModelQueryConditions__Find, options?: ModelOptions__Find): FxOrmQuery.IChainFind
             (conditions: ModelQueryConditions__Find, options: ModelOptions__Find, callback: ModelMethodCallback__Find): Model
             (conditions: ModelQueryConditions__Find, limit: number, order?: string[]): FxOrmQuery.IChainFind
@@ -244,8 +244,6 @@ declare namespace FxOrmModel {
         // whether lazyload property, if it is, it can be loaded only by its accessor
         lazyload?: boolean
     }
-
-    type ModelFieldItem = FxSqlQueryColumns.SelectInputArgType
 
     // @deprecated
     type OrigDetailedModelProperty = FxOrmProperty.NormalizedProperty

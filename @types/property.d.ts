@@ -13,27 +13,10 @@ declare namespace FxOrmProperty {
             (prop?: FxOrmProperty.NormalizedProperty, helper?: FxSqlQuery.Class_Query): any
         }
     }
+    
     /**
      * @description useful when pass property's option(such as type, big, ...etc) internally, useless for exposed api.
      */
-    interface NormalizedFieldOptions {
-        key: boolean
-        type: string
-
-        size: number | string
-        unsigned: boolean
-        time: boolean
-        big: boolean
-        values: any[]
-        required: boolean
-        name: string
-        mapsTo: FxOrmModel.ModelPropertyDefinition['mapsTo']
-    }
-
-    interface NormalizedFieldOptionsHash {
-        [k: string]: FxOrmProperty.NormalizedFieldOptions
-    }
-
     interface NormalizedProperty extends FxOrmModel.ModelPropertyDefinition {
         // all fields inherited from `FxOrmModel.ModelPropertyDefinition` are still optional
 

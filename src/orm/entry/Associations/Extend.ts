@@ -29,7 +29,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 			autoFetch      : opts.autoFetch || false,
 			autoFetchLimit : opts.autoFetchLimit || 2,
 			field          : Utilities.wrapFieldObject({
-				field: opts.field,
+				field: opts.field as FxOrmProperty.NormalizedPropertyHash,
 				model: Model,
 				altName: Model.table
 			}) || Utilities.formatField(
@@ -48,7 +48,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 		};
 
 		const newProperties: FxOrmModel.DetailedPropertyDefinitionHash = _cloneDeep(properties);
-		for (var k in association.field as FxOrmProperty.NormalizedFieldOptionsHash) {
+		for (var k in association.field as FxOrmProperty.NormalizedPropertyHash) {
 		    newProperties[k] = association.field[k];
 		}
 
@@ -61,7 +61,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 		);
 
 		association.model = db.define(association.table, newProperties, modelOpts);
-		association.model.hasOne(Model.table, Model, { extension: true, field: association.field as FxOrmProperty.NormalizedFieldOptionsHash });
+		association.model.hasOne(Model.table, Model, { extension: true, field: association.field as FxOrmProperty.NormalizedPropertyHash });
 
 		associations.push(association);
 
