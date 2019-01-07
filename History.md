@@ -1,7 +1,16 @@
 
-v1.7.3 / 2018-12-21
+v1.8.0 / 2019-01-08
 ==================
 
+  * remove some comments.
+  * build next minor version's typo.
+  * remove unstandard interface.
+  * typo fix.
+
+v1.7.3 / 2018-12-21
+===================
+
+  * Release v1.7.3
   * typo fix.
 
 v1.7.2 / 2018-12-18
