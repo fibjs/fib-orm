@@ -310,7 +310,7 @@ function addChainMethod(
 
 		opts.exists.push({
 			table      : association.mergeTable,
-			link       : [ Object.keys(association.mergeId), association.model.id ],
+			link       : [ Object.keys(association.mergeId), association.model.id ] as FxSqlQuerySql.WhereExistsLinkTuple,
 			conditions : conditions
 		});
 

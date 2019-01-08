@@ -52,7 +52,7 @@ declare namespace FxOrmQuery {
 
     interface ChainWhereExistsInfo {
         table: string
-        link: string
+        link: FxSqlQuerySql.WhereExistsLinkTuple
         conditions: FxSqlQuerySubQuery.SubQueryConditions
     }
 
@@ -157,8 +157,8 @@ declare namespace FxOrmQuery {
         associations
 
         /* in instance */
-        exists?
-        __eager?
+        exists?: FxOrmQuery.ChainWhereExistsInfo[]
+        __eager?: FxOrmAssociation.InstanceAssociationItem[]
     }
 
     interface ChainFindInstanceOptions extends ChainFindOptions {

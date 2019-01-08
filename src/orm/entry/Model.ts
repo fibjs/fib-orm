@@ -212,7 +212,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 
 	model.drop = function <T>(
 		this:FxOrmModel.Model,
-		cb?: FxOrmNS.GenericCallback<T>
+		cb?: FxOrmNS.GenericCallback<void>
 	) {
 		if (arguments.length === 0) {
 			cb = noOp;
@@ -233,7 +233,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 
 	model.sync = function <T>(
 		this:FxOrmModel.Model,
-		cb?: FxOrmNS.GenericCallback<T>
+		cb?: FxOrmNS.GenericCallback<FxOrmSqlDDLSync.SyncResult>
 	) {
 		if (arguments.length === 0) {
 			cb = function () {};
@@ -710,7 +710,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	model.addProperty = function (propIn, options) {
 		var cType: FxOrmProperty.CustomPropertyType;
 		var prop = Property.normalize({
-			prop: propIn, name: (options && options.name || propIn.name),
+			prop: propIn as FxOrmModel.ModelPropertyDefinition, name: (options && options.name || propIn.name),
 			customTypes: opts.db.customTypes, settings: opts.settings
 		});
 
@@ -780,10 +780,10 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	}
 
 	// If no keys are defined add the default one
-	if (opts.keys.length == 0 && !Object.values(opts.properties).some((p: FxOrmModel.ModelPropertyDefinition) => p.key === true)) {
+	if (opts.keys.length == 0 && !Object.values(opts.properties).some((p: FxOrmProperty.NormalizedProperty) => p.key === true)) {
 		opts.properties[opts.settings.get("properties.primary_key")] = {
 			type: 'serial', key: true, required: false, klass: 'primary'
-		};
+		} as FxOrmProperty.NormalizedProperty;
 	}
 
 	// standardize properties

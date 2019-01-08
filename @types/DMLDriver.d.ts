@@ -37,10 +37,10 @@ declare namespace FxOrmDMLDriver {
 
         /* shared :start */
         sync: {
-            <T>(opts: FxOrmDMLShared.SyncOptions, cb: FxOrmNS.GenericCallback<T>): DMLDriver            
+            <T>(opts: FxOrmDMLShared.SyncOptions, cb: FxOrmNS.GenericCallback<FxOrmSqlDDLSync.SyncResult>): DMLDriver            
         }
         drop: {
-            <T>(opts: FxOrmDMLShared.DropOptions, cb: FxOrmNS.GenericCallback<T>): DMLDriver            
+            <T>(opts: FxOrmDMLShared.DropOptions, cb: FxOrmNS.GenericCallback<void>): DMLDriver            
         }
         /* shared :end */
 
@@ -144,7 +144,7 @@ declare namespace FxOrmDMLDriver {
         limit?: number
         order?: string
         merge?: FxOrmQuery.ChainFindMergeInfo
-        exists?: FxOrmQuery.ChainWhereExistsInfo
+        exists?: FxOrmQuery.ChainWhereExistsInfo[]
     }
     interface DMLDriver_CountOptions {
         merge?: FxOrmQuery.ChainFindMergeInfo
@@ -184,22 +184,24 @@ declare namespace FxOrmDMLDriver {
 
 declare namespace FxOrmDMLShared {
     interface SyncOptions {
+        id: string[]
         extension: boolean
-        id
-        table
-        properties
-        allProperties
-        indexes
-        customTypes
-        one_associations
-        many_associations
-        extend_associations
+        table: string
+        properties: FxOrmProperty.NormalizedPropertyHash
+        allProperties: FxOrmProperty.NormalizedPropertyHash
+        indexes: string[]
+        customTypes: {
+            [key: string]: FxOrmProperty.CustomPropertyType;
+        }
+        one_associations: FxOrmAssociation.InstanceAssociationItem_HasOne[]
+        many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[]
+        extend_associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[]
     }
 
     interface DropOptions {
-        table
-        properties
-        one_associations
-        many_associations
+        table: string
+        properties: FxOrmProperty.NormalizedPropertyHash
+        one_associations: FxOrmAssociation.InstanceAssociationItem_HasOne[]
+        many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[]
     }
 }

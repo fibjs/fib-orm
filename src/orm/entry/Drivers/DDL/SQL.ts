@@ -6,7 +6,10 @@ export const sync: FxOrmDMLDriver.DMLDriver['sync'] = function (
 ) {
 	var sync = new Sync({
 		driver  : this,
-		debug   : false // function (text) { console.log(text); }
+		// debug   : false // function (text) { console.log(text); }
+		debug: function (text) {
+			(global as any).console.log("> %s", text);
+		}
 	});
 
 	var setIndex = function (p: FxOrmProperty.NormalizedPropertyHash, v: FxOrmProperty.NormalizedProperty, k: string) {
@@ -31,7 +34,10 @@ export const sync: FxOrmDMLDriver.DMLDriver['sync'] = function (
 		Object.entries(props).forEach(([k, v]) => setIndex(props, v, k))
 		_merge(props, opts.many_associations[i].props);
 
-		sync.defineCollection(opts.many_associations[i].mergeTable, props);
+		sync.defineCollection(
+			opts.many_associations[i].mergeTable,
+			props as FxOrmSqlDDLSync__Collection.Collection['properties']
+		);
 	}
 
 	sync.sync(cb);

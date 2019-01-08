@@ -17,7 +17,8 @@ declare namespace FxOrmProperty {
     /**
      * @description useful when pass property's option(such as type, big, ...etc) internally, useless for exposed api.
      */
-    interface NormalizedProperty extends FxOrmModel.ModelPropertyDefinition {
+    // interface NormalizedProperty extends FxOrmModel.ModelPropertyDefinition {
+    interface NormalizedProperty extends FxOrmSqlDDLSync__Column.Property {
         // all fields inherited from `FxOrmModel.ModelPropertyDefinition` are still optional
 
         rational?: boolean

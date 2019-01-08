@@ -30,7 +30,7 @@ declare namespace FxOrmModel {
         /* property operation :start */
         addProperty: {
             (
-                propIn: ModelPropertyDefinition,
+                propIn: FxOrmProperty.NormalizedProperty, /* ModelPropertyDefinition */
                 options?: {
                     name?: string
                     klass?: 'primary' | 'hasOne'
@@ -39,8 +39,8 @@ declare namespace FxOrmModel {
         }
         /* property operation :end */
 
+        sync(callback?: FxOrmNS.GenericCallback<FxOrmSqlDDLSync.SyncResult>): Model;
         drop(callback?: FxOrmNS.VoidCallback): Model;
-        sync(callback?: FxOrmNS.VoidCallback): Model;
 
         /**
          * methods used to add associations
@@ -51,7 +51,7 @@ declare namespace FxOrmModel {
         }
         hasMany: {
             (assoc_name: string, ext_model: Model, assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_HasMany): FxOrmModel.Model
-            (assoc_name: string, ext_model: Model, assoc_props?: ModelPropertyDefinitionHash, assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_HasMany): FxOrmModel.Model
+            (assoc_name: string, ext_model: Model, assoc_props: ModelPropertyDefinitionHash, assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_HasMany): FxOrmModel.Model
         }
         extendsTo: (...args: any[]) => Model;
 
@@ -258,8 +258,8 @@ declare namespace FxOrmModel {
     
     type ComplexModelPropertyDefinition = ModelPropertyDefinition | PrimitiveConstructorModelPropertyDefinition | EumTypeValues | PropTypeStrPropertyDefinition
 
-    interface ModelPropertyDefinitionHash {
-        [key: string]: ComplexModelPropertyDefinition
+    type ModelPropertyDefinitionHash = {
+        [key: string]: FxOrmModel.ModelDefineOptions
     }
 
     interface DetailedPropertyDefinitionHash {

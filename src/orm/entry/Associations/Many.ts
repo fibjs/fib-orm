@@ -16,7 +16,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 			mergeAssocId: FxOrmProperty.NormalizedPropertyHash;
 
 		let OtherModel: FxOrmModel.Model = Model;
-		let props: FxOrmModel.DetailedPropertyDefinitionHash = null;
+		let props: FxOrmProperty.NormalizedPropertyHash | FxOrmModel.DetailedPropertyDefinitionHash = null;
 		let opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany = {};
 
 		for (let i = 0; i < arguments.length; i++) {
@@ -42,7 +42,10 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 		} else {
 			for (var k in props) {
 				props[k] = Property.normalize({
-					prop: props[k], name: k, customTypes: db.customTypes, settings: Model.settings
+					prop: props[k] as FxOrmModel.ComplexModelPropertyDefinition,
+					name: k,
+					customTypes: db.customTypes,
+					settings: Model.settings
 				});
 			}
 		}

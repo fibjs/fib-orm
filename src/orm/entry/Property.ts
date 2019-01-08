@@ -7,36 +7,36 @@ var KNOWN_TYPES = [
 ];
 
 export const normalize: FxOrmNS.PropertyModule['normalize'] = function (opts): FxOrmProperty.NormalizedProperty {
-	let result_prop: FxOrmProperty.NormalizedProperty = opts.prop as FxOrmModel.ModelPropertyDefinition
+	let result_prop: FxOrmProperty.NormalizedProperty = opts.prop as FxOrmProperty.NormalizedProperty
 
 	if (typeof opts.prop === "function") {
 		const primitiveProp: FxOrmModel.PrimitiveConstructorModelPropertyDefinition = opts.prop 
 		switch (primitiveProp.name) {
 			case "String":
-				result_prop = { type: "text" };
+				result_prop = <FxOrmProperty.NormalizedProperty>{ type: "text" };
 				break;
 			case "Number":
-				result_prop = { type: "number" };
+				result_prop = <FxOrmProperty.NormalizedProperty>{ type: "number" };
 				break;
 			case "Boolean":
-				result_prop = { type: "boolean" };
+				result_prop = <FxOrmProperty.NormalizedProperty>{ type: "boolean" };
 				break;
 			case "Date":
-				result_prop = { type: "date" };
+				result_prop = <FxOrmProperty.NormalizedProperty>{ type: "date" };
 				break;
 			case "Object":
-				result_prop = { type: "object" };
+				result_prop = <FxOrmProperty.NormalizedProperty>{ type: "object" };
 				break;
 			case "Buffer":
-				result_prop = { type: "binary" };
+				result_prop = <FxOrmProperty.NormalizedProperty>{ type: "binary" };
 				break;
 		}
 	} else if (typeof opts.prop === "string") {
-		result_prop = {
-			type: opts.prop as FxOrmModel.PropTypeStrPropertyDefinition
+		result_prop = <FxOrmProperty.NormalizedProperty>{
+			type: opts.prop
 		};
 	} else if (Array.isArray(opts.prop)) {
-		result_prop = { type: "enum", values: opts.prop };
+		result_prop = <FxOrmProperty.NormalizedProperty>{ type: "enum", values: opts.prop };
 	} else {
 		result_prop = _cloneDeep(opts.prop);
 	}

@@ -341,7 +341,7 @@ export function getRealPath (path_str, stack_index?) {
 };
 
 export function transformPropertyNames (
-	dataIn: FxOrmInstance.InstanceDataPayload, properties: FxOrmProperty.NormalizedPropertyHash
+	dataIn: FxOrmInstance.InstanceDataPayload, properties: FxOrmProperty.NormalizedPropertyHash | FxOrmModel.ModelPropertyDefinition
 ) {
 	var k: string, prop: FxOrmModel.ModelPropertyDefinition;
 	var dataOut: FxOrmInstance.InstanceDataPayload = {};
