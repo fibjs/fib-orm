@@ -201,9 +201,9 @@ declare namespace FxOrmNS {
 
         syncSync(): void;
 
-        begin: void;
-        commit: void;
-        rollback: void;
+        begin: {(): void;}
+        commit: {(): void;}
+        rollback: {(): void;}
         trans: {
             (fun: Function): void;
         }

@@ -1,4 +1,5 @@
 /// <reference types="@fxjs/sql-ddl-sync" />
+/// <reference path="Error.d.ts" />
 
 declare namespace FxOrmNS {
     type IdType = string | number
