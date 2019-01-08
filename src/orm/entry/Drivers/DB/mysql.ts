@@ -1,4 +1,5 @@
 import db = require('db');
+import url = require('url');
 
 declare var setImmediate;
 
@@ -7,8 +8,13 @@ class Database implements FxOrmDb.DatabaseBase_MySQL {
     opts: FxOrmNS.IDBConnectionConfig;
     pool: any;
     
-    constructor(conn_opts: FxOrmNS.IDBConnectionConfig) {
-        this.opts = conn_opts;
+    constructor(conn_opts: string | FxOrmNS.IDBConnectionConfig) {
+        if (typeof conn_opts === 'object') {
+            this.opts = conn_opts as FxOrmNS.IDBConnectionConfig
+            this.opts.username = this.opts.username || this.opts.user
+        } else if (typeof conn_opts === 'string') {
+            this.opts = url.parse(conn_opts) as any;
+        }
     }
 
     on(ev: string) {}
