@@ -1,7 +1,13 @@
 
-v1.8.2 / 2019-01-09
+v1.8.3 / 2019-01-09
 ==================
 
+  * typo fix.
+
+v1.8.2 / 2019-01-09
+===================
+
+  * Release v1.8.2
   * typo fix.
   * upgrade dependencies.
   * normalize some types
