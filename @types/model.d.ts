@@ -172,7 +172,7 @@ declare namespace FxOrmModel {
     interface Hooks {
         beforeValidation?: FxOrmHook.HookActionCallback;
         beforeCreate?: FxOrmHook.HookActionCallback;
-        afterCreate?: FxOrmHook.HookActionCallback;
+        afterCreate?: FxOrmHook.HookResultCallback;
         beforeSave?: FxOrmHook.HookActionCallback;
         afterSave?: FxOrmHook.HookResultCallback;
         afterLoad?: FxOrmHook.HookActionCallback;
