@@ -68,7 +68,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 			{ makeKey: makeKey, required: true }
 		)
 
-		var assocName = opts.name || ucfirst(name);
+		var assocName = opts.name || Utilities.formatNameFor("assoc:hasMany", name);
 		var assocTemplateName = opts.accessor || assocName;
 		const fieldhash = Utilities.wrapFieldObject({ field: opts.field, model: OtherModel, altName: Model.table }) || Utilities.formatField(Model, name, true, opts.reversed)
 		var association: FxOrmAssociation.InstanceAssociationItem_HasMany = {
@@ -537,12 +537,6 @@ function autoFetchInstance(
 			return cb(null);
 		}
 	);
-}
-
-function ucfirst(text: string) {
-	return text[0].toUpperCase() + text.substr(1).replace(/_([a-z])/, function (m, l) {
-		return l.toUpperCase();
-	});
 }
 
 function noOperation(...args: any[]) { }

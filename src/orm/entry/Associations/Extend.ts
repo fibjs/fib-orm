@@ -21,7 +21,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 	) {
 		opts = opts || {};
 
-		const assocName = opts.name || ucfirst(name);
+		const assocName = opts.name || Utilities.formatNameFor("assoc:extendsTo", name);
 		const association: FxOrmAssociation.InstanceAssociationItem_ExtendTos = {
 			name           : name,
 			table          : opts.table || defineDefaultExtendsToTableName(Model.table, name),
@@ -276,8 +276,4 @@ function autoFetchInstance(
 	} else {
 		return cb(null);
 	}
-}
-
-function ucfirst(text: string) {
-	return text[0].toUpperCase() + text.substr(1);
 }

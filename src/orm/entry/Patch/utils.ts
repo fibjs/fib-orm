@@ -1,5 +1,7 @@
 import * as util from 'util'
 
+import * as Utilities from '../Utilities'
+
 interface ModelFuncToPatch extends Function {
     is_new?: boolean;
 }
@@ -166,7 +168,7 @@ export function patchHas(m: FxOrmModel.Model, funcs: HashOfModelFuncNameToPath) 
                 var r = old_func.apply(this, Array.prototype.slice.apply(arguments));
 
                 var name = arguments[0];
-                name = 'findBy' + name.charAt(0).toUpperCase() + name.slice(1);
+                name = 'findBy' + Utilities.formatNameFor('findBy:common', name);
                 patchSync(this, [name]);
 
                 return r;

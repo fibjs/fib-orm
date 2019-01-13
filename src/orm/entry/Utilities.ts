@@ -398,3 +398,33 @@ export function renameDatastoreFieldsToPropertyNames (
 	}
 	return data;
 }
+
+export function camelCaseHasMany(text: string) {
+	return ucfirst(text[0]) + text.substr(1).replace(/_([a-z])/, function (m, l) {
+		return l.toUpperCase();
+	});
+}
+
+export function ucfirst(text: string) {
+	return text[0].toUpperCase() + text.substr(1);
+}
+
+export function formatNameFor (
+	key: 'assoc:hasMany' | 'assoc:hasOne' | 'findBy:common' | 'findBy:hasOne' | 'assoc:extendsTo' | 'findBy:extendsTo' | 'field:lazyload',
+	name: string
+) {
+	switch (key) {
+		case 'assoc:hasMany':
+			return camelCaseHasMany(name)
+		case 'findBy:common':
+		case 'assoc:hasOne':
+		case 'findBy:hasOne':
+			return ucfirst(name)
+		case 'assoc:extendsTo':
+		case 'findBy:extendsTo':
+			return ucfirst(name)
+		case 'field:lazyload':
+			return ucfirst(name.toLocaleLowerCase())
+			break
+	}	
+}

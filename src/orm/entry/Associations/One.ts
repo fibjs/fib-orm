@@ -38,10 +38,9 @@ export function prepare (
 		};
 		association = util.extend(association, assoc_options || {})
 
-		assocName = ucfirst(association.name);
+		assocName = Utilities.formatNameFor("assoc:hasOne", association.name);
 		assocTemplateName = association.accessor || assocName;
 
-		// if (!association.hasOwnProperty("field")) {
 		if (!association.field) {
 			association.field = Utilities.formatField(association.model, association.name, association.required, association.reversed);
 		} else if(!association.extension) {
@@ -383,8 +382,4 @@ function autoFetchInstance(
 	} else {
 		return cb(null);
 	}
-}
-
-function ucfirst(text: string) {
-	return text[0].toUpperCase() + text.substr(1);
 }

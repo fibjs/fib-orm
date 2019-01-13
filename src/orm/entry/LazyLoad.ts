@@ -1,3 +1,5 @@
+import Utilities = require("./Utilities");
+
 export function extend (
 	Instance: FxOrmInstance.Instance,
 	Model: FxOrmModel.Model,
@@ -16,7 +18,7 @@ function addLazyLoadProperty(
 	Model: FxOrmModel.Model,
 	property: string
 ) {
-	var method = ucfirst(name);
+	var method = Utilities.formatNameFor("field:lazyload", name);
 
 	Object.defineProperty(Instance, "get" + method, {
 		value: function <T>(cb: FxOrmNS.ExecutionCallback<FxOrmNS.Nilable<T>>) {
@@ -83,8 +85,4 @@ function addLazyLoadProperty(
 		},
 		enumerable: false
 	});
-}
-
-function ucfirst(text: string) {
-	return text[0].toUpperCase() + text.substr(1).toLowerCase();
 }

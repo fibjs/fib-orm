@@ -3,6 +3,11 @@
 declare namespace FxOrmAssociation {
     type AssociationKeyComputation = Function | string
     interface AssociationDefinitionOptions {
+        /**
+         * it's also accessor base for `extendsTo`, `hasOne`, `hasMany`,
+         * 
+         * @notice fallback from `acessor` for `hasOne`, `hasMany`
+         */
         name?: string;
         model?: FxOrmModel.Model;
         field?: FxOrmProperty.NormalizedPropertyHash
@@ -11,7 +16,13 @@ declare namespace FxOrmAssociation {
         extension?: boolean;
         required?: boolean;
         reversed?: boolean;
+        /**
+         * accessor base for `hasOne`, `hasMany`
+         */
         accessor?: string;
+        /**
+         * accessor base for `hasOne`
+         */
         reverseAccessor?: string;
         autoFetch?: boolean;
         autoFetchLimit?: number;
