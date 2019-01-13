@@ -57,7 +57,6 @@ export function prepare (
 			});
 
 		for (var k in Accessors) {
-			// if (!association.hasOwnProperty(k + "Accessor")) {
 			if (!association[k + "Accessor"]) {
 				association[k + "Accessor"] = Accessors[k] + assocTemplateName;
 			}

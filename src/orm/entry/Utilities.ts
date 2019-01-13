@@ -154,7 +154,7 @@ export function populateConditions (
 	for (var i = 0; i < model.id.length; i++) {
 		if (typeof target[fields[i]] === 'undefined' || overwrite !== false) {
 			target[fields[i]] = source[model.id[i]];
-		} else if (Array.isArray(target[fields[i]])) {
+		} else if (Array.isArray(target[fields[i]])) { // that might be conjunction query conditions
 			(target[fields[i]] as FxSqlQueryComparator.SubQueryInput[])
 				.push(
 					source[model.id[i]] as FxSqlQueryComparator.SubQueryInput
