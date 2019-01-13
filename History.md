@@ -1,7 +1,15 @@
 
-v1.8.3 / 2019-01-09
+v1.8.4 / 2019-01-13
 ==================
 
+  * upgrade fib-typify.
+  * add whereExists method to ChainFind Instance.
+  * allow pass `exists` to ChainFind's options in Model's `find`.
+
+v1.8.3 / 2019-01-09
+===================
+
+  * Release v1.8.3
   * typo fix.
 
 v1.8.2 / 2019-01-09
