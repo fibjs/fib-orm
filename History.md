@@ -1,7 +1,14 @@
 
-v1.8.4 / 2019-01-13
+v1.8.5 / 2019-01-14
 ==================
 
+  * upgrade.
+  * normalize assoc'name formmting.
+
+v1.8.4 / 2019-01-13
+===================
+
+  * Release v1.8.4
   * upgrade fib-typify.
   * add whereExists method to ChainFind Instance.
   * allow pass `exists` to ChainFind's options in Model's `find`.
