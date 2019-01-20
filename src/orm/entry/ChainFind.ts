@@ -225,17 +225,17 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			});
 			return this;
 		},
-		first: function (cb) {
-			return this.run(function (err: Error, items: any) {
+		first: function <T>(cb: FxOrmNS.ExecutionCallback<T>) {
+			return this.run(function (err: Error, items: T[]) {
 				return cb(err, items && items.length > 0 ? items[0] : null);
 			});
 		},
-		last: function (cb) {
-			return this.run(function (err: Error, items: any) {
+		last: function <T>(cb: FxOrmNS.ExecutionCallback<T>) {
+			return this.run(function (err: Error, items: T[]) {
 				return cb(err, items && items.length > 0 ? items[items.length - 1] : null);
 			});
 		},
-		each: function (cb?) {
+		each: function (cb?: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 			return ChainInstance(this, cb);
 		},
 		run: function<T> (cb: FxOrmNS.ExecutionCallback<T>) {
@@ -244,7 +244,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 		},
 		eager: function () {
 			// This will allow params such as ("abc", "def") or (["abc", "def"])
-			var associations = util.flatten(arguments);
+			var associations: string[] = util.flatten(arguments);
 
 			// TODO: Implement eager loading for Mongo and delete this.
 			if (opts.driver.config.protocol == "mongodb:") {

@@ -119,21 +119,27 @@ declare namespace FxOrmQuery {
         order(propertyOrderDesc: string, order?: string | "Z" | "A"): IChainFind;
         orderRaw(str: string, args: any[]): IChainFind;
         limit(limit: number): IChainFind;
-        count(callback: FxOrmNS.ExecutionCallback<number>): void;
-        remove(callback: FxOrmNS.VoidCallback): void;
-        run<T>(callback?: FxOrmNS.ExecutionCallback<T>): void;
+        count(callback: FxOrmNS.ExecutionCallback<number>): IChainFind;
+        remove(callback: FxOrmNS.VoidCallback): IChainFind;
+        run<T>(callback?: FxOrmNS.ExecutionCallback<T>): IChainFind;
 
         // removed in commit 717ee65a7a23ed6762856cf3c187700e36c9ba70
         // success(callback?: FxOrmModel.ModelMethodCallback__Find): void;
         // fail(callback?: FxOrmModel.ModelMethodCallback__Find): void;
 
-        first<T>(callback?: FxOrmNS.ExecutionCallback<T>): void;
-        last<T>(callback?: FxOrmNS.ExecutionCallback<T>): void;
+        first<T>(callback?: FxOrmNS.ExecutionCallback<T>): IChainFind;
+        last<T>(callback?: FxOrmNS.ExecutionCallback<T>): IChainFind;
 
-        each(callback: (result: FxOrmInstance.Instance) => void): void;
-        each(): IChainFind;
+        // each(callback: (result: FxOrmInstance.Instance) => void): void;
+        each: {
+            (cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>): void;
+            (): IChainFind;
+        }
 
-        eager(): IChainFind;
+        eager: {
+            (...assocs: string[]): IChainFind;
+            (assocs: string[]): IChainFind;
+        }
 
         model: FxOrmModel.Model;
         options: ChainFindInstanceOptions
@@ -158,7 +164,7 @@ declare namespace FxOrmQuery {
         newInstance: {
             (data: FxOrmInstance.InstanceDataPayload, cb: FxOrmNS.GenericCallback<FxOrmInstance.Instance>): void
         }
-        associations
+        associations: FxOrmAssociation.InstanceAssociationItem[]
 
         /* in instance */
         exists?: FxOrmQuery.ChainWhereExistsInfo[]
