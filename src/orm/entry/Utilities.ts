@@ -343,10 +343,10 @@ export function getRealPath (path_str, stack_index?) {
 export function transformPropertyNames (
 	dataIn: FxOrmInstance.InstanceDataPayload, properties: FxOrmProperty.NormalizedPropertyHash | FxOrmModel.ModelPropertyDefinition
 ) {
-	var k: string, prop: FxOrmModel.ModelPropertyDefinition;
+	var prop: FxOrmModel.ModelPropertyDefinition;
 	var dataOut: FxOrmInstance.InstanceDataPayload = {};
 
-	for (k in dataIn) {
+	for (let k in dataIn) {
 		prop = properties[k];
 		if (prop) {
 			dataOut[prop.mapsTo] = dataIn[k];
@@ -387,10 +387,8 @@ export function transformOrderPropertyNames (
 export function renameDatastoreFieldsToPropertyNames (
 	data: FxOrmInstance.InstanceDataPayload, fieldToPropertyMap: FxOrmProperty.FieldToPropertyMapType
 ) {
-	var k, prop;
-
-	for (k in data) {
-		prop = fieldToPropertyMap[k];
+	for (let k in data) {
+		const prop = fieldToPropertyMap[k];
 		if (prop && prop.name != k) {
 			data[prop.name] = data[k];
 			delete data[k];

@@ -54,7 +54,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 	var handleValidations = function (cb) {
 		// var pending = [], errors = [];
 		var required: boolean,
-			alwaysValidate: boolean;
+				alwaysValidate: boolean;
 
 		Hook.wait(instance, opts.hooks.beforeValidation, function (err) {
 			if (err) {
@@ -209,7 +209,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 
 			opts.changes.length = 0;
 
-			for (i = 0; i < opts.keyProperties.length; i++) {
+			for (let i = 0; i < opts.keyProperties.length; i++) {
 				prop = opts.keyProperties[i];
 				opts.data[prop.name] = info.hasOwnProperty(prop.name) ? info[prop.name] : data[prop.name];
 			}
@@ -555,16 +555,14 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		});
 	};
 
-	var i, k;
-
-	for (k in Model.allProperties) {
+	for (let k in Model.allProperties) {
 		addInstanceProperty(k);
 	}
-	for (k in opts.extra) {
+	for (let k in opts.extra) {
 		addInstanceProperty(k);
 	}
 
-	for (k in opts.methods) {
+	for (let k in opts.methods) {
 		Object.defineProperty(instance, k, {
 			value      : opts.methods[k].bind(instance),
 			enumerable : false,
@@ -572,7 +570,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		});
 	}
 
-	for (k in opts.extra) {
+	for (let k in opts.extra) {
 		addInstanceExtraProperty(k);
 	}
 
@@ -713,7 +711,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		enumerable: false
 	});
 
-	for (i = 0; i < opts.keyProperties.length; i++) {
+	for (let i = 0; i < opts.keyProperties.length; i++) {
 		var prop = opts.keyProperties[i];
 
 		if (!(prop.name in opts.data)) {
@@ -725,11 +723,11 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 
 	opts.setupAssociations(instance);
 
-	for (i = 0; i < opts.one_associations.length; i++) {
+	for (let i = 0; i < opts.one_associations.length; i++) {
 		var asc = opts.one_associations[i];
 
 		if (!asc.reversed && !asc.extension) {
-			for (k in asc.field as FxOrmProperty.NormalizedPropertyHash) {
+			for (let k in asc.field as FxOrmProperty.NormalizedPropertyHash) {
 				if (!opts.data.hasOwnProperty(k)) {
 					addInstanceProperty(k);
 				}
@@ -750,7 +748,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			delete opts.data[asc.name];
 		}
 	}
-	for (i = 0; i < opts.many_associations.length; i++) {
+	for (let i = 0; i < opts.many_associations.length; i++) {
 		var aName = opts.many_associations[i].name;
 		opts.associations[aName] = {
 			changed: false, data: opts.many_associations[i]

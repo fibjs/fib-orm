@@ -717,10 +717,10 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		});
 
 		// Maintains backwards compatibility
-		if (opts.keys.indexOf(k) != -1) {
+		if (opts.keys.indexOf(prop.name) != -1) {
 			prop.key = true;
 		} else if (prop.key) {
-			opts.keys.push(k);
+			opts.keys.push(prop.name);
 		}
 
 		if (options && options.klass) {
@@ -775,7 +775,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	});
 
 	// Standardize validations
-	for (var k in opts.validations) {
+	for (let k in opts.validations) {
 		if (!Array.isArray(opts.validations[k])) {
 			opts.validations[k] = [ opts.validations[k] ] as enforce.IValidator[];
 		}
@@ -789,7 +789,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	}
 
 	// standardize properties
-	for (k in opts.properties) {
+	for (let k in opts.properties) {
 		model.addProperty(opts.properties[k], { name: k, klass: 'primary' });
 	}
 
@@ -798,7 +798,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	}
 
 	// setup hooks
-	for (k in AvailableHooks) {
+	for (let k in AvailableHooks) {
 		model[AvailableHooks[k]] = createHookHelper(AvailableHooks[k]);
 	}
 

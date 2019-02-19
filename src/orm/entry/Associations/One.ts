@@ -56,14 +56,14 @@ export function prepare (
 				makeKey: false, required: association.required
 			});
 
-		for (var k in Accessors) {
+		for (let k in Accessors) {
 			if (!association[k + "Accessor"]) {
 				association[k + "Accessor"] = Accessors[k] + assocTemplateName;
 			}
 		}
 
 		associations.push(association);
-		for (k in association.field as FxOrmProperty.NormalizedPropertyHash) {
+		for (let k in association.field as FxOrmProperty.NormalizedPropertyHash) {
 			if (!association.field.hasOwnProperty(k)) {
 				continue;
 			}

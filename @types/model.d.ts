@@ -211,34 +211,9 @@ declare namespace FxOrmModel {
         };
     }
 
-    interface ModelPropertyDefinition {
-        /**
-         * text | number | integer | boolean | date | enum | object | <del>point</del> | binary | serial
-         * view details in https://github.com/dresende/node-orm2/wiki/Model-Properties
-         */
-        type: string
-        // ?
-        name?: string
-        // has unique constrain
-        unique?: boolean
-        // is primary key
+    interface ModelPropertyDefinition extends FxOrmSqlDDLSync__Column.Property {
         key?: boolean
-        // is required
-        
-        required?: boolean
-        // whether building index for this field
-        index?: boolean
-
-        defaultValue?: any
-
-        unsigned?: boolean
-        size?: number
-        values?: any[]
-        time?: boolean
-        big?: boolean
-
-        mapsTo?: string
-
+        klass?: 'primary' | 'hasOne'
         alwaysValidate?: boolean
         enumerable?: boolean
         // whether lazyload property, if it is, it can be loaded only by its accessor
@@ -259,7 +234,7 @@ declare namespace FxOrmModel {
     type ComplexModelPropertyDefinition = ModelPropertyDefinition | PrimitiveConstructorModelPropertyDefinition | EumTypeValues | PropTypeStrPropertyDefinition
 
     type ModelPropertyDefinitionHash = {
-        [key: string]: FxOrmModel.ModelDefineOptions
+        [key: string]: ComplexModelPropertyDefinition
     }
 
     interface DetailedPropertyDefinitionHash {

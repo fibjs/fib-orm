@@ -21,9 +21,10 @@ declare namespace FxOrmProperty {
     interface NormalizedProperty extends FxOrmSqlDDLSync__Column.Property {
         // all fields inherited from `FxOrmModel.ModelPropertyDefinition` are still optional
 
-        rational?: boolean
-        klass?: string
+        key?: boolean
+        klass?: 'primary' | 'hasOne'
         lazyload?: boolean
+        alwaysValidate?: boolean
         lazyname?: string
     }
 

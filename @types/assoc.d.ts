@@ -44,8 +44,8 @@ declare namespace FxOrmAssociation {
         reverse?: string;
         // is association property a primary key
         key?: boolean
-        mergeId?: string | FxOrmProperty.NormalizedPropertyHash
-        mergeAssocId?: string | FxOrmProperty.NormalizedPropertyHash
+        mergeId?: string | FxOrmModel.DetailedPropertyDefinitionHash
+        mergeAssocId?: string | FxOrmModel.DetailedPropertyDefinitionHash
         reverseAssociation?: string
 
         hooks?: HasManyHooks
