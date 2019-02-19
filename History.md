@@ -1,7 +1,16 @@
 
-v1.8.5 / 2019-01-14
+v1.8.6 / 2019-02-20
 ==================
 
+  * robust.
+  * upgrade dependency, fix peerDependencies.
+  * upgrade entry and dependencies.
+  * fix IChainFind['eager']
+
+v1.8.5 / 2019-01-14
+===================
+
+  * Release v1.8.5
   * upgrade.
   * normalize assoc'name formmting.
 
