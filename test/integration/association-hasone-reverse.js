@@ -1,3 +1,4 @@
+var ORM = require('../../');
 var test = require("test");
 test.setup();
 
@@ -309,6 +310,70 @@ describe("hasOne", function () {
                     });
                 });
             }, 3, done);
+        });
+    });
+
+    describe("if not passing another Model", function () {
+        it("could use findBy*", function () {
+            db.settings.set('instance.identityCache', false);
+            db.settings.set('instance.returnAllErrors', true);
+
+            var Person = db.define("person", {
+                name: String
+            });
+            Person.hasOne("father", {
+                autoFetch: false,
+                reverse: 'Children_of_f'
+            });
+            Person.hasOne("mother", {
+                autoFetch: false,
+                reverse: 'Children_of_m'
+            });
+
+            helper.dropSync(Person, function () {
+                var child = new Person({
+                    name: "Child"
+                });
+                child.setFatherSync(new Person({
+                    name: "Father"
+                }));
+                child.setMotherSync(new Person({
+                    name: "Mother"
+                }));
+
+                // reverse
+                var parents = Person.findByChildren_of_fSync({
+                    name: ORM.eq("Child")
+                });
+                assert.equal(parents.length, 1);
+                assert.deepEqual(parents.map(x => x.name).sort(), ['Father'])
+
+                // reverse
+                var parents = Person.findByChildren_of_mSync({
+                    name: ORM.eq("Child")
+                });
+                assert.equal(parents.length, 1);
+                assert.deepEqual(parents.map(x => x.name).sort(), ['Mother'])
+
+                // manually
+                var children = Person.findSync({}, {
+                    chainfind_linktable: 'person as p2',
+                    __merge: {
+                        from  : { table: 'person as p1', field: ['father_id'] },
+                        to    : { table: 'person as p2', field: ['id'] },
+                        where : [ 'p2', { id: ORM.ne(Date.now()) } ],
+                        table : 'person'
+                    },
+                    extra: []
+                });
+                assert.equal(children.length, 1);
+                assert.equal(children[0].name, 'Father');
+
+                var persons = Person.findSync({
+                });
+                assert.equal(persons.length, 3);
+                assert.deepEqual(persons.map(x => x.name).sort(), ['Child', 'Father', 'Mother'])
+            });
         });
     });
 });

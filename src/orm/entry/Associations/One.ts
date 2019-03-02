@@ -17,12 +17,14 @@ export function prepare (
 			assoc_options = arguments[1] as FxOrmAssociation.AssociationDefinitionOptions_HasOne
 			ext_model = arguments[1] = null as FxOrmModel.Model
 		}
+
+		ext_model = ext_model || Model;
 		
 		var assocName: string;
 		var assocTemplateName: string;
 		var association: FxOrmAssociation.InstanceAssociationItem_HasOne = {
-			name           : assoc_name || Model.table,
-			model          : ext_model || Model,
+			name           : assoc_name || ext_model.table,
+			model          : ext_model,
 
 			field		   : null,
 			reversed       : false,
@@ -110,12 +112,39 @@ export function prepare (
 				throw new ORMError(".findBy(" + assocName + ") is missing a conditions object", 'PARAM_MISMATCH');
 			}
 
+			const ft_tuple_fields = [Object.keys(association.field), association.model.id]
+			let ft_tuple_table = null
+
+			let from_table = `${association.model.table}`,
+				to_table = `${Model.table}`,
+				where_table = from_table;
+
+			const same_ft = from_table === to_table;
+			if (same_ft) {
+				ft_tuple_table = [
+					// from
+					!association.reversed ? `${from_table}2` : `${to_table}1`,
+					// to
+					!association.reversed ? `${from_table}1` : `${to_table}2`,
+				]
+
+				where_table = ft_tuple_table[0]
+
+				from_table = `${from_table} as ${ft_tuple_table[0]}`
+				to_table = `${to_table} as ${ft_tuple_table[1]}`
+			}
+
 			options.__merge = {
-				from  : { table: association.model.table, field: (association.reversed ? Object.keys(association.field) : association.model.id) },
-				to    : { table: Model.table, field: (association.reversed ? association.model.id : Object.keys(association.field) ) },
-				where : [ association.model.table, conditions ],
+				from  : { table: from_table, field: (!association.reversed ? ft_tuple_fields[1] : ft_tuple_fields[0]) },
+				to    : { table: to_table, field: (!association.reversed ? ft_tuple_fields[0] : ft_tuple_fields[1] ) },
+				where : [ where_table, conditions ],
 				table : Model.table
 			};
+
+			if (same_ft) {
+				options.chainfind_linktable = to_table
+			}
+
 			options.extra = [];
 
 			if (typeof cb === "function") {

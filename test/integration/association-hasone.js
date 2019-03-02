@@ -301,6 +301,61 @@ describe("hasOne", function () {
                 }));
             });
         });
+
+        it("could use findBy*", function () {
+            db.settings.set('instance.identityCache', false);
+            db.settings.set('instance.returnAllErrors', true);
+
+            var Person = db.define("person", {
+                name: String
+            });
+            Person.hasOne("father", {
+                autoFetch: false,
+            });
+            Person.hasOne("mother", {
+                autoFetch: false,
+            });
+
+            helper.dropSync(Person, function () {
+                var child = new Person({
+                    name: "Child"
+                });
+                child.setFatherSync(new Person({
+                    name: "Father"
+                }));
+                child.setMotherSync(new Person({
+                    name: "Mother"
+                }));
+
+                var children = Person.findByFatherSync({
+                    name: ORM.eq("Father")
+                });
+                assert.equal(children.length, 1);
+                assert.equal(children[0].name, 'Child');
+
+                var children = Person.findByMotherSync({
+                    name: ORM.eq("Mother")
+                });
+                assert.equal(children.length, 1);
+                assert.equal(children[0].name, 'Child');
+
+                // manually
+                var children = Person.findSync({}, {
+                    // chainfind_linktable: 'person as p2',
+                    __merge: {
+                        from  : { table: 'person as p1', field: ['id'] },
+                        // to    : { table: 'person as p2', field: ['father_id'] },
+                        // where : [ 'p2', { id: ORM.ne(Date.now()) } ],
+                        to    : { table: 'person', field: ['father_id'] },
+                        where : [ 'person', { id: ORM.ne(Date.now()) } ],
+                        table : 'person'
+                    },
+                    extra: []
+                });
+                assert.equal(children.length, 1);
+                assert.equal(children[0].name, 'Child');
+            });
+        });
     });
 
     describe("association name letter case", function () {

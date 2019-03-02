@@ -242,7 +242,9 @@ declare namespace FxOrmModel {
     }
 
     interface ModelOptions__Find {
-        only?: string
+        chainfind_linktable?: string;
+        
+        only?: string;
         limit?: number;
         order?: any;
         offset?: number;

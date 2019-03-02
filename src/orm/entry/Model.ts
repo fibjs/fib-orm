@@ -419,7 +419,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		var chain = new ChainFind(model, {
 			only         : options.only || model_fields,
 			keys         : opts.keys,
-			table        : opts.table,
+			table        : options.chainfind_linktable || opts.table,
 			driver       : opts.driver,
 			conditions   : conditions,
 			associations : many_associations,

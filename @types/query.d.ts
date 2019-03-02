@@ -43,6 +43,7 @@ declare namespace FxOrmQuery {
             field: string
         }
         to: {
+            table?: string
             field: string
         }
         select: FxSqlQueryColumns.SelectInputArgType[]

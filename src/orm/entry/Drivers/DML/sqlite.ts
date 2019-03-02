@@ -90,7 +90,7 @@ Driver.prototype.find = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite, fields, table, conditions, opts, cb
 ) {
 	var q = this.query.select()
-	                  .from(table).select(fields);
+	                  .from(table, undefined, undefined).select(fields);
 
 	if (opts.offset) {
 		q.offset(opts.offset);
@@ -108,7 +108,10 @@ Driver.prototype.find = function (
 	}
 
 	if (opts.merge) {
-		q.from(opts.merge.from.table, opts.merge.from.field, opts.merge.to.field).select(opts.merge.select);
+		q.from
+			.apply(q, [opts.merge.from.table, opts.merge.from.field, opts.merge.to.table, opts.merge.to.field].filter(x => x))
+			.select(opts.merge.select);
+		
 		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
 			q = q.where(opts.merge.where[0], opts.merge.where[1], opts.merge.table || null, conditions);
 		} else {
@@ -136,7 +139,7 @@ Driver.prototype.count = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite, table, conditions, opts, cb
 ) {
 	var q = this.query.select()
-	                  .from(table)
+	                  .from(table, undefined, undefined)
 	                  .count(null, 'c');
 
 	if (opts.merge) {
