@@ -1,7 +1,15 @@
 
-v1.8.6 / 2019-02-20
+v1.8.7 / 2019-03-03
 ==================
 
+  * code literal change.
+  * support `ModelOptions__Find['chainfind_linktable']` and apply it.
+  * remove wrong comment.
+
+v1.8.6 / 2019-02-20
+===================
+
+  * Release v1.8.6
   * robust.
   * upgrade dependency, fix peerDependencies.
   * upgrade entry and dependencies.
