@@ -145,10 +145,9 @@ Driver.prototype.find = function (
 		q.from(opts.merge.from.table, opts.merge.from.field, opts.merge.to.field)
 		.select(opts.merge.select);
 
-		// for hasMany
 		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
 			q = q.where(opts.merge.where[0], opts.merge.where[1], opts.merge.table || null, conditions);
-		} else { // for non-hasMany
+		} else {
 			q = q.where(opts.merge.table || null, conditions);
 		}
 	} else {
