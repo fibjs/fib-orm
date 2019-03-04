@@ -1,6 +1,6 @@
 import util = require('util')
 
-import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName } from "./_utils";
+import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName, ACCESSOR_KEYS } from "./_utils";
 
 const _cloneDeep          = require('lodash.clonedeep');
 import ORMError   = require("../Error");
@@ -39,10 +39,11 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 				false
 			),
 
-			getAccessor    : opts.getAccessor || defineAssociationAccessorMethodName('get', assocName),
-			setAccessor    : opts.setAccessor || defineAssociationAccessorMethodName('set', assocName),
-			hasAccessor    : opts.hasAccessor || defineAssociationAccessorMethodName('has', assocName),
-			delAccessor    : opts.delAccessor || defineAssociationAccessorMethodName('remove', assocName),
+			getAccessor    : opts.getAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.get, assocName),
+			setAccessor    : opts.setAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.set, assocName),
+			hasAccessor    : opts.hasAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.has, assocName),
+			delAccessor    : opts.delAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.del, assocName),
+			modelFindByAccessor: opts.delAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.modelFindBy, assocName),
 
 			model: null
 		};
@@ -65,7 +66,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 
 		associations.push(association);
 
-		Model["findBy" + assocName] = function () {
+		Model[association.modelFindByAccessor] = function () {
 			var cb: FxOrmModel.ModelMethodCallback__Find = null,
 				conditions: FxOrmModel.ModelQueryConditions__Find = null,
 				options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
@@ -86,7 +87,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 			}
 
 			if (conditions === null) {
-				throw new ORMError(".findBy(" + assocName + ") is missing a conditions object", 'PARAM_MISMATCH');
+				throw new ORMError(`.${association.modelFindByAccessor}() is missing a conditions object`, 'PARAM_MISMATCH');
 			}
 
 			options.__merge = {

@@ -2,12 +2,7 @@ import util = require('util')
 
 import Utilities = require("../Utilities");
 import ORMError = require("../Error");
-const Accessors = {
-	"get": "get",
-	"set": "set",
-	"has": "has",
-	"del": "remove"
-};
+import { ACCESSOR_KEYS } from './_utils';
 
 export function prepare (
 	Model: FxOrmModel.Model, associations: FxOrmAssociation.InstanceAssociationItem_HasOne[]
@@ -36,7 +31,9 @@ export function prepare (
 			setAccessor	   : null,
 			getAccessor	   : null,
 			hasAccessor    : null,
-			delAccessor    : null
+			delAccessor    : null,
+			
+			modelFindByAccessor : null,
 		};
 		association = util.extend(association, assoc_options || {})
 
@@ -58,9 +55,9 @@ export function prepare (
 				makeKey: false, required: association.required
 			});
 
-		for (let k in Accessors) {
+		for (let k in ACCESSOR_KEYS) {
 			if (!association[k + "Accessor"]) {
-				association[k + "Accessor"] = Accessors[k] + assocTemplateName;
+				association[k + "Accessor"] = ACCESSOR_KEYS[k] + assocTemplateName;
 			}
 		}
 
@@ -88,7 +85,7 @@ export function prepare (
 			});
 		}
 
-		Model["findBy" + assocTemplateName] = function () {
+		Model[association.modelFindByAccessor] = function () {
 			var cb: FxOrmModel.ModelMethodCallback__Find = null,
 				conditions: FxOrmModel.ModelQueryConditions__Find = null,
 				options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
@@ -109,7 +106,7 @@ export function prepare (
 			}
 
 			if (conditions === null) {
-				throw new ORMError(".findBy(" + assocName + ") is missing a conditions object", 'PARAM_MISMATCH');
+				throw new ORMError(`.${association.modelFindByAccessor}() is missing a conditions object`, 'PARAM_MISMATCH');
 			}
 
 			const ft_tuple_fields = [Object.keys(association.field), association.model.id]
