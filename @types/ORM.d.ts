@@ -18,6 +18,7 @@
 /// <reference path="patch.d.ts" />
 
 /// <reference path="Db.d.ts" />
+/// <reference path="Helpers.d.ts" />
 /// <reference path="Error.d.ts" />
 /// <reference path="Adapter.d.ts" />
 /// <reference path="Validators.d.ts" />
@@ -253,6 +254,7 @@ declare namespace FxOrmNS {
         FxSqlQueryComparator.ComparatorHash
         /* deprecated :end */
     {
+        Helpers: FxOrmHelper.HelperModules
         validators: FxOrmValidators.ValidatorModules
         Settings: FxOrmSettings.Settings
         settings: FxOrmSettings.SettingInstance

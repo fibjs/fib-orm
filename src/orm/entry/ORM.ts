@@ -11,6 +11,7 @@ import DriverAliases  = require("./Drivers/aliases");
 import adapters       = require("./Adapters");
 import ORMError       = require("./Error");
 import Utilities      = require("./Utilities");
+import Helpers      = require("./Helpers");
 
 import Enforces   	  = require("@fibjs/enforce");
 // Deprecated, use enforce
@@ -425,6 +426,7 @@ const ORM_Module: FxOrmNS.ExportModule = {
 	Settings,
 	singleton,
 	Property,
+	Helpers,
 
 	Text: SqlQuery.Text,
 	...SqlQuery.comparators,
