@@ -7,6 +7,7 @@ import Settings = require("../Settings");
 import Property = require("../Property");
 import ORMError = require("../Error");
 import Utilities = require("../Utilities");
+import { ACCESSOR_KEYS } from './_utils';
 
 export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associations: FxOrmAssociation.InstanceAssociationItem_HasMany[]) {
 	Model.hasMany = function () {
@@ -83,11 +84,11 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 			mergeTable: opts.mergeTable || (Model.table + "_" + name),
 			mergeId: mergeId,
 			mergeAssocId: mergeAssocId,
-			getAccessor: opts.getAccessor || ("get" + assocTemplateName),
-			setAccessor: opts.setAccessor || ("set" + assocTemplateName),
-			hasAccessor: opts.hasAccessor || ("has" + assocTemplateName),
-			delAccessor: opts.delAccessor || ("remove" + assocTemplateName),
-			addAccessor: opts.addAccessor || ("add" + assocTemplateName),
+			getAccessor: opts.getAccessor || (ACCESSOR_KEYS.get + assocTemplateName),
+			setAccessor: opts.setAccessor || (ACCESSOR_KEYS.set + assocTemplateName),
+			hasAccessor: opts.hasAccessor || (ACCESSOR_KEYS.has + assocTemplateName),
+			delAccessor: opts.delAccessor || (ACCESSOR_KEYS.del + assocTemplateName),
+			addAccessor: opts.addAccessor || (ACCESSOR_KEYS.add + assocTemplateName)
 		};
 		associations.push(association);
 
@@ -103,6 +104,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 				autoFetchLimit: association.autoFetchLimit
 			});
 		}
+
 		return this;
 	};
 };

@@ -10,9 +10,16 @@ export function defineAssociationAccessorMethodName (
 }
 
 export const ACCESSOR_KEYS = {
+	/* common :start */
 	"get": "get" as 'get',
 	"set": "set" as 'set',
 	"has": "has" as 'has',
 	"del": "remove" as 'remove',
-	"modelFindBy": "findBy" as 'findBy'
+	/* common :end */
+	
+	// useful for association `hasOne`, `extendsTo`
+	"modelFindBy": "findBy" as 'findBy',
+
+	// useful for association `hasMany` 
+	"add": "add" as 'add',
 };
