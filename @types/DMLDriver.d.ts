@@ -144,11 +144,11 @@ declare namespace FxOrmDMLDriver {
         limit?: number
         order?: string
         merge?: FxOrmQuery.ChainFindMergeInfo
-        exists?: FxOrmQuery.ChainWhereExistsInfo[]
+        exists?: {[key: string]: FxOrmQuery.ChainWhereExistsInfo} | FxOrmQuery.ChainWhereExistsInfo[]
     }
     interface DMLDriver_CountOptions {
         merge?: FxOrmQuery.ChainFindMergeInfo
-        exists?: FxOrmQuery.ChainWhereExistsInfo
+        exists?: DMLDriver_FindOptions['exists']
     }
     /* ============================= DMLDriver API Options :end   ============================= */
 

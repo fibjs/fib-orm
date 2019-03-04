@@ -6,11 +6,13 @@ interface ModelFuncToPatch extends Function {
     is_new?: boolean;
 }
 
+type FxOrmModelAndInstance = FxOrmModel.Model | FxOrmInstance.Instance | FxOrmQuery.IChainFind
+
 type HashOfModelFuncNameToPath = string[];
 
 // patch async function to sync function
 export function patchSync(
-    o: FxOrmModel.Model | FxOrmNS.FibOrmFixedModelInstance | FxOrmNS.FibOrmDB,
+    o: FxOrmModelAndInstance | FxOrmNS.FibOrmDB,
     funcs: HashOfModelFuncNameToPath
 ) {
     funcs.forEach(function (func) {
@@ -37,7 +39,7 @@ function is_model_conjunctions_key (k: string) {
 }
 
 // hook find, patch result
-export function patchResult(o: FxOrmNS.FibOrmFixedModelInstance | FxOrmModel.Model): void {
+export function patchResult(o: FxOrmModelAndInstance): void {
     var old_func: ModelFuncToPatch = o.find;
     var m: FxOrmModel.Model = o.model || o;
     // keyof FxSqlQuerySql.DetailedQueryWhereCondition
@@ -90,20 +92,12 @@ export function patchResult(o: FxOrmNS.FibOrmFixedModelInstance | FxOrmModel.Mod
             filter_date(opt);
         }
 
-        var rs: FxOrmNS.FibOrmFixedModelInstance = old_func.apply(this, Array.prototype.slice.apply(arguments));
+        var rs: FxOrmInstance.Instance = old_func.apply(this, Array.prototype.slice.apply(arguments));
         if (rs) {
             patchResult(rs);
-            patchSync(rs, [
-                "count",
-                "first",
-                "last",
-                'all',
-                'where',
-                'find',
-                'remove',
-                'run'
-            ]);
+            patchIChainFindLikeRs(rs);
         }
+        
         return rs;
     }
 
@@ -111,7 +105,7 @@ export function patchResult(o: FxOrmNS.FibOrmFixedModelInstance | FxOrmModel.Mod
     o.where = o.all = o.find = new_func;
 }
 
-export function patchObject(m: FxOrmNS.FibOrmFixedModelInstance) {
+export function patchObject(m: FxOrmInstance.Instance) {
     var methods = [
         "save",
         "remove",
@@ -160,7 +154,7 @@ export function patchObject(m: FxOrmNS.FibOrmFixedModelInstance) {
     patchSync(m, methods);
 }
 
-export function patchHas(m: FxOrmModel.Model, funcs: HashOfModelFuncNameToPath) {
+export function patchFindBy(m: FxOrmModel.Model, funcs: HashOfModelFuncNameToPath) {
     funcs.forEach(function (func) {
         var old_func: ModelFuncToPatch = m[func];
         if (old_func)
@@ -196,7 +190,7 @@ export function patchModel(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions) {
      * as patch in `afterAutoFetch` would process instance's basic/lazyload/associated fields' accessors
      */
     m.afterAutoFetch(function (next) {
-        patchObject(this as FxOrmNS.FibOrmFixedModelInstance);
+        patchObject(this as FxOrmInstance.Instance);
 
         if (_afterAutoFetch) {
             if (_afterAutoFetch.length > 0)
@@ -223,12 +217,56 @@ export function patchModel(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions) {
         'sync'
     ]);
 
-    patchHas(m, [
+    patchFindBy(m, [
         'hasOne',
+        'hasMany',
         'extendsTo'
     ]);
 
     patchAggregate(m);
+}
+
+export function patchIChainFindLikeRs (
+    rs: FxOrmModelAndInstance,
+    opts: {
+        new_callback_generator?: {
+            (cb: FxOrmNS.ExecutionCallback<any>): {
+                (err: FxOrmError.ExtendedError, foundAssocItems: any): FxOrmQuery.IChainFind
+            }
+        },
+        exlude_keys?: string[]
+    } = {}
+) {
+    const {
+        exlude_keys = [],
+        new_callback_generator = null
+    } = opts || {};
+
+    const patchKeys = util.difference([
+        "count",
+        "first",
+        "last",
+        'all',
+        'where',
+        'find',
+        'remove',
+        'run'
+    ], exlude_keys);
+
+    patchKeys.forEach(patchKey => {
+        if (typeof rs[patchKey] === 'function' && new_callback_generator) {
+            const old_func = rs[patchKey].bind(rs);
+            rs[patchKey] = function (...args: any[]) {
+                old_func(
+                    new_callback_generator.apply(this, args)
+                );
+                
+                return rs
+            } as any
+        }
+
+        patchSync(rs, [patchKey]);
+    });
 }
 
 interface keyPropertiesTypeItem {

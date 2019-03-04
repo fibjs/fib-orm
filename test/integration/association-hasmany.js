@@ -46,6 +46,7 @@ describe("hasMany", function () {
                     name: String
                 });
                 Person.hasMany('pets', Pet, {}, {
+                    reverse: opts.reversePets,
                     autoFetch: opts.autoFetchPets
                 });
 
@@ -456,6 +457,170 @@ describe("hasMany", function () {
             });
         });
 
+        describe("findBy", function () {
+            function assertion_people_for_findby (people) {
+                assert.equal(people.length, 2);
+                
+                var Jane = people.find(person => person.name === "Jane")
+                var JanePets = Jane.getPetsSync("-name");
+                
+                assert.ok(Array.isArray(JanePets));
+                assert.equal(JanePets.length, 1);
+                assert.equal(JanePets[0].model(), Pet);
+                assert.equal(JanePets[0].name, "Mutt");
+                
+                var John = people.find(person => person.name === "John")
+                var JohnPets = John.getPetsSync("-name");
+                
+                assert.ok(Array.isArray(JohnPets));
+                assert.equal(JohnPets.length, 2);
+                assert.equal(JohnPets[0].model(), Pet);
+                assert.equal(JohnPets[0].name, "Mutt");
+                assert.equal(JohnPets[1].name, "Deco");
+            }
+
+            function assertion_pets_for_findby (pets) {
+                assert.equal(pets.length, 2);
+                
+                var Mutt = pets.find(pet => pet.name === "Mutt")
+                var MuttOwners = Mutt.getOwnersSync("-name");
+                
+                assert.ok(Array.isArray(MuttOwners));
+                assert.equal(MuttOwners.length, 2);
+                assert.equal(MuttOwners[0].model(), Person);
+                assert.equal(MuttOwners[0].name, "John");
+                assert.equal(MuttOwners[1].name, "Jane");
+                
+                var Deco = pets.find(pet => pet.name === "Deco")
+                var DecoOwners = Deco.getOwnersSync("-name");
+                
+                assert.ok(Array.isArray(DecoOwners));
+                assert.equal(DecoOwners.length, 1);
+                assert.equal(DecoOwners[0].model(), Person);
+                assert.equal(DecoOwners[0].name, "John");
+            }
+
+            describe("findBy() - A hasMany B, with reverse", function () {
+                before(setup({
+                    reversePets: 'owners',
+                    autoFetchPets: false
+                }));
+
+                it("could find A with `findbyB()`", function (done) {
+                    var John = Person.findByPets({ name: "Mutt" }, { order: 'name' }).lastSync();
+                    var Jane = Person.findByPets({ name: "Mutt" }, { order: '-name' }).firstSync();
+                    assertion_people_for_findby([John, Jane]);
+
+                    var John = Person.findByPets({ name: "Mutt" }, {  }).firstSync();
+                    var Jane = Person.findByPets({ name: "Mutt" }, {  }).lastSync();
+                    assertion_people_for_findby([John, Jane]);
+
+                    var personCount = Person.findByPets({ name: "Mutt" }, {  }).countSync();
+                    assert.ok(personCount, 2);
+
+                    ;[
+                        'all',
+                        'where',
+                        'find',
+                        // 'remove',
+                        'run'
+                    ].forEach(ichainFindKey => {
+                        var people = Person.findByPets({ name: "Mutt" })[`${ichainFindKey}Sync`]();
+                        assertion_people_for_findby(people);
+                    });
+
+                    var people = Person.findByPetsSync({ name: "Mutt" });
+                    assertion_people_for_findby(people);
+
+                    // asynchronous version
+                    Person.findByPets({ name: "Mutt" })
+                        .run(function (err, people) {
+                            assertion_people_for_findby(people);
+                            done();
+                        });
+                });
+
+                it("could find B with `findbyA()`", function (done) {
+                    var Mutt = Pet.findByOwners({ name: "John" }, { order: 'name' }).lastSync();
+                    var Deco = Pet.findByOwners({ name: "John" }, { order: '-name' }).firstSync();
+                    assertion_pets_for_findby([Mutt, Deco]);
+
+                    var Mutt = Pet.findByOwners({ name: "John" }, {  }).firstSync();
+                    var Deco = Pet.findByOwners({ name: "John" }, {  }).lastSync();
+                    assertion_pets_for_findby([Mutt, Deco]);
+
+                    var personCount = Pet.findByOwners({ name: "John" }, {  }).countSync();
+                    assert.ok(personCount, 2);
+
+                    ;[
+                        'all',
+                        'where',
+                        'find',
+                        // 'remove',
+                        'run'
+                    ].forEach(ichainFindKey => {
+                        var people = Pet.findByOwners({ name: "John" })[`${ichainFindKey}Sync`]();
+                        assertion_pets_for_findby(people);
+                    });
+
+                    var pets = Pet.findByOwnersSync({ name: "John" });
+                    assertion_pets_for_findby(pets);
+
+                    // asynchronous version
+                    Pet.findByOwners({ name: "John" })
+                        .run(function (err, pets) {
+                            assertion_pets_for_findby(pets);
+                            done();
+                        });
+                });
+
+                it("zero count", function () {
+                    var personCount = Pet.findByOwners({ name: "Bob" }, {  }).countSync();
+                    assert.ok(personCount, 0);
+                })
+            });
+
+            describe("findBy() - A hasMany B, without reverse", function () {
+                before(setup({
+                    autoFetchPets: false
+                }));
+
+                it("A hasMany B, could find A with `findbyB()`", function (done) {
+                    var John = Person.findByPets({ name: "Mutt" }, { order: 'name' }).lastSync();
+                    var Jane = Person.findByPets({ name: "Mutt" }, { order: '-name' }).firstSync();
+                    assertion_people_for_findby([John, Jane]);
+
+                    var John = Person.findByPets({ name: "Mutt" }, {  }).firstSync();
+                    var Jane = Person.findByPets({ name: "Mutt" }, {  }).lastSync();
+                    assertion_people_for_findby([John, Jane]);
+
+                    var personCount = Person.findByPets({ name: "Mutt" }, {  }).countSync();
+                    assert.ok(personCount, 2);
+
+                    ;[
+                        'all',
+                        'where',
+                        'find',
+                        // 'remove',
+                        'run'
+                    ].forEach(ichainFindKey => {
+                        var people = Person.findByPets({ name: "Mutt" })[`${ichainFindKey}Sync`]();
+                        assertion_people_for_findby(people);
+                    });
+
+                    var people = Person.findByPetsSync({ name: "Mutt" });
+                    assertion_people_for_findby(people);
+
+                    // asynchronous version
+                    Person.findByPets({ name: "Mutt" })
+                        .run(function (err, people) {
+                            assertion_people_for_findby(people);
+                            done();
+                        });
+                });
+            });
+        });
+
         describe("with autoFetch turned on", function () {
             before(setup({
                 autoFetchPets: true
@@ -694,7 +859,7 @@ describe("hasMany", function () {
                     })
                 });
         })
-    })
+    });
 });
 
 if (require.main === module) {

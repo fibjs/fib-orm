@@ -1,4 +1,5 @@
 import util = require('util');
+import coroutine = require('coroutine');
 
 const _flatten = require('lodash.flatten')
 
@@ -7,7 +8,8 @@ import Settings = require("../Settings");
 import Property = require("../Property");
 import ORMError = require("../Error");
 import Utilities = require("../Utilities");
-import { ACCESSOR_KEYS } from './_utils';
+import { ACCESSOR_KEYS, getMapsToFromProperty } from './_utils';
+import { patchIChainFindLikeRs } from '../Patch/utils';
 
 export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associations: FxOrmAssociation.InstanceAssociationItem_HasMany[]) {
 	Model.hasMany = function () {
@@ -74,7 +76,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 		const fieldhash = Utilities.wrapFieldObject({ field: opts.field, model: OtherModel, altName: Model.table }) || Utilities.formatField(Model, name, true, opts.reversed)
 		var association: FxOrmAssociation.InstanceAssociationItem_HasMany = {
 			name: name,
-			model: OtherModel || Model,
+			model: OtherModel,
 			props: props,
 			hooks: opts.hooks || {},
 			autoFetch: opts.autoFetch || false,
@@ -88,7 +90,9 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 			setAccessor: opts.setAccessor || (ACCESSOR_KEYS.set + assocTemplateName),
 			hasAccessor: opts.hasAccessor || (ACCESSOR_KEYS.has + assocTemplateName),
 			delAccessor: opts.delAccessor || (ACCESSOR_KEYS.del + assocTemplateName),
-			addAccessor: opts.addAccessor || (ACCESSOR_KEYS.add + assocTemplateName)
+			addAccessor: opts.addAccessor || (ACCESSOR_KEYS.add + assocTemplateName),
+
+			modelFindByAccessor: opts.modelFindByAccessor || (ACCESSOR_KEYS.modelFindBy + assocTemplateName),
 		};
 		associations.push(association);
 
@@ -104,6 +108,106 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 				autoFetchLimit: association.autoFetchLimit
 			});
 		}
+
+		Model[association.modelFindByAccessor] = function () {
+			var cb: FxOrmModel.ModelMethodCallback__Find = null,
+				conditions: FxOrmModel.ModelQueryConditions__Find = null,
+				findby_opts: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
+
+			for (var i = 0; i < arguments.length; i++) {
+				switch (typeof arguments[i]) {
+					case "function":
+						cb = arguments[i];
+						break;
+					case "object":
+						if (conditions === null) {
+							conditions = arguments[i];
+						} else {
+							findby_opts = arguments[i];
+						}
+						break;
+				}
+			}
+
+			if (conditions === null) {
+				throw new ORMError(`.${association.modelFindByAccessor}() is missing a conditions object`, 'PARAM_MISMATCH');
+			}
+			
+			findby_opts.exists = [
+				{
+					table: association.mergeTable,
+					link: [
+						Object.values(association.mergeAssocId).map(getMapsToFromProperty),
+						association.model.id
+					],
+					conditions: conditions
+				}
+			]
+			findby_opts.extra = [];
+
+			const get_run_callback = function (rcb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance | FxOrmInstance.Instance[]>) {
+				return function (err: FxOrmError.ExtendedError, foundAssocItems: FxOrmInstance.Instance[]) {
+					if (err)
+						return rcb(err)
+
+					// console.log('foundAssocItems', foundAssocItems);
+					const query_exists: FxOrmQuery.ChainWhereExistsInfo[] = foundAssocItems.map(foundAssocItem => {
+						const rev_conditions = {};
+						Utilities.populateConditions(
+							Model,
+							Object.values(association.mergeAssocId).map(getMapsToFromProperty),
+							foundAssocItem,
+							rev_conditions
+						);
+
+						return {
+							table: association.mergeTable,
+							link: [
+								Object.values(association.mergeId).map(getMapsToFromProperty),
+								Model.id
+							] as FxSqlQuerySql.WhereExistsLinkTuple,
+							conditions: rev_conditions
+						}
+					});
+					// console.log('query_exists', query_exists);
+
+					const keyChainFind = Model.find({}, { exists: query_exists });
+
+					if (findby_opts.order) keyChainFind.order(findby_opts.order)
+					if (findby_opts.limit) keyChainFind.limit(findby_opts.order)
+					if (findby_opts.offset) keyChainFind.offset(findby_opts.order)
+
+					const finalFoundItems = keyChainFind.runSync();
+					
+					return rcb(null, finalFoundItems);
+				}
+			}
+
+			if (typeof cb === 'function') {
+				return association.model.find({}, findby_opts, get_run_callback(cb));
+			}
+
+			const chain = association.model.find({}, findby_opts);
+
+			/**
+			 * don't support IChainFind's meaningless apis here:
+			 * - .remove()
+			 */
+			delete chain.remove
+			
+			patchIChainFindLikeRs(chain, {
+				new_callback_generator: get_run_callback,
+				/**
+				 * support IChainFind's apis:
+				 * - .fisrt()
+				 * - .last()
+				 * - .count()
+				 */
+				exlude_keys: ['first', 'last', 'count']
+			});
+
+			return chain
+		};
 
 		return this;
 	};
@@ -146,6 +250,22 @@ export function autoFetch(
 	}
 };
 
+function adjustForMapsTo(properties: FxOrmProperty.NormalizedPropertyHash, field: string[]) {
+	if (!field)
+		return ;
+
+	/**
+	 * Loop through the (cloned) association model id fields ... some of them may've been mapped to different
+	 * names in the actual database - if so update to the mapped database column name
+	 */
+	for (var i = 0; i < field.length; i++) {
+		var idProp = properties[field[i]];
+		if (idProp && idProp.mapsTo) {
+			field[i] = idProp.mapsTo;
+		}
+	}
+}
+
 function extendInstance(
 	Model: FxOrmModel.Model,
 	Instance: FxOrmInstance.Instance,
@@ -160,22 +280,11 @@ function extendInstance(
 		});
 	}
 
-	function adjustForMapsTo(options) {
-		// Loop through the (cloned) association model id fields ... some of them may've been mapped to different
-		// names in the actual database - if so update to the mapped database column name
-		for (var i = 0; i < options.__merge.to.field.length; i++) {
-			var idProp = association.model.properties[options.__merge.to.field[i]];
-			if (idProp && idProp.mapsTo) {
-				options.__merge.to.field[i] = idProp.mapsTo;
-			}
-		}
-	}
-
 	Object.defineProperty(Instance, association.hasAccessor, {
 		value: function (...Instances: FxOrmInstance.Instance[]) {
 			// var Instances = Array.prototype.slice.apply(arguments);
 			var cb: FxOrmNS.GenericCallback<boolean> = Instances.pop() as any;
-			var conditions = {}, options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {} as FxOrmAssociation.ModelAssociationMethod__FindOptions;
+			var conditions = {}, options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
 
 			if (Instances.length) {
 				if (Array.isArray(Instances[0])) {
@@ -195,7 +304,7 @@ function extendInstance(
 				table: association.model.table
 			};
 
-			adjustForMapsTo(options);
+			adjustForMapsTo(association.model.properties, options.__merge.to.field);
 
 			options.extra = association.props;
 			options.extra_info = {
@@ -290,7 +399,7 @@ function extendInstance(
 				table: association.model.table
 			};
 
-			adjustForMapsTo(options);
+			adjustForMapsTo(association.model.properties, options.__merge.to.field);
 
 			options.extra = association.props;
 			options.extra_info = {

@@ -26,16 +26,18 @@ declare namespace FxOrmAssociation {
         reverseAccessor?: string;
         autoFetch?: boolean;
         autoFetchLimit?: number;
-    }
-
-    interface AssociationDefinitionOptions_ExtendsTo extends AssociationDefinitionOptions {
-        table?: string;
         
         getAccessor?: string;
         setAccessor?: string;
         hasAccessor?: string;
         delAccessor?: string;
         addAccessor?: string;
+
+        modelFindByAccessor?: string;
+    }
+
+    interface AssociationDefinitionOptions_ExtendsTo extends AssociationDefinitionOptions {
+        table?: string;
     }
     interface AssociationDefinitionOptions_HasOne extends AssociationDefinitionOptions {
         reverse?: string;
@@ -76,6 +78,7 @@ declare namespace FxOrmAssociation {
         setAccessor: string
         hasAccessor: string
         delAccessor: string
+
         addAccessor?: string
 
         // model: FxOrmModel.Model
@@ -91,8 +94,6 @@ declare namespace FxOrmAssociation {
 
     interface InstanceAssociationItem_ExtendTos extends InstanceAssociationItem {
         table: string;
-
-        modelFindByAccessor: string
     }
 
     interface InstanceAssociationItem_HasOne extends InstanceAssociationItem {
@@ -122,6 +123,8 @@ declare namespace FxOrmAssociation {
         hasAccessor: string
         delAccessor: string
         addAccessor: string
+
+        modelFindByAccessor?: string
     }
 
     interface InstanceAssociationItemInformation {
@@ -131,8 +134,14 @@ declare namespace FxOrmAssociation {
     }
 
     interface ModelAssociationMethod__ComputationPayload__Merge {
-        from: { table: string, field: string | string[] }
-        to: { table: string, field: string | string[] }
+        from: {
+            table: string,
+            field: string[]
+        }
+        to: {
+            table: string,
+            field: string[]
+        }
         where: [string, FxOrmModel.ModelQueryConditions__Find]
         table?: string
     }

@@ -23,3 +23,7 @@ export const ACCESSOR_KEYS = {
 	// useful for association `hasMany` 
 	"add": "add" as 'add',
 };
+
+export function getMapsToFromProperty (property: FxOrmProperty.NormalizedProperty) {
+	return property.mapsTo || property.name
+}

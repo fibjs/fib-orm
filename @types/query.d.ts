@@ -113,7 +113,7 @@ declare namespace FxOrmQuery {
         where: IChainFind['find']
         
         only(...args: (string|string[])[]): IChainFind;
-        omit(): IChainFind;
+        omit(...args: (string|string[])[]): IChainFind;
         skip(offset: number): IChainFind;
         offset(offset: number): IChainFind;
 
