@@ -585,7 +585,7 @@ describe("hasMany", function () {
                     autoFetchPets: false
                 }));
 
-                it("A hasMany B, could find A with `findbyB()`", function (done) {
+                it("could find A with `findbyB()`", function (done) {
                     var John = Person.findByPets({ name: "Mutt" }, { order: 'name' }).lastSync();
                     var Jane = Person.findByPets({ name: "Mutt" }, { order: '-name' }).firstSync();
                     assertion_people_for_findby([John, Jane]);

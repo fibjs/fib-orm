@@ -150,7 +150,6 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 					if (err)
 						return rcb(err)
 
-					// console.log('foundAssocItems', foundAssocItems);
 					const query_exists: FxOrmQuery.ChainWhereExistsInfo[] = foundAssocItems.map(foundAssocItem => {
 						const rev_conditions = {};
 						Utilities.populateConditions(
@@ -169,7 +168,6 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 							conditions: rev_conditions
 						}
 					});
-					// console.log('query_exists', query_exists);
 
 					const keyChainFind = Model.find({}, { exists: query_exists });
 
