@@ -7,7 +7,7 @@ import { ACCESSOR_KEYS } from './_utils';
 export function prepare (
 	Model: FxOrmModel.Model, associations: FxOrmAssociation.InstanceAssociationItem_HasOne[]
 ) {
-	Model.hasOne = function (assoc_name: string, ext_model?: any, assoc_options?: any) {
+	Model.hasOne = function (assoc_name, ext_model, assoc_options) {
 		if (arguments[1] && !arguments[1].table) {
 			assoc_options = arguments[1] as FxOrmAssociation.AssociationDefinitionOptions_HasOne
 			ext_model = arguments[1] = null as FxOrmModel.Model
