@@ -6,7 +6,6 @@ declare namespace FxOrmInstance {
     }
 
     interface CreateOptions {
-        extra?: FxOrmInstance.InstanceDataPayload
         autoFetch?: boolean
         autoFetchLimit?: number
         cascadeRemove?: boolean
@@ -14,7 +13,8 @@ declare namespace FxOrmInstance {
         is_new?: boolean
         isShell?: boolean
         autoSave?: boolean
-        extra_info?
+        extra?: InstanceConstructorOptions['extra']
+        extra_info?: InstanceConstructorOptions['extra_info']
     }
 
     type InstanceChangeRecords = string[]
@@ -26,8 +26,13 @@ declare namespace FxOrmInstance {
 
         data?: InstanceDataPayload
         changes?: InstanceChangeRecords
-        extra?: InstanceDataPayload
-        extra_info
+        extra?: string[] | FxOrmProperty.NormalizedPropertyHash
+        extra_info?: {
+            table: string
+            id: string[]
+            id_prop: string[]
+            assoc_prop: string[]
+        }
 
         is_new?: boolean
         isShell?: boolean

@@ -257,7 +257,7 @@ declare namespace FxOrmModel {
         autoFetchLimit?: number
         __merge?: FxOrmAssociation.ModelAssociationMethod__ComputationPayload__Merge
         exists?: FxOrmQuery.ChainWhereExistsInfo[]
-        extra?: FxOrmModel.ModelPropertyDefinitionHash | any[]
+        extra?: FxOrmInstance.InstanceConstructorOptions['extra']
         extra_info?: {
             table: string
             id: Model['id']

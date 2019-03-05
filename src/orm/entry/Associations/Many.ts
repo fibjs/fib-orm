@@ -135,7 +135,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 			}
 
 			findby_opts = findby_opts || {};
-			assoc_find_opts = cutOffAssociatedModelFindOptions(findby_opts, associationSemanticNameCore) || {};
+			assoc_find_opts = cutOffAssociatedModelFindOptions(findby_opts, association.name) || {};
 			
 			assoc_find_opts.exists = Array.isArray(assoc_find_opts.exists) ? assoc_find_opts.exists : [];
 			assoc_find_opts.exists.push({
@@ -146,8 +146,6 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 				],
 				conditions: conditions
 			});
-			
-			assoc_find_opts.extra = [];
 
 			const get_run_callback = function (rcb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance | FxOrmInstance.Instance[]>) {
 				return function (err: FxOrmError.ExtendedError, foundAssocItems: FxOrmInstance.Instance[]) {

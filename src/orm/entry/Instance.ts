@@ -490,7 +490,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		}
 	}
 
-	var addInstanceProperty = function (key) {
+	var addInstanceProperty = function (key: string) {
 		var defaultValue = null;
 		var prop = Model.allProperties[key];
 
@@ -534,7 +534,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			enumerable: !(prop && !prop.enumerable)
 		});
 	};
-	var addInstanceExtraProperty = function (key) {
+	var addInstanceExtraProperty = function (key: string) {
 		if (!instance.hasOwnProperty("extra")) {
 			instance.extra = {};
 		}

@@ -60,7 +60,7 @@ declare namespace FxOrmQuery {
     interface InsertResult {
         insertId?: string | number
         
-        [extra_info: string]: any
+        [extra_key: string]: any
     }
 
     interface IAggregated {

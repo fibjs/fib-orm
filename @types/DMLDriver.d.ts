@@ -1,8 +1,11 @@
 /// <reference types="@fxjs/sql-query" />
 /// <reference types="@fxjs/sql-ddl-sync" />
 
+/// <reference path="_common.d.ts" />
 /// <reference path="connect.d.ts" />
 /// <reference path="property.d.ts" />
+/// <reference path="assoc.d.ts" />
+/// <reference path="Query.d.ts" />
 
 declare namespace FxOrmDMLDriver {
     type DriverUidType = string
