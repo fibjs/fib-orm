@@ -40,7 +40,7 @@ declare namespace FxOrmPatch {
         // uniq id
         uid: string
         hasMany?: {
-            (Model: FxOrmModel.Model, association: FxOrmAssociation.InstanceAssociationItem)
+            (Model: FxOrmModel.Model, association: FxOrmAssociation.InstanceAssociationItem): any
         }
         
         execQuerySync: (query: string, opt: FxOrmDMLDriver.OrigOrmExecQueryOpts) => any

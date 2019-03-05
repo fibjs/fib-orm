@@ -1,7 +1,7 @@
 import db = require('db');
 import url = require('url');
 
-declare var setImmediate;
+declare var setImmediate: any;
 
 class Database implements FxOrmDb.DatabaseBase_MySQL {
     conn: FxOrmNS.IDbConnection;
@@ -26,8 +26,8 @@ class Database implements FxOrmDb.DatabaseBase_MySQL {
     connect(cb: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): void {
         const that = this;
         const openMySQL: {
-            (connString: string, cb: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>)
-            (connString: FxOrmNS.IDBConnectionConfig, cb: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>)
+            (connString: string, cb: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): void
+            (connString: FxOrmNS.IDBConnectionConfig, cb: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): void
         } = db.openMySQL as any
 
         openMySQL(this.opts, function (e: Error, conn: FxOrmNS.IDbConnection) {

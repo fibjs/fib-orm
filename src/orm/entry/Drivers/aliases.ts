@@ -3,4 +3,4 @@ export = {
 	pg         : "postgres",
 
 	mongo      : "mongodb"
-};
+} as {[k: string]: string};

@@ -18,7 +18,7 @@ export function eagerQuery<T = any> (
 	var desiredKey = Object.keys(association.field);
 	var assocKey = Object.keys(association.mergeAssocId);
 
-	var where = {};
+	var where: {[k: string]: string[]} = {};
 	where[desiredKey + ''] = keys;
 
 	var query = this.query.select()

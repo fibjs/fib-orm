@@ -1,25 +1,25 @@
 import enforce = require("@fibjs/enforce");
 import util    = require("util");
 
-export const required       : enforce.enforcementValidation = enforce.required
-export const notEmptyString : enforce.enforcementValidation = enforce.notEmptyString
+export const required       : FibjsEnforce.enforcementValidation = enforce.required
+export const notEmptyString : FibjsEnforce.enforcementValidation = enforce.notEmptyString
 
-export const rangeNumber    : enforce.enforcementValidation = enforce.ranges.number
-export const rangeLength    : enforce.enforcementValidation = enforce.ranges.length
+export const rangeNumber    : FibjsEnforce.enforcementValidation = enforce.ranges.number
+export const rangeLength    : FibjsEnforce.enforcementValidation = enforce.ranges.length
 
-export const insideList     : enforce.enforcementValidation = enforce.lists.inside
-export const outsideList    : enforce.enforcementValidation = enforce.lists.outside
+export const insideList     : FibjsEnforce.enforcementValidation = enforce.lists.inside
+export const outsideList    : FibjsEnforce.enforcementValidation = enforce.lists.outside
 
-export const password       : enforce.enforcementValidation = enforce.security.password
+export const password       : FibjsEnforce.enforcementValidation = enforce.security.password
 
-export const patterns       : enforce.enforcementsContainer = enforce.patterns
+export const patterns       : FibjsEnforce.enforcementsContainer = enforce.patterns
 
 /**
  * Check if a value is the same as a value
  * of another property (useful for password
  * checking).
  **/
-export function equalToProperty (name: string, msg?: string): enforce.ValidationCallback {
+export function equalToProperty (name: string, msg?: string): FibjsEnforce.ValidationCallback {
 	return function (v, next) {
 		if (v === this[name]) {
 			return next();
@@ -48,7 +48,7 @@ export function unique (
 		scope?: string[]
 	} = {},
 	msg: string = null
-): enforce.ValidationCallback {
+): FibjsEnforce.ValidationCallback {
 	for (let k in arguments) {
 		const arg = arguments[k];
 		if (typeof arg === "string") {
@@ -70,7 +70,7 @@ export function unique (
 
 		var chain: FxOrmQuery.IChainFind = ctx.model.find();
 
-		var chainQuery = function (prop, value) {
+		var chainQuery = function (prop: string, value: any) {
 			var query: string | FxOrmModel.ModelQueryConditions__Find = null;
 
 			if (opts.ignoreCase === true && ctx.model.properties[prop] && ctx.model.properties[prop].type === 'text') {

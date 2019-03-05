@@ -27,9 +27,10 @@ declare namespace FxOrmDMLDriver {
     }
 
     interface DMLDriverConstructor {
-        (this: DMLDriver, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase, opts: DMLDriverOptions): void
+        new (config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase, opts: FxOrmDMLDriver.DMLDriverOptions): DMLDriver
         prototype: DMLDriver
     }
+
 
     type AggregationFuncTuple = [string, string]
     interface DMLDriver extends FxOrmSqlDDLSync__Driver.Driver {
@@ -48,10 +49,10 @@ declare namespace FxOrmDMLDriver {
         /* shared :end */
 
         connect: {
-            (cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>)
+            (cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): void
         }
         reconnect: {
-            (cb: null | FxOrmNS.VoidCallback, connection: null | FxOrmDb.DatabaseBase_MySQL)
+            (cb: null | FxOrmNS.VoidCallback, connection: null | FxOrmDb.DatabaseBase_MySQL): void
         }
         ping: {
             (cb?: FxOrmNS.VoidCallback): void
@@ -73,7 +74,7 @@ declare namespace FxOrmDMLDriver {
          */
         aggregate_functions: (string|AggregationFuncTuple)[]
         execSimpleQuery: {
-            <T=any>(query: string, cb: FxOrmNS.GenericCallback<T>)
+            <T=any>(query: string, cb: FxOrmNS.GenericCallback<T>): void
         }
         /**
          * @description do eager-query
@@ -84,7 +85,7 @@ declare namespace FxOrmDMLDriver {
                 opts: FxOrmQuery.ChainFindOptions,
                 keys: string[],
                 cb: FibOrmNS.GenericCallback<T>
-            )
+            ): void
         }
 
         find: {
@@ -106,7 +107,7 @@ declare namespace FxOrmDMLDriver {
                 conditions: FxSqlQuerySubQuery.SubQueryConditions,
                 opts: DMLDriver_CountOptions,
                 cb: FxOrmNS.GenericCallback<T>
-            )
+            ): void
         }
         insert: {
             (
@@ -114,7 +115,7 @@ declare namespace FxOrmDMLDriver {
                 data: FxSqlQuerySql.DataToSet,
                 keyProperties: FxOrmProperty.NormalizedProperty[],
                 cb: FxOrmNS.GenericCallback<FxOrmQuery.InsertResult>
-            )
+            ): void
         }
         update: {
             <T=any>(
@@ -122,26 +123,26 @@ declare namespace FxOrmDMLDriver {
                 changes: FxSqlQuerySql.DataToSet,
                 conditions: FxSqlQuerySubQuery.SubQueryConditions,
                 cb: FxOrmNS.GenericCallback<T>
-            )
+            ): void
         }
         remove: {
             <T=any>(
                 table: string,
                 conditions: FxSqlQuerySubQuery.SubQueryConditions,
                 cb: FxOrmNS.GenericCallback<T>
-            )
+            ): void
         }
         clear: {
             <T=any>(
                 table: string,
                 cb: FxOrmNS.GenericCallback<T>
-            )
+            ): void
         }
         poolQuery: {
             <T=any>(
                 query: string,
                 cb: FxOrmNS.GenericCallback<T>
-            )
+            ): void
         }
         valueToProperty: {
             (value: any, property: FxOrmProperty.NormalizedProperty): any
@@ -154,12 +155,15 @@ declare namespace FxOrmDMLDriver {
         [ext_key: string]: any
     }
     /* ============================= DMLDriver API Options :start ============================= */
+    // type ChainWhereExistsInfoPayload = {[key: string]: FxOrmQuery.ChainWhereExistsInfo} | FxOrmQuery.ChainWhereExistsInfo[]
+    type ChainWhereExistsInfoPayload = FxOrmQuery.ChainWhereExistsInfo[]
+    
     interface DMLDriver_FindOptions {
         offset?: number
         limit?: number
-        order?: string
+        order?: FxOrmQuery.OrderNormalizedResult[]
         merge?: FxOrmQuery.ChainFindMergeInfo
-        exists?: {[key: string]: FxOrmQuery.ChainWhereExistsInfo} | FxOrmQuery.ChainWhereExistsInfo[]
+        exists?: ChainWhereExistsInfoPayload
     }
     interface DMLDriver_CountOptions {
         merge?: FxOrmQuery.ChainFindMergeInfo
@@ -170,15 +174,22 @@ declare namespace FxOrmDMLDriver {
     /* ============================= typed db :start ============================= */
 
     interface DMLDriverConstructor_MySQL extends DMLDriverConstructor {
-        (this: DMLDriver_MySQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_MySQL, opts: DMLDriverOptions): void
+        (this: DMLDriver_MySQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_MySQL, opts: FxOrmDMLDriver.DMLDriverOptions): void
         prototype: DMLDriver_MySQL
     }
     interface DMLDriver_MySQL extends DMLDriver {
         db: FxOrmDb.DatabaseBase_MySQL
     }
+    interface DMLDriverConstructor_PostgreSQL extends DMLDriverConstructor {
+        (this: DMLDriver_PostgreSQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_PostgreSQL, opts: FxOrmDMLDriver.DMLDriverOptions): void
+        prototype: DMLDriver_PostgreSQL
+    }
+    interface DMLDriver_PostgreSQL extends DMLDriver {
+        db: FxOrmDb.DatabaseBase_PostgreSQL
+    }
 
     interface DMLDriverConstructor_SQLite extends DMLDriverConstructor {
-        (this: DMLDriver_SQLite, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_SQLite, opts: DMLDriverOptions): void
+        (this: DMLDriver_SQLite, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_SQLite, opts: FxOrmDMLDriver.DMLDriverOptions): void
         prototype: DMLDriver_SQLite
     }
     interface DMLDriver_SQLite extends DMLDriver {

@@ -4,10 +4,10 @@ declare namespace FxOrmProperty {
             (prop?: FxOrmProperty.NormalizedProperty): string
         }
         valueToProperty?: {
-            (value?: any, prop?: FxOrmProperty.NormalizedProperty)
+            (value?: any, prop?: FxOrmProperty.NormalizedProperty): any
         }
         propertyToValue?: {
-            (value?: any, prop?: FxOrmProperty.NormalizedProperty)
+            (value?: any, prop?: FxOrmProperty.NormalizedProperty): any
         }
         datastoreGet?: {
             (prop?: FxOrmProperty.NormalizedProperty, helper?: FxSqlQuery.Class_Query): any

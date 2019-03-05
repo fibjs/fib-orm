@@ -6,11 +6,11 @@ var shared  = require("./_shared");
 var DDL     = require("../DDL/SQL");
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function(
-	this: FxOrmDMLDriver.DMLDriver_SQLite, config, connection, opts
+	this: FxOrmDMLDriver.DMLDriver_SQLite, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_SQLite, opts: FxOrmDMLDriver.DMLDriverOptions
 ) {
 	this.dialect = 'sqlite';
-	this.config = config || {};
-	this.opts   = opts || {};
+	this.config = config || <FxOrmNS.IDBConnectionConfig>{};
+	this.opts   = opts || <FxOrmDMLDriver.DMLDriverOptions>{};
 
 	if (!this.config.timezone) {
 		this.config.timezone = "local";
@@ -30,7 +30,6 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function(
 		} else {
 			this.db = new sqlite3.Database(decodeURIComponent((config.host ? config.host : "") + (config.pathname || "")) || ':memory:');
 		}
-
 	}
 
 	this.aggregate_functions = [ "ABS", "ROUND",
@@ -38,7 +37,7 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function(
 	                             "RANDOM",
 	                             "SUM", "COUNT",
 	                             "DISTINCT" ];
-}
+} as any as FxOrmDMLDriver.DMLDriverConstructor_SQLite;
 
 util.extend(Driver.prototype, shared, DDL);
 
@@ -123,7 +122,8 @@ Driver.prototype.find = function (
 
 	if (opts.exists) {
 		for (let k in opts.exists) {
-			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
+			const exist_item = opts.exists[k];
+			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
 		}
 	}
 
@@ -155,7 +155,8 @@ Driver.prototype.count = function (
 
 	if (opts.exists) {
 		for (let k in opts.exists) {
-			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
+			const exist_item = opts.exists[k];
+			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
 		}
 	}
 
@@ -180,14 +181,15 @@ Driver.prototype.insert = function (
 	}
 
 
-	this.db.all(q, function (err, info) {
+	this.db.all<any>(q, function (err: FxOrmError.ExtendedError, info: any) {
 		if (err)            return cb(err);
 		if (!keyProperties) return cb(null);
 
-		var i, ids = {}, prop;
+		var ids: {[k: string]: any} = {},
+			prop;
 
 		if (keyProperties.length == 1 && keyProperties[0].type == 'serial') {
-			this.db.get("SELECT last_insert_rowid() AS last_row_id", function (err, row) {
+			this.db.get("SELECT last_insert_rowid() AS last_row_id", function (err: FxOrmError.ExtendedError, row: FxSqlQuerySql.SqlFoundRowItem) {
 				if (err) return cb(err);
 
 				ids[keyProperties[0].name] = row.last_row_id;
@@ -239,7 +241,7 @@ Driver.prototype.clear = function (
 ) {
 	var debug = this.opts.debug;
 
-	this.execQuery("DELETE FROM ??", [table], function (err) {
+	this.execQuery("DELETE FROM ??", [table], function (err: FxOrmError.ExtendedError) {
 		if (err) return cb(err);
 
 		this.execQuery("DELETE FROM ?? WHERE NAME = ?", ['sqlite_sequence', table], cb);
@@ -388,7 +390,7 @@ Object.defineProperty(Driver.prototype, "isSql", {
     value: true
 });
 
-function convertTimezone(tz) {
+function convertTimezone(tz: FxSqlQuery.FxSqlQueryTimezone) {
 	if (tz == "Z") return 0;
 
 	var m = tz.match(/([\+\-\s])(\d\d):?(\d\d)?/);

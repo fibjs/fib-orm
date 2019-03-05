@@ -1,6 +1,6 @@
 import util = require('util')
 
-const _cloneDeep = require('lodash.clonedeep')
+import _cloneDeep = require('lodash.clonedeep')
 
 /**
  * Order should be a String (with the property name assumed ascending)
@@ -27,7 +27,7 @@ export function standardizeOrder (order: FxOrmQuery.OrderRawInput): FxOrmQuery.O
 		return [ [ order, "A" ] ];
 	}
 
-	const new_order = [];
+	const new_order: FxOrmQuery.OrderNormalizedTuple[] = [];
 	let minus: boolean;
 
 	for (let i = 0; i < order.length; i++) {
@@ -36,7 +36,7 @@ export function standardizeOrder (order: FxOrmQuery.OrderRawInput): FxOrmQuery.O
 		if (i < order.length - 1 && [ "A", "Z" ].indexOf(order[i + 1].toUpperCase()) >= 0) {
 			new_order.push([
 				(minus ? order[i].substr(1) : order[i]),
-				order[i + 1]
+				order[i + 1] as FxSqlQuery.OrderNormalizedTuple[1]
 			]);
 			i += 1;
 		} else if (minus) {
@@ -113,12 +113,15 @@ export function checkConditions (
  * Gets all the values within an object or array, optionally
  * using a keys array to get only specific values
  */
-export function values <T=any>(obj: object|[], keys?: string[]): T[] {
-	var vals = [];
+export function values (obj: any[] | {[k: string]: any}, keys?: string[]) {
+	var vals: any[] = [];
 
 	if (keys) {
+		const non_arr = obj as {[k: string]: any}
 		for (let i = 0; i < keys.length; i++) {
-			vals.push(obj[keys[i]]);
+			vals.push(
+				non_arr[keys[i]]
+			);
 		}
 	} else if (Array.isArray(obj)) {
 		for (let i = 0; i < obj.length; i++) {
@@ -137,7 +140,7 @@ export function values <T=any>(obj: object|[], keys?: string[]): T[] {
 // Qn:       is Zero a valid value for a FK column?
 // Why?      Well I've got a pre-existing database that started all its 'serial' IDs at zero...
 // Answer:   hasValues() is only used in hasOne association, so it's probably ok...
-export function hasValues (obj: object, keys: string[]): boolean {
+export function hasValues (obj: {[k: string]: any}, keys: string[]): boolean {
 	for (let i = 0; i < keys.length; i++) {
 		if (!obj[keys[i]] && obj[keys[i]] !== 0) return false;  // 0 is also a good value...
 	}
@@ -147,7 +150,8 @@ export function hasValues (obj: object, keys: string[]): boolean {
 export function populateConditions (
 	model: FxOrmModel.Model,
 	fields: string[],
-	source: FxOrmAssociation.AssociationDefinitionOptions | FxOrmInstance.Instance,
+	// source: FxOrmAssociation.AssociationDefinitionOptions | FxOrmInstance.Instance,
+	source: FxOrmInstance.InstanceDataPayload,
 	target: FxSqlQuerySubQuery.SubQueryConditions,
 	overwrite?: boolean
 ): void {
@@ -179,7 +183,7 @@ export function getConditions (
 
 export function wrapFieldObject (
 	params: {
-		field: string | FxOrmProperty.NormalizedPropertyHash
+		field: string /* hasOne's Model's id field */ | FxOrmProperty.NormalizedPropertyHash
 		model: FxOrmModel.Model
 		altName: string
 		mapsTo?: FxOrmModel.ModelPropertyDefinition['mapsTo']
@@ -316,7 +320,7 @@ export function convertPropToJoinKeyProp (
 	return props;
 }
 
-export function getRealPath (path_str, stack_index?) {
+export function getRealPath (path_str: string, stack_index?: number) {
 	var path = require("path"); // for now, load here (only when needed)
 	var cwd = process.cwd();
 	var err = new Error();
@@ -362,8 +366,8 @@ export function transformOrderPropertyNames (
 ) {
 	if (!order) return order;
 
-	var item;
-	var newOrder = JSON.parse(JSON.stringify(order));
+	var item: FxOrmQuery.ChainFindOptions['order'][0];
+	var newOrder: FxOrmQuery.ChainFindOptions['order'] = JSON.parse(JSON.stringify(order));
 
 	// Rename order properties according to mapsTo
 	for (let i = 0; i < newOrder.length; i++) {

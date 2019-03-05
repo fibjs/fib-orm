@@ -22,16 +22,16 @@ const MODEL_FUNCS = [
 	"exists", "settings", "aggregate"
 ];
 
-const ChainFind: FxOrmQuery.ChainFindGenerator = function (
+const ChainFind = function (
 	this: void,
 	Model: FxOrmModel.Model, opts: FxOrmQuery.ChainFindOptions
 ) {
 
-	var chainRun = function<T> (done: FxOrmNS.GenericCallback<T|T[]|FxOrmInstance.InstanceDataPayload[]>) {
+	const chainRun = function<T> (done: FxOrmNS.GenericCallback<T|T[]|FxOrmInstance.InstanceDataPayload[]>) {
 		const conditions: FxSqlQuerySubQuery.SubQueryConditions = Utilities.transformPropertyNames(opts.conditions, opts.properties);
 		const order = Utilities.transformOrderPropertyNames(opts.order, opts.properties);
 
-		opts.driver.find(opts.only as FxSqlQueryColumns.SelectInputArgType[], opts.table, conditions, {
+		opts.driver.find(opts.only, opts.table, conditions, {
 			limit  : opts.limit,
 			order  : order,
 			merge  : opts.merge,
@@ -46,7 +46,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			}
 
 			var eagerLoad = function (err: Error, items: FxOrmInstance.InstanceDataPayload[]) {
-				var idMap = {};
+				var idMap: {[key: string]: number} = {};
 
 				var keys = util.map(items, function (item: FxOrmInstance.InstanceDataPayload, index: number) {
 					var key = item[opts.keys[0]];
@@ -97,7 +97,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 		});
 	}
 
-	var chain: FxOrmQuery.IChainFind = {
+	const chain: FxOrmQuery.IChainFind = {
 		model: null,
 		options: null,
 		
@@ -109,7 +109,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			opts.conditions = opts.conditions || {};
 
 			if (typeof util.last(args) === "function") {
-			    cb = args.pop() as any;
+			    cb = args.pop() as FxOrmNS.GenericCallback<T>;
 			}
 
 			if (typeof args[0] === "object") {
@@ -124,7 +124,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			}
 			return this;
 		},
-		whereExists: function <T>() {
+		whereExists: function () {
 			if (arguments.length && Array.isArray(arguments[0])) {
 				opts.exists = arguments[0];
 			} else {
@@ -162,7 +162,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			opts.offset = offset;
 			return this;
 		},
-		order: function (property, order) {
+		order: function (property, order?) {
 			if (!Array.isArray(opts.order)) {
 				opts.order = [];
 			}
@@ -173,11 +173,13 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			}
 			return this;
 		},
-		orderRaw: function (str: string, args: FxSqlQuerySql.SqlAssignmentValues) {
+		orderRaw: function (str, args?) {
 			if (!Array.isArray(opts.order)) {
 				opts.order = [];
 			}
-			opts.order.push([ str, args || [] as any ]);
+			args = args || [];
+
+			opts.order.push([ str, args ]);
 			return this;
 		},
 		count: function (cb) {
@@ -209,7 +211,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 				}
 
 				var conditions: FxSqlQuerySubQuery.SubQueryConditions = {};
-				var or;
+				var or: FxSqlQueryComparator.SubQueryInput;
 
 				conditions.or = [];
 
@@ -279,7 +281,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 	chain.options = opts as FxOrmQuery.ChainFindInstanceOptions;
 
 	return chain
-}
+} as any as FxOrmQuery.ChainFindGenerator;
 
 export = ChainFind
 
@@ -288,22 +290,26 @@ function addChainMethod(
 	association: FxOrmAssociation.InstanceAssociationItem,
 	opts: FxOrmQuery.ChainFindOptions
 ) {
-	chain[association.hasAccessor] = function (value) {
+	chain[association.hasAccessor] = function<T = any> (value: T) {
 		if (!opts.exists) {
 			opts.exists = [];
 		}
-		var conditions = {};
+		var conditions: FxSqlQuerySubQuery.SubQueryConditions = {};
 
 		var assocIds = Object.keys(association.mergeAssocId);
 		var ids = association.model.id;
-		function mergeConditions(source) {
-			for (let i = 0; i < assocIds.length; i++) {
-				if (typeof conditions[assocIds[i]] === "undefined") {
+		function mergeConditions(source: FxOrmInstance.InstanceDataPayload) {
+			for (let i = 0, cond_item; i < assocIds.length; i++) {
+				if (typeof cond_item === "undefined") {
 					conditions[assocIds[i]] = source[ids[i]];
-				} else if (Array.isArray(conditions[assocIds[i]])) {
-					conditions[assocIds[i]].push(source[ids[i]]);
+				} else if (
+					(cond_item = conditions[assocIds[i]])
+					&& Array.isArray(cond_item)
+				) {
+					cond_item.push(source[ids[i]]);
+					conditions[assocIds[i]] = cond_item
 				} else {
-					conditions[assocIds[i]] = [ conditions[assocIds[i]], source[ids[i]] ];
+					conditions[assocIds[i]] = [ cond_item, source[ids[i]] ];
 				}
 			}
 		}

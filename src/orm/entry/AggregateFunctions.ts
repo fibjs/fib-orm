@@ -1,15 +1,15 @@
 import ORMError   = require("./Error");
 import Utilities  = require("./Utilities");
 
-const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
+const AggregateFunctions = function (
 	this: FxOrmQuery.IAggregated,
 	opts: FxOrmQuery.AggregateConstructorOptions
 ) {
 	if (typeof opts.driver.getQuery !== "function") {
-		throw new ORMError('NO_SUPPORT', "This driver does not support aggregate functions");
+		throw new ORMError("This driver does not support aggregate functions", 'NO_SUPPORT');
 	}
 	if (!Array.isArray(opts.driver.aggregate_functions)) {
-		throw new ORMError('NO_SUPPORT', "This driver does not support aggregate functions");
+		throw new ORMError("This driver does not support aggregate functions", 'NO_SUPPORT');
 	}
 
 	const aggregates: [ FxSqlQuerySql.SqlSelectFieldsDescriptor[] ]    = [ [] ];
@@ -19,7 +19,7 @@ const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
 	const appendFunction = function (fun: string) {
 		return function () {
 			// select 1st array as aargs
-			var args: string | '*' = (arguments.length && Array.isArray(arguments[0]) ? arguments[0] : Array.prototype.slice.apply(arguments));
+			var args: string[] = (arguments.length && Array.isArray(arguments[0]) ? arguments[0] : Array.prototype.slice.apply(arguments));
 
 			if (args.length > 0) {
 				aggregates[aggregates.length - 1].push({ f: fun, a: args, alias: aggregateAlias(fun, args) });
@@ -54,7 +54,7 @@ const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
 		},
 		select: function (...columns: (string|string[])[]) {
 			if (columns.length === 0) {
-				throw new ORMError('PARAM_MISMATCH', "When using append you must at least define one property");
+				throw new ORMError("When using append you must at least define one property", 'PARAM_MISMATCH');
 			}
 			if (Array.isArray(columns[0])) {
 				opts.propertyList = opts.propertyList.concat(columns[0] as string[]);
@@ -65,7 +65,7 @@ const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
 		},
 		as: function (alias) {
 			if (!aggregates.length || (aggregates.length === 1 && aggregates[0].length === 0)) {
-				throw new ORMError('PARAM_MISMATCH', "No aggregate functions defined yet");
+				throw new ORMError("No aggregate functions defined yet", 'PARAM_MISMATCH');
 			}
 
 			var len = aggregates.length;
@@ -92,13 +92,13 @@ const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
 		},
 		get: function <T>(cb: FxOrmNS.GenericCallback<T[]>) {
 			if (typeof cb !== "function") {
-				throw new ORMError('MISSING_CALLBACK', "You must pass a callback to Model.aggregate().get()");
+				throw new ORMError("You must pass a callback to Model.aggregate().get()", 'MISSING_CALLBACK');
 			}
 			if (aggregates[aggregates.length - 1].length === 0) {
 				aggregates.length -= 1;
 			}
 			if (!aggregates.length) {
-				throw new ORMError('PARAM_MISMATCH', "Missing aggregate functions");
+				throw new ORMError("Missing aggregate functions", 'PARAM_MISMATCH');
 			}
 
 			const query = opts.driver.getQuery()
@@ -170,24 +170,33 @@ const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
 	};
 
 	for (let i = 0; i < opts.driver.aggregate_functions.length; i++) {
-		addAggregate(proto, opts.driver.aggregate_functions[i], appendFunction);
+		addAggregate(
+			proto,
+			opts.driver.aggregate_functions[i] as FxOrmQuery.KeyOfIAggregated,
+			appendFunction
+		);
 	}
 
 	return proto;
-}
+} as any as FxOrmQuery.AggregateConstructor;
 
 export = AggregateFunctions
 
 function addAggregate(
-	proto: FxOrmQuery.IAggregated, fun: string|string[], builder: Function
+	proto: FxOrmQuery.IAggregated,
+	fun: FxOrmQuery.KeyOfIAggregated|FxOrmQuery.KeyOfIAggregated[],
+	builder: Function
 ) {
+	let k: FxOrmQuery.KeyOfIAggregated
 	if (Array.isArray(fun)) {
-		proto[fun[0].toLowerCase()] = builder((fun[1] || fun[0]).toLowerCase());
+		k = fun[0].toLowerCase() as FxOrmQuery.KeyOfIAggregated
+		proto[k] = builder((fun[1] || fun[0]).toLowerCase());
 	} else {
-		proto[fun.toLowerCase()] = builder(fun.toLowerCase());
+		k = fun.toLowerCase() as FxOrmQuery.KeyOfIAggregated
+		proto[k] = builder(fun.toLowerCase());
 	}
 }
 
-function aggregateAlias(fun, fields) {
+function aggregateAlias(fun: string, fields?: string[]) {
 	return fun + (fields && fields.length ? "_" + fields.join("_") : "");
 }

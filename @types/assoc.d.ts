@@ -66,7 +66,7 @@ declare namespace FxOrmAssociation {
         name: string
         model: FxOrmModel.Model
         // is the association is extendsTo
-        field: string | FxOrmProperty.NormalizedPropertyHash
+        field: string | string[] | FxOrmProperty.NormalizedPropertyHash
         
         extension?: boolean
 
@@ -87,6 +87,9 @@ declare namespace FxOrmAssociation {
         autoFetchLimit: number
         
         mapsTo?: FxOrmModel.ModelPropertyDefinition['mapsTo']
+
+        // *Accessor functions
+        [k: string]: any
     }
 
     interface InstanceAssociatedInstance extends FxOrmInstance.Instance {
@@ -98,6 +101,8 @@ declare namespace FxOrmAssociation {
     }
 
     interface InstanceAssociationItem_HasOne extends InstanceAssociationItem {
+        field: string | FxOrmProperty.NormalizedPropertyHash
+        
         reverse?: string;
         // template name
         accessor?: string;

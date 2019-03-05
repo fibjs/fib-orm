@@ -9,24 +9,24 @@ var DDL     = require("../DDL/SQL");
 
 var switchableFunctions = {
 	pool: {
-		connect: function (cb) {
-			this.db.connect(this.config, function (err, client, done) {
+		connect: function<T = any> (cb: FxOrmNS.GenericCallback<T>) {
+			this.db.connect(this.config, function (err: FxOrmError.ExtendedError, client: any, done: Function) {
 				if (!err) {
 					done();
 				}
 				cb(err);
 			});
 		},
-		execSimpleQuery: function (query, cb) {
+		execSimpleQuery: function<T extends {rows: any} = any> (query: string, cb: FxOrmNS.GenericCallback<T>) {
 			if (this.opts.debug) {
 				require("../../Debug").sql('postgres', query);
 			}
-			this.db.connect(this.config, function (err, client, done) {
+			this.db.connect(this.config, function (err: FxOrmError.ExtendedError, client: any, done: Function) {
 				if (err) {
 					return cb(err);
 				}
 
-				client.query(query, function (err, result) {
+				client.query(query, function (err: FxOrmError.ExtendedError, result: T) {
 					done();
 
 					if (err) {
@@ -38,21 +38,21 @@ var switchableFunctions = {
 			});
 			return this;
 		},
-		on: function(ev, cb) {
+		on: function<T = any> (ev: string, cb: FxOrmNS.GenericCallback<T>) {
 			// Because `pg` is the same for all instances of this driver
 			// we can't keep adding listeners since they are never removed.
 			return this;
 		}
 	},
 	client: {
-		connect: function (cb) {
+		connect: function<T = any> (cb: FxOrmNS.GenericCallback<T>) {
 			this.db.connect(cb);
 		},
-		execSimpleQuery: function (query, cb) {
+		execSimpleQuery: function<T extends {rows: any} = any> (query: string, cb: FxOrmNS.GenericCallback<T>) {
 			if (this.opts.debug) {
 				require("../../Debug").sql('postgres', query);
 			}
-			this.db.query(query, function (err, result) {
+			this.db.query(query, function (err: FxOrmError.ExtendedError, result: T) {
 				if (err) {
 					cb(err);
 				} else {
@@ -61,7 +61,7 @@ var switchableFunctions = {
 			});
 			return this;
 		},
-		on: function(ev, cb) {
+		on: function<T = any> (ev: string, cb: FxOrmNS.GenericCallback<T>) {
 			if (ev == "error") {
 				this.db.on("error", cb);
 			}
@@ -70,12 +70,14 @@ var switchableFunctions = {
 	}
 };
 
-export function Driver(config, connection, opts) {
+export const Driver: FxOrmDMLDriver.DMLDriverConstructor = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_PostgreSQL, opts: FxOrmDMLDriver.DMLDriverOptions
+) {
 	var functions = switchableFunctions.client;
 
 	this.dialect = 'postgresql';
-	this.config = config || {};
-	this.opts   = opts || {};
+	this.config = config || <FxOrmNS.IDBConnectionConfig>{};
+	this.opts   = opts || <FxOrmDMLDriver.DMLDriverOptions>{};
 
 	if (!this.config.timezone) {
 		this.config.timezone = "local";
@@ -116,18 +118,18 @@ export function Driver(config, connection, opts) {
 		"SUM", "COUNT",
 		"DISTINCT"
 	];
-}
+} as any as FxOrmDMLDriver.DMLDriverConstructor;
 
 util.extend(Driver.prototype, shared, DDL);
 
-Driver.prototype.ping = function (cb) {
+Driver.prototype.ping = function<T = any> (cb: FxOrmNS.SuccessCallback<T>) {
 	this.execSimpleQuery("SELECT * FROM pg_stat_activity LIMIT 1", function () {
 		return cb();
 	});
 	return this;
 };
 
-Driver.prototype.close = function (cb) {
+Driver.prototype.close = function<T = any> (cb: FxOrmNS.SuccessCallback<T>) {
 	this.db.end();
 
 	if (typeof cb == "function") cb();
@@ -139,7 +141,7 @@ Driver.prototype.getQuery = function () {
 	return this.query;
 };
 
-Driver.prototype.find = function (fields, table, conditions, opts, cb) {
+Driver.prototype.find = function (fields, table, conditions, opts, cb: FxOrmNS.GenericCallback<any>) {
 	var q = this.query.select().from(table).select(fields);
 
 	if (opts.offset) {
@@ -169,7 +171,8 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb) {
 
 	if (opts.exists) {
 		for (let k in opts.exists) {
-			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
+			const exist_item = opts.exists[k];
+			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
 		}
 	}
 
@@ -194,7 +197,8 @@ Driver.prototype.count = function (table, conditions, opts, cb) {
 
 	if (opts.exists) {
 		for (let k in opts.exists) {
-			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
+			const exist_item = opts.exists[k];
+			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
 		}
 	}
 
@@ -206,12 +210,13 @@ Driver.prototype.count = function (table, conditions, opts, cb) {
 Driver.prototype.insert = function (table, data, keyProperties, cb) {
 	var q = this.query.insert().into(table).set(data).build();
 
-	this.execSimpleQuery(q + " RETURNING *", function (err, results) {
+	this.execSimpleQuery(q + " RETURNING *", function (err: FxOrmError.ExtendedError, results: any) {
 		if (err) {
 			return cb(err);
 		}
 
-		var i, ids = {}, prop;
+		var ids: {[k: string]: any} = {},
+			prop;
 
 		if (keyProperties) {
 			for (let i = 0; i < keyProperties.length; i++) {
@@ -353,7 +358,7 @@ Object.defineProperty(Driver.prototype, "isSql", {
     value: true
 });
 
-function convertTimezone(tz) {
+function convertTimezone(tz: FxSqlQuery.FxSqlQueryTimezone) {
 	if (tz == "Z") {
 		return 0;
 	}

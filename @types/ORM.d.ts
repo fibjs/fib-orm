@@ -46,7 +46,6 @@ declare namespace FxOrmNS {
     
     export type ComplexModelPropertyDefinition = FxOrmModel.ComplexModelPropertyDefinition
     export type FibOrmFixedModelOptions = FxOrmModel.ModelOptions
-    export type ValidationOptionHash = FxOrmValidators.ValidationOptionHash
     export type PatchedSyncfiedModelOrInstance = FxOrmPatch.PatchedSyncfiedModelOrInstance
     export type PatchedSyncfiedInstanceWithDbWriteOperation = FxOrmPatch.PatchedSyncfiedInstanceWithDbWriteOperation
     export type PatchedSyncfiedInstanceWithAssociations = FxOrmPatch.PatchedSyncfiedInstanceWithAssociations
@@ -148,30 +147,28 @@ declare namespace FxOrmNS {
     interface PluginOptions {
         [key: string]: any
     }
-    interface PluginDefineFunction {
-        (orm?: ORM, opts?: PluginOptions): Plugin
-    }
     interface PluginConstructor {
-        new (orm?: ORM, opts?: PluginOptions)
+        new (orm?: ORM, opts?: PluginOptions): Plugin
+        // prototype: Plugin
     }
     interface Plugin {
         // (connection: FibORM, proto: any, opts: any, cb: Function): any
         beforeDefine?: {
-            (name?: string, properties?: FxOrmModel.ModelPropertyDefinitionHash, opts?: FxOrmModel.ModelOptions)
+            (name?: string, properties?: FxOrmModel.ModelPropertyDefinitionHash, opts?: FxOrmModel.ModelOptions): void
         }
         define?: {
-            (model?: FxOrmModel.Model, orm?: ORM)
+            (model?: FxOrmModel.Model, orm?: ORM): void
         }
     }
 
     interface ORMConstructor {
-        (driver_name: string, driver: FxOrmDMLDriver.DMLDriver, settings: FxOrmSettings.SettingInstance): void
+        new (driver_name: string, driver: FxOrmDMLDriver.DMLDriver, settings: FxOrmSettings.SettingInstance): ORM
         prototype: ORM
     }
 
     interface ORM extends Class_EventEmitter, FxOrmSynchronous.SynchronizedORMInstance, FxOrmPatch.PatchedORMInstance {
         validators: FxOrmValidators.ValidatorModules;
-        enforce: FxOrmValidators.FibjsEnforce;
+        enforce: FibjsEnforce.ExportModule;
         settings: FxOrmSettings.SettingInstance;
         driver_name: string;
         driver: FxOrmPatch.PatchedDMLDriver;
@@ -180,7 +177,7 @@ declare namespace FxOrmNS {
         plugins: Plugin[];
         customTypes: { [key: string]: FxOrmProperty.CustomPropertyType };
 
-        use(plugin: PluginDefineFunction | PluginConstructor, options?: PluginOptions): ORM;
+        use(plugin: PluginConstructor, options?: PluginOptions): ORM;
 
         define(name: string, properties: FxOrmModel.ModelPropertyDefinitionHash, opts?: FxOrmModel.ModelOptions): FxOrmModel.Model;
         defineType(name: string, type: FxOrmProperty.CustomPropertyType): this;
@@ -233,7 +230,7 @@ declare namespace FxOrmNS {
             (key?: string): SingletonModule
         };
         get: {
-            (key: string, opts: SingletonOptions, createCb: Function, returnCb: Function)
+            <T = any>(key: string, opts: SingletonOptions, createCb: Function, returnCb: Function): T
         };
     }
     
@@ -260,7 +257,7 @@ declare namespace FxOrmNS {
         settings: FxOrmSettings.SettingInstance
         singleton: any
         Property: PropertyModule
-        enforce: FxOrmValidators.FibjsEnforce
+        enforce: FibjsEnforce.ExportModule
         ErrorCodes: FxOrmNS.PredefineErrorCodes
         addAdapter: FxOrmNS.AddAdapatorFunction
 

@@ -7,7 +7,7 @@ export const sync: FxOrmDMLDriver.DMLDriver['sync'] = function (
 	var sync = new Sync({
 		driver  : this,
 		// debug   : false // function (text) { console.log(text); }
-		debug: function (text) {
+		debug: function (text: string) {
 			(process.env as any).DEBUG_SQLDDLSYNC && (global as any).console.log("> %s", text);
 		}
 	});

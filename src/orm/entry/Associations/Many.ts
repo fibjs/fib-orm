@@ -1,7 +1,7 @@
 import util = require('util');
 import coroutine = require('coroutine');
 
-const _flatten = require('lodash.flatten')
+import _flatten = require('lodash.flatten')
 
 import Hook = require("../Hook");
 import Settings = require("../Settings");
@@ -431,7 +431,7 @@ function extendInstance(
 			var items = _flatten(arguments);
 			var cb = util.last(items) instanceof Function ? items.pop() : noOperation;
 
-			Instance[association.delAccessor](function (err) {
+			Instance[association.delAccessor](function (err: FxOrmError.ExtendedError) {
 				if (err) return cb(err);
 
 				if (items.length) {
@@ -487,7 +487,7 @@ function extendInstance(
 			if (this.saved()) {
 				run();
 			} else {
-				this.save(function (err) {
+				this.save(function (err: FxOrmError.ExtendedError) {
 					if (err) {
 						return cb(err);
 					}
@@ -503,7 +503,7 @@ function extendInstance(
 	Object.defineProperty(Instance, association.addAccessor, {
 		value: function () {
 			var Associations: FxOrmAssociation.InstanceAssociatedInstance[] = [];
-			var opts = {};
+			var add_opts: {[k: string]: any} = {};
 			var cb = noOperation;
 
 			for (let i = 0; i < arguments.length; i++) {
@@ -517,7 +517,7 @@ function extendInstance(
 						} else if (arguments[i].isInstance) {
 							Associations.push(arguments[i]);
 						} else {
-							opts = arguments[i];
+							add_opts = arguments[i];
 						}
 						break;
 				}
@@ -545,13 +545,13 @@ function extendInstance(
 								return cb(err);
 							}
 
-							var data = {};
+							var data: {[k: string]: any} = {};
 
-							for (let k in opts) {
+							for (let k in add_opts) {
 								if (k in association.props && Driver.propertyToValue) {
-									data[k] = Driver.propertyToValue(opts[k], association.props[k]);
+									data[k] = Driver.propertyToValue(add_opts[k], association.props[k]);
 								} else {
-									data[k] = opts[k];
+									data[k] = add_opts[k];
 								}
 							}
 
@@ -583,7 +583,7 @@ function extendInstance(
 					};
 
 					if (Object.keys(association.props).length) {
-						Hook.wait(Association, association.hooks.beforeSave, saveAssociation, opts);
+						Hook.wait(Association, association.hooks.beforeSave, saveAssociation, add_opts);
 					} else {
 						Hook.wait(Association, association.hooks.beforeSave, saveAssociation);
 					}

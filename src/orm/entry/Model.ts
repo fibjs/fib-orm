@@ -28,8 +28,7 @@ const AvailableHooks: (keyof FxOrmModel.Hooks)[] = [
 
 function noOp () {};
 
-export const Model: FxOrmModel.ModelConstructor = function (
-	this: FxOrmModel.Model,
+export const Model = function (
 	m_opts: FxOrmModel.ModelConstructorOptions
 ) {
 	m_opts = util.extend(m_opts || {}, { keys: m_opts.keys || [] });
@@ -44,7 +43,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	const allProperties: FxOrmProperty.NormalizedPropertyHash = {};
 	const keyProperties: FxOrmProperty.NormalizedProperty[] = [];
 
-	var createHookHelper = function (hook: string) {
+	var createHookHelper = function (hook: keyof FxOrmModel.Hooks) {
 		return function (cb: FxOrmHook.HookActionCallback) {
 			if (typeof cb !== "function") {
 				delete m_opts.hooks[hook];
@@ -103,7 +102,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 			ExtendAssociation.extend(model, instance, m_opts.driver, extend_associations, assoc_opts);
 		};
 
-		var pending  = 2, create_err = null;
+		var pending  = 2, create_err: FxOrmError.ExtendedError = null;
 		var instance = new Instance(model, {
 			uid                    : inst_opts.uid, // singleton unique id
 			keys                   : m_opts.keys,
@@ -164,7 +163,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 
 	    if (Array.isArray(m_opts.keys) && Array.isArray(data)) {
 	        if (data.length == m_opts.keys.length) {
-	            var data2 = {};
+	            var data2: FxOrmModel.ModelInstanceConstructorOptions[0] = {};
 	            for (let i = 0; i < m_opts.keys.length; i++) {
 	                data2[m_opts.keys[i]] = data[i++];
 	            }
@@ -178,7 +177,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	            throw err;
 	        }
 	    } else if (typeof data === "number" || typeof data === "string") {
-	        var data2 = {};
+	        var data2: FxOrmModel.ModelInstanceConstructorOptions[0] = {};
 	        data2[m_opts.keys[0]] = data;
 
 	        return createInstance(data2, { isShell: true });
@@ -466,7 +465,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 			chain.run(cb);
 			return this;
 		}
-	};
+	} as FxOrmModel.Model['find'];
 
 	model.where = model.all = model.find;
 
@@ -513,7 +512,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		}
 
 		if (typeof cb !== "function") {
-		    throw new ORMError('MISSING_CALLBACK', "Missing Model.count() callback", { model: m_opts.table });
+		    throw new ORMError("Missing Model.count() callback", 'MISSING_CALLBACK', { model: m_opts.table });
 		}
 
 		if (conditions) {
@@ -559,7 +558,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 			propertyList : propertyList,
 			properties   : allProperties
 		});
-	} as FxOrmModel.Model['aggregate'];
+	};
 
 	model.exists = function (...ids: any[]) {
 		var cb: FxOrmModel.ModelMethodCallback__Boolean  = ids.pop() as any;
@@ -626,12 +625,12 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	} as FxOrmModel.Model['exists'];
 
 	model.create = function () {
-		var itemsParams = []
-		var items       = [];
+		var itemsParams: FxOrmInstance.InstanceDataPayload[] = []
+		var items: FxOrmInstance.Instance[] = [];
 		// var options     = {};
-		var done        = null;
-		var create_err	= null;
-		var single      = false;
+		var done: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance | FxOrmInstance.Instance[]>        = null;
+		var create_err: FxOrmError.ExtendedError	= null;
+		var single: boolean      = false;
 
 		for (let i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
@@ -699,16 +698,16 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		return this;
 	} as FxOrmModel.Model['clear'];
 
-	model.prependValidation = function (key: string, validation: enforce.IValidator) {
+	model.prependValidation = function (key: string, validation: FibjsEnforce.IValidator) {
 		if(m_opts.validations.hasOwnProperty(key)) {
-			(m_opts.validations[key] as enforce.IValidator[]).splice(0, 0, validation);
+			(m_opts.validations[key] as FibjsEnforce.IValidator[]).splice(0, 0, validation);
 		} else {
 			m_opts.validations[key] = [validation];
 		}
-	} as FxOrmModel.Model['prependValidation'];
+	};
 
 	// control current owned fields
-	const currFields = {};
+	const currFields: {[k: string]: true} = {};
 
 	model.addProperty = function (propIn, options) {
 		var cType: FxOrmProperty.CustomPropertyType;
@@ -777,8 +776,9 @@ export const Model: FxOrmModel.ModelConstructor = function (
 
 	// Standardize validations
 	for (let k in m_opts.validations) {
-		if (!Array.isArray(m_opts.validations[k])) {
-			m_opts.validations[k] = [ m_opts.validations[k] ] as enforce.IValidator[];
+		const validationHash = m_opts.validations[k]
+		if (!Array.isArray(validationHash)) {
+			m_opts.validations[k] = [ validationHash ];
 		}
 	}
 
@@ -808,4 +808,4 @@ export const Model: FxOrmModel.ModelConstructor = function (
 	ExtendAssociation.prepare(m_opts.db, model, extend_associations);
 
 	return model;
-}
+} as any as FxOrmModel.ModelConstructor;

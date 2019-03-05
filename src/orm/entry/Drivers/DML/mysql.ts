@@ -6,7 +6,7 @@ import shared  = require("./_shared");
 import DDL     = require("../DDL/SQL");
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_MySQL = function(
-	this: FxOrmDMLDriver.DMLDriver_MySQL, config, connection, opts
+	this: FxOrmDMLDriver.DMLDriver_MySQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_MySQL, opts: FxOrmDMLDriver.DMLDriverOptions
 ) {
 	this.dialect = 'mysql';
 	this.config = config || <FxOrmNS.IDBConnectionConfig>{};
@@ -28,7 +28,7 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor_MySQL = function(
 	                             "CONV", [ "RANDOM", "RAND" ], "RADIANS", "DEGREES",
 	                             "SUM", "COUNT",
 	                             "DISTINCT"];
-}
+} as any as FxOrmDMLDriver.DMLDriverConstructor_MySQL;
 
 util.extend(Driver.prototype, shared, DDL);
 
@@ -157,7 +157,8 @@ Driver.prototype.find = function (
 
 	if (opts.exists) {
 		for (let k in opts.exists) {
-			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
+			const exist_item = opts.exists[k];
+			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
 		}
 	}
 
@@ -184,7 +185,8 @@ Driver.prototype.count = function (
 
 	if (opts.exists) {
 		for (let k in opts.exists) {
-			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
+			const exist_item = opts.exists[k];
+			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
 		}
 	}
 
@@ -255,12 +257,12 @@ Driver.prototype.clear = function (
 Driver.prototype.poolQuery = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, query, cb
 ) {
-	this.db.pool.getConnection(function (err, con) {
+	this.db.pool.getConnection(function (err: FxOrmError.ExtendedError, con: any) {
 		if (err) {
 			return cb(err);
 		}
 
-		con.query(query, function (err: Error, data) {
+		con.query(query, function (err: Error, data: any) {
 			if (con.release) {
 				con.release();
 			} else {

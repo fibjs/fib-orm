@@ -5,15 +5,15 @@ declare namespace FxOrmNS {
     type IdType = string | number
     
     interface VoidCallback {
-        (err?: FxOrmError.ExtendedError|null): any
+        (err?: FxOrmError.ExtendedError | null): any
     }
 
     interface ExecutionCallback<T> {
-        (err: string|FxOrmError.ExtendedError|null, result?: T): any
+        (err: string | FxOrmError.ExtendedError | FxOrmError.ExtendedError[] | null, result?: T): any
     }
 
     interface GenericCallback<T> {
-        (err: FxOrmError.ExtendedError|null, result?: T): any
+        (err: FxOrmError.ExtendedError | null, result?: T): any
     }
 
     interface SuccessCallback<T> {

@@ -1,27 +1,24 @@
 /// <reference types="@fibjs/enforce" />
 
 declare namespace FxOrmValidators {
-   type FibjsEnforce = typeof enforce
-
    interface ValidatorModules {
-        required: enforce.enforcementValidation
-        notEmptyString: enforce.enforcementValidation
-        rangeNumber: enforce.enforcementValidation
-        rangeLength: enforce.enforcementValidation
-        insideList: enforce.enforcementValidation
-        outsideList: enforce.enforcementValidation
-        password: enforce.enforcementValidation
+        required: FibjsEnforce.enforcementValidation
+        notEmptyString: FibjsEnforce.enforcementValidation
+        rangeNumber: FibjsEnforce.enforcementValidation
+        rangeLength: FibjsEnforce.enforcementValidation
+        insideList: FibjsEnforce.enforcementValidation
+        outsideList: FibjsEnforce.enforcementValidation
+        password: FibjsEnforce.enforcementValidation
 
-        patterns: enforce.enforcementsContainer
+        patterns: FibjsEnforce.enforcementsContainer
 
         /* extra validators: start */
-        equalToProperty(name: string, message?: string): enforce.ValidationCallback;
-        unique(opts?: { ignoreCase: boolean }, message?: string): enforce.ValidationCallback;
+        equalToProperty(name: string, message?: string): FibjsEnforce.ValidationCallback;
+        unique(opts?: { ignoreCase: boolean }, message?: string): FibjsEnforce.ValidationCallback;
         /* extra validators: end */
    }
 
-   interface ValidationOptionHash {
-      [validation: string]: enforce.IValidator | enforce.IValidator[]
-      // [validation: string]: enforce.ValidationCallback | enforce.ValidationCallback[]
-  }
+   interface IValidatorHash {
+      [validation: string]: FibjsEnforce.IValidator[]
+   }
 }

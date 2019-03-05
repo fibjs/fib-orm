@@ -1,4 +1,4 @@
-const _cloneDeep = require('lodash.clonedeep');
+import _cloneDeep = require('lodash.clonedeep');
 import ORMError = require("./Error");
 
 var KNOWN_TYPES = [
@@ -7,7 +7,8 @@ var KNOWN_TYPES = [
 ];
 
 export const normalize: FxOrmNS.PropertyModule['normalize'] = function (opts): FxOrmProperty.NormalizedProperty {
-	let result_prop: FxOrmProperty.NormalizedProperty = opts.prop as FxOrmProperty.NormalizedProperty
+	const orig_prop = opts.prop as FxOrmProperty.NormalizedProperty
+	let result_prop: FxOrmProperty.NormalizedProperty = orig_prop
 
 	if (typeof opts.prop === "function") {
 		const primitiveProp: FxOrmModel.PrimitiveConstructorModelPropertyDefinition = opts.prop 
@@ -38,7 +39,7 @@ export const normalize: FxOrmNS.PropertyModule['normalize'] = function (opts): F
 	} else if (Array.isArray(opts.prop)) {
 		result_prop = <FxOrmProperty.NormalizedProperty>{ type: "enum", values: opts.prop };
 	} else {
-		result_prop = _cloneDeep(opts.prop);
+		result_prop = _cloneDeep<FxOrmProperty.NormalizedProperty>(orig_prop);
 	}
 
 	if (KNOWN_TYPES.indexOf(result_prop.type) === -1 && !(result_prop.type in opts.customTypes)) {

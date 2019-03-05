@@ -39,7 +39,9 @@ declare namespace FxOrmQuery {
 
     type OrderRawInput = string | OrderRawTuple
     type OrderRawTuple = [string, string?]
-    type OrderNormalizedTuple = [string, "Z" | "A"]
+    type OrderNormalizedTuple = FxSqlQuery.OrderNormalizedTuple
+    type OrderSqlStyleTuple = FxSqlQuery.OrderSqlStyleTuple
+    type OrderNormalizedResult = FxSqlQuery.OrderNormalizedResult
     
     interface ChainFindMergeInfo {
         from: {
@@ -68,42 +70,47 @@ declare namespace FxOrmQuery {
     }
 
     interface IAggregated {
-        groupBy(...columns: string[]): IAggregated;
-        limit(limit: number): IAggregated;
-        limit(offset: number, limit: number): IAggregated;
-        order(...order: string[]): IAggregated;
+        groupBy: {
+            (...columns: string[]): IAggregated;
+        }
+        limit: {
+            (limit: number): IAggregated;
+            (offset: number, limit: number): IAggregated;
+        }
+        order: {
+            (...order: string[]): IAggregated;
+        }
         select: {
             (columns: string[]): IAggregated;
             (...columns: string[]): IAggregated;
         }
-        as(alias: string): IAggregated;
-        call(fun: string, args: any[]): IAggregated;
+        as: {
+            (alias: string): IAggregated;
+        }
+        call: {
+            (fun: string, args: any[]): IAggregated;
+        }
         get: {
-            <T>(cb: FxOrmNS.GenericCallback<T[]>)
+            <T = any>(cb: FxOrmNS.GenericCallback<T[]>): void
         }
     }
+    type KeyOfIAggregated = keyof IAggregated
 
     interface AggregateConstructorOptions {
         driver: FxOrmDMLDriver.DMLDriver
         driver_name?: string
         limit?: [number, number]
-        order?: FxOrmQuery.OrderNormalizedTuple[] // string[]
+        order?: FxOrmQuery.OrderNormalizedTuple[]
         // property name's list
         propertyList?: string[]
         table?: string
         conditions?: FxOrmQuery.QueryConditions
         properties: FxOrmProperty.NormalizedPropertyHash
     }
-    interface AggregateConstructor {
-        (opts: AggregateConstructorOptions): void
-        prototype: IAggregated
-    }
+    
+    type AggregateConstructor = new (opts: AggregateConstructorOptions) => IAggregated
 
-    interface ChainFindGenerator {
-        // new (Model: FxOrmModel.Model, opts: FxOrmQuery.ChainFindOptions)
-        (Model: FxOrmModel.Model, opts: FxOrmQuery.ChainFindOptions): void
-        prototype: IChainFind
-    }
+    type ChainFindGenerator = new (Model: FxOrmModel.Model, opts: FxOrmQuery.ChainFindOptions) => IChainFind
 
     interface IChainFind {
         find: {
@@ -121,8 +128,8 @@ declare namespace FxOrmQuery {
         skip(offset: number): IChainFind;
         offset(offset: number): IChainFind;
 
-        order(propertyOrderDesc: FxOrmQuery.OrderNormalizedTuple[0], order?: string | FxOrmQuery.OrderNormalizedTuple[1]): IChainFind;
-        orderRaw(str: string, args: any[]): IChainFind;
+        order(propertyOrderDesc: string, order?: FxOrmQuery.OrderNormalizedTuple[1]): IChainFind;
+        orderRaw(str: FxOrmQuery.OrderSqlStyleTuple[0], args?: FxOrmQuery.OrderSqlStyleTuple[1]): IChainFind;
         limit(limit: number): IChainFind;
         count(callback: FxOrmNS.ExecutionCallback<number>): IChainFind;
         remove(callback: FxOrmNS.VoidCallback): IChainFind;
@@ -161,8 +168,9 @@ declare namespace FxOrmQuery {
         conditions: QueryConditions
         properties: FxOrmProperty.NormalizedPropertyHash
         keyProperties: FxOrmProperty.NormalizedProperty[]
-        order: FxOrmQuery.OrderNormalizedTuple[]
-        only: string|FxSqlQueryColumns.SelectInputArgType[]
+        order: (FxOrmQuery.OrderNormalizedTuple | FxOrmQuery.OrderSqlStyleTuple)[]
+        // only: string|FxSqlQueryColumns.SelectInputArgType[]
+        only: (string|FxSqlQueryColumns.SelectInputArgType)[]
         limit: number
         offset: number
         merge: FxOrmQuery.ChainFindMergeInfo

@@ -14,7 +14,7 @@ export class Database implements FxOrmDb.DatabaseBase {
         this.conn.execute(sql, cb);
     }
 
-    get<T=any>(sql: string, cb: FxOrmNS.GenericCallback<T>) {
+    get<T extends any[] =any>(sql: string, cb: FxOrmNS.GenericCallback<T>) {
         this.all(sql, function (e: Error, r: T) {
             if (e)
                 cb(e);

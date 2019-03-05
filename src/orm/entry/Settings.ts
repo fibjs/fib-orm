@@ -1,6 +1,6 @@
 /// <reference path="../../../@types/index.d.ts" />
 
-const _cloneDeep = require('lodash.clonedeep');
+import _cloneDeep = require('lodash.clonedeep');
 
 const default_settings = {
 	properties : {
@@ -61,7 +61,7 @@ export const Container: FxOrmSettings.SettingsContainerGenerator = function (set
 	};
 }
 
-function set(key: string, value: any, obj) {
+function set (key: string, value: any, obj: {[k: string]: any}): any {
 	const p = key.indexOf(".");
 
 	if (p === -1) {
@@ -75,7 +75,7 @@ function set(key: string, value: any, obj) {
 	return set(key.substr(p + 1), value, obj[key.substr(0, p)]);
 }
 
-function get(key: string, def: any, obj) {
+function get(key: string, def: any, obj: {[k: string]: any}): any {
 	const p = key.indexOf(".");
 
 	if (p === -1) {

@@ -2,14 +2,15 @@ export function defineDefaultExtendsToTableName (modelTableName: string, assocNa
 	return `${modelTableName}_${assocName}`
 }
 
+type ACCESSOR_PREFIX = 'add' | 'get' | 'set' | 'has' | 'remove' | 'findBy'
 export function defineAssociationAccessorMethodName (
-	prefixer: 'get' | 'set' | 'has' | 'remove' | 'findBy',
+	prefixer: ACCESSOR_PREFIX,
 	assocName: string
 ): string {
 	return `${prefixer}${assocName}`
 }
 
-export const ACCESSOR_KEYS = {
+export const ACCESSOR_KEYS: {[k: string]: ACCESSOR_PREFIX} = {
 	/* common :start */
 	"get": "get" as 'get',
 	"set": "set" as 'set',
@@ -26,7 +27,10 @@ export function getMapsToFromProperty (property: FxOrmProperty.NormalizedPropert
 	return property.mapsTo || property.name
 }
 
-export function cutOffAssociatedModelFindOptions (findby_options: FxOrmAssociation.ModelAssociationMethod__FindByOptions, assocNameTplName: string) {
+export function cutOffAssociatedModelFindOptions (
+	findby_options: FxOrmAssociation.ModelAssociationMethod__FindByOptions,
+	assocNameTplName: string
+) {
 	let opts = null;
 	if (findby_options.hasOwnProperty(assocNameTplName)) {
 		const k = `${assocNameTplName}_find_options`;

@@ -1,4 +1,4 @@
-let map = {};
+let map: {[k: string]: any} = {};
 
 export const clear: FxOrmNS.SingletonModule['clear'] = function (key?: string) {
 	if (typeof key === "string") {

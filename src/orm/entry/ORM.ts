@@ -4,7 +4,7 @@ import url            = require("url");
 import uuid			  = require('uuid')
 
 import SqlQuery       = require("@fxjs/sql-query");
-const _cloneDeep 	  = require('lodash.clonedeep');
+import _cloneDeep 	  = require('lodash.clonedeep');
 
 import { Model }      from "./Model";
 import DriverAliases  = require("./Drivers/aliases");
@@ -137,8 +137,8 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 	return db;
 };
 
-const ORM: FxOrmNS.ORMConstructor = function (
-	this: FxOrmNS.ORM, driver_name, driver, settings
+const ORM = function (
+	this: FxOrmNS.ORM, driver_name: string, driver: FxOrmDMLDriver.DMLDriver, settings: FxOrmSettings.SettingInstance
 ) {
 	this.validators  = validators;
 	this.enforce     = Enforces;
@@ -172,13 +172,14 @@ const ORM: FxOrmNS.ORMConstructor = function (
 	}.bind(this);
 
 	driver.on("error", onError);
-}
+} as any as FxOrmNS.ORMConstructor;
 
 util.inherits(ORM, events.EventEmitter);
 
 ORM.prototype.use = function (
 	this: FxOrmNS.ORM,
-	plugin_const: FxOrmNS.PluginConstructor, opts
+	plugin_const,
+	opts
 ) {
 	if (typeof plugin_const === "string") {
 		try {
@@ -284,7 +285,7 @@ ORM.prototype.load = function (
 		var file = files.shift();
 
 		try {
-			return require(Utilities.getRealPath(file, 4))(this, function (err) {
+			return require(Utilities.getRealPath(file, 4))(this, function (err: FxOrmError.ExtendedError) {
 				if (err) return cb(err);
 
 				return loadNext();
@@ -364,7 +365,7 @@ ORM.prototype.serial = function (
 ) {
 	return {
 		get: function (cb: FibOrmNS.GenericCallback<any[]>) {
-			var params = [];
+			var params: any[] = [];
 			var getNext = function () {
 				if (params.length === chains.length) {
 					params.unshift(null);

@@ -46,8 +46,10 @@ export function prepare (
 			});
 		}
 
+		const normalizedField = association.field as FxOrmProperty.NormalizedPropertyHash
+
 		Utilities.convertPropToJoinKeyProp(
-			association.field as FxOrmProperty.NormalizedPropertyHash,
+			normalizedField as FxOrmProperty.NormalizedPropertyHash,
 			{
 				makeKey: false, required: association.required
 			});
@@ -59,13 +61,13 @@ export function prepare (
 		}
 
 		associations.push(association);
-		for (let k in association.field as FxOrmProperty.NormalizedPropertyHash) {
-			if (!association.field.hasOwnProperty(k)) {
+		for (let k in normalizedField) {
+			if (!normalizedField.hasOwnProperty(k)) {
 				continue;
 			}
 			if (!association.reversed) {
 				Model.addProperty(
-					util.extend({}, association.field[k], { klass: 'hasOne' }),
+					util.extend({}, normalizedField[k], { klass: 'hasOne' }),
 					false
 				);
 			}
@@ -76,7 +78,7 @@ export function prepare (
 				reversed       : true,
 				accessor       : association.reverseAccessor,
 				reverseAccessor: undefined,
-				field          : association.field as FxOrmProperty.NormalizedPropertyHash,
+				field          : normalizedField,
 				autoFetch      : association.autoFetch,
 				autoFetchLimit : association.autoFetchLimit
 			});
@@ -106,7 +108,7 @@ export function prepare (
 				throw new ORMError(`.${association.modelFindByAccessor}() is missing a conditions object`, 'PARAM_MISMATCH');
 			}
 
-			const ft_tuple_fields = [Object.keys(association.field), association.model.id]
+			const ft_tuple_fields = [Object.keys(normalizedField), association.model.id]
 			let ft_tuple_table = null
 
 			let from_table = `${association.model.table}`,
@@ -157,7 +159,7 @@ export function extend (
 	Instance: FxOrmInstance.Instance,
 	Driver: FxOrmDMLDriver.DMLDriver,
 	// extend target
-	associations: FxOrmAssociation.InstanceAssociationItem[]
+	associations: FxOrmAssociation.InstanceAssociationItem_HasOne[]
 ) {
 	for (let i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i]);
@@ -193,17 +195,19 @@ function extendInstance(
 	Instance: FxOrmInstance.Instance,
 	Driver: FxOrmDMLDriver.DMLDriver,
 	// extend target
-	association: FxOrmAssociation.InstanceAssociationItem
+	association: FxOrmAssociation.InstanceAssociationItem_HasOne
 ) {
 	Object.defineProperty(Instance, association.hasAccessor, {
-		value: function (opts?: FxOrmAssociation.AccessorOptions_has, cb?: FxOrmNS.GenericCallback<boolean>) {
-			if (typeof opts === "function") {
-				cb = opts as any;
-				opts = {};
+		value: function (_has_opts?: FxOrmAssociation.AccessorOptions_has, cb?: FxOrmNS.GenericCallback<boolean>) {
+			if (typeof _has_opts === "function") {
+				cb = _has_opts as any;
+				_has_opts = {};
 			}
 
 			if (Utilities.hasValues(Instance, Object.keys(association.field))) {
-				association.model.get(Utilities.values(Instance, Object.keys(association.field)), opts, function (err, instance) {
+				association.model.get(Utilities.values(Instance, Object.keys(association.field)),
+				_has_opts,
+				function (err: FxOrmError.ExtendedError, instance: FxOrmInstance.Instance) {
 					return cb(err, instance ? true : false);
 				});
 			} else {

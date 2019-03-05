@@ -38,7 +38,7 @@ function addLazyLoadProperty(
 	});
 	Object.defineProperty(Instance, "remove" + method, {
 		value: function (cb: FxOrmNS.ExecutionCallback<FxOrmNS.Nilable<void>>) {
-			var conditions = {};
+			var conditions: {[k: string]: any} = {};
 			conditions[Model.id + ''] = Instance[Model.id + ''];
 
 			Model
@@ -63,7 +63,7 @@ function addLazyLoadProperty(
 	});
 	Object.defineProperty(Instance, "set" + method, {
 		value: function (data: FxOrmInstance.InstanceDataPayload, cb: FxOrmNS.ExecutionCallback<void>) {
-			var conditions = {};
+			var conditions: {[k: string]: any} = {};
 			conditions[Model.id + ''] = Instance[Model.id + ''];
 
 			Model

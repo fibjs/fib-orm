@@ -17,8 +17,10 @@ export = class ORMError extends Error {
   message: string = '';
   code: number = 0;
   literalCode: string = '';
+
+  [k: string]: any;
   
-  constructor (message: string, code?: string, extras?: any) {
+  constructor (message: string, code?: keyof FxOrmNS.PredefineErrorCodes, extras?: any) {
     super();
 
     Error.call(this);

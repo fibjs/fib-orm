@@ -1,11 +1,14 @@
+/**
+ * NOT SUPPORTED
+ */
 export = function ChainInstance(chain: FxOrmQuery.IChainFind, cb: Function): FxOrmQuery.IChainFind|any {
-	let instances = null;
+	let instances: FxOrmInstance.Instance[] = null;
 	let loading   = false;
 	const queue: {hwd: Function, args?: any}[] = [];
 
 	var load = function () {
 		loading = true;
-		chain.run(function (err, items) {
+		chain.run(function (err: FxOrmError.ExtendedError, items: FxOrmInstance.Instance[]) {
 			instances = items;
 
 			return next();
@@ -30,33 +33,33 @@ export = function ChainInstance(chain: FxOrmQuery.IChainFind, cb: Function): FxO
 		item.hwd.apply(calls, item.args);
 	};
 	var calls = {
-		_each: promise(function (cb: Function) {
+		_each: promise(function (cb: any) {
 			instances.forEach(cb);
 
 			return next();
 		}),
-		filter: promise(function (cb: Function) {
+		filter: promise(function (cb: any) {
 			instances = instances.filter(cb);
 
 			return next();
 		}),
-		sort: promise(function (cb: Function) {
+		sort: promise(function (cb: any) {
 			instances.sort(cb);
 
 			return next();
 		}),
-		count: promise(function (cb: Function) {
+		count: promise(function (cb: any) {
 			cb(instances.length);
 
 			return next();
 		}),
-		get: promise(function (cb: Function) {
+		get: promise(function (cb: any) {
 			cb(instances);
 
 			return next();
 		}),
-		save: promise(function (cb: Function) {
-			var saveNext = function (i: number) {
+		save: promise(function (cb: any) {
+			var saveNext = function (i: number): any {
 				if (i >= instances.length) {
 					if (typeof cb === "function") {
 						cb();

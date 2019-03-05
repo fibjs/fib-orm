@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "noImplicitUseStrict": true,
         "lib": [
             "es6",

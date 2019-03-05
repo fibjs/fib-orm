@@ -34,4 +34,8 @@ declare namespace FxOrmDb {
             (cb?: FxOrmNS.VoidCallback): void
         }
     }
+
+    // not supported now.
+    interface DatabaseBase_PostgreSQL extends DatabaseBase {
+    }
 }

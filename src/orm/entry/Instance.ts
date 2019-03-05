@@ -11,9 +11,13 @@ interface EmitEventFunctionInInstance {
 	(state: string, _instance?: any): void
 }
 
-export const Instance: FxOrmInstance.InstanceConstructor = function (
+interface InnerSaveOptions {
+		saveAssociations?: boolean
+	}
+
+export const Instance = function (
 	this: FxOrmInstance.Instance,
-	Model, _opts
+	Model: FxOrmModel.Model, _opts: FxOrmInstance.InstanceConstructorOptions
 ) {
 	const opts: FxOrmInstance.InnerInstanceOptions = util.extend({}, _opts);
 	opts.data = opts.data || {};
@@ -25,7 +29,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 	opts.originalKeyValues = {};
 
 	var instance_saving = false;
-	var events = {};
+	var events: {[k: string]: Function[]} = {};
 	var instance: FxOrmInstance.Instance = {} as FxOrmInstance.Instance;
 
 	var emitEvent: EmitEventFunctionInInstance = function () {
@@ -44,19 +48,23 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			opts.originalKeyValues[prop.name] = opts.data[prop.name];
 		}
 	};
-	var shouldSaveAssocs = function (saveOptions) {
+	var shouldSaveAssocs = function (
+		saveOptions: {
+			saveAssociations?: boolean
+		}
+	) {
 		if (Model.settings.get("instance.saveAssociationsByDefault")) {
 			return saveOptions.saveAssociations !== false;
 		} else {
 			return !!saveOptions.saveAssociations;
 		}
 	};
-	var handleValidations = function (cb) {
+	var handleValidations = function <T = any>(cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 		// var pending = [], errors = [];
 		var required: boolean,
 				alwaysValidate: boolean;
 
-		Hook.wait(instance, opts.hooks.beforeValidation, function (err) {
+		Hook.wait(instance, opts.hooks.beforeValidation, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				return saveError(cb, err);
 			}
@@ -82,7 +90,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 				if (!alwaysValidate && !required && instance[k] == null) {
 					continue; // avoid validating if property is not required and is "empty"
 				}
-				for (let i = 0; i < (opts.validations[k] as enforce.IValidator[]).length; i++) {
+				for (let i = 0; i < opts.validations[k].length; i++) {
 					checks.add(k, opts.validations[k][i]);
 				}
 			}
@@ -94,7 +102,10 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			return checks.check(instance, cb);
 		});
 	};
-	var saveError = function (cb, err) {
+	var saveError = function (
+		cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>,
+		err: FxOrmError.ExtendedError
+	) {
 		instance_saving = false;
 
 		emitEvent("save", err, instance);
@@ -105,7 +116,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			cb(err, instance);
 		}
 	};
-	var saveInstance = function (saveOptions, cb) {
+	var saveInstance = function (saveOptions: InnerSaveOptions, cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 		// what this condition means:
 		// - If the instance is in state mode
 		// - AND it's not an association that is asking it to save
@@ -115,13 +126,13 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		}
 		instance_saving = true;
 
-		handleValidations(function (err) {
+		handleValidations(function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				return saveError(cb, err);
 			}
 
 			if (opts.is_new) {
-				waitHooks([ "beforeCreate", "beforeSave" ], function (err) {
+				waitHooks([ "beforeCreate", "beforeSave" ], function (err: FxOrmError.ExtendedError) {
 					if (err) {
 						return saveError(cb, err);
 					}
@@ -129,7 +140,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 					return saveNew(saveOptions, getInstanceData(), cb);
 				});
 			} else {
-				waitHooks([ "beforeSave" ], function (err) {
+				waitHooks([ "beforeSave" ], function (err: FxOrmError.ExtendedError) {
 					if (err) {
 						return saveError(cb, err);
 					}
@@ -152,7 +163,8 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		cb();
 	};
 	var getInstanceData = function () {
-		var data = {}, prop;
+		var data: FxOrmInstance.InstanceDataPayload = {},
+				prop;
 		for (let k in opts.data) {
 			if (!opts.data.hasOwnProperty(k)) continue;
 			prop = Model.allProperties[k];
@@ -174,12 +186,12 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 
 		return data;
 	};
-	var waitHooks = function (hooks, next) {
+	var waitHooks = function (hooks: FxOrmModel.keyofHooks[], next: FxOrmHook.HookActionNextFunction) {
 		var nextHook = function () {
 			if (hooks.length === 0) {
 				return next();
 			}
-			Hook.wait(instance, opts.hooks[hooks.shift()], function (err) {
+			Hook.wait(instance, opts.hooks[hooks.shift()], function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					return next(err);
 				}
@@ -190,7 +202,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 
 		return nextHook();
 	};
-	var saveNew = function (saveOptions, data, cb) {
+	var saveNew = function (saveOptions: InnerSaveOptions, data: FxOrmInstance.InstanceDataPayload, cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 		var i, prop;
 
 		var finish = function (err?: Error) {
@@ -223,11 +235,11 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			return saveAssociations(finish);
 		});
 	};
-	var savePersisted = function (saveOptions, data, cb) {
+	var savePersisted = function (saveOptions: InnerSaveOptions, data: FxOrmInstance.InstanceDataPayload, cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 		var changes = <FxSqlQuerySql.DataToSet>{},
 			conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 
-		var next = function (saved) {
+		var next = function (saved: boolean) {
 			var finish = function () {
 				saveInstanceExtra(cb);
 			}
@@ -240,7 +252,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 						finish();
 					}, false);
 				} else {
-					saveAssociations(function (err, assocSaved) {
+					saveAssociations(function (err: FxOrmError.ExtendedError, assocSaved: boolean) {
 						if (saved || assocSaved) {
 							runAfterSaveActions(function () {
 								if (err) return cb(err);
@@ -266,7 +278,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			}
 			changes = Utilities.transformPropertyNames(changes, Model.allProperties);
 
-			opts.driver.update(opts.table, changes, conditions, function (err) {
+			opts.driver.update(opts.table, changes, conditions, function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					return saveError(cb, err);
 				}
@@ -277,12 +289,12 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			});
 		}
 	};
-	var saveAssociations = function (cb) {
+	var saveAssociations = function (cb: FxOrmNS.ExecutionCallback<boolean>) {
 		var pending = 1, errored = false, i;
-		var saveAssociation = function (accessor, instances) {
+		var saveAssociation = function (accessor: string, instances: FxOrmInstance.Instance[]) {
 			pending += 1;
 
-			instance[accessor](instances, function (err) {
+			instance[accessor](instances, function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					if (errored) return;
 
@@ -296,7 +308,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			});
 		};
 
-		var _saveOneAssociation = function (assoc) {
+		var _saveOneAssociation = function (assoc: FxOrmAssociation.InstanceAssociationItem) {
 			if (!instance[assoc.name] || typeof instance[assoc.name] !== "object") return;
 			if (assoc.reversed) {
 				// reversed hasOne associations should behave like hasMany
@@ -323,7 +335,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		}
 
 
-		var _saveManyAssociation = function (assoc) {
+		var _saveManyAssociation = function (assoc: FxOrmAssociation.InstanceAssociationItem) {
 			var assocVal = instance[assoc.name];
 
 			if (!Array.isArray(assocVal)) return;
@@ -346,22 +358,26 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			return cb(null, false);
 		}
 	};
-	var saveInstanceExtra = function (cb) {
+	var getNormalizedExtraDataInPropertyTime = function () {
+		return opts.extra as FxOrmProperty.NormalizedPropertyHash
+	};
+
+	var saveInstanceExtra = function (cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 		if (opts.extrachanges.length === 0) {
 			if (cb) return cb(null, instance);
 			else return;
 		}
 
-		var data = {};
+		var data: FxOrmInstance.InstanceDataPayload = {};
 		var conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 
 		for (let i = 0; i < opts.extrachanges.length; i++) {
 			if (!opts.data.hasOwnProperty(opts.extrachanges[i])) continue;
 
-			if (opts.extra[opts.extrachanges[i]]) {
+			if (getNormalizedExtraDataInPropertyTime()[opts.extrachanges[i]]) {
 				data[opts.extrachanges[i]] = opts.data[opts.extrachanges[i]];
 				if (opts.driver.propertyToValue) {
-					data[opts.extrachanges[i]] = opts.driver.propertyToValue(data[opts.extrachanges[i]], opts.extra[opts.extrachanges[i]]);
+					data[opts.extrachanges[i]] = opts.driver.propertyToValue(data[opts.extrachanges[i]], getNormalizedExtraDataInPropertyTime()[opts.extrachanges[i]]);
 				}
 			} else {
 				data[opts.extrachanges[i]] = opts.data[opts.extrachanges[i]];
@@ -373,11 +389,11 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			conditions[opts.extra_info.assoc_prop[i]] = opts.data[opts.keys[i]];
 		}
 
-		opts.driver.update(opts.extra_info.table, data, conditions, function (err) {
+		opts.driver.update(opts.extra_info.table, data, conditions, function (err: FxOrmError.ExtendedError) {
 			return cb(err);
 		});
 	};
-	var removeInstance = function (cb) {
+	var removeInstance = function (cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 		if (opts.is_new) {
 			return cb(null);
 		}
@@ -387,7 +403,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		    conditions[opts.keys[i]] = opts.data[opts.keys[i]];
 		}
 
-		Hook.wait(instance, opts.hooks.beforeRemove, function (err) {
+		Hook.wait(instance, opts.hooks.beforeRemove, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				emitEvent("remove", err, instance);
 				if (typeof cb === "function") {
@@ -411,8 +427,8 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			});
 		});
 	};
-	var saveInstanceProperty = function (key, value) {
-		var changes = {},
+	var saveInstanceProperty = function (key: string, value: any) {
+		var changes: FxOrmInstance.InstanceDataPayload = {},
 			conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 			changes[key] = value;
 
@@ -426,14 +442,14 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			conditions[opts.keys[i]] = opts.data[opts.keys[i]];
 		}
 
-		Hook.wait(instance, opts.hooks.beforeSave, function (err) {
+		Hook.wait(instance, opts.hooks.beforeSave, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				Hook.trigger(instance, opts.hooks.afterSave, false);
 				emitEvent("save", err, instance);
 				return;
 			}
 
-			opts.driver.update(opts.table, changes, conditions, function (err) {
+			opts.driver.update(opts.table, changes, conditions, function (err: FxOrmError.ExtendedError) {
 				if (!err) {
 					opts.data[key] = value;
 				}
@@ -443,7 +459,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		});
 	};
 	var setInstanceProperty = function (key: string, value: any) {
-		var prop = Model.allProperties[key] || opts.extra[key];
+		var prop = Model.allProperties[key] || getNormalizedExtraDataInPropertyTime()[key];
 
 		if (prop) {
 			if ('valueToProperty' in opts.driver) {
@@ -458,7 +474,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 	}
 
 	// ('data.a.b', 5) => opts.data.a.b = 5
-	var setPropertyByPath = function (path, value) {
+	var setPropertyByPath = function (path: string|string[], value: any) {
 		if (typeof path == 'string') {
 			path = path.split('.');
 		} else if (!Array.isArray(path)) {
@@ -466,7 +482,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		}
 
 		var propName = path.shift();
-		var prop = Model.allProperties[propName] || opts.extra[propName];
+		var prop = Model.allProperties[propName] || getNormalizedExtraDataInPropertyTime()[propName];
 		var currKey: string, currObj: any;
 
 		if (!prop) {
@@ -575,7 +591,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 	}
 
 	Object.defineProperty(instance, "on", {
-		value: function (event, cb) {
+		value: function (event: string, cb: FxOrmNS.VoidCallback) {
 			if (!events.hasOwnProperty(event)) {
 				events[event] = [];
 			}
@@ -589,7 +605,9 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 	Object.defineProperty(instance, "save", {
 		value: function () {
 			var arg = null, objCount = 0;
-			var data = {}, saveOptions = {}, cb = null;
+			var data: FxOrmInstance.InstanceDataPayload = {},
+					saveOptions = {},
+					cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance> = null;
 
 			while (arguments.length > 0) {
 				arg = Array.prototype.shift.call(arguments);
@@ -622,7 +640,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 				}
 			}
 
-			saveInstance(saveOptions, function (err) {
+			saveInstance(saveOptions, function (err: FxOrmError.ExtendedError) {
 				if (!cb) return;
 				if (err) return cb(err);
 
@@ -642,7 +660,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		writable: true
 	});
 	Object.defineProperty(instance, "remove", {
-		value: function (cb) {
+		value: function (cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 			removeInstance(cb);
 
 			return this;
@@ -656,7 +674,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		writable: true
 	});
 	Object.defineProperty(instance, "markAsDirty", {
-		value: function (propName) {
+		value: function (propName: string) {
 			if (propName != undefined) {
 				opts.changes.push(propName);
 			}
@@ -686,8 +704,8 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 		enumerable: false
 	});
 	Object.defineProperty(instance, "validate", {
-		value: function (cb: FxOrmNS.GenericCallback<Error[]|false>) {
-			handleValidations(function (errors: Error[]) {
+		value: function (cb: FxOrmNS.GenericCallback<FxOrmError.ExtendedError|false>) {
+			handleValidations(function (errors: FxOrmError.ExtendedError) {
 				cb(null, errors || false);
 			});
 		},
@@ -736,7 +754,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 
 		if (asc.name in opts.data) {
 			var d = opts.data[asc.name];
-			var mapper = function (obj) {
+			var mapper = function (obj: FxOrmInstance.Instance | FxOrmInstance.InstanceDataPayload) {
 				return obj.isInstance ? obj : new asc.model(obj);
 			};
 
@@ -767,4 +785,4 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 	});
 
 	return instance;
-}
+} as any as FxOrmInstance.InstanceConstructor

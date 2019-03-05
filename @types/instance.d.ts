@@ -40,7 +40,7 @@ declare namespace FxOrmInstance {
         methods?: FxOrmModel.ModelConstructorOptions['methods']
 
         keyProperties: FxOrmProperty.NormalizedProperty[]
-        validations: FxOrmModel.ModelConstructorOptions['validations']
+        validations: FxOrmValidators.IValidatorHash
         hooks: FxOrmModel.ModelConstructorOptions['hooks']
 
         one_associations: FxOrmAssociation.InstanceAssociationItem_HasOne[]
@@ -53,7 +53,7 @@ declare namespace FxOrmInstance {
         driver: FxOrmDMLDriver.DMLDriver
 
         setupAssociations: {
-            (instance: Instance)
+            (instance: Instance): void
         }
         fieldToPropertyMap: FxOrmProperty.FieldToPropertyMapType
     }
@@ -65,21 +65,18 @@ declare namespace FxOrmInstance {
         extrachanges: InstanceChangeRecords
     }
 
-    interface InstanceConstructor {
-        (model: FxOrmModel.Model, opts: InstanceConstructorOptions): void
-    }
+    type InstanceConstructor = new (model: FxOrmModel.Model, opts: InstanceConstructorOptions) => FxOrmInstance.Instance
 
     interface Instance extends FxOrmSynchronous.SynchronizedInstance {
-        on(event: string, callback): Instance;
         save(): Instance;
         save(data: { [property: string]: any; }, callback: FxOrmNS.VoidCallback): Instance;
         save(data: { [property: string]: any; }, options: any, callback: FxOrmNS.VoidCallback): Instance;
         saved(): boolean;
         remove(callback: FxOrmNS.VoidCallback): Instance;
         validate: {
-            (callback: FxOrmNS.ValidatorCallback)
+            (callback: FxOrmNS.ValidatorCallback): void
         };
-        on(event: string, callback): Instance;
+        on(event: string, callback: FxOrmNS.GenericCallback<any>): Instance;
         save(callback?: FxOrmNS.VoidCallback): Instance;
         save(data: { [property: string]: any; }, callback?: FxOrmNS.VoidCallback): Instance;
         save(data: { [property: string]: any; }, options: any, callback?: FxOrmNS.VoidCallback): Instance;

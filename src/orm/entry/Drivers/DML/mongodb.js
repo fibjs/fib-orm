@@ -1,4 +1,4 @@
-import util = require('util')
+const util = require('util')
 
 const _merge = require('lodash.merge')
 const mongodb   = require("mongodb");

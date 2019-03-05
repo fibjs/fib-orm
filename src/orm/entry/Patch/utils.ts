@@ -52,7 +52,7 @@ export function patchResult(o: FxOrmModelAndInstance): void {
      * filter the Date-Type SelectQuery Property corresponding item when call find-like executor ('find', 'get', 'where')
      * @param opt 
      */
-    function filter_date(opt) {
+    function filter_date(opt: FxOrmInstance.Instance) {
         for (let k in opt) {
             if (is_model_conjunctions_key(k))
                 Array.isArray(opt[k]) && opt[k].forEach(filter_date);
@@ -68,8 +68,8 @@ export function patchResult(o: FxOrmModelAndInstance): void {
                             comps.forEach(c => {
                                 var v1 = v[c];
 
-                                if (util.isArray(v1)) {
-                                    v1.forEach((v2, i) => {
+                                if (Array.isArray(v1)) {
+                                    v1.forEach((v2: any, i) => {
                                         if (!util.isDate(v2))
                                             v1[i] = new Date(v2);
                                     });
@@ -180,7 +180,7 @@ export function patchAggregate(m: FxOrmModel.Model) {
 }
 
 export function patchModel(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions) {
-    var _afterAutoFetch;
+    var _afterAutoFetch: FxOrmHook.HookActionCallback;
     if (opts !== undefined && opts.hooks)
         _afterAutoFetch = opts.hooks.afterAutoFetch;
 
@@ -189,8 +189,8 @@ export function patchModel(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions) {
      * because patch in `afterLoad` only process instance's basic(exclude lazyload) fields' accessors，
      * as patch in `afterAutoFetch` would process instance's basic/lazyload/associated fields' accessors
      */
-    m.afterAutoFetch(function (next) {
-        patchObject(this as FxOrmInstance.Instance);
+    m.afterAutoFetch(function (this: FxOrmInstance.Instance, next: FxOrmHook.HookActionNextFunction) {
+        patchObject(this);
 
         if (_afterAutoFetch) {
             if (_afterAutoFetch.length > 0)
@@ -269,21 +269,17 @@ export function patchIChainFindLikeRs (
     });
 }
 
-interface keyPropertiesTypeItem {
-    type: string;
-    name: string;
-}
-export function patchInsert(table: string, data: any, keyProperties: keyPropertiesTypeItem[], cb: Function) {
+export function patchInsert(table: string, data: any, keyProperties: FxOrmProperty.NormalizedProperty[], cb: Function) {
     var q = this.query.insert()
         .into(table)
         .set(data)
         .build();
 
-    this.db.all(q, function (err, info) {
+    this.db.all(q, function (err: FxOrmError.ExtendedError, info: FxOrmInstance.Instance) {
         if (err) return cb(err);
         if (!keyProperties) return cb(null);
 
-        var ids = {},
+        var ids: {[k: string]: any} = {},
             prop;
 
         if (keyProperties.length == 1 && keyProperties[0].type == 'serial') {
@@ -324,7 +320,11 @@ export function patchDriver(driver: FxOrmDMLDriver.DMLDriver) {
     }
 }
 
-export function execQuerySync(query: string, opt) {
+export function execQuerySync(
+    this: FxOrmPatch.PatchedDMLDriver,
+    query: string,
+    opt: FxSqlQuerySql.SqlEscapeArgType[]
+) {
     if (arguments.length == 2)
         query = this.query.escape(query, opt);
 

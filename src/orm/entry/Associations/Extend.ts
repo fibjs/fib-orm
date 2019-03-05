@@ -2,10 +2,10 @@ import util = require('util')
 
 import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName, ACCESSOR_KEYS } from "./_utils";
 
-const _cloneDeep          = require('lodash.clonedeep');
+import _cloneDeep = require('lodash.clonedeep');
 import ORMError   = require("../Error");
 import Singleton  = require("../Singleton");
-import Utilities       = require("../Utilities");
+import Utilities  = require("../Utilities");
 
 /**
  * 
@@ -49,20 +49,22 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 		};
 
 		const newProperties: FxOrmModel.DetailedPropertyDefinitionHash = _cloneDeep(properties);
-		for (let k in association.field as FxOrmProperty.NormalizedPropertyHash) {
-		    newProperties[k] = association.field[k];
+		const assoc_field = association.field as FxOrmProperty.NormalizedPropertyHash
+
+		for (let k in assoc_field) {
+		    newProperties[k] = assoc_field[k];
 		}
 
 		const modelOpts: FxOrmModel.ModelOptions = util.extend(
 			util.pick(assoc_options, 'identityCache', 'autoSave', 'cascadeRemove', 'hooks', 'methods', 'validations'),
 			{
-				id        : Object.keys(association.field),
+				id        : Object.keys(assoc_field),
 				extension : true,
 			}
 		);
 
 		association.model = db.define(association.table, newProperties, modelOpts);
-		association.model.hasOne(Model.table, Model, { extension: true, field: association.field as FxOrmProperty.NormalizedPropertyHash });
+		association.model.hasOne(Model.table, Model, { extension: true, field: assoc_field });
 
 		associations.push(association);
 
@@ -91,7 +93,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 			}
 
 			options.__merge = {
-				from  : { table: association.model.table, field: Object.keys(association.field) },
+				from  : { table: association.model.table, field: Object.keys(assoc_field) },
 				to    : { table: Model.table, field: Model.id },
 				where : [ association.model.table, conditions ],
 				table : Model.table,
@@ -157,7 +159,7 @@ function extendInstance(
 			if (!Instance[Model.id + '']) {
 			    cb(new ORMError("Instance not saved, cannot get extension", 'NOT_DEFINED', { model: Model.table }));
 			} else {
-				association.model.get(Utilities.values(Instance, Model.id), function (err: Error, extension) {
+				association.model.get(Utilities.values(Instance, Model.id), function (err: Error, extension: FxOrmInstance.Instance) {
 					return cb(err, !err && extension ? true : false);
 				});
 			}
@@ -166,7 +168,7 @@ function extendInstance(
 		enumerable : false
 	});
 	Object.defineProperty(Instance, association.getAccessor, {
-		value: function (opts, cb) {
+		value: function (opts: FxOrmModel.ModelOptions__Get, cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 			if (typeof opts == "function") {
 				cb = opts;
 				opts = {};
@@ -182,13 +184,16 @@ function extendInstance(
 		enumerable : false
 	});
 	Object.defineProperty(Instance, association.setAccessor, {
-		value : function (Extension, cb) {
-			Instance.save(function (err) {
+		value : function (
+			Extension: FxOrmInstance.Instance | FxOrmInstance.InstanceDataPayload,
+			cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>
+		) {
+			Instance.save(function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					return cb(err);
 				}
 
-				Instance[association.delAccessor](function (err) {
+				Instance[association.delAccessor](function (err: FxOrmError.ExtendedError) {
 					if (err) {
 						return cb(err);
 					}
@@ -211,11 +216,11 @@ function extendInstance(
 		enumerable : false
 	});
 	Object.defineProperty(Instance, association.delAccessor, {
-		value : function (cb) {
+		value : function (cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance>) {
 			if (!Instance[Model.id + '']) {
 			    cb(new ORMError("Instance not saved, cannot get extension", 'NOT_DEFINED', { model: Model.table }));
 			} else {
-				var conditions = {};
+				var conditions: {[k: string]: any} = {};
 				var fields = Object.keys(association.field);
 
 				for (let i = 0; i < Model.id.length; i++) {
@@ -268,7 +273,8 @@ function autoFetchInstance(
 	}
 
 	if (Instance.isPersisted()) {
-		Instance[association.getAccessor]({ autoFetchLimit: opts.autoFetchLimit - 1 }, function (err, Assoc) {
+		Instance[association.getAccessor]({ autoFetchLimit: opts.autoFetchLimit - 1 },
+		function (err: FxOrmError.ExtendedError, Assoc: FxOrmAssociation.InstanceAssociationItem) {
 			if (!err) {
 				Instance[association.name] = Assoc;
 			}

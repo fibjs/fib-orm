@@ -37,7 +37,7 @@ declare namespace FxOrmModel {
                     name?: string
                     klass?: 'primary' | 'hasOne'
                 } | false
-            )
+            ): FxOrmProperty.NormalizedProperty
         }
         /* property operation :end */
 
@@ -115,16 +115,17 @@ declare namespace FxOrmModel {
         /* data operation api :end */
 
         prependValidation: {
-            (key: string, validation: enforce.IValidator)
+            (key: string, validation: FibjsEnforce.IValidator): void
         }
 
         [property: string]: any;
     }
 
-    interface ModelConstructor {
-        (opts: ModelConstructorOptions): void
-        prototype: Model
-    }
+    type ModelConstructor = new (opts: ModelConstructorOptions) => Model
+    // interface ModelConstructor {
+    //     (opts: ModelConstructorOptions): void
+    //     prototype: Model
+    // }
 
     interface ModelConstructorOptions {
         db: FxOrmNS.ORM
@@ -143,7 +144,7 @@ declare namespace FxOrmModel {
         cascadeRemove: boolean
         hooks: Hooks
         methods: {[method_name: string]: Function}
-        validations: FxOrmValidators.ValidationOptionHash
+        validations: FxOrmValidators.IValidatorHash
     }
     
     interface ModelDefineOptions {
@@ -181,6 +182,7 @@ declare namespace FxOrmModel {
         beforeRemove?: FxOrmHook.HookActionCallback;
         afterRemove?: FxOrmHook.HookResultCallback;
     }
+    type keyofHooks = keyof Hooks
 
     interface ModelHooks {
         beforeValidation?: {
@@ -245,7 +247,7 @@ declare namespace FxOrmModel {
     interface ModelOptions__Find {
         chainfind_linktable?: string;
         
-        only?: string;
+        only?: string[];
         limit?: number;
         order?: string | [string, string?];
         offset?: number;
@@ -264,6 +266,9 @@ declare namespace FxOrmModel {
             id_prop: string[]
             assoc_prop: string[]
         }
+
+        // access dynamic findby options
+        [k: string]: any
     }
 
     interface ModelOptions__Get extends ModelOptions__Find {}
@@ -281,8 +286,8 @@ declare namespace FxOrmModel {
     type ModelMethodCallback__Get = FxOrmNS.GenericCallback<FxOrmInstance.Instance>
     type ModelMethodCallback__CreateItem = FxOrmNS.GenericCallback<FxOrmInstance.Instance>
     type ModelMethodCallback__UpdateItem = FxOrmNS.GenericCallback<FxOrmInstance.Instance>
-    type ModelMethodCallback__BatchCreate = FxOrmNS.GenericCallback<FxOrmInstance.Instance>
-    type ModelMethodCallback__BatchUpdate = FxOrmNS.GenericCallback<FxOrmInstance.Instance>
+    type ModelMethodCallback__BatchCreate = FxOrmNS.GenericCallback<FxOrmInstance.Instance[]>
+    type ModelMethodCallback__BatchUpdate = FxOrmNS.GenericCallback<FxOrmInstance.Instance[]>
 
     type ModelMethodCallback__Count = FxOrmNS.GenericCallback<number>
 }
