@@ -92,7 +92,6 @@ describe("hasMany extra properties", function () {
         function assertion_people_for_findby (people) {
             const John = people.find(person => person.name === "John");
             assert.property(John, "pets");
-            console.log('John.pets', John.pets);
             assert.ok(Array.isArray(John.pets));
 
             assert.equal(John.pets.length, 2);
