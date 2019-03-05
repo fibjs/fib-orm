@@ -15,8 +15,6 @@ export function prepare (
 
 		ext_model = ext_model || Model;
 		
-		var assocName: string;
-		var assocTemplateName: string;
 		var association: FxOrmAssociation.InstanceAssociationItem_HasOne = {
 			name           : assoc_name || ext_model.table,
 			model          : ext_model,
@@ -37,8 +35,7 @@ export function prepare (
 		};
 		association = util.extend(association, assoc_options || {})
 
-		assocName = Utilities.formatNameFor("assoc:hasOne", association.name);
-		assocTemplateName = association.accessor || assocName;
+		var associationSemanticNameCore = Utilities.formatNameFor("assoc:hasOne", association.name);
 
 		if (!association.field) {
 			association.field = Utilities.formatField(association.model, association.name, association.required, association.reversed);
@@ -57,7 +54,7 @@ export function prepare (
 
 		for (let k in ACCESSOR_KEYS) {
 			if (!association[k + "Accessor"]) {
-				association[k + "Accessor"] = ACCESSOR_KEYS[k] + assocTemplateName;
+				association[k + "Accessor"] = ACCESSOR_KEYS[k] + associationSemanticNameCore;
 			}
 		}
 

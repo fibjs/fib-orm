@@ -17,19 +17,19 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 	Model.extendsTo = function (
 		name: string,
 		properties: FxOrmModel.DetailedPropertyDefinitionHash,
-		opts: FxOrmAssociation.AssociationDefinitionOptions_ExtendsTo
+		assoc_options: FxOrmAssociation.AssociationDefinitionOptions_ExtendsTo
 	) {
-		opts = opts || {};
+		assoc_options = assoc_options || {};
 
-		const assocName = opts.name || Utilities.formatNameFor("assoc:extendsTo", name);
+		const associationSemanticNameCore = assoc_options.name || Utilities.formatNameFor("assoc:extendsTo", name);
 		const association: FxOrmAssociation.InstanceAssociationItem_ExtendTos = {
 			name           : name,
-			table          : opts.table || defineDefaultExtendsToTableName(Model.table, name),
-			reversed       : opts.reversed,
-			autoFetch      : opts.autoFetch || false,
-			autoFetchLimit : opts.autoFetchLimit || 2,
+			table          : assoc_options.table || defineDefaultExtendsToTableName(Model.table, name),
+			reversed       : assoc_options.reversed,
+			autoFetch      : assoc_options.autoFetch || false,
+			autoFetchLimit : assoc_options.autoFetchLimit || 2,
 			field          : Utilities.wrapFieldObject({
-				field: opts.field as FxOrmProperty.NormalizedPropertyHash,
+				field: assoc_options.field as FxOrmProperty.NormalizedPropertyHash,
 				model: Model,
 				altName: Model.table
 			}) || Utilities.formatField(
@@ -39,11 +39,11 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 				false
 			),
 
-			getAccessor    : opts.getAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.get, assocName),
-			setAccessor    : opts.setAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.set, assocName),
-			hasAccessor    : opts.hasAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.has, assocName),
-			delAccessor    : opts.delAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.del, assocName),
-			modelFindByAccessor: opts.modelFindByAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.modelFindBy, assocName),
+			getAccessor    : assoc_options.getAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.get, associationSemanticNameCore),
+			setAccessor    : assoc_options.setAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.set, associationSemanticNameCore),
+			hasAccessor    : assoc_options.hasAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.has, associationSemanticNameCore),
+			delAccessor    : assoc_options.delAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.del, associationSemanticNameCore),
+			modelFindByAccessor: assoc_options.modelFindByAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.modelFindBy, associationSemanticNameCore),
 
 			model: null
 		};
@@ -54,7 +54,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 		}
 
 		const modelOpts: FxOrmModel.ModelOptions = util.extend(
-			util.pick(opts, 'identityCache', 'autoSave', 'cascadeRemove', 'hooks', 'methods', 'validations'),
+			util.pick(assoc_options, 'identityCache', 'autoSave', 'cascadeRemove', 'hooks', 'methods', 'validations'),
 			{
 				id        : Object.keys(association.field),
 				extension : true,

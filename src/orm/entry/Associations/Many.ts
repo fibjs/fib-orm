@@ -20,7 +20,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 
 		let OtherModel: FxOrmModel.Model = Model;
 		let props: FxOrmProperty.NormalizedPropertyHash | FxOrmModel.DetailedPropertyDefinitionHash = null;
-		let opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany = {};
+		let assoc_options: FxOrmAssociation.AssociationDefinitionOptions_HasMany = {};
 
 		for (let i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
@@ -34,7 +34,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 					if (props === null) {
 						props = arguments[i];
 					} else {
-						opts = arguments[i];
+						assoc_options = arguments[i];
 					}
 					break;
 			}
@@ -53,53 +53,53 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 			}
 		}
 
-		makeKey = opts.key || Settings.defaults().hasMany.key;
+		makeKey = assoc_options.key || Settings.defaults().hasMany.key;
 
 		mergeId = Utilities.convertPropToJoinKeyProp(
 			Utilities.wrapFieldObject({
-				field: opts.mergeId, model: Model, altName: Model.table
+				field: assoc_options.mergeId, model: Model, altName: Model.table
 			}) ||
-			Utilities.formatField(Model, Model.table, true, opts.reversed),
+			Utilities.formatField(Model, Model.table, true, assoc_options.reversed),
 			{ makeKey: makeKey, required: true }
 		);
 
 		mergeAssocId = Utilities.convertPropToJoinKeyProp(
 			Utilities.wrapFieldObject({
-				field: opts.mergeAssocId, model: OtherModel, altName: name
+				field: assoc_options.mergeAssocId, model: OtherModel, altName: name
 			}) ||
-			Utilities.formatField(OtherModel, name, true, opts.reversed),
+			Utilities.formatField(OtherModel, name, true, assoc_options.reversed),
 			{ makeKey: makeKey, required: true }
 		)
 
-		var assocName = opts.name || Utilities.formatNameFor("assoc:hasMany", name);
-		var assocTemplateName = opts.accessor || assocName;
-		const fieldhash = Utilities.wrapFieldObject({ field: opts.field, model: OtherModel, altName: Model.table }) || Utilities.formatField(Model, name, true, opts.reversed)
+		var associationSemanticNameCore = assoc_options.name || Utilities.formatNameFor("assoc:hasMany", name);
+		
+		const fieldhash = Utilities.wrapFieldObject({ field: assoc_options.field, model: OtherModel, altName: Model.table }) || Utilities.formatField(Model, name, true, assoc_options.reversed)
 		var association: FxOrmAssociation.InstanceAssociationItem_HasMany = {
 			name: name,
 			model: OtherModel,
 			props: props,
-			hooks: opts.hooks || {},
-			autoFetch: opts.autoFetch || false,
-			autoFetchLimit: opts.autoFetchLimit || 2,
+			hooks: assoc_options.hooks || {},
+			autoFetch: assoc_options.autoFetch || false,
+			autoFetchLimit: assoc_options.autoFetchLimit || 2,
 			// I'm not sure the next key is used..
 			field: fieldhash,
-			mergeTable: opts.mergeTable || (Model.table + "_" + name),
+			mergeTable: assoc_options.mergeTable || (Model.table + "_" + name),
 			mergeId: mergeId,
 			mergeAssocId: mergeAssocId,
-			getAccessor: opts.getAccessor || (ACCESSOR_KEYS.get + assocTemplateName),
-			setAccessor: opts.setAccessor || (ACCESSOR_KEYS.set + assocTemplateName),
-			hasAccessor: opts.hasAccessor || (ACCESSOR_KEYS.has + assocTemplateName),
-			delAccessor: opts.delAccessor || (ACCESSOR_KEYS.del + assocTemplateName),
-			addAccessor: opts.addAccessor || (ACCESSOR_KEYS.add + assocTemplateName),
+			getAccessor: assoc_options.getAccessor || (ACCESSOR_KEYS.get + associationSemanticNameCore),
+			setAccessor: assoc_options.setAccessor || (ACCESSOR_KEYS.set + associationSemanticNameCore),
+			hasAccessor: assoc_options.hasAccessor || (ACCESSOR_KEYS.has + associationSemanticNameCore),
+			delAccessor: assoc_options.delAccessor || (ACCESSOR_KEYS.del + associationSemanticNameCore),
+			addAccessor: assoc_options.addAccessor || (ACCESSOR_KEYS.add + associationSemanticNameCore),
 
-			modelFindByAccessor: opts.modelFindByAccessor || (ACCESSOR_KEYS.modelFindBy + assocTemplateName),
+			modelFindByAccessor: assoc_options.modelFindByAccessor || (ACCESSOR_KEYS.modelFindBy + associationSemanticNameCore),
 		};
 		associations.push(association);
 
-		if (opts.reverse) {
-			OtherModel.hasMany(opts.reverse, Model, association.props, {
+		if (assoc_options.reverse) {
+			OtherModel.hasMany(assoc_options.reverse, Model, association.props, {
 				reversed: true,
-				association: opts.reverseAssociation,
+				association: assoc_options.reverseAssociation,
 				mergeTable: association.mergeTable,
 				mergeId: association.mergeAssocId,
 				mergeAssocId: association.mergeId,
@@ -135,7 +135,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 			}
 
 			findby_opts = findby_opts || {};
-			assoc_find_opts = cutOffAssociatedModelFindOptions(findby_opts, assocTemplateName) || {};
+			assoc_find_opts = cutOffAssociatedModelFindOptions(findby_opts, associationSemanticNameCore) || {};
 			
 			assoc_find_opts.exists = Array.isArray(assoc_find_opts.exists) ? assoc_find_opts.exists : [];
 			assoc_find_opts.exists.push({
