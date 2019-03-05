@@ -172,8 +172,8 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 					const keyChainFind = Model.find({}, { exists: query_exists });
 
 					if (findby_opts.order) keyChainFind.order(findby_opts.order)
-					if (findby_opts.limit) keyChainFind.limit(findby_opts.order)
-					if (findby_opts.offset) keyChainFind.offset(findby_opts.order)
+					if (findby_opts.limit) keyChainFind.limit(findby_opts.limit)
+					if (findby_opts.offset) keyChainFind.offset(findby_opts.offset)
 
 					const finalFoundItems = keyChainFind.runSync();
 					
