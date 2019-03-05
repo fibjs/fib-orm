@@ -72,6 +72,18 @@ declare namespace FxOrmDMLDriver {
         execSimpleQuery: {
             <T=any>(query: string, cb: FxOrmNS.GenericCallback<T>)
         }
+        /**
+         * @description do eager-query
+         */
+        eagerQuery: {
+            <T = any>(
+                association: FxOrmAssociation.InstanceAssociationItem,
+                opts: FxOrmQuery.ChainFindOptions,
+                keys: string[],
+                cb: FibOrmNS.GenericCallback<T>
+            )
+        }
+
         find: {
             <T=FxOrmDMLDriver.QueryDataPayload[]>(
                 fields: FxSqlQueryColumns.SelectInputArgType[],

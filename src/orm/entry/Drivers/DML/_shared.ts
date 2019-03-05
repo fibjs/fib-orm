@@ -9,7 +9,12 @@ export function execQuery () {
 	return this.execSimpleQuery(query, cb);
 }
 
-export function eagerQuery (association, opts, keys, cb) {
+export function eagerQuery<T = any> (
+	association: FxOrmAssociation.InstanceAssociationItem,
+	opts: FxOrmQuery.ChainFindOptions,
+	keys: string[],
+	cb: FibOrmNS.ExecutionCallback<T>
+) {
 	var desiredKey = Object.keys(association.field);
 	var assocKey = Object.keys(association.mergeAssocId);
 

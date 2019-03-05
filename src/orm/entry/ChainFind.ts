@@ -51,7 +51,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 				var keys = util.map(items, function (item: FxOrmInstance.InstanceDataPayload, index: number) {
 					var key = item[opts.keys[0]];
 					// Create the association arrays
-					for (var i = 0, association: FxOrmAssociation.InstanceAssociationItem; association = opts.__eager[i]; i++) {
+					for (let i = 0, association: FxOrmAssociation.InstanceAssociationItem; association = opts.__eager[i]; i++) {
 						item[association.name] = [];
 					}
 					idMap[key] = index;
@@ -63,11 +63,11 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 					// if err exists, chainRun would finished before this fiber released
 					if (err) return 
 
-					opts.driver.eagerQuery(association, opts, keys, function (eager_err, instances) {
+					opts.driver.eagerQuery<FxOrmInstance.Instance>(association, opts, keys, function (eager_err, instances) {
 						err = eager_err
 						if (eager_err) return done(eager_err)
 
-						for (var i = 0, instance; instance = instances[i]; i++) {
+						for (let i = 0, instance: FxOrmInstance.Instance; instance = instances[i]; i++) {
 							// Perform a parent lookup with $p, and initialize it as an instance.
 							items[idMap[instance.$p]][association.name].push(association.model(instance));
 						}
