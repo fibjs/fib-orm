@@ -442,7 +442,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 			});
 		});
 	};
-	var setInstanceProperty = function (key, value) {
+	var setInstanceProperty = function (key: string, value: any) {
 		var prop = Model.allProperties[key] || opts.extra[key];
 
 		if (prop) {
@@ -467,7 +467,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 
 		var propName = path.shift();
 		var prop = Model.allProperties[propName] || opts.extra[propName];
-		var currKey, currObj;
+		var currKey: string, currObj: any;
 
 		if (!prop) {
 			return;

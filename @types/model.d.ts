@@ -25,6 +25,8 @@ declare namespace FxOrmModel {
         /* @nonenum */
         uid: string;
 
+        keys: string[];
+
         allProperties: FxOrmProperty.NormalizedPropertyHash
 
         /* property operation :start */
@@ -259,7 +261,7 @@ declare namespace FxOrmModel {
         extra?: FxOrmModel.ModelPropertyDefinitionHash | any[]
         extra_info?: {
             table: string
-            id: any
+            id: Model['id']
             id_prop: string[]
             assoc_prop: string[]
         }

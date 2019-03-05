@@ -264,6 +264,12 @@ function adjustForMapsTo(properties: FxOrmProperty.NormalizedPropertyHash, field
 	}
 }
 
+function mapKeysToString (keys: string[], item: FxOrmInstance.Instance) {
+	return util.map(keys, function (k: string) {
+		return item[k];
+	}).join(',')
+}
+
 function extendInstance(
 	Model: FxOrmModel.Model,
 	Instance: FxOrmInstance.Instance,
@@ -280,7 +286,6 @@ function extendInstance(
 
 	Object.defineProperty(Instance, association.hasAccessor, {
 		value: function (...Instances: FxOrmInstance.Instance[]) {
-			// var Instances = Array.prototype.slice.apply(arguments);
 			var cb: FxOrmNS.GenericCallback<boolean> = Instances.pop() as any;
 			var conditions = {}, options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
 
@@ -322,14 +327,12 @@ function extendInstance(
 				if (err) return cb(err);
 				if (util.isEmpty(Instances)) return cb(null, false);
 
-				var mapKeysToString = function (item) {
-					return util.map(association.model.keys, function (k) {
-						return item[k];
-					}).join(',')
-				}
-
-				var foundItemsIDs = Array.from( new Set ( foundItems.map(mapKeysToString) ) );
-				var InstancesIDs = Array.from( new Set ( Instances.map(mapKeysToString) ) );
+				var foundItemsIDs = Array.from( new Set (
+					foundItems.map(item => mapKeysToString(association.model.keys, item))
+				));
+				var InstancesIDs = Array.from( new Set (
+					Instances.map(item => mapKeysToString(association.model.keys, item))
+				));
 
 				var sameLength = foundItemsIDs.length == InstancesIDs.length;
 				var sameContents = sameLength && util.isEmpty(util.difference(foundItemsIDs, InstancesIDs));
