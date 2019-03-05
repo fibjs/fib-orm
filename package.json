@@ -58,6 +58,6 @@
     "peerDependencies": {
         "@fxjs/sql-ddl-sync": ">= 0.3.1 < 0.4",
         "@fxjs/sql-query": ">= 0.2.1 < 0.3",
-        "@ibjs/enforce": ">= 0.0.8 < 0.1"
+        "@fibjs/enforce": ">= 0.0.8 < 0.1"
     }
 }
