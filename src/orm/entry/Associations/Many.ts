@@ -8,7 +8,7 @@ import Settings = require("../Settings");
 import Property = require("../Property");
 import ORMError = require("../Error");
 import Utilities = require("../Utilities");
-import { ACCESSOR_KEYS, getMapsToFromProperty } from './_utils';
+import { ACCESSOR_KEYS, getMapsToFromProperty, cutOffAssociatedModelFindOptions } from './_utils';
 import { patchIChainFindLikeRs } from '../Patch/utils';
 
 export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associations: FxOrmAssociation.InstanceAssociationItem_HasMany[]) {
@@ -112,7 +112,8 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 		Model[association.modelFindByAccessor] = function () {
 			var cb: FxOrmModel.ModelMethodCallback__Find = null,
 				conditions: FxOrmModel.ModelQueryConditions__Find = null,
-				findby_opts: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
+				findby_opts: FxOrmAssociation.ModelAssociationMethod__FindByOptions = null,
+				assoc_find_opts: FxOrmAssociation.ModelAssociationMethod__FindByOptions = {};
 
 			for (let i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
@@ -122,28 +123,31 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 					case "object":
 						if (conditions === null) {
 							conditions = arguments[i];
-						} else {
+						} else if (findby_opts === null) {
 							findby_opts = arguments[i];
 						}
 						break;
 				}
 			}
-
+			
 			if (conditions === null) {
 				throw new ORMError(`.${association.modelFindByAccessor}() is missing a conditions object`, 'PARAM_MISMATCH');
 			}
+
+			findby_opts = findby_opts || {};
+			assoc_find_opts = cutOffAssociatedModelFindOptions(findby_opts, assocTemplateName) || {};
 			
-			findby_opts.exists = [
-				{
-					table: association.mergeTable,
-					link: [
-						Object.values(association.mergeAssocId).map(getMapsToFromProperty),
-						association.model.id
-					],
-					conditions: conditions
-				}
-			]
-			findby_opts.extra = [];
+			assoc_find_opts.exists = Array.isArray(assoc_find_opts.exists) ? assoc_find_opts.exists : [];
+			assoc_find_opts.exists.push({
+				table: association.mergeTable,
+				link: [
+					Object.values(association.mergeAssocId).map(getMapsToFromProperty),
+					association.model.id
+				],
+				conditions: conditions
+			});
+			
+			assoc_find_opts.extra = [];
 
 			const get_run_callback = function (rcb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance | FxOrmInstance.Instance[]>) {
 				return function (err: FxOrmError.ExtendedError, foundAssocItems: FxOrmInstance.Instance[]) {
@@ -169,11 +173,10 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 						}
 					});
 
-					const keyChainFind = Model.find({}, { exists: query_exists });
-
-					if (findby_opts.order) keyChainFind.order(findby_opts.order)
-					if (findby_opts.limit) keyChainFind.limit(findby_opts.limit)
-					if (findby_opts.offset) keyChainFind.offset(findby_opts.offset)
+					findby_opts.exists = Array.isArray(findby_opts.exists) ? findby_opts.exists : [];
+					findby_opts.exists = findby_opts.exists.concat(query_exists);
+					
+					const keyChainFind = Model.find({}, findby_opts);
 
 					const finalFoundItems = keyChainFind.runSync();
 					
@@ -181,11 +184,11 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 				}
 			}
 
-			if (typeof cb === 'function') {
-				return association.model.find({}, findby_opts, get_run_callback(cb));
-			}
+			const chain = association.model.find({}, assoc_find_opts);
 
-			const chain = association.model.find({}, findby_opts);
+			if (typeof cb === 'function') {
+				return chain.find(get_run_callback(cb));
+			}
 
 			/**
 			 * don't support IChainFind's meaningless apis here:
