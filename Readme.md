@@ -23,8 +23,6 @@ npm run ci
 
 ## Features
 
-`@fxjs/orm` add a set of synchronous version methods on node-orm2 object.
-
 ## Introduction
 
 This is a fibjs object relational mapping module.
@@ -71,7 +69,7 @@ people[0].age = 16;
 people[0].saveSync();
 ```
 
-The node.js version like this:
+The callback version like this:
 ```js
 var orm = require("orm");
 
@@ -118,7 +116,6 @@ orm.connect("mysql://username:password@host/database", function (err, db) {
 			            // err.msg = "under-age";
 		        });
 		    });
-
 		});
 	});
 });
@@ -127,15 +124,15 @@ orm.connect("mysql://username:password@host/database", function (err, db) {
 ## Documentation
 
 
-Fibjs did not add new functions, the development of documents can refer to node-orm, only need to change the asynchronous call to synchronous version.  [wiki](https://github.com/dresende/node-orm2/wiki/).
+Fibjs did not add new functions, the development of documents can refer to node-orm, only need to change the asynchronous call to synchronous version.  [wiki](https://github.com/fxjs-modules/orm/wiki/).
 
 ## Settings
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Settings).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Settings).
 
 ## Connecting
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Connecting-to-Database).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Connecting-to-Database).
 
 ## Models
 
@@ -145,11 +142,11 @@ Models support behaviours for accessing and manipulating table data.
 
 ## Defining Models
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Defining-Models).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Defining-Models).
 
 ### Properties
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Model-Properties).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Model-Properties).
 
 ### Instance Methods
 
@@ -187,7 +184,7 @@ Person.tallerThan = function(height) {
 var tallPeople = Person.tallerThan( 192);
 ```
 
-
+<!-- 
 ## Loading Models [NOT SUPPORT]
 
 Models can be in separate modules. Simply ensure that the module holding the models uses module.exports to publish a function that accepts the database connection, then load your models however you like.
@@ -215,15 +212,15 @@ module.exports = function (db) {
         name : String
     });
 };
-```
+``` -->
 
 ## Synchronizing Models
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Syncing-and-dropping-models).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Syncing-and-dropping-models).
 
 ## Dropping Models
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Syncing-and-dropping-models).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Syncing-and-dropping-models).
 
 ## Advanced Options
 
@@ -268,7 +265,7 @@ Other options:
 
 ## Hooks
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Model-Hooks).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Model-Hooks).
 
 ## Finding Items
 
@@ -310,7 +307,7 @@ var people = Person.findSync({ surname: "Doe" }, { offset: 2 });
 
 You can also use raw SQL when searching. It's documented in the *Chaining* section below.
 
-### Model.countSync([ conditions])
+### Model.countSync([ conditions ])
 
 If you just want to count the number of items that match a condition you can just use `.count()` instead of finding all
 of them and counting. This will actually tell the database server to do a count (it won't be done in the node process itself).
@@ -320,7 +317,7 @@ var count = Person.countSync({ surname: "Doe" });
 console.log("We have %d Does in our db", count);
 ```
 
-### Model.existsSync([ conditions])
+### Model.existsSync([ conditions ])
 
 Similar to `.count()`, this method just checks if the count is greater than zero or not.
 
@@ -400,8 +397,7 @@ Person.find({ surname: "Doe" }).removeSync();
 // Does gone..
 ```
 
-You can also make modifications to your instances using common Array traversal methods and save everything
-in the end. [NOT SUPPORT]
+You can also make modifications to your instances using common Array traversal methods and save everything in the end. [NOT SUPPORT]
 
 ```js
 Person.find({ surname: "Doe" }).each(function (person) {
@@ -562,7 +558,7 @@ console.log("removed!");
 
 ## Validations
 
-See information in the [wiki](https://github.com/dresende/node-orm2/wiki/Model-Validations).
+See information in the [wiki](https://github.com/fxjs-modules/orm/wiki/Model-Validations).
 
 ## Associations
 
@@ -577,10 +573,10 @@ Animal will have the `owner_id` property automatically added.
 
 The following functions will become available:
 ```js
-animal.getOwnerSync()         // Gets owner
-animal.setOwnerSync(person) // Sets owner_id
-animal.hasOwnerSync()         // Checks if owner exists
-animal.removeOwnerSync()                // Sets owner_id to 0
+animal.getOwnerSync()			// Gets owner
+animal.setOwnerSync(person) 	// Sets owner_id
+animal.hasOwnerSync()         	// Checks if owner exists
+animal.removeOwnerSync()        // Sets owner_id to 0
 ```
 
 **Chain Find**
@@ -625,18 +621,21 @@ This will create a join table `patient_doctors` when you call `Patient.sync()`:
 The following functions will be available:
 
 ```js
-patient.getDoctorsSync()           // List of doctors
+patient.getDoctorsSync()        // List of doctors
 patient.addDoctorsSync(docs)    // Adds entries to join table
 patient.setDoctorsSync(docs)    // Removes existing entries in join table, adds new ones
 patient.hasDoctorsSync(docs)    // Checks if patient is associated to specified doctors
 patient.removeDoctorsSync(docs) // Removes specified doctors from join table
 
 doctor.getPatientsSync()
-etc...
+// etc...
 
 // You can also do:
 patient.doctors = [doc1, doc2];
 patient.saveSync()
+
+// Model methods
+Patient.findByDoctorsSync({ /* conditions */ }) // Find patients by conditions for doctors
 ```
 
 To associate a doctor to a patient:
@@ -649,8 +648,7 @@ which will add `{patient_id: 4, doctor_id: 6, why: "remove appendix"}` to the jo
 
 #### getAccessor
 
-This accessor in this type of association returns a `ChainFind` if not passing a callback. This means you can
-do things like:
+This accessor in this type of association returns a `ChainFind` if not passing a callback. This means you can do things like:
 
 ```js
 var doctors = patient.getDoctors().order("name").offset(1).runSync());
@@ -789,6 +787,8 @@ var pets = Person(4).getPetsSync();
 //
 // In this example, ORM will fetch all pets
 // whose owner_id = 4
+
+Pet.findByOwnersSync({ /* conditions */ }) // Find pets by conditions for their owners
 ```
 
 This makes even more sense when having `hasMany` associations since you can manage the *many to many*
@@ -810,8 +810,26 @@ Person.hasMany("pets", Pet, {
 
 Person(1).getPetsSync(...);
 Pet(2).getOwnersSync(...);
+
+Person.findByPetsSync({ /* conditions */ }) // Find people by conditions for their pets
+Pet.findByOwnersSync({ /* conditions */ }) // Find pets by conditions for their owners
 ```
 
+## Accessors
+
+Like examples above, there are accessors in every **Associations**, all types of accessors are listed below,in this case, `Person.hasMany('pets', Pet, {}, {reverse: 'owner'})`
+
+ Accessor Type | Callor | hasOne | hasMany | extendsTo | Sample
+ :-----------|:--------|:--------|:--------|:--------|:--------
+ hasAccessor     			| instance 	| ✔️ | ✔️ | ✔️ | `pet.hasOwnersSync()`
+ getAccessor	  			| instance 	| ✔️ | ✔️ | ✔️ | `pet.getOwnersSync()`
+ setAccessor	  			| instance 	| ✔️ | ✔️ | ✔️ | `pet.setOwnersSync()`
+ delAccessor     			| instance 	| ✔️ | ✔️ | ✔️ | `person.removePetsSync([pet])`; `person.removePetsSync()`
+ addAccessor     			| instance 	| ✔️ | ❎ | ❎ | `person.addPetsSync([pet])`
+ modelFindByAccessor     	| model		| ✔️ | ✔️ | ✔️ | `Pet.findByOwnersSync({name: "Butt"})`
+```
+
+Those accessors makes sense for all associations (`hasOne`, `hasMany`, `extendsTo`), view details in [test cases](./test/integration)
 
 ## Transaction support
 

@@ -15,11 +15,9 @@ export const ACCESSOR_KEYS = {
 	"set": "set" as 'set',
 	"has": "has" as 'has',
 	"del": "remove" as 'remove',
+	"modelFindBy": "findBy" as 'findBy',
 	/* common :end */
 	
-	// useful for association `hasOne`, `extendsTo`
-	"modelFindBy": "findBy" as 'findBy',
-
 	// useful for association `hasMany` 
 	"add": "add" as 'add',
 };
