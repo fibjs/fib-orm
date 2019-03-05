@@ -27,7 +27,7 @@ Driver.prototype.sync = function (opts, cb) {
 
 		var indexes = [], pending;
 
-		for (var i = 0; i < opts.one_associations.length; i++) {
+		for (let i = 0; i < opts.one_associations.length; i++) {
 			if (opts.one_associations[i].extension) continue;
 			if (opts.one_associations[i].reversed) continue;
 
@@ -36,7 +36,7 @@ Driver.prototype.sync = function (opts, cb) {
 			}
 		}
 
-		for (i = 0; i < opts.many_associations.length; i++) {
+		for (let i = 0; i < opts.many_associations.length; i++) {
 			if (opts.many_associations[i].reversed) continue;
 
 			indexes.push(opts.many_associations[i].name);
@@ -44,7 +44,7 @@ Driver.prototype.sync = function (opts, cb) {
 
 		pending = indexes.length;
 
-		for (i = 0; i < indexes.length; i++) {
+		for (let i = 0; i < indexes.length; i++) {
 			collection.createIndex(indexes[i], function () {
 				if (--pending === 0) {
 					return cb();
@@ -110,7 +110,7 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb) {
 	if (opts.order) {
 		var orders = [];
 
-		for (var i = 0; i < opts.order.length; i++) {
+		for (let i = 0; i < opts.order.length; i++) {
 			orders.push([ opts.order[i][0], (opts.order[i][1] == 'Z' ? 'desc' : 'asc') ]);
 		}
 		cursor.sort(orders);
@@ -130,7 +130,7 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb) {
 
 		var pending = 0;
 
-		for (var i = 0; i < docs.length; i++) {
+		for (let i = 0; i < docs.length; i++) {
 			convertFromDB(docs[i], this.config.timezone);
 			if (opts.extra && opts.extra[docs[i]._id]) {
 				docs[i] = _merge(docs[i], util.omit(opts.extra[docs[i]._id], '_id'));
@@ -164,7 +164,7 @@ Driver.prototype.count = function (table, conditions, opts, cb) {
 	if (opts.order) {
 		var orders = [];
 
-		for (var i = 0; i < opts.order.length; i++) {
+		for (let i = 0; i < opts.order.length; i++) {
 			orders.push([ opts.order[i][0], (opts.order[i][1] == 'Z' ? 'desc' : 'asc') ]);
 		}
 		cursor.sort(orders);
@@ -197,7 +197,7 @@ Driver.prototype.insert = function (table, data, keyProperties, cb) {
 			var i, ids = {}, prop;
 
 			if (keyProperties && docs.length) {
-				for (i = 0; i < keyProperties.length; i++) {
+				for (let i = 0; i < keyProperties.length; i++) {
 					prop = keyProperties[i];
 
 					if (prop.mapsTo in docs[0]) {
@@ -228,7 +228,7 @@ Driver.prototype.hasMany = function (Model, association) {
 
 				var found;
 
-				for (var i = 0; i < Associations.length; i++) {
+				for (let i = 0; i < Associations.length; i++) {
 					found = false;
 					for (var j = 0; j < docs[0][association.name].length; j++) {
 						if (docs[0][association.name][j]._id == Associations[i][association.model.id]) {
@@ -258,7 +258,7 @@ Driver.prototype.hasMany = function (Model, association) {
 				var extra = {}
 				conditions._id = { $in: [] };
 
-				for (var i = 0; i < docs[0][association.name].length; i++) {
+				for (let i = 0; i < docs[0][association.name].length; i++) {
 					conditions._id.$in.push(new mongodb.ObjectID(docs[0][association.name][i]._id));
 					extra[docs[0][association.name][i]._id] = docs[0][association.name][i];
 				}
@@ -313,7 +313,7 @@ Driver.prototype.hasMany = function (Model, association) {
 			var pull = {};
 			pull[association.name] = [];
 
-			for (var i = 0; i < Associations.length; i++) {
+			for (let i = 0; i < Associations.length; i++) {
 				var props = {_id: Associations[i][association.model.id]};
 				
 				if (Associations[i].extra !== undefined) {
@@ -373,7 +373,7 @@ function convertToDB(obj, timeZone) {
 			continue;
 		}
 		if (Array.isArray(obj[k]) && k[0] != '$') {
-			for (var i = 0; i < obj[k].length; i++) {
+			for (let i = 0; i < obj[k].length; i++) {
 				obj[k][i] = convertToDBVal(k, obj[k][i], timeZone);
 			}
 

@@ -90,7 +90,7 @@ export function prepare (
 				conditions: FxOrmModel.ModelQueryConditions__Find = null,
 				options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
 
-			for (var i = 0; i < arguments.length; i++) {
+			for (let i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
 					case "function":
 						cb = arguments[i];
@@ -161,7 +161,7 @@ export function extend (
 	// extend target
 	associations: FxOrmAssociation.InstanceAssociationItem[]
 ) {
-	for (var i = 0; i < associations.length; i++) {
+	for (let i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i]);
 	}
 };
@@ -185,7 +185,7 @@ export function autoFetch (
 		}
 	};
 
-	for (var i = 0; i < associations.length; i++) {
+	for (let i = 0; i < associations.length; i++) {
 		autoFetchInstance(Instance, associations[i], opts, autoFetchDone);
 	}
 };

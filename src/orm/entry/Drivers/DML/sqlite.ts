@@ -102,7 +102,7 @@ Driver.prototype.find = function (
 		q.limit('9223372036854775807');
 	}
 	if (opts.order) {
-		for (var i = 0; i < opts.order.length; i++) {
+		for (let i = 0; i < opts.order.length; i++) {
 			q.order(opts.order[i][0], opts.order[i][1]);
 		}
 	}
@@ -195,7 +195,7 @@ Driver.prototype.insert = function (
 				return cb(null, ids);
 			});
 		} else {
-			for (i = 0; i < keyProperties.length; i++) {
+			for (let i = 0; i < keyProperties.length; i++) {
 				prop = keyProperties[i];
                                 // Zero is a valid value for an ID column
 				ids[prop.name] = data[prop.mapsTo] !== undefined ? data[prop.mapsTo] : null;

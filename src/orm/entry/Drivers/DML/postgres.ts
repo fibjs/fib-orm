@@ -149,7 +149,7 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb) {
 		q.limit(opts.limit);
 	}
 	if (opts.order) {
-		for (var i = 0; i < opts.order.length; i++) {
+		for (let i = 0; i < opts.order.length; i++) {
 			q.order(opts.order[i][0], opts.order[i][1]);
 		}
 	}
@@ -214,7 +214,7 @@ Driver.prototype.insert = function (table, data, keyProperties, cb) {
 		var i, ids = {}, prop;
 
 		if (keyProperties) {
-			for (i = 0; i < keyProperties.length; i++) {
+			for (let i = 0; i < keyProperties.length; i++) {
 				prop = keyProperties[i];
                                 // Zero is a valid value for an ID column
 				ids[prop.name] = results[0][prop.mapsTo] !== undefined ? results[0][prop.mapsTo] : null;

@@ -30,7 +30,7 @@ export function standardizeOrder (order: string|string[]) {
 	const new_order = [];
 	let minus: boolean;
 
-	for (var i = 0; i < order.length; i++) {
+	for (let i = 0; i < order.length; i++) {
 		minus = (order[i][0] === "-");
 
 		if (i < order.length - 1 && [ "A", "Z" ].indexOf(order[i + 1].toUpperCase()) >= 0) {
@@ -138,7 +138,7 @@ export function values <T=any>(obj: object|[], keys?: string[]): T[] {
 // Why?      Well I've got a pre-existing database that started all its 'serial' IDs at zero...
 // Answer:   hasValues() is only used in hasOne association, so it's probably ok...
 export function hasValues (obj: object, keys: string[]): boolean {
-	for (var i = 0; i < keys.length; i++) {
+	for (let i = 0; i < keys.length; i++) {
 		if (!obj[keys[i]] && obj[keys[i]] !== 0) return false;  // 0 is also a good value...
 	}
 	return true;
@@ -151,7 +151,7 @@ export function populateConditions (
 	target: FxSqlQuerySubQuery.SubQueryConditions,
 	overwrite?: boolean
 ): void {
-	for (var i = 0; i < model.id.length; i++) {
+	for (let i = 0; i < model.id.length; i++) {
 		if (typeof target[fields[i]] === 'undefined' || overwrite !== false) {
 			target[fields[i]] = source[model.id[i]];
 		} else if (Array.isArray(target[fields[i]])) { // that might be conjunction query conditions
@@ -249,7 +249,7 @@ export function formatField (
 	var keys = model.id;
 	var assoc_key: FxOrmAssociation.AssociationKeyComputation = model.settings.get("properties.association_key");
 
-	for (var i = 0; i < keys.length; i++) {
+	for (let i = 0; i < keys.length; i++) {
 		if (reversed) {
 			field_name = keys[i];
 		} else if (typeof assoc_key === "function") {
@@ -366,7 +366,7 @@ export function transformOrderPropertyNames (
 	var newOrder = JSON.parse(JSON.stringify(order));
 
 	// Rename order properties according to mapsTo
-	for (var i = 0; i < newOrder.length; i++) {
+	for (let i = 0; i < newOrder.length; i++) {
 		item = newOrder[i];
 
 		// orderRaw

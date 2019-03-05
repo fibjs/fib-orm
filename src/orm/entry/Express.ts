@@ -67,7 +67,7 @@ function checkRequestQueue() {
 	if (_pending > 0) return;
 	if (_queue.length === 0) return;
 
-	for (var i = 0; i < _queue.length; i++) {
+	for (let i = 0; i < _queue.length; i++) {
 		_queue[i]();
 	}
 

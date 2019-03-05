@@ -114,7 +114,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 				conditions: FxOrmModel.ModelQueryConditions__Find = null,
 				findby_opts: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
 
-			for (var i = 0; i < arguments.length; i++) {
+			for (let i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
 					case "function":
 						cb = arguments[i];
@@ -219,7 +219,7 @@ export function extend(
 	opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany,
 	createInstance: Function
 ) {
-	for (var i = 0; i < associations.length; i++) {
+	for (let i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i], opts, createInstance);
 	}
 };
@@ -243,7 +243,7 @@ export function autoFetch(
 		}
 	};
 
-	for (var i = 0; i < associations.length; i++) {
+	for (let i = 0; i < associations.length; i++) {
 		autoFetchInstance(Instance, associations[i], opts, autoFetchDone);
 	}
 };
@@ -256,7 +256,7 @@ function adjustForMapsTo(properties: FxOrmProperty.NormalizedPropertyHash, field
 	 * Loop through the (cloned) association model id fields ... some of them may've been mapped to different
 	 * names in the actual database - if so update to the mapped database column name
 	 */
-	for (var i = 0; i < field.length; i++) {
+	for (let i = 0; i < field.length; i++) {
 		var idProp = properties[field[i]];
 		if (idProp && idProp.mapsTo) {
 			field[i] = idProp.mapsTo;
@@ -319,7 +319,7 @@ function extendInstance(
 
 			Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
 
-			for (var i = 0; i < Instances.length; i++) {
+			for (let i = 0; i < Instances.length; i++) {
 				Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Instances[i], options.__merge.where[1], false);
 			}
 
@@ -351,7 +351,7 @@ function extendInstance(
 			var order = null;
 			var cb = null;
 
-			for (var i = 0; i < arguments.length; i++) {
+			for (let i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
 					case "function":
 						cb = arguments[i];
@@ -448,7 +448,7 @@ function extendInstance(
 			var Associations: FxOrmAssociation.AssociationDefinitionOptions_HasMany[] = [];
 			var cb = noOperation;
 
-			for (var i = 0; i < args.length; i++) {
+			for (let i = 0; i < args.length; i++) {
 				switch (typeof args[i]) {
 					case "function":
 						cb = args[i];
@@ -472,7 +472,7 @@ function extendInstance(
 					return Driver.remove(association.mergeTable, conditions, cb);
 				}
 
-				for (var i = 0; i < Associations.length; i++) {
+				for (let i = 0; i < Associations.length; i++) {
 					Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Associations[i], conditions, false);
 				}
 
@@ -503,7 +503,7 @@ function extendInstance(
 			var opts = {};
 			var cb = noOperation;
 
-			for (var i = 0; i < arguments.length; i++) {
+			for (let i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
 					case "function":
 						cb = arguments[i];

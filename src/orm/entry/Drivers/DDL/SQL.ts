@@ -26,7 +26,7 @@ export const sync: FxOrmDMLDriver.DMLDriver['sync'] = function (
 
 	sync.defineCollection(opts.table, opts.allProperties);
 
-	for (var i = 0; i < opts.many_associations.length; i++) {
+	for (let i = 0; i < opts.many_associations.length; i++) {
 		props = {};
 
 		_merge(props, opts.many_associations[i].mergeId);

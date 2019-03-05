@@ -71,7 +71,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 				conditions: FxOrmModel.ModelQueryConditions__Find = null,
 				options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
 
-			for (var i = 0; i < arguments.length; i++) {
+			for (let i = 0; i < arguments.length; i++) {
 				switch (typeof arguments[i]) {
 					case "function":
 						cb = arguments[i];
@@ -115,7 +115,7 @@ export function extend (
 	associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[],
 	opts: FibOrmNS.ModelExtendOptions
 ) {
-	for (var i = 0; i < associations.length; i++) {
+	for (let i = 0; i < associations.length; i++) {
 		extendInstance(Model, Instance, Driver, associations[i], opts);
 	}
 };
@@ -139,7 +139,7 @@ export function autoFetch (
 		}
 	};
 
-	for (var i = 0; i < associations.length; i++) {
+	for (let i = 0; i < associations.length; i++) {
 		autoFetchInstance(Instance, associations[i], opts, autoFetchDone);
 	}
 };
@@ -198,7 +198,7 @@ function extendInstance(
 						Extension = new association.model(Extension);
 					}
 
-					for (var i = 0; i < Model.id.length; i++) {
+					for (let i = 0; i < Model.id.length; i++) {
 						Extension[fields[i]] = Instance[Model.id[i]];
 					}
 
@@ -217,7 +217,7 @@ function extendInstance(
 				var conditions = {};
 				var fields = Object.keys(association.field);
 
-				for (var i = 0; i < Model.id.length; i++) {
+				for (let i = 0; i < Model.id.length; i++) {
 				    conditions[fields[i]] = Instance[Model.id[i]];
 				}
 
@@ -228,7 +228,7 @@ function extendInstance(
 
 					var pending = extensions.length;
 
-					for (var i = 0; i < extensions.length; i++) {
+					for (let i = 0; i < extensions.length; i++) {
 						Singleton.clear(extensions[i].__singleton_uid() + '');
 						extensions[i].remove(function () {
 							if (--pending === 0) {

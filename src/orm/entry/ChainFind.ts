@@ -213,7 +213,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 
 				conditions.or = [];
 
-				for (var i = 0; i < data.length; i++) {
+				for (let i = 0; i < data.length; i++) {
 					or = {};
 					for (var j = 0; j < opts.keys.length; j++) {
 						or[keys[j]] = data[i][keys[j]];
@@ -261,7 +261,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 	chain.all = chain.where = chain.find;
 
 	if (opts.associations) {
-		for (var i = 0; i < opts.associations.length; i++) {
+		for (let i = 0; i < opts.associations.length; i++) {
 			addChainMethod(chain, opts.associations[i], opts);
 		}
 	}
@@ -297,7 +297,7 @@ function addChainMethod(
 		var assocIds = Object.keys(association.mergeAssocId);
 		var ids = association.model.id;
 		function mergeConditions(source) {
-			for (var i = 0; i < assocIds.length; i++) {
+			for (let i = 0; i < assocIds.length; i++) {
 				if (typeof conditions[assocIds[i]] === "undefined") {
 					conditions[assocIds[i]] = source[ids[i]];
 				} else if (Array.isArray(conditions[assocIds[i]])) {
@@ -309,7 +309,7 @@ function addChainMethod(
 		}
 
 		if (Array.isArray(value)) {
-			for (var i = 0; i < value.length; i++) {
+			for (let i = 0; i < value.length; i++) {
 				mergeConditions(value[i]);
 			}
 		} else {

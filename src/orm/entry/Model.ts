@@ -354,7 +354,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		var order = null;
 		var merge = null;
 
-		for (var i = 0; i < arguments.length; i++) {
+		for (let i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
 				case "number":
 					options.limit = arguments[i];
@@ -437,7 +437,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 
 				// Construct UID
 				var uid = m_opts.driver.uid + "/" + m_opts.table + (merge ? "+" + merge.from.table : "");
-				for (var i = 0; i < m_opts.keys.length; i++) {
+				for (let i = 0; i < m_opts.keys.length; i++) {
 					uid += "/" + data[m_opts.keys[i]];
 				}
 
@@ -473,7 +473,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		var cb: FxOrmModel.ModelMethodCallback__Get = null;
 
 		// extract callback
-		for (var i = 0; i < args.length; i++) {
+		for (let i = 0; i < args.length; i++) {
 			if (typeof args[i] === "function") {
 				cb = args.splice(i, 1)[0];
 				break;
@@ -500,7 +500,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		var conditions: FxSqlQuerySubQuery.SubQueryConditions = null;
 		var cb: FxOrmModel.ModelMethodCallback__Count         = null;
 
-		for (var i = 0; i < arguments.length; i++) {
+		for (let i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
 				case "object":
 					conditions = arguments[i];
@@ -536,7 +536,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		var conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 		var propertyList: string[] = [];
 
-		for (var i = 0; i < arguments.length; i++) {
+		for (let i = 0; i < arguments.length; i++) {
 			if (typeof arguments[i] === 'object') {
 				if (Array.isArray(arguments[i])) {
 					propertyList = arguments[i];
@@ -632,7 +632,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		var create_err	= null;
 		var single      = false;
 
-		for (var i = 0; i < arguments.length; i++) {
+		for (let i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
 				case "object":
 					if ( !single && Array.isArray(arguments[i]) ) {
