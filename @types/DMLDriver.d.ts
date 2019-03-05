@@ -5,7 +5,7 @@
 /// <reference path="connect.d.ts" />
 /// <reference path="property.d.ts" />
 /// <reference path="assoc.d.ts" />
-/// <reference path="Query.d.ts" />
+/// <reference path="query.d.ts" />
 
 declare namespace FxOrmDMLDriver {
     type DriverUidType = string
