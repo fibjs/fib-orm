@@ -94,6 +94,7 @@ declare namespace FxOrmAssociation {
 
     interface InstanceAssociationItem_ExtendTos extends InstanceAssociationItem {
         table: string;
+        modelFindByAccessor: string
     }
 
     interface InstanceAssociationItem_HasOne extends InstanceAssociationItem {

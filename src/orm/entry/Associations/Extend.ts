@@ -43,7 +43,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 			setAccessor    : opts.setAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.set, assocName),
 			hasAccessor    : opts.hasAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.has, assocName),
 			delAccessor    : opts.delAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.del, assocName),
-			modelFindByAccessor: opts.delAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.modelFindBy, assocName),
+			modelFindByAccessor: opts.modelFindByAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.modelFindBy, assocName),
 
 			model: null
 		};
