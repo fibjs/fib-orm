@@ -2,7 +2,7 @@ var test = require('test')
 test.setup()
 
 var helper = require('../support/spec_helper');
-var ORM = require('../../');
+// var ORM = require('../../');
 
 describe("hasMany extra properties", function () {
     var db = null;
@@ -23,6 +23,9 @@ describe("hasMany extra properties", function () {
             Person.hasMany('pets', Pet, {
                 since: Date,
                 data: Object
+            }, {
+                reverse: opts.reversePets ? 'owners' : null,
+                autoFetch: !!opts.autoFetchPets
             });
 
             return helper.dropSync([Person, Pet]);
@@ -79,6 +82,97 @@ describe("hasMany extra properties", function () {
 
             assert.equal(typeof John.pets[0].extra.data, 'object');
             assert.equal(JSON.stringify(data), JSON.stringify(John.pets[0].extra.data));
+        });
+    });
+
+    describe("findBy with extra data", function () {
+        var data = {
+            adopted: true
+        };
+        function assertion_people_for_findby (people) {
+            const John = people.find(person => person.name === "John");
+            assert.property(John, "pets");
+            console.log('John.pets', John.pets);
+            assert.ok(Array.isArray(John.pets));
+
+            assert.equal(John.pets.length, 2);
+
+            assert.property(John.pets[0], "name");
+            assert.property(John.pets[0], "extra");
+            assert.isObject(John.pets[0].extra);
+            assert.property(John.pets[0].extra, "since");
+            assert.ok(John.pets[0].extra.since instanceof Date);
+
+            assert.equal(typeof John.pets[0].extra.data, 'object');
+            assert.equal(JSON.stringify(data), JSON.stringify(John.pets[0].extra.data));
+        }
+
+        describe("findBy() - A hasMany B, without reverse", function () {
+            before(function () {
+                setup({
+                    autoFetchPets: false,
+                })();
+
+                var people = Person.createSync([{
+                    name: "John"
+                }]);
+
+                var pets = Pet.createSync([{
+                    name: "Deco"
+                }, {
+                    name: "Mutt"
+                }]);
+
+                var data = {
+                    adopted: true
+                };
+
+                people[0].addPetsSync(pets, {
+                    since: new Date(),
+                    data: data
+                });
+            });
+
+            it("could find A with `findbyB()`", function (done) {
+                var John = Person.findByPets(
+                    { name: "Mutt" }, 
+                    // find options for host model `Person`
+                    {
+                        order: 'name',
+                        autoFetch: true,
+                        // find options for associated model `Pet`,
+                        // {accessor}_find_options
+                        [`Pets_find_options`]: {
+                        }
+                    }
+                ).firstSync();
+
+                assertion_people_for_findby([John]);
+
+                var personCount = Person.findByPets({ name: "Mutt" }, { autoFetch: true }).countSync();
+                assert.ok(personCount, 1);
+
+                ;[
+                    'all',
+                    'where',
+                    'find',
+                    // 'remove',
+                    'run'
+                ].forEach(ichainFindKey => {
+                    var people = Person.findByPets({ name: "Mutt" }, { autoFetch: true })[`${ichainFindKey}Sync`]();
+                    assertion_people_for_findby(people);
+                });
+
+                var people = Person.findByPetsSync({ name: "Mutt" }, { autoFetch: true });
+                assertion_people_for_findby(people);
+
+                // asynchronous version
+                Person.findByPets({ name: "Mutt" }, { autoFetch: true })
+                    .run(function (err, people) {
+                        assertion_people_for_findby(people);
+                        done();
+                    });
+            });
         });
     });
 
@@ -158,7 +252,7 @@ describe("hasMany extra properties", function () {
             assert.ok(John.pets[0].extra.since instanceof Date);
 
             assert.equal(typeof John.pets[0].extra.data, 'object');
-            assert.equal(JSON.stringify(data), JSON.stringify(John.pets[0].extra.data)); 
+            assert.equal(JSON.stringify(data), JSON.stringify(John.pets[0].extra.data));
         })
     })
 });

@@ -25,3 +25,16 @@ export const ACCESSOR_KEYS = {
 export function getMapsToFromProperty (property: FxOrmProperty.NormalizedProperty) {
 	return property.mapsTo || property.name
 }
+
+export function cutOffAssociatedModelFindOptions (findby_options: FxOrmAssociation.ModelAssociationMethod__FindByOptions, assocNameTplName: string) {
+	let opts = null;
+	if (findby_options.hasOwnProperty(assocNameTplName)) {
+		const k = `${assocNameTplName}_find_options`;
+		opts = findby_options[k];
+		
+		delete findby_options[k]
+	}
+		return 
+	
+	return opts
+}

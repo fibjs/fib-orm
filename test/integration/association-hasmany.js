@@ -508,7 +508,7 @@ describe("hasMany", function () {
 
                 it("could find A with `findbyB()`", function (done) {
                     var John = Person.findByPets({ name: "Mutt" }, { order: 'name' }).lastSync();
-                    var Jane = Person.findByPets({ name: "Mutt" }, { order: '-name' }).firstSync();
+                    var Jane = Person.findByPets({ name: "Mutt" }, { order: 'name' }).firstSync();
                     assertion_people_for_findby([John, Jane]);
 
                     var John = Person.findByPets({ name: "Mutt" }, {  }).firstSync();
@@ -541,8 +541,12 @@ describe("hasMany", function () {
                 });
 
                 it("could find B with `findbyA()`", function (done) {
-                    var Mutt = Pet.findByOwners({ name: "John" }, { order: 'name' }).lastSync();
-                    var Deco = Pet.findByOwners({ name: "John" }, { order: '-name' }).firstSync();
+                    var Mutt = Pet.findByOwners({ name: "John" }, {
+                        Owners_find_options: { order: 'name' }
+                    }).lastSync();
+                    var Deco = Pet.findByOwners({ name: "John" }, {
+                        Owners_find_options: { order: 'name' }
+                    }).firstSync();
                     assertion_pets_for_findby([Mutt, Deco]);
 
                     var Mutt = Pet.findByOwners({ name: "John" }, {  }).firstSync();
@@ -587,7 +591,7 @@ describe("hasMany", function () {
 
                 it("could find A with `findbyB()`", function (done) {
                     var John = Person.findByPets({ name: "Mutt" }, { order: 'name' }).lastSync();
-                    var Jane = Person.findByPets({ name: "Mutt" }, { order: '-name' }).firstSync();
+                    var Jane = Person.findByPets({ name: "Mutt" }, { order: 'name' }).firstSync();
                     assertion_people_for_findby([John, Jane]);
 
                     var John = Person.findByPets({ name: "Mutt" }, {  }).firstSync();

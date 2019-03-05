@@ -153,6 +153,9 @@ declare namespace FxOrmAssociation {
     interface ModelAssociationMethod__FindOptions extends FxOrmModel.ModelOptions__Find, ModelAssociationMethod__Options {
     }
 
+    interface ModelAssociationMethod__FindByOptions extends FxOrmModel.ModelOptions__Find, ModelAssociationMethod__Options {
+    }
+
     interface ModelAssociationMethod__GetOptions extends FxOrmModel.ModelOptions__Find, ModelAssociationMethod__Options {
     }
 
