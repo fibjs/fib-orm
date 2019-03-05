@@ -48,7 +48,7 @@ const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
 			}
 			return this;
 		},
-		order: function (...orders: string[]) {
+		order: function (...orders: FxOrmQuery.OrderRawTuple) {
 			opts.order = Utilities.standardizeOrder(orders);
 			return this;
 		},
@@ -103,7 +103,7 @@ const AggregateFunctions: FxOrmQuery.AggregateConstructor = function (
 
 			const query = opts.driver.getQuery()
 				.select()
-				.from(opts.table)
+				.from(opts.table, undefined, undefined)
 				.select(opts.propertyList);
 
 			for (let i = 0; i < aggregates.length; i++) {

@@ -351,8 +351,8 @@ export const Model: FxOrmModel.ModelConstructor = function (
 		var conditions: FxSqlQuerySubQuery.SubQueryConditions = null;
 		var options = <FxOrmModel.ModelOptions__Find>{};
 		var cb: FxOrmModel.ModelMethodCallback__Find = null;
-		var order = null;
-		var merge = null;
+		var order: FxOrmModel.ModelOptions__Find['order'] = null;
+		var merge: FxOrmQuery.ChainFindMergeInfo = null;
 
 		for (let i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
@@ -390,9 +390,9 @@ export const Model: FxOrmModel.ModelConstructor = function (
 					break;
 				case "string":
 					if (arguments[i][0] === "-") {
-						order = [ arguments[i].substr(1), "Z" ];
+						order = [ arguments[i].substr(1), "Z" ] as FxOrmModel.ModelOptions__Find['order'];
 					} else {
-						order = [ arguments[i] ];
+						order = [ arguments[i] ] as FxOrmModel.ModelOptions__Find['order'];
 					}
 					break;
 			}
@@ -408,8 +408,9 @@ export const Model: FxOrmModel.ModelConstructor = function (
 			options.cascadeRemove = m_opts.cascadeRemove;
 		}
 
+		let normalized_order: FxOrmQuery.OrderNormalizedTuple[] = null
 		if (order) {
-			order = Utilities.standardizeOrder(order);
+			normalized_order = Utilities.standardizeOrder(order);
 		}
 		
 		if (conditions) {
@@ -424,7 +425,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 			conditions   : conditions,
 			associations : many_associations,
 			limit        : options.limit,
-			order        : order,
+			order        : normalized_order,
 			merge        : merge,
 			exists		 : options.exists || [],
 			offset       : options.offset,
@@ -465,7 +466,7 @@ export const Model: FxOrmModel.ModelConstructor = function (
 			chain.run(cb);
 			return this;
 		}
-	} as FxOrmModel.Model['find'];
+	};
 
 	model.where = model.all = model.find;
 

@@ -19,7 +19,7 @@ export const sync: FxOrmDMLDriver.DMLDriver['sync'] = function (
 	var props: FxOrmProperty.NormalizedPropertyHash = {};
 
 	if (this.customTypes) {
-		for (var k in this.customTypes) {
+		for (let k in this.customTypes) {
 			sync.defineType(k, this.customTypes[k]);
 		}
 	}

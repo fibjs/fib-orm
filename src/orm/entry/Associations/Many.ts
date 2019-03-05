@@ -43,7 +43,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 		if (props === null) {
 			props = {};
 		} else {
-			for (var k in props) {
+			for (let k in props) {
 				props[k] = Property.normalize({
 					prop: props[k] as FxOrmModel.ComplexModelPropertyDefinition,
 					name: k,
@@ -305,7 +305,8 @@ function extendInstance(
 				from: { table: association.mergeTable, field: Object.keys(association.mergeAssocId) },
 				to: { table: association.model.table, field: association.model.id.slice(0) },   // clone model id
 				where: [association.mergeTable, {}],
-				table: association.model.table
+				table: association.model.table,
+				select: []
 			};
 
 			adjustForMapsTo(association.model.properties, options.__merge.to.field);
@@ -398,7 +399,8 @@ function extendInstance(
 				from: { table: association.mergeTable, field: Object.keys(association.mergeAssocId) },
 				to: { table: association.model.table, field: association.model.id.slice(0) }, // clone model id
 				where: [association.mergeTable, {}],
-				table: association.model.table
+				table: association.model.table,
+				select: []
 			};
 
 			adjustForMapsTo(association.model.properties, options.__merge.to.field);
@@ -545,7 +547,7 @@ function extendInstance(
 
 							var data = {};
 
-							for (var k in opts) {
+							for (let k in opts) {
 								if (k in association.props && Driver.propertyToValue) {
 									data[k] = Driver.propertyToValue(opts[k], association.props[k]);
 								} else {

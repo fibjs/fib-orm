@@ -191,7 +191,7 @@ ORM.prototype.use = function (
 	var plugin: FxOrmNS.Plugin = new plugin_const(this, opts || {});
 
 	if (typeof plugin.define === "function") {
-		for (var k in this.models) {
+		for (let k in this.models) {
 			plugin.define(this.models[k], this);
 		}
 	}

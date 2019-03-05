@@ -36,18 +36,22 @@ declare namespace FxOrmQuery {
 
     type QueryConditions = FxSqlQuerySubQuery.SubQueryConditions
     /* query conditions :end */
+
+    type OrderRawInput = string | OrderRawTuple
+    type OrderRawTuple = [string, string?]
+    type OrderNormalizedTuple = [string, "Z" | "A"]
     
     interface ChainFindMergeInfo {
         from: {
             table: string
-            field: string
+            field: string[]
         }
         to: {
             table?: string
-            field: string
+            field: string[]
         }
         select: FxSqlQueryColumns.SelectInputArgType[]
-        where: FxSqlQuerySubQuery.SubQueryConditions[]
+        where: [string, FxOrmModel.ModelQueryConditions__Find]
         table: string
     }
 
@@ -83,7 +87,7 @@ declare namespace FxOrmQuery {
         driver: FxOrmDMLDriver.DMLDriver
         driver_name?: string
         limit?: [number, number]
-        order?: string[]
+        order?: FxOrmQuery.OrderNormalizedTuple[] // string[]
         // property name's list
         propertyList?: string[]
         table?: string
@@ -117,7 +121,7 @@ declare namespace FxOrmQuery {
         skip(offset: number): IChainFind;
         offset(offset: number): IChainFind;
 
-        order(propertyOrderDesc: string, order?: string | "Z" | "A"): IChainFind;
+        order(propertyOrderDesc: FxOrmQuery.OrderNormalizedTuple[0], order?: string | FxOrmQuery.OrderNormalizedTuple[1]): IChainFind;
         orderRaw(str: string, args: any[]): IChainFind;
         limit(limit: number): IChainFind;
         count(callback: FxOrmNS.ExecutionCallback<number>): IChainFind;
@@ -157,7 +161,7 @@ declare namespace FxOrmQuery {
         conditions: QueryConditions
         properties: FxOrmProperty.NormalizedPropertyHash
         keyProperties: FxOrmProperty.NormalizedProperty[]
-        order: [FxSqlQuerySql.SqlFragmentStr?, [...FxSqlQuerySql.SqlAssignmentValues]?]
+        order: FxOrmQuery.OrderNormalizedTuple[]
         only: string|FxSqlQueryColumns.SelectInputArgType[]
         limit: number
         offset: number

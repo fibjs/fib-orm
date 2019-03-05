@@ -53,7 +53,7 @@ export function patchResult(o: FxOrmModelAndInstance): void {
      * @param opt 
      */
     function filter_date(opt) {
-        for (var k in opt) {
+        for (let k in opt) {
             if (is_model_conjunctions_key(k))
                 Array.isArray(opt[k]) && opt[k].forEach(filter_date);
             else {

@@ -31,7 +31,7 @@ Driver.prototype.sync = function (opts, cb) {
 			if (opts.one_associations[i].extension) continue;
 			if (opts.one_associations[i].reversed) continue;
 
-			for (var k in opts.one_associations[i].field) {
+			for (let k in opts.one_associations[i].field) {
 				indexes.push(k);
 			}
 		}
@@ -282,7 +282,7 @@ Driver.prototype.hasMany = function (Model, association) {
 			var push = {};
 			push[association.name] = { _id : Association[association.model.id] };
 
-			for (var k in data) {
+			for (let k in data) {
 				push[association.name][k] = data[k];
 			}
 
@@ -363,7 +363,7 @@ Driver.prototype.clear = function (table, cb) {
 };
 
 function convertToDB(obj, timeZone) {
-	for (var k in obj) {
+	for (let k in obj) {
 		if ([ 'and', 'or', 'not' ].indexOf(k) >= 0) {
 			for (var j = 0; j < obj[k].length; j++) {
 				convertToDB(obj[k][j], timeZone);
@@ -386,7 +386,7 @@ function convertToDB(obj, timeZone) {
 }
 
 function convertFromDB(obj, timezone) {
-	for (var k in obj) {
+	for (let k in obj) {
 		if (obj[k] instanceof mongodb.ObjectID) {
 			obj[k] = obj[k].toString();
 			continue;

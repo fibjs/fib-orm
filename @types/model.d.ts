@@ -247,7 +247,7 @@ declare namespace FxOrmModel {
         
         only?: string;
         limit?: number;
-        order?: any;
+        order?: string | [string, string?];
         offset?: number;
         identityCache?: boolean
 

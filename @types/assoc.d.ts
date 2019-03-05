@@ -134,18 +134,7 @@ declare namespace FxOrmAssociation {
         data?: InstanceAssociationItem
     }
 
-    interface ModelAssociationMethod__ComputationPayload__Merge {
-        from: {
-            table: string,
-            field: string[]
-        }
-        to: {
-            table: string,
-            field: string[]
-        }
-        where: [string, FxOrmModel.ModelQueryConditions__Find]
-        table?: string
-    }
+    type ModelAssociationMethod__ComputationPayload__Merge = FxOrmQuery.ChainFindMergeInfo
 
     interface ModelAssociationMethod__Options {
     }

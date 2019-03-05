@@ -265,7 +265,7 @@ const ChainFind: FxOrmQuery.ChainFindGenerator = function (
 			addChainMethod(chain, opts.associations[i], opts);
 		}
 	}
-	for (var k in Model) {
+	for (let k in Model) {
 		if (MODEL_FUNCS.indexOf(k) >= 0) {
 			continue;
 		}

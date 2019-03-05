@@ -19,7 +19,7 @@ const _cloneDeep = require('lodash.clonedeep')
  * 9. [ 'property1', '-property2' ] (ORDER BY property1 ASC, property2 DESC)
  * ...
  */
-export function standardizeOrder (order: string|string[]) {
+export function standardizeOrder (order: FxOrmQuery.OrderRawInput): FxOrmQuery.OrderNormalizedTuple[] {
 	if (typeof order === "string") {
 		if (order[0] === "-") {
 			return [ [ order.substr(1), "Z" ] ];
@@ -197,7 +197,7 @@ export function wrapFieldObject (
 	}
 
 	if (typeof params.field == 'object') {
-		for (var k in params.field) {
+		for (let k in params.field) {
 			if (!/[0-9]+/.test(k) && params.field.hasOwnProperty(k)) {
 				return params.field;
 			}
@@ -298,7 +298,7 @@ export function convertPropToJoinKeyProp (
 ): FxOrmProperty.NormalizedPropertyHash {
 	var prop: FxOrmProperty.NormalizedProperty;
 
-	for (var k in props) {
+	for (let k in props) {
 		prop = props[k];
 
 		prop.required = opts.required;

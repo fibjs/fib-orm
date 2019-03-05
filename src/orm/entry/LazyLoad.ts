@@ -5,7 +5,7 @@ export function extend (
 	Model: FxOrmModel.Model,
 	properties: FxOrmProperty.NormalizedPropertyHash
 ) {
-	for (var k in properties) {
+	for (let k in properties) {
 		if (properties[k].lazyload === true) {
 			addLazyLoadProperty(properties[k].lazyname || k, Instance, Model, k);
 		}

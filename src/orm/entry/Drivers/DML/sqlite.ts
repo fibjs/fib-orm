@@ -122,7 +122,7 @@ Driver.prototype.find = function (
 	}
 
 	if (opts.exists) {
-		for (var k in opts.exists) {
+		for (let k in opts.exists) {
 			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
 		}
 	}
@@ -154,7 +154,7 @@ Driver.prototype.count = function (
 	}
 
 	if (opts.exists) {
-		for (var k in opts.exists) {
+		for (let k in opts.exists) {
 			q.whereExists(opts.exists[k].table, table, opts.exists[k].link, opts.exists[k].conditions);
 		}
 	}

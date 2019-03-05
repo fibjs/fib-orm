@@ -49,7 +49,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 		};
 
 		const newProperties: FxOrmModel.DetailedPropertyDefinitionHash = _cloneDeep(properties);
-		for (var k in association.field as FxOrmProperty.NormalizedPropertyHash) {
+		for (let k in association.field as FxOrmProperty.NormalizedPropertyHash) {
 		    newProperties[k] = association.field[k];
 		}
 
@@ -94,7 +94,8 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 				from  : { table: association.model.table, field: Object.keys(association.field) },
 				to    : { table: Model.table, field: Model.id },
 				where : [ association.model.table, conditions ],
-				table : Model.table
+				table : Model.table,
+				select: []
 			};
 			options.extra = [];
 

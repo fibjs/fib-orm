@@ -153,7 +153,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 	};
 	var getInstanceData = function () {
 		var data = {}, prop;
-		for (var k in opts.data) {
+		for (let k in opts.data) {
 			if (!opts.data.hasOwnProperty(k)) continue;
 			prop = Model.allProperties[k];
 
@@ -616,7 +616,7 @@ export const Instance: FxOrmInstance.InstanceConstructor = function (
 				}
 			}
 
-			for (var k in data) {
+			for (let k in data) {
 				if (data.hasOwnProperty(k)) {
 					this[k] = data[k];
 				}

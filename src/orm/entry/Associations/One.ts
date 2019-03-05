@@ -132,7 +132,8 @@ export function prepare (
 				from  : { table: from_table, field: (!association.reversed ? ft_tuple_fields[1] : ft_tuple_fields[0]) },
 				to    : { table: to_table, field: (!association.reversed ? ft_tuple_fields[0] : ft_tuple_fields[1] ) },
 				where : [ where_table, conditions ],
-				table : Model.table
+				table : Model.table,
+				select: []
 			};
 
 			if (same_ft) {
@@ -354,7 +355,7 @@ function extendInstance(
 	if (!association.reversed) {
 		Object.defineProperty(Instance, association.delAccessor, {
 			value: function (cb: FxOrmNS.GenericCallback<void>) {
-				for (var k in association.field as FxOrmProperty.NormalizedPropertyHash) {
+				for (let k in association.field as FxOrmProperty.NormalizedPropertyHash) {
 					if (association.field.hasOwnProperty(k)) {
 						Instance[k] = null;
 					}
