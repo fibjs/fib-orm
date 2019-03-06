@@ -827,9 +827,9 @@ Like examples above, there are accessors in every **Associations**, all types of
  delAccessor     			| instance 	| ✔️ | ✔️ | ✔️ | `person.removePetsSync([pet])`; `person.removePetsSync()`
  addAccessor     			| instance 	| ✔️ | ❎ | ❎ | `person.addPetsSync([pet])`
  modelFindByAccessor     	| model		| ✔️ | ✔️ | ✔️ | `Pet.findByOwnersSync({name: "Butt"})`
-```
 
-Those accessors makes sense for all associations (`hasOne`, `hasMany`, `extendsTo`), view details in [test cases](./test/integration)
+
+Those accessors makes sense for all associations (`hasOne`, `hasMany`, `extendsTo`), view details in [test cases](./test/integration).
 
 ## Transaction support
 
