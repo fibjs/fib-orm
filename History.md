@@ -1,7 +1,33 @@
 
-v1.8.7 / 2019-03-03
+v1.8.8 / 2019-03-06
 ==================
 
+  * fix bad config in package.json
+  * enable 'compilerOptions.noImplicitAny' in tsconfig.json; upgrade key dependencies, enhance robust of typo.
+  * type robust.
+  * typo fix.
+  * [hasmany-extra] robust change; add test case about.
+  * type robust.
+  * code normalization.
+  * test case code clean.
+  * robust type change.
+  * support semantic `{accessor}_find_options` for findby options in has-many options.
+  * [WIP]
+  * batch robust change for `for-loop` iteration initial idx statement.
+  * type robust change.
+  * robust change.
+  * [Many.ts] fix.
+  * update README.md.
+  * code clean.
+  * support `findBy*()` in has-many association.
+  * add Helpers Module
+  * code normalization.
+  * support `InstanceAssociationItem_ExtendTos['modelFindByAccessor']` and `InstanceAssociationItem_HasOne['modelFindByAccessor']`, then apply them.
+
+v1.8.7 / 2019-03-03
+===================
+
+  * Release v1.8.7
   * code literal change.
   * support `ModelOptions__Find['chainfind_linktable']` and apply it.
   * remove wrong comment.
