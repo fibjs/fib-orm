@@ -1,7 +1,24 @@
 
-v1.8.8 / 2019-03-06
+v1.9.0 / 2019-03-11
 ==================
 
+  * 1.9.0
+  * upgrade core dependencies to support literal where-condition-object.
+  * robust change for test case.
+  * upgrade dependency.
+  * upgrade core dependencies, typo robust.
+  * recovery fallback mysql conn in test.
+  * use mysql as default test db in travis-ci.
+  * change default mysql test connection, fix one error test case for mysql.
+  * upgrade key dependency.
+  * add type Model['associations'] and support it.
+  * 1.9.0-dev
+  * doc fix.
+
+v1.8.8 / 2019-03-06
+===================
+
+  * Release v1.8.8
   * fix bad config in package.json
   * enable 'compilerOptions.noImplicitAny' in tsconfig.json; upgrade key dependencies, enhance robust of typo.
   * type robust.
