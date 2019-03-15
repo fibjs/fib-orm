@@ -1,7 +1,13 @@
 
-v1.9.0 / 2019-03-11
+v1.9.1 / 2019-03-16
 ==================
 
+  * peer latest @fxjs/sql-query to support modifiers.
+
+v1.9.0 / 2019-03-11
+===================
+
+  * Release v1.9.0
   * 1.9.0
   * upgrade core dependencies to support literal where-condition-object.
   * robust change for test case.
