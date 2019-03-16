@@ -1,7 +1,13 @@
 
-v1.9.1 / 2019-03-16
+v1.9.2 / 2019-03-16
 ==================
 
+  * support `join_where` option in `ModelAssociationMethod__Options`.
+
+v1.9.1 / 2019-03-16
+===================
+
+  * Release v1.9.1
   * peer latest @fxjs/sql-query to support modifiers.
 
 v1.9.0 / 2019-03-11
