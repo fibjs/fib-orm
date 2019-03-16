@@ -147,7 +147,7 @@ export function hasValues (obj: {[k: string]: any}, keys: string[]): boolean {
 	return true;
 };
 
-export function populateConditions (
+export function populateModelIdKeysConditions (
 	model: FxOrmModel.Model,
 	fields: string[],
 	// source: FxOrmAssociation.AssociationDefinitionOptions | FxOrmInstance.Instance,
@@ -176,7 +176,7 @@ export function getConditions (
 ): FxSqlQuerySubQuery.SubQueryConditions {
 	var conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 
-	populateConditions(model, fields, from, conditions);
+	populateModelIdKeysConditions(model, fields, from, conditions);
 
 	return conditions;
 };

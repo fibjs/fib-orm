@@ -145,6 +145,8 @@ declare namespace FxOrmAssociation {
     type ModelAssociationMethod__ComputationPayload__Merge = FxOrmQuery.ChainFindMergeInfo
 
     interface ModelAssociationMethod__Options {
+        // only valid for hasMany assoc
+        join_where?: FxOrmModel.ModelOptions__Find
     }
 
     interface ModelAssociationMethod__FindOptions extends FxOrmModel.ModelOptions__Find, ModelAssociationMethod__Options {

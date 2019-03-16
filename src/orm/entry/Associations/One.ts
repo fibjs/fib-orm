@@ -308,7 +308,7 @@ function extendInstance(
 					}
 
 					if (!Array.isArray(OtherInstance)) {
-						Utilities.populateConditions(
+						Utilities.populateModelIdKeysConditions(
 							Model, Object.keys(association.field), Instance, OtherInstance, true
 						);
 
@@ -324,7 +324,7 @@ function extendInstance(
 
 						var other = associations.pop();
 
-						Utilities.populateConditions(
+						Utilities.populateModelIdKeysConditions(
 							Model, Object.keys(association.field), Instance, other, true
 						);
 
@@ -349,7 +349,7 @@ function extendInstance(
 
 					Instance[association.name] = OtherInstance;
 
-					Utilities.populateConditions(association.model, Object.keys(association.field), OtherInstance, Instance);
+					Utilities.populateModelIdKeysConditions(association.model, Object.keys(association.field), OtherInstance, Instance);
 
 					return Instance.save({}, { saveAssociations: false }, cb);
 				});

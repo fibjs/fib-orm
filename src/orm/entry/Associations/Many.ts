@@ -154,7 +154,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 
 					const query_exists: FxOrmQuery.ChainWhereExistsInfo[] = foundAssocItems.map(foundAssocItem => {
 						const rev_conditions = {};
-						Utilities.populateConditions(
+						Utilities.populateModelIdKeysConditions(
 							Model,
 							Object.values(association.mergeAssocId).map(getMapsToFromProperty),
 							foundAssocItem,
@@ -293,7 +293,9 @@ function extendInstance(
 	Object.defineProperty(Instance, association.hasAccessor, {
 		value: function (...Instances: FxOrmInstance.Instance[]) {
 			var cb: FxOrmNS.GenericCallback<boolean> = Instances.pop() as any;
-			var conditions = {}, options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
+			var conditions = {},
+				join_conditions = {},
+				options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
 
 			if (Instances.length) {
 				if (Array.isArray(Instances[0])) {
@@ -309,7 +311,7 @@ function extendInstance(
 			options.__merge = {
 				from: { table: association.mergeTable, field: Object.keys(association.mergeAssocId) },
 				to: { table: association.model.table, field: association.model.id.slice(0) },   // clone model id
-				where: [association.mergeTable, {}],
+				where: [association.mergeTable, join_conditions],
 				table: association.model.table,
 				select: []
 			};
@@ -324,10 +326,10 @@ function extendInstance(
 				assoc_prop: Object.keys(association.mergeAssocId)
 			};
 
-			Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
+			Utilities.populateModelIdKeysConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
 
 			for (let i = 0; i < Instances.length; i++) {
-				Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Instances[i], options.__merge.where[1], false);
+				Utilities.populateModelIdKeysConditions(association.model, Object.keys(association.mergeAssocId), Instances[i], options.__merge.where[1], false);
 			}
 
 			association.model.find(conditions, options, function (err, foundItems) {
@@ -353,8 +355,9 @@ function extendInstance(
 	});
 	Object.defineProperty(Instance, association.getAccessor, {
 		value: function () {
-			var options: FxOrmAssociation.ModelAssociationMethod__GetOptions = {} as FxOrmAssociation.ModelAssociationMethod__GetOptions;
+			var options = <FxOrmAssociation.ModelAssociationMethod__GetOptions>{};
 			var conditions = null;
+			var join_conditions = {};
 			var order = null;
 			var cb = null;
 
@@ -396,6 +399,10 @@ function extendInstance(
 				conditions = {};
 			}
 
+			if (! (join_conditions = options.join_where) ) {
+				join_conditions = {};
+			}
+
 			if (Driver.hasMany) {
 				return Driver.hasMany(Model, association).get(Instance, conditions, options, createInstance, cb);
 			}
@@ -403,7 +410,7 @@ function extendInstance(
 			options.__merge = {
 				from: { table: association.mergeTable, field: Object.keys(association.mergeAssocId) },
 				to: { table: association.model.table, field: association.model.id.slice(0) }, // clone model id
-				where: [association.mergeTable, {}],
+				where: [association.mergeTable, join_conditions],
 				table: association.model.table,
 				select: []
 			};
@@ -418,7 +425,7 @@ function extendInstance(
 				assoc_prop: Object.keys(association.mergeAssocId)
 			};
 
-			Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
+			Utilities.populateModelIdKeysConditions(Model, Object.keys(association.mergeId), Instance, options.__merge.where[1]);
 
 			if (cb === null) {
 				return association.model.find(conditions, options);
@@ -481,13 +488,13 @@ function extendInstance(
 				}
 
 				for (let i = 0; i < Associations.length; i++) {
-					Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Associations[i], conditions, false);
+					Utilities.populateModelIdKeysConditions(association.model, Object.keys(association.mergeAssocId), Associations[i], conditions, false);
 				}
 
 				Driver.remove(association.mergeTable, conditions, cb);
 			};
 
-			Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, conditions);
+			Utilities.populateModelIdKeysConditions(Model, Object.keys(association.mergeId), Instance, conditions);
 
 			if (this.saved()) {
 				run();
@@ -572,8 +579,8 @@ function extendInstance(
 								});
 							}
 
-							Utilities.populateConditions(Model, Object.keys(association.mergeId), Instance, data);
-							Utilities.populateConditions(association.model, Object.keys(association.mergeAssocId), Association, data);
+							Utilities.populateModelIdKeysConditions(Model, Object.keys(association.mergeId), Instance, data);
+							Utilities.populateModelIdKeysConditions(association.model, Object.keys(association.mergeAssocId), Association, data);
 
 							Driver.insert(association.mergeTable, data, null, function (err) {
 								if (err) {

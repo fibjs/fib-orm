@@ -95,6 +95,159 @@ describe("hasMany extra properties", function () {
         });
     });
 
+    describe("getAccessor with join_where", function () {
+       const bt = cutOffMilliSecond(new Date());
+        const since_list = Array.apply(null, {length: 2}).fill(undefined).map((_, idx) => {
+            return new Date(bt.getTime() + 86400 * 1e3 * idx)
+        });
+
+        var data = {
+            adopted: true
+        };
+
+        function assertion_people_for_get_with_join_where (people) {
+            const John = people.find(person => person.name === "John");
+            assert.property(John, "pets");
+            assert.ok(Array.isArray(John.pets));
+
+            assert.equal(John.pets.length, 2);
+
+            John.pets.forEach((pet, idx) => {
+                assert.property(pet, "name");
+                assert.property(pet, "extra");
+                assert.isObject(pet.extra);
+                assert.property(pet.extra, "since");
+                assert.ok(pet.extra.since instanceof Date);
+                assert.equal(pet.extra.since + '', since_list[idx] + '');
+
+                assert.equal(typeof pet.extra.data, 'object');
+                assert.equal(JSON.stringify(data), JSON.stringify(pet.extra.data));
+            });
+        }
+
+        describe("getAccessor - A hasMany B, without reverse", function () {
+            before(function () {
+                setup({
+                    autoFetchPets: false,
+                })();
+
+                var people = Person.createSync([{
+                    name: "John"
+                }]);
+
+                var pets = Pet.createSync([{
+                    name: "Deco"
+                }, {
+                    name: "Mutt"
+                }]);
+
+                pets.forEach((pet, idx) => {
+                    people[0].addPetsSync(pet, {
+                        since: since_list[idx],
+                        data: data
+                    });
+                });
+            });
+
+            it("could get B from A with filter to join table", function () {
+                var John = Person.find(
+                    { name: "John" }, 
+                ).firstSync();
+
+                var Deco = John.getPets({}, {
+                    join_where: {
+                        since: ORM.eq(since_list[0])
+                    }
+                }).firstSync();
+
+                var Mutt = John.getPets({}, {
+                    join_where: {
+                        since: ORM.eq(since_list[1])
+                    }
+                }).firstSync();
+
+                John.pets = [Deco, Mutt];
+
+                assertion_people_for_get_with_join_where([John]);
+            });
+
+            it("find item with non-exists join where condition", function () {
+                var John = Person.find(
+                    { name: "John" }, 
+                ).firstSync();
+                
+                var Invalid = John.getPets({}, {
+                    join_where: {
+                        since: ORM.lt(since_list[0])
+                    }
+                }).firstSync();
+                
+                assert.isNull(Invalid);
+            });
+        });
+
+        describe("getAccessor - A hasMany B, with reverse", function () {
+            before(function () {
+                setup({
+                    autoFetchPets: false,
+                    reversePets: true
+                })();
+
+                var people = Person.createSync([{
+                    name: "John"
+                }]);
+
+                var pets = Pet.createSync([{
+                    name: "Deco"
+                }, {
+                    name: "Mutt"
+                }]);
+
+                pets.forEach((pet, idx) => {
+                    people[0].addPetsSync(pet, {
+                        since: since_list[idx],
+                        data: data
+                    });
+                });
+            });
+
+            it("could get A from B with filter to join table", function () {
+                var Deco = Pet.find(
+                    { name: "Deco" },
+                ).firstSync();
+
+                var Mutt = Pet.find(
+                    { name: "Mutt" }, 
+                ).firstSync();
+
+                var JohnForDeco = Deco.getOwners(
+                    {},
+                    {
+                        join_where: {
+                            since: ORM.eq(since_list[0])
+                        }
+                    } 
+                ).firstSync();
+                Deco.extra = JohnForDeco.extra;
+
+                var JohnForMutt = Mutt.getOwners(
+                    {},
+                    {
+                        join_where: {
+                            since: ORM.eq(since_list[1])
+                        }
+                    } 
+                ).firstSync();
+                Mutt.extra = JohnForMutt.extra;
+
+                var John = new Person(JohnForMutt);
+                John.pets = [Deco, Mutt];
+
+                assertion_people_for_get_with_join_where([John]);
+            });
+        });
+    });
+
     describe("findBy with extra data", function () {
         var data = {
             adopted: true
@@ -274,7 +427,7 @@ describe("hasMany extra properties", function () {
             });
         });
     });
-
+ 
     describe("if call whereExists", function () {
         before(setup());
 
@@ -353,7 +506,7 @@ describe("hasMany extra properties", function () {
             assert.equal(typeof John.pets[0].extra.data, 'object');
             assert.equal(JSON.stringify(data), JSON.stringify(John.pets[0].extra.data));
         })
-    })
+    });
 });
 
 if (require.main === module) {
