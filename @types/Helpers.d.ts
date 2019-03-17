@@ -13,5 +13,10 @@ declare namespace FxOrmHelper {
       getOneAssociationItemFromInstanceByAssocModel (instance: FxOrmNS.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasOne
       getExtendsToAssociationItemFromInstanceByAssocModel (instance: FxOrmNS.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_ExtendTos
       getAssociationItemFromInstanceByAssocModel (reltype: string, inst: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem
+
+      getManyAssociationItemFromModel (extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasMany
+      getOneAssociationItemFromModel (extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasOne
+      getExtendsToAssociationItemFromModel (extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_ExtendTos
+      getAssociationItemFromModel (reltype: string, extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem
    }
 }

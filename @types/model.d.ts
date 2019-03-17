@@ -70,9 +70,6 @@ declare namespace FxOrmModel {
             } | {
                 type: 'extendsTo'
                 association: FxOrmAssociation.InstanceAssociationItem_ExtendTos
-            } | {
-                type: FxOrmAssociation.AssociationType
-                association: FxOrmAssociation.InstanceAssociationItem
             }
         }
         findBy: {
