@@ -259,17 +259,19 @@ describe("hasMany extra properties", function () {
 
             assert.equal(John.pets.length, 2);
 
-            assert.property(John.pets[0], "name");
-            assert.property(John.pets[0], "extra");
-            assert.isObject(John.pets[0].extra);
-            assert.property(John.pets[0].extra, "since");
-            assert.ok(John.pets[0].extra.since instanceof Date);
+            John.pets.forEach(pet => {
+                assert.property(pet, "name");
+                assert.property(pet, "extra");
+                assert.isObject(pet.extra);
+                assert.property(pet.extra, "since");
+                assert.ok(pet.extra.since instanceof Date);
 
-            assert.equal(typeof John.pets[0].extra.data, 'object');
-            assert.equal(JSON.stringify(data), JSON.stringify(John.pets[0].extra.data));
+                assert.equal(typeof pet.extra.data, 'object');
+                assert.equal(JSON.stringify(data), JSON.stringify(pet.extra.data));
+            });
         }
 
-        describe("findBy() - A hasMany B, without reverse", function () {
+        describe("findBy*() - A hasMany B, without reverse", function () {
             /**
              * mysql would deprecate millisecond when store field as `datetime` type,
              * avoid this difference to make test case working.
@@ -300,7 +302,7 @@ describe("hasMany extra properties", function () {
                 });
             });
 
-            it("could find A with `findbyB()`", function (done) {
+            it("could find A with `findByB()`", function (done) {
                 var John = Person.findByPets(
                     { name: "Mutt" }, 
                     // find options for host model `Person`
@@ -404,6 +406,164 @@ describe("hasMany extra properties", function () {
                     ]
                 ].forEach(([conditions]) => {
                     var John = Person.findByPets(
+                        { name: "Mutt" }, 
+                        // find options for host model `Person`
+                        {
+                            exists: [
+                                {
+                                    table: 'person_pets',
+                                    link: [
+                                        'pets_id', 'id'
+                                    ],
+                                    conditions: conditions
+                                }
+                            ],
+                            order: 'name',
+                            autoFetch: true
+                        }
+                    ).firstSync();
+
+                    assert.property(John, "pets");
+                    assertion_people_for_findby([John]);
+                });
+            });
+        });
+
+        describe("findBy('extend') - A hasMany B, without reverse", function () {
+            /**
+             * mysql would deprecate millisecond when store field as `datetime` type,
+             * avoid this difference to make test case working.
+             */
+            const since = cutOffMilliSecond(new Date());
+            before(function () {
+                setup({
+                    autoFetchPets: false,
+                })();
+
+                var people = Person.createSync([{
+                    name: "John"
+                }]);
+
+                var pets = Pet.createSync([{
+                    name: "Deco"
+                }, {
+                    name: "Mutt"
+                }]);
+
+                var data = {
+                    adopted: true
+                };
+
+                people[0].addPetsSync(pets, {
+                    since: since,
+                    data: data
+                });
+            });
+
+            it("could find A with `findByB()`", function (done) {
+                var John = Person.findBy('pets', 
+                    { name: "Mutt" }, 
+                    // find options for host model `Person`
+                    {
+                        order: 'name',
+                        autoFetch: true,
+                        // find options for associated model `Pet`,
+                        // {accessor}_find_options
+                        [`pets_find_options`]: {
+                        }
+                    }
+                ).firstSync();
+
+                assertion_people_for_findby([John]);
+
+                var personCount = Person.findBy('pets', { name: "Mutt" }, { autoFetch: true }).countSync();
+                assert.ok(personCount, 1);
+
+                ;[
+                    'all',
+                    'where',
+                    'find',
+                    // 'remove',
+                    'run'
+                ].forEach(ichainFindKey => {
+                    var people = Person.findBy('pets', { name: "Mutt" }, { autoFetch: true })[`${ichainFindKey}Sync`]();
+                    assertion_people_for_findby(people);
+                });
+
+                var people = Person.findBySync('pets', { name: "Mutt" }, { autoFetch: true });
+                assertion_people_for_findby(people);
+
+                // asynchronous version
+                Person.findBy('pets', { name: "Mutt" }, { autoFetch: true })
+                    .run(function (err, people) {
+                        assertion_people_for_findby(people);
+                        done();
+                    });
+            });
+
+            it("use wrong extra data find A with `findByB()`", function (/* done */) {
+                var John = Person.findBy('pets', 
+                    { name: "Mutt" }, 
+                    // find options for host model `Person`
+                    {
+                        exists: [
+                            {
+                                table: 'person_pets',
+                                link: [
+                                    'pets_id', 'id'
+                                ],
+                                conditions: {
+                                    name: "non_existed_extra_field"
+                                }
+                            }
+                        ],
+                        order: 'name',
+                        autoFetch: true,
+                        // find options for associated model `Pet`,
+                        // {accessor}_find_options
+                        [`pets_find_options`]: {
+                        }
+                    }
+                ).firstSync();
+
+                assert.ok(John === null);
+
+                var John = Person.findBy('pets', 
+                    { name: "Mutt" }, 
+                    // find options for host model `Person`
+                    {
+                        exists: [
+                            {
+                                table: 'person_pets',
+                                link: [
+                                    'pets_id', 'id'
+                                ],
+                                conditions: {
+                                    since: ORM.ne(since)
+                                }
+                            }
+                        ],
+                        order: 'name',
+                        autoFetch: true
+                    }
+                ).firstSync();
+
+                assert.ok(John === null);
+            });
+
+            it("use right extra data find A with `findByB()`", function () {
+                ;[
+                    [
+                        {since: since},
+                    ],
+                    [
+                        {since: ORM.eq(since)},
+                    ],
+                    [
+                        {since: {eq: since}},
+                    ]
+                ].forEach(([conditions]) => {
+                    var John = Person.findBy('pets', 
                         { name: "Mutt" }, 
                         // find options for host model `Person`
                         {
