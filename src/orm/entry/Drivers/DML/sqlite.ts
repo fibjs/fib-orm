@@ -1,9 +1,10 @@
 import util = require('util')
 
-var sqlite3 = require("../DB/sqlite3");
-var Query   = require("@fxjs/sql-query").Query;
-var shared  = require("./_shared");
-var DDL     = require("../DDL/SQL");
+import sqlite3 		= require("../DB/sqlite3");
+import shared  		= require("./_shared");
+import DDL     		= require("../DDL/SQL");
+import { Query }	from "@fxjs/sql-query";
+import utils		= require("./_utils");
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function(
 	this: FxOrmDMLDriver.DMLDriver_SQLite, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_SQLite, opts: FxOrmDMLDriver.DMLDriverOptions
@@ -101,32 +102,10 @@ Driver.prototype.find = function (
 		// OFFSET cannot be used without LIMIT so we use the biggest INTEGER number possible
 		q.limit('9223372036854775807');
 	}
-	if (opts.order) {
-		for (let i = 0; i < opts.order.length; i++) {
-			q.order(opts.order[i][0], opts.order[i][1]);
-		}
-	}
-
-	if (opts.merge) {
-		q.from
-			.apply(q, [opts.merge.from.table, opts.merge.from.field, opts.merge.to.table, opts.merge.to.field].filter(x => x))
-			.select(opts.merge.select);
-		
-		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
-			q = q.where(opts.merge.where[0], opts.merge.where[1], opts.merge.table || null, conditions);
-		} else {
-			q = q.where(opts.merge.table || null, conditions);
-		}
-	} else {
-		q = q.where(conditions);
-	}
-
-	if (opts.exists) {
-		for (let k in opts.exists) {
-			const exist_item = opts.exists[k];
-			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
-		}
-	}
+	
+	utils.buildOrderToQuery.apply(this, [q, opts.order]);
+	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
+	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
 	const qstr = q.build();
 
@@ -143,23 +122,8 @@ Driver.prototype.count = function (
 	                  .from(table)
 	                  .count(null, 'c');
 
-	if (opts.merge) {
-		q.from(opts.merge.from.table, opts.merge.from.field, opts.merge.to.field);
-		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
-			q = q.where(opts.merge.where[0], opts.merge.where[1], conditions);
-		} else {
-			q = q.where(conditions);
-		}
-	} else {
-		q = q.where(conditions);
-	}
-
-	if (opts.exists) {
-		for (let k in opts.exists) {
-			const exist_item = opts.exists[k];
-			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
-		}
-	}
+	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
+	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
 	const qstr = q.build();
 

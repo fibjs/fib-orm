@@ -1,9 +1,10 @@
 import util    = require("util");
 
-import {Query} from "@fxjs/sql-query";
-import mysql   = require("../DB/mysql");
-import shared  = require("./_shared");
-import DDL     = require("../DDL/SQL");
+import mysql 		= require("../DB/mysql");
+import shared  		= require("./_shared");
+import DDL     		= require("../DDL/SQL");
+import { Query }	from "@fxjs/sql-query";
+import utils		= require("./_utils");
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_MySQL = function(
 	this: FxOrmDMLDriver.DMLDriver_MySQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_MySQL, opts: FxOrmDMLDriver.DMLDriverOptions
@@ -135,32 +136,10 @@ Driver.prototype.find = function (
 		// OFFSET cannot be used without LIMIT so we use the biggest BIGINT number possible
 		q.limit('18446744073709551615');
 	}
-	if (opts.order) {
-		for (let i = 0; i < opts.order.length; i++) {
-			q.order(opts.order[i][0], opts.order[i][1]);
-		}
-	}
-
-	if (opts.merge) {
-		q.from
-			.apply(q, [opts.merge.from.table, opts.merge.from.field, opts.merge.to.table, opts.merge.to.field].filter(x => x))
-			.select(opts.merge.select);
-
-		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
-			q = q.where(opts.merge.where[0], opts.merge.where[1], opts.merge.table || null, conditions);
-		} else {
-			q = q.where(opts.merge.table || null, conditions);
-		}
-	} else {
-		q = q.where(conditions);
-	}
-
-	if (opts.exists) {
-		for (let k in opts.exists) {
-			const exist_item = opts.exists[k];
-			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
-		}
-	}
+	
+	utils.buildOrderToQuery.apply(this, [q, opts.order]);
+	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
+	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
 	this.execSimpleQuery(q.build(), cb);
 };
@@ -172,23 +151,8 @@ Driver.prototype.count = function (
 	                  .from(table)
 	                  .count(null, 'c');
 
-	if (opts.merge) {
-		q.from(opts.merge.from.table, opts.merge.from.field, opts.merge.to.field);
-		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
-			q = q.where(opts.merge.where[0], opts.merge.where[1], conditions);
-		} else {
-			q = q.where(conditions);
-		}
-	} else {
-		q = q.where(conditions);
-	}
-
-	if (opts.exists) {
-		for (let k in opts.exists) {
-			const exist_item = opts.exists[k];
-			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
-		}
-	}
+	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
+	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
 	q = q.build();
 
@@ -318,7 +282,6 @@ Driver.prototype.propertyToValue = function (
 			break;
 		case "point":
 			return function() { return 'POINT(' + value.x + ', ' + value.y + ')'; };
-			break;
 		default:
 			customType = this.customTypes[property.type];
 			if(customType && 'propertyToValue' in customType) {

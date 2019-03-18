@@ -2,10 +2,11 @@
 
 import util       = require("util");
 
-var pg      = require("pg");
-var Query   = require("@fxjs/sql-query").Query;
-var shared  = require("./_shared");
-var DDL     = require("../DDL/SQL");
+const pg 			= require("pg");
+import shared  		= require("./_shared");
+import DDL     		= require("../DDL/SQL");
+import { Query }	from "@fxjs/sql-query";
+import utils		= require("./_utils");
 
 var switchableFunctions = {
 	pool: {
@@ -156,25 +157,10 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb: FxOrmNS.G
 		}
 	}
 
-	if (opts.merge) {
-		q.from
-			.apply(q, [opts.merge.from.table, opts.merge.from.field, opts.merge.to.table, opts.merge.to.field].filter(x => x))
-			.select(opts.merge.select);
-		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
-			q = q.where(opts.merge.where[0], opts.merge.where[1], opts.merge.table || null, conditions);
-		} else {
-			q = q.where(opts.merge.table || null, conditions);
-		}
-	} else {
-		q = q.where(conditions);
-	}
-
-	if (opts.exists) {
-		for (let k in opts.exists) {
-			const exist_item = opts.exists[k];
-			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
-		}
-	}
+	
+	utils.buildOrderToQuery.apply(this, [q, opts.order]);
+	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
+	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
 	q = q.build();
 
@@ -184,23 +170,8 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb: FxOrmNS.G
 Driver.prototype.count = function (table, conditions, opts, cb) {
 	var q = this.query.select().from(table).count(null, 'c');
 
-	if (opts.merge) {
-		q.from(opts.merge.from.table, opts.merge.from.field, opts.merge.to.field);
-		if (opts.merge.where && Object.keys(opts.merge.where[1]).length) {
-			q = q.where(opts.merge.where[0], opts.merge.where[1], conditions);
-		} else {
-			q = q.where(conditions);
-		}
-	} else {
-		q = q.where(conditions);
-	}
-
-	if (opts.exists) {
-		for (let k in opts.exists) {
-			const exist_item = opts.exists[k];
-			q.whereExists(exist_item.table, table, exist_item.link, exist_item.conditions);
-		}
-	}
+	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
+	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
 	q = q.build();
 
@@ -340,10 +311,7 @@ Driver.prototype.propertyToValue = function (value, property) {
 			}
 			break;
 		case "point":
-			return function () {
-				return "POINT(" + value.x + ', ' + value.y + ")";
-			};
-			break;
+			return function() { return 'POINT(' + value.x + ', ' + value.y + ')'; };
 		default:
 			customType = this.customTypes[property.type];
 
