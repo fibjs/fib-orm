@@ -33,7 +33,7 @@ declare namespace FxOrmDMLDriver {
 
 
     type AggregationFuncTuple = [string, string]
-    interface DMLDriver extends FxOrmSqlDDLSync__Driver.Driver {
+    interface DMLDriver extends DefaultSqlDriver {
         db: FxOrmDb.DatabaseBase
         dialect: FxSqlQueryDialect.DialectType
         config: FxOrmNS.IDBConnectionConfig
@@ -207,6 +207,9 @@ declare namespace FxOrmDMLDriver {
         [key: string]: any;
     }
     /* Connection About Patch :end */
+
+    type DefaultSqlDriver = FxOrmSqlDDLSync__Driver.Driver<FxSqlQuery.Class_Query>
+    type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<FxSqlQuery.Class_Query>
 }
 
 declare namespace FxOrmDMLShared {

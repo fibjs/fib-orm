@@ -42,7 +42,7 @@
     },
     "dependencies": {
         "@fibjs/enforce": "0.0.8",
-        "@fxjs/sql-ddl-sync": "^0.3.6",
+        "@fxjs/sql-ddl-sync": "^0.3.8",
         "@fxjs/sql-query": "^0.2.5",
         "lodash.clonedeep": "^4.5.0",
         "lodash.flatten": "^4.4.0",
