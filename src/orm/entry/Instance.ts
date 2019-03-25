@@ -474,7 +474,7 @@ export const Instance = function (
 	}
 
 	// ('data.a.b', 5) => opts.data.a.b = 5
-	var setPropertyByPath = function (path: string|string[], value: any) {
+	var setPropertyByPath: FxOrmInstance.Instance['set'] = function (path, value) {
 		if (typeof path == 'string') {
 			path = path.split('.');
 		} else if (!Array.isArray(path)) {

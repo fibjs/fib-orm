@@ -268,6 +268,7 @@ export function formatField (
 
 			field_opts = <FxOrmProperty.NormalizedProperty>{
 				type     : p.type || "integer",
+				// TODO: make 32 when p.type === 'text'
 				size     : p.size || 4,
 				unsigned : p.unsigned || true,
 				time     : p.time || false,

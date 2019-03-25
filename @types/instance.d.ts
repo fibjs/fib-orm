@@ -99,7 +99,7 @@ declare namespace FxOrmInstance {
         /**
          * @noenum
          */
-        set: Function;
+        set: (path: string|string[], value: any) => void;
         markAsDirty: (propName: string) => void;
         dirtyProperties: {[key: string]: any};
 

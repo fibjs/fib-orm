@@ -440,6 +440,7 @@ function extendInstance(
 	});
 	Object.defineProperty(Instance, association.setAccessor, {
 		value: function () {
+			// TODO: shold allow passing `extra` as 2nd argument
 			var items = _flatten(arguments);
 			var cb = util.last(items) instanceof Function ? items.pop() : noOperation;
 

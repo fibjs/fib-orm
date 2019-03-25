@@ -29,7 +29,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 			autoFetch      : assoc_options.autoFetch || false,
 			autoFetchLimit : assoc_options.autoFetchLimit || 2,
 			field          : Utilities.wrapFieldObject({
-				field: assoc_options.field as FxOrmProperty.NormalizedPropertyHash,
+				field: assoc_options.field,
 				model: Model,
 				altName: Model.table
 			}) || Utilities.formatField(
