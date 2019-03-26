@@ -1,7 +1,18 @@
 
-v1.9.2 / 2019-03-16
+v1.9.3 / 2019-03-26
 ==================
 
+  * add helpers; fix lack of patch to instance in afterLoad hook.
+  * code clean and add some TODO.
+  * abstract common code in Drivers' find/count implements.
+  * upgrade @fxjs/sql-ddl-sync to version with typo not bound with @fxjs/sql-query
+  * robust for test cases.
+  * add pointless helpers; normalize code.
+
+v1.9.2 / 2019-03-16
+===================
+
+  * Release v1.9.2
   * support `join_where` option in `ModelAssociationMethod__Options`.
 
 v1.9.1 / 2019-03-16
