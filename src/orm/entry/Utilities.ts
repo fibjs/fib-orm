@@ -183,7 +183,7 @@ export function getConditions (
 
 export function wrapFieldObject (
 	params: {
-		field: string /* hasOne's Model's id field */ | FxOrmProperty.NormalizedPropertyHash
+		field: FxOrmAssociation.InstanceAssociationItem['field']
 		model: FxOrmModel.Model
 		altName: string
 		mapsTo?: FxOrmModel.ModelPropertyDefinition['mapsTo']
@@ -202,8 +202,9 @@ export function wrapFieldObject (
 
 	if (typeof params.field == 'object') {
 		for (let k in params.field) {
+			/* 1st self-own & non-array kv */
 			if (!/[0-9]+/.test(k) && params.field.hasOwnProperty(k)) {
-				return params.field;
+				return params.field as FxOrmProperty.NormalizedPropertyHash;
 			}
 		}
 	}

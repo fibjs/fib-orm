@@ -12,7 +12,7 @@ declare namespace FxOrmAssociation {
          */
         name?: string;
         model?: FxOrmModel.Model;
-        field?: FxOrmProperty.NormalizedPropertyHash
+        field?: InstanceAssociationItem['field']
 
         // is the association is extendsTo
         extension?: boolean;
@@ -67,9 +67,9 @@ declare namespace FxOrmAssociation {
     interface InstanceAssociationItem {
         name: string
         model: FxOrmModel.Model
-        // is the association is extendsTo
         field: string | string[] | FxOrmProperty.NormalizedPropertyHash
         
+        // is the association is extendsTo
         extension?: boolean
 
         mergeId?: FxOrmProperty.NormalizedPropertyHash
@@ -84,7 +84,6 @@ declare namespace FxOrmAssociation {
         addAccessor?: string
         modelFindByAccessor?: string
 
-        // model: FxOrmModel.Model
         reversed?: boolean
         autoFetch: boolean
         autoFetchLimit: number

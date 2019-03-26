@@ -19,6 +19,6 @@ declare namespace FxOrmValidators {
    }
 
    interface IValidatorHash {
-      [validation: string]: FibjsEnforce.IValidator[]
+      [validation: string]: FibjsEnforce.IValidator | FibjsEnforce.IValidator[]
    }
 }

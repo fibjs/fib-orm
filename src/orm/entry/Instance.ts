@@ -90,8 +90,9 @@ export const Instance = function (
 				if (!alwaysValidate && !required && instance[k] == null) {
 					continue; // avoid validating if property is not required and is "empty"
 				}
-				for (let i = 0; i < opts.validations[k].length; i++) {
-					checks.add(k, opts.validations[k][i]);
+				const validation = opts.validations[k] as FibjsEnforce.IValidator[]
+				for (let i = 0; i < validation.length; i++) {
+					checks.add(k, validation[i]);
 				}
 			}
 
