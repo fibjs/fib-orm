@@ -149,8 +149,9 @@ declare namespace FxOrmNS {
     }
     interface PluginConstructor {
         new (orm?: ORM, opts?: PluginOptions): Plugin
-        // prototype: Plugin
+        prototype: Plugin
     }
+    type PluginConstructCallback = (orm: ORM, opts: PluginOptions) => Plugin
     interface Plugin {
         // (connection: FibORM, proto: any, opts: any, cb: Function): any
         beforeDefine?: {
@@ -177,7 +178,9 @@ declare namespace FxOrmNS {
         plugins: Plugin[];
         customTypes: { [key: string]: FxOrmProperty.CustomPropertyType };
 
-        use(plugin: PluginConstructor, options?: PluginOptions): ORM;
+        use: {
+            (plugin: /* PluginConstructor |  */PluginConstructCallback, options?: PluginOptions): ORM;
+        }
 
         define(name: string, properties: FxOrmModel.ModelPropertyDefinitionHash, opts?: FxOrmModel.ModelOptions): FxOrmModel.Model;
         defineType(name: string, type: FxOrmProperty.CustomPropertyType): this;

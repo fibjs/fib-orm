@@ -67,6 +67,8 @@ declare namespace FxOrmInstance {
 
     type InstanceConstructor = new (model: FxOrmModel.Model, opts: InstanceConstructorOptions) => FxOrmInstance.Instance
 
+    type InstanceEventType = 
+        'ready' | 'save' | 'beforeRemove' | 'remove'
     interface Instance extends FxOrmSynchronous.SynchronizedInstance {
         save(): Instance;
         save(data: { [property: string]: any; }, callback: FxOrmNS.VoidCallback): Instance;
@@ -76,7 +78,7 @@ declare namespace FxOrmInstance {
         validate: {
             (callback: FxOrmNS.ValidatorCallback): void
         };
-        on(event: string, callback: FxOrmNS.GenericCallback<any>): Instance;
+        on(event: InstanceEventType, callback: FxOrmNS.GenericCallback<any>): Instance;
         save(callback?: FxOrmNS.VoidCallback): Instance;
         save(data: { [property: string]: any; }, callback?: FxOrmNS.VoidCallback): Instance;
         save(data: { [property: string]: any; }, options: any, callback?: FxOrmNS.VoidCallback): Instance;

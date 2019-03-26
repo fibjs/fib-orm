@@ -157,6 +157,7 @@ export const preReplaceHook: FxOrmHelper.HelperModules['preReplaceHook'] = funct
     m[hookName](function (this: FxOrmInstance.Instance, next: boolean | FxOrmHook.HookActionNextFunction) {
         cb.call(this, this);
 
+        _oldHook = _oldHook.bind(this)
         if (_oldHook) {
             if (_oldHook.length > 0) {
                 if (typeof next === 'boolean')

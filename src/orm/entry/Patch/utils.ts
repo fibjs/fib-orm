@@ -1,19 +1,19 @@
 import * as util from 'util'
 
 import * as Utilities from '../Utilities'
-import { preReplaceHook } from '../Helpers';
+import { preReplaceHook, prependHook } from '../Helpers';
 
 interface ModelFuncToPatch extends Function {
     is_new?: boolean;
 }
 
-type FxOrmModelAndInstance = FxOrmModel.Model | FxOrmInstance.Instance | FxOrmQuery.IChainFind
+type FxOrmModelAndIChainFind = FxOrmModel.Model | FxOrmQuery.IChainFind
 
 type HashOfModelFuncNameToPath = string[];
 
 // patch async function to sync function
 export function patchSync(
-    o: FxOrmModelAndInstance | FxOrmNS.FibOrmDB,
+    o: FxOrmModelAndIChainFind | FxOrmNS.ORM | FxOrmInstance.Instance,
     funcs: HashOfModelFuncNameToPath
 ) {
     funcs.forEach(function (func) {
@@ -43,10 +43,18 @@ function is_model_conjunctions_key (k: string) {
     return model_conjunctions_keys.includes(k as any)
 }
 
+function is_ichainfind (o: FxOrmModelAndIChainFind): o is FxOrmQuery.IChainFind {
+    return o.model && o.model.allProperties
+}
+
 // hook find, patch result
-export function patchResult(o: FxOrmModelAndInstance): void {
+export function patchResult(o: FxOrmModelAndIChainFind): void {
     var old_func: ModelFuncToPatch = o.find;
-    var m: FxOrmModel.Model = o.model || o;
+    if (!old_func)
+        return ;
+
+    var m: FxOrmModel.Model = is_ichainfind(o) ? o.model : o;
+    
     // keyof FxSqlQuerySql.DetailedQueryWhereCondition
     var comps = ['val', 'from', 'to'];
 
@@ -97,7 +105,7 @@ export function patchResult(o: FxOrmModelAndInstance): void {
             filter_date(opt);
         }
 
-        var rs: FxOrmInstance.Instance = old_func.apply(this, Array.prototype.slice.apply(arguments));
+        var rs: FxOrmQuery.IChainFind = old_func.apply(this, Array.prototype.slice.apply(arguments));
         if (rs) {
             patchResult(rs);
             patchIChainFindLikeRs(rs);
@@ -107,7 +115,7 @@ export function patchResult(o: FxOrmModelAndInstance): void {
     }
 
     new_func.is_new = true;
-    o.where = o.all = o.find = new_func;
+    o.where = o.all = o.find = new_func as FxOrmModel.Model['find'];
 }
 
 export function patchObject(m: FxOrmInstance.Instance) {
@@ -184,18 +192,18 @@ export function patchAggregate(m: FxOrmModel.Model) {
     };
 }
 
-export function patchModel(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions) {
-    opts = opts || {};
-    opts.hooks = opts.hooks || {};
-
-    preReplaceHook(m, opts, 'afterLoad', function (instance) {
-        patchObject(instance);
+export function patchHooksInModelOptions(
+    opts: FxOrmModel.ModelOptions,
+    hooks: (keyof FxOrmNS.Hooks)[] = ['afterLoad', 'afterAutoFetch']
+) {
+    hooks.forEach(hook => {
+        prependHook(opts.hooks, hook, function () {
+            patchObject(this);
+        });
     });
+}
 
-    preReplaceHook(m, opts, 'afterAutoFetch', function (instance) {
-        patchObject(instance);
-    });
-
+export function patchModelAfterDefine(m: FxOrmModel.Model, /* opts: FxOrmModel.ModelOptions */) {
     patchResult(m);
 
     patchSync(m, [
@@ -222,7 +230,7 @@ export function patchModel(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions) {
 }
 
 export function patchIChainFindLikeRs (
-    rs: FxOrmModelAndInstance,
+    rs: FxOrmModelAndIChainFind,
     opts: {
         new_callback_generator?: {
             (cb: FxOrmNS.ExecutionCallback<any>): {

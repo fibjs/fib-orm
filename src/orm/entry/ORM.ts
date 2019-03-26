@@ -189,7 +189,7 @@ ORM.prototype.use = function (
 		}
 	}
 
-	var plugin: FxOrmNS.Plugin = new plugin_const(this, opts || {});
+	var plugin: FxOrmNS.Plugin = plugin_const(this, opts || {});
 
 	if (typeof plugin.define === "function") {
 		for (let k in this.models) {

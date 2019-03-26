@@ -16,6 +16,7 @@ import Validators        = require("./Validators");
 import ORMError          = require("./Error");
 import Hook              = require("./Hook");
 import AggregateFunctions = require("./AggregateFunctions");
+import { patchHooksInModelOptions } from './Patch/utils';
 
 const AvailableHooks: (keyof FxOrmModel.Hooks)[] = [
 	"beforeCreate", "afterCreate",
@@ -49,6 +50,8 @@ export const Model = function (
 				delete m_opts.hooks[hook];
 			} else {
 				m_opts.hooks[hook] = cb;
+				if (hook === 'afterLoad' || hook === 'afterAutoFetch')
+					patchHooksInModelOptions(m_opts, [hook])
 			}
 			return this;
 		};

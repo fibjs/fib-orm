@@ -1,7 +1,8 @@
 import url = require('url')
 import util = require('util')
 
-import { patchSync, patchDriver, patchModel, execQuerySync } from './utils';
+import { patchSync, patchDriver, execQuerySync } from './utils';
+import patchPlugin from './plugin'
 
 export = function (connection: FxOrmNS.IConnectFunction) {
     const conn = util.sync(connection) 
@@ -26,18 +27,7 @@ export = function (connection: FxOrmNS.IConnectFunction) {
 
         patchDriver(orm.driver);
 
-        var def = orm.define;
-        orm.define = function (name: string, properties: FxOrmModel.ModelPropertyDefinitionHash, opts: FxOrmModel.ModelOptions) {
-            if (opts !== undefined) {
-                opts = util.clone(opts);
-                if (opts.hooks !== undefined)
-                    opts.hooks = util.clone(opts.hooks);
-            }
-
-            var m: FxOrmModel.Model = def.call(this, name, properties, opts);
-            patchModel(m, opts);
-            return m;
-        }
+        orm.use(patchPlugin);
 
         orm.begin = function () {
             return this.driver.db.conn.begin();

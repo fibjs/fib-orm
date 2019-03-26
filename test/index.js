@@ -46,6 +46,8 @@ function t() {
 
     run('./integration/date-type.js');
 
+    run('./integration/helpers.js');
+
     test.run(console.DEBUG);
 }
 
