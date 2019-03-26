@@ -1,7 +1,13 @@
 
-v1.9.3 / 2019-03-26
+v1.9.4 / 2019-03-27
 ==================
 
+  * better implements for patch on Model and model's hooks.
+
+v1.9.3 / 2019-03-26
+===================
+
+  * Release v1.9.3
   * add helpers; fix lack of patch to instance in afterLoad hook.
   * code clean and add some TODO.
   * abstract common code in Drivers' find/count implements.
