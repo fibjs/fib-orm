@@ -115,3 +115,60 @@ export const getAssociationItemFromModel: FxOrmHelper.HelperModules['getAssociat
     }
 }
 /* by ext_name x assoc_model :end */
+
+/* hooks :start */
+export const prependHook: FxOrmHelper.HelperModules['prependHook'] = function (hooks, hookName, preLogic) {
+	if (typeof hooks[hookName] === 'function') {
+		var oldHook = hooks[hookName];
+		
+		const callOldHook = function (next: Function|boolean) {
+            if (typeof oldHook === 'function') {
+                if (oldHook.length > 0)
+                    return oldHook.call(this, next)
+                
+				oldHook.call(this)
+			}
+			
+			if (typeof next === 'function')
+				next()
+		}
+		
+		hooks[hookName] = function (next: Function|boolean) {
+			if (preLogic.length > 0) {
+				var self = this
+				return preLogic.call(this, function () {
+					callOldHook.call(self, next)
+				})
+			}
+
+			preLogic.call(this)
+			callOldHook.call(this, next)
+		};
+	} else {
+		hooks[hookName] = preLogic;
+	}
+}
+
+export const preReplaceHook: FxOrmHelper.HelperModules['preReplaceHook'] = function (m, opts, hookName, cb) {
+    var _oldHook: typeof opts.hooks[typeof hookName];
+    if (opts !== undefined && opts.hooks)
+        _oldHook = opts.hooks[hookName];
+
+    m[hookName](function (this: FxOrmInstance.Instance, next: boolean | FxOrmHook.HookActionNextFunction) {
+        cb.call(this, this);
+
+        if (_oldHook) {
+            if (_oldHook.length > 0) {
+                if (typeof next === 'boolean')
+                    return (_oldHook as FxOrmHook.HookResultCallback)(next);
+                else
+                    return (_oldHook as FxOrmHook.HookActionCallback)(next);
+            }
+            _oldHook();
+        }
+
+        if (typeof next === 'function')
+            next();
+    });
+}
+/* hooks: start */

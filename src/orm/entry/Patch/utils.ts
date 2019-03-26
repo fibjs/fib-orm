@@ -1,6 +1,7 @@
 import * as util from 'util'
 
 import * as Utilities from '../Utilities'
+import { preReplaceHook } from '../Helpers';
 
 interface ModelFuncToPatch extends Function {
     is_new?: boolean;
@@ -17,6 +18,10 @@ export function patchSync(
 ) {
     funcs.forEach(function (func) {
         const old_func = o[func];
+        /**
+         * we should re init the sync method in hook `afterAutoFetch`,
+         * so never check if new_func existed.
+         */
         if (old_func) {
             Object.defineProperty(o, func + 'Sync', {
                 value: util.sync(old_func),
@@ -180,25 +185,15 @@ export function patchAggregate(m: FxOrmModel.Model) {
 }
 
 export function patchModel(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions) {
-    var _afterAutoFetch: FxOrmHook.HookActionCallback;
-    if (opts !== undefined && opts.hooks)
-        _afterAutoFetch = opts.hooks.afterAutoFetch;
+    opts = opts || {};
+    opts.hooks = opts.hooks || {};
 
-    /**
-     * use `afterAutoFetch` rather than `afterLoad`,
-     * because patch in `afterLoad` only process instance's basic(exclude lazyload) fields' accessors，
-     * as patch in `afterAutoFetch` would process instance's basic/lazyload/associated fields' accessors
-     */
-    m.afterAutoFetch(function (this: FxOrmInstance.Instance, next: FxOrmHook.HookActionNextFunction) {
-        patchObject(this);
+    preReplaceHook(m, opts, 'afterLoad', function (instance) {
+        patchObject(instance);
+    });
 
-        if (_afterAutoFetch) {
-            if (_afterAutoFetch.length > 0)
-                return _afterAutoFetch(next);
-            _afterAutoFetch();
-        }
-
-        next();
+    preReplaceHook(m, opts, 'afterAutoFetch', function (instance) {
+        patchObject(instance);
     });
 
     patchResult(m);

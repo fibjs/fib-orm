@@ -18,5 +18,8 @@ declare namespace FxOrmHelper {
       getOneAssociationItemFromModel (extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasOne
       getExtendsToAssociationItemFromModel (extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_ExtendTos
       getAssociationItemFromModel (reltype: string, extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem
+
+      prependHook (hooks: FxOrmNS.Hooks, hookName: keyof FxOrmNS.Hooks, preLogic: FxOrmNS.Hooks[keyof FxOrmNS.Hooks]): void
+      preReplaceHook (m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions, hookName: keyof FxOrmNS.Hooks, cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void): void
    }
 }
