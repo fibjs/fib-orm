@@ -76,13 +76,11 @@ declare namespace FxOrmNS {
     }
 
     interface IDBConnectionConfig extends IConnectionOptions {
-        protocol: string
-        query: {
-            [key: string]: string;
-        }
-        database: string
-        user: string
-        password: string
-        host: string
+        protocol: IConnectionOptions['protocol']
+        query: IConnectionOptions['query']
+        database: IConnectionOptions['database']
+        user: IConnectionOptions['user']
+        password: IConnectionOptions['password']
+        host: IConnectionOptions['host']
     }
 }

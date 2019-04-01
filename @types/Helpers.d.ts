@@ -1,5 +1,7 @@
 declare namespace FxOrmHelper {
    interface HelperModules {
+      parseDbConfig (config: string | FxOrmNS.IConnectionOptions, cb?: FxOrmNS.IConnectionCallback): FxOrmNS.IDBConnectionConfig
+
       get_many_associations_from_instance_by_extname (instance: FxOrmNS.Instance): FxOrmAssociation.InstanceAssociationItem_HasMany[]
       get_one_associations_from_instance_by_extname (instance: FxOrmNS.Instance): FxOrmAssociation.InstanceAssociationItem_HasOne[]
       get_extendsto_associations_from_instance_by_extname (instance: FxOrmNS.Instance): FxOrmAssociation.InstanceAssociationItem_ExtendTos[]

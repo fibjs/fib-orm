@@ -1,10 +1,8 @@
 import util           = require("util");
 import events         = require("events");
-import url            = require("url");
 import uuid			  = require('uuid')
 
 import SqlQuery       = require("@fxjs/sql-query");
-import _cloneDeep 	  = require('lodash.clonedeep');
 import ormPluginSyncPatch from './patch/plugin'
 
 import { Model }      from "./Model";
@@ -54,68 +52,16 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 		cb: FxOrmNS.IConnectionCallback = arguments[1]
 
 	if (arguments.length === 0 || !opts) {
-		return ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
+		return Utilities.ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
 	}
 
-	if (typeof opts == 'string') {
-		if ((opts as string).trim().length === 0) {
-			return ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
-		}
-		opts = url.parse(opts, true).toJSON();
-	}
+	const cfg = Helpers.parseDbConfig(opts);
 
-	// support fibjs built-in object
-	if (typeof opts.toJSON === 'function')
-		opts = opts.toJSON()
-	else
-		opts = _cloneDeep(opts);
-
-	if (opts.protocol === 'sqlite:' && opts.timezone === undefined)
-		opts.timezone = 'UTC';
-
-	opts.query = opts.query || {};
-
-	for(var k in opts.query) {
-		opts.query[k] = queryParamCast(opts.query[k]);
-		opts[k] = opts.query[k];
-	}
-
-	if (!opts.database) {
-		if (!opts.pathname) {
-			return cb(new Error("CONNECTION_URL_NO_DATABASE"));
-		}
-		opts.database = (opts.pathname ? opts.pathname.substr(1) : "");
-	}
-	if (!opts.protocol) {
-		return ORM_Error(new ORMError("CONNECTION_URL_NO_PROTOCOL", 'PARAM_MISMATCH'), cb);
-	}
-	if (!opts.host) {
-		opts.host = opts.hostname = "localhost";
-	}
-	if (opts.auth) {
-		opts.user = opts.auth.split(":")[0];
-		opts.password = opts.auth.split(":")[1];
-	}
-	if (opts.hasOwnProperty("username") && !opts.user) {
-		opts.user = opts.username
-	}
-	if (!opts.hasOwnProperty("user")) {
-		opts.user = "root";
-	}
-	if (!opts.hasOwnProperty("password")) {
-		opts.password = "";
-	}
-	if (opts.hasOwnProperty("hostname")) {
-		opts.host = opts.hostname;
-	}
-
-	var proto  = opts.protocol.replace(/:$/, '');
+	var proto  = cfg.protocol.replace(/:$/, '');
 	var db: FxOrmNS.ORM;
 	if (DriverAliases[proto]) {
 		proto = DriverAliases[proto];
 	}
-
-	const cfg: FxOrmNS.IDBConnectionConfig = opts as FxOrmNS.IDBConnectionConfig
 
 	try {
 		var Driver = adapters.get(proto);
@@ -141,9 +87,9 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 		});
 	} catch (ex) {
 		if (ex.code === "MODULE_NOT_FOUND" || ex.message.indexOf('find module') > -1) {
-			return ORM_Error(new ORMError("Connection protocol not supported - have you installed the database driver for " + proto + "?", 'NO_SUPPORT'), cb);
+			return Utilities.ORM_Error(new ORMError("Connection protocol not supported - have you installed the database driver for " + proto + "?", 'NO_SUPPORT'), cb);
 		}
-		return ORM_Error(ex, cb);
+		return Utilities.ORM_Error(ex, cb);
 	}
 
 	patchSync(db, [
@@ -384,7 +330,7 @@ ORM.prototype.drop = function (
 
 	return this;
 };
-ORM.prototype.serial = function (
+ORM.prototype.queryParamCastserial = function (
 	this: FxOrmNS.ORM,
 	...chains: any[]
 ) {
@@ -436,36 +382,6 @@ ORM.prototype.trans = function (
 	func = func.bind(this.driver.db.conn);
 	return this.driver.db.conn.trans(func);	
 };
-
-function ORM_Error(err: Error, cb: FibOrmNS.VoidCallback) {
-	var Emitter: any = new events.EventEmitter();
-
-	Emitter.use = Emitter.define = Emitter.sync = Emitter.load = function () {};
-
-	if (typeof cb === "function") {
-		cb(err);
-	}
-
-	process.nextTick(function () {
-		Emitter.emit("connect", err);
-	});
-
-	return Emitter;
-}
-
-function queryParamCast (val: any): any {
-	if (typeof val == 'string')	{
-		switch (val) {
-			case '1':
-			case 'true':
-				return true;
-			case '0':
-			case 'false':
-				return false;
-		}
-	}
-	return val;
-}
 
 import { patchSync, patchDriver, execQuerySync } from "./Patch/utils";
 

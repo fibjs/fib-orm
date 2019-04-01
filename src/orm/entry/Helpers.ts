@@ -1,3 +1,70 @@
+import url 	  = require('url');
+
+import _cloneDeep 	  = require('lodash.clonedeep');
+
+import Utilities      = require("./Utilities");
+import ORMError       = require("./Error");
+
+export const parseDbConfig: FxOrmHelper.HelperModules['parseDbConfig'] = function (opts, cb) {
+    let config: FxOrmNS.IConnectionOptions = null;
+
+	if (typeof opts == 'string') {
+		if ((opts as string).trim().length === 0) {
+			return Utilities.ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
+		}
+		config = url.parse(opts, true).toJSON();
+	} else {
+        config = opts
+    }
+
+	// support fibjs built-in object
+	if (typeof config.toJSON === 'function')
+		config = config.toJSON()
+	else
+		config = _cloneDeep(config);
+
+	if (config.protocol === 'sqlite:' && config.timezone === undefined)
+		config.timezone = 'UTC';
+
+	config.query = config.query || {};
+
+	for(var k in config.query) {
+		config.query[k] = Utilities.queryParamCast(config.query[k]);
+		config[k] = config.query[k];
+	}
+
+	if (!config.database) {
+		if (!config.pathname) {
+			return cb(new Error("CONNECTION_URL_NO_DATABASE"));
+		}
+		config.database = (config.pathname ? config.pathname.substr(1) : "");
+	}
+	if (!config.protocol) {
+		return Utilities.ORM_Error(new ORMError("CONNECTION_URL_NO_PROTOCOL", 'PARAM_MISMATCH'), cb);
+	}
+	if (!config.host) {
+		config.host = config.hostname = "localhost";
+	}
+	if (config.auth) {
+		config.user = config.auth.split(":")[0];
+		config.password = config.auth.split(":")[1];
+	}
+	if (config.hasOwnProperty("username") && !config.user) {
+		config.user = config.username
+	}
+	if (!config.hasOwnProperty("user")) {
+		config.user = "root";
+	}
+	if (!config.hasOwnProperty("password")) {
+		config.password = "";
+	}
+	if (config.hasOwnProperty("hostname")) {
+		config.host = config.hostname;
+	}
+
+    return config;
+}
+
 export const get_many_associations_from_instance_by_extname: FxOrmHelper.HelperModules['get_many_associations_from_instance_by_extname'] = function (instance) {
     return instance.__opts.many_associations
 }

@@ -1,4 +1,5 @@
 import util = require('util')
+import events         = require("events");
 
 import _cloneDeep = require('lodash.clonedeep')
 
@@ -431,4 +432,34 @@ export function formatNameFor (
 			return ucfirst(name.toLocaleLowerCase())
 			break
 	}	
+}
+
+export function ORM_Error(err: Error, cb: FibOrmNS.VoidCallback) {
+	var Emitter: any = new events.EventEmitter();
+
+	Emitter.use = Emitter.define = Emitter.sync = Emitter.load = function () {};
+
+	if (typeof cb === "function") {
+		cb(err);
+	}
+
+	process.nextTick(function () {
+		Emitter.emit("connect", err);
+	});
+
+	return Emitter;
+}
+
+export function queryParamCast (val: any): any {
+	if (typeof val == 'string')	{
+		switch (val) {
+			case '1':
+			case 'true':
+				return true;
+			case '0':
+			case 'false':
+				return false;
+		}
+	}
+	return val;
 }
