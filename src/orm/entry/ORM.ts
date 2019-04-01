@@ -5,6 +5,7 @@ import uuid			  = require('uuid')
 
 import SqlQuery       = require("@fxjs/sql-query");
 import _cloneDeep 	  = require('lodash.clonedeep');
+import ormPluginSyncPatch from './patch/plugin'
 
 import { Model }      from "./Model";
 import DriverAliases  = require("./Drivers/aliases");
@@ -55,14 +56,22 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 	if (arguments.length === 0 || !opts) {
 		return ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
 	}
+
 	if (typeof opts == 'string') {
 		if ((opts as string).trim().length === 0) {
 			return ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
 		}
-		opts = url.parse(opts, true);
-	} else if (typeof opts == 'object') {
-		opts = _cloneDeep(opts);
+		opts = url.parse(opts, true).toJSON();
 	}
+
+	// support fibjs built-in object
+	if (typeof opts.toJSON === 'function')
+		opts = opts.toJSON()
+	else
+		opts = _cloneDeep(opts);
+
+	if (opts.protocol === 'sqlite:' && opts.timezone === undefined)
+		opts.timezone = 'UTC';
 
 	opts.query = opts.query || {};
 
@@ -72,20 +81,23 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 	}
 
 	if (!opts.database) {
-		// if (!opts.pathname) {
-		// 	return cb(new Error("CONNECTION_URL_NO_DATABASE"));
-		// }
+		if (!opts.pathname) {
+			return cb(new Error("CONNECTION_URL_NO_DATABASE"));
+		}
 		opts.database = (opts.pathname ? opts.pathname.substr(1) : "");
 	}
 	if (!opts.protocol) {
 		return ORM_Error(new ORMError("CONNECTION_URL_NO_PROTOCOL", 'PARAM_MISMATCH'), cb);
 	}
-	// if (!opts.host) {
-	// 	opts.host = opts.hostname = "localhost";
-	// }
+	if (!opts.host) {
+		opts.host = opts.hostname = "localhost";
+	}
 	if (opts.auth) {
 		opts.user = opts.auth.split(":")[0];
 		opts.password = opts.auth.split(":")[1];
+	}
+	if (opts.hasOwnProperty("username") && !opts.user) {
+		opts.user = opts.username
 	}
 	if (!opts.hasOwnProperty("user")) {
 		opts.user = "root";
@@ -134,6 +146,15 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 		return ORM_Error(ex, cb);
 	}
 
+	patchSync(db, [
+		'sync',
+		'close',
+		'drop',
+		'ping'
+	]);
+
+	patchDriver(db.driver);
+
 	return db;
 };
 
@@ -144,7 +165,7 @@ const ORM = function (
 	this.enforce     = Enforces;
 	this.settings    = settings;
 	this.driver_name = driver_name;
-	this.driver      = driver as FxOrmPatch.PatchedDMLDriver;
+	this.driver      = driver;
 	this.driver.uid  = uuid.node().hex();
 	this.tools       = {...SqlQuery.comparators};
 	this.models      = {};
@@ -172,6 +193,10 @@ const ORM = function (
 	}.bind(this);
 
 	driver.on("error", onError);
+
+	driver.execQuerySync = execQuerySync;
+
+	this.use(ormPluginSyncPatch);
 } as any as FxOrmNS.ORMConstructor;
 
 util.inherits(ORM, events.EventEmitter);
@@ -389,6 +414,28 @@ ORM.prototype.serial = function (
 		}
 	};
 };
+ORM.prototype.begin = function (
+	this: FxOrmNS.ORM,
+) {
+	return this.driver.db.conn.begin();	
+};
+ORM.prototype.commit = function (
+	this: FxOrmNS.ORM,
+) {
+	return this.driver.db.conn.commit();	
+};
+ORM.prototype.rollback = function (
+	this: FxOrmNS.ORM,
+) {
+	return this.driver.db.conn.rollback();	
+};
+ORM.prototype.trans = function (
+	this: FxOrmNS.ORM,
+	func,
+) {
+	func = func.bind(this.driver.db.conn);
+	return this.driver.db.conn.trans(func);	
+};
 
 function ORM_Error(err: Error, cb: FibOrmNS.VoidCallback) {
 	var Emitter: any = new events.EventEmitter();
@@ -420,7 +467,7 @@ function queryParamCast (val: any): any {
 	return val;
 }
 
-import Patch       = require("./Patch");
+import { patchSync, patchDriver, execQuerySync } from "./Patch/utils";
 
 const ORM_Module: FxOrmNS.ExportModule = {
 	validators,
@@ -438,7 +485,7 @@ const ORM_Module: FxOrmNS.ExportModule = {
 	addAdapter: adapters.add,
 	use,
 	connect,
-	connectSync: Patch(connect)
+	connectSync: util.sync(connect) as FxOrmNS.ExportModule['connectSync']
 } as FxOrmNS.ExportModule
 
 export = ORM_Module

@@ -36,15 +36,7 @@ declare namespace FxOrmPatch {
         [associationFunc: string]: Function;
     }
 
-    interface PatchedDMLDriver extends FxOrmDMLDriver.DMLDriver {
-        // uniq id
-        uid: string
-        hasMany?: {
-            (Model: FxOrmModel.Model, association: FxOrmAssociation.InstanceAssociationItem): any
-        }
-        
-        execQuerySync: (query: string, opt: FxOrmDMLDriver.OrigOrmExecQueryOpts) => any
-    }
+    type PatchedDMLDriver = FxOrmDMLDriver.DMLDriver;
 
     interface PatchedORMInstance {
         driver: FxOrmPatch.PatchedDMLDriver;

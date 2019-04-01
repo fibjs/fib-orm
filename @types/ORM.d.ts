@@ -172,7 +172,7 @@ declare namespace FxOrmNS {
         enforce: FibjsEnforce.ExportModule;
         settings: FxOrmSettings.SettingInstance;
         driver_name: string;
-        driver: FxOrmPatch.PatchedDMLDriver;
+        driver: FxOrmDMLDriver.DMLDriver;
         tools: FxSqlQueryComparator.ComparatorHash;
         models: { [key: string]: FxOrmModel.Model };
         plugins: Plugin[];
@@ -202,12 +202,10 @@ declare namespace FxOrmNS {
 
         syncSync(): void;
 
-        begin: {(): void;}
-        commit: {(): void;}
-        rollback: {(): void;}
-        trans: {
-            (fun: Function): void;
-        }
+        begin: FxOrmNS.IDbConnection['begin'];
+        commit: FxOrmNS.IDbConnection['commit'];
+        rollback: FxOrmNS.IDbConnection['rollback'];
+        trans: FxOrmNS.IDbConnection['trans'];
 
         [extraMember: string]: any;
     }

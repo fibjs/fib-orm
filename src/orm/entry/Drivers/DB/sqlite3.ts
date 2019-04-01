@@ -1,6 +1,6 @@
 import db = require('db');
 
-export class Database implements FxOrmDb.DatabaseBase {
+export class Database implements FxOrmDb.DatabaseBase_SQLite {
     conn: FxOrmNS.IDbConnection;
     pool: any
     

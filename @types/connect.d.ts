@@ -10,28 +10,32 @@ declare namespace FxOrmNS {
             (cb?: FxOrmNS.VoidCallback): void
         }
         begin: {
-            <T=any>(cb?: FxOrmNS.GenericCallback<T>): void
+            <T=any>(): void
         };
         commit: {
-            <T=any>(cb?: FxOrmNS.GenericCallback<T>): void
+            <T=any>(): void
         };
         rollback: {
-            <T=any>(cb?: FxOrmNS.GenericCallback<T>): void
+            <T=any>(): void
         };
         trans: {
-            <T=any>(cb?: FxOrmNS.GenericCallback<T>): void
-            (func: Function): boolean
+            <T=any>(
+                cb?: FxOrmNS.GenericCallback<T, void | boolean, IDbConnection>
+            ): boolean
         }
         execute: {
             <T=any>(sql: string, cb: FxOrmNS.GenericCallback<T>): any;
             (sql: string, ...args: any[]): any;
         }
 
-        hasMany?: Function;
-        remove?: Function;
+        [ext: string]: any;
+        /* maybe useless :start */
+        // hasMany?: Function;
+        // remove?: Function;
 
-        propertyToValue?: Function;
-        insert?: Function;
+        // propertyToValue?: Function;
+        // insert?: Function;
+        /* maybe useless :end */
     }
     
     interface IConnectionCallback {

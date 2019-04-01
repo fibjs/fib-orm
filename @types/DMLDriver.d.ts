@@ -153,6 +153,16 @@ declare namespace FxOrmDMLDriver {
         }
         readonly isSql: boolean
 
+        /* patched :start */
+        // uniq id
+        uid: string
+        hasMany?: {
+            (Model: FxOrmModel.Model, association: FxOrmAssociation.InstanceAssociationItem): any
+        }
+        
+        execQuerySync: (query: string, opt: FxOrmDMLDriver.OrigOrmExecQueryOpts) => any
+        /* patched :end */
+
         [ext_key: string]: any
     }
     /* ============================= DMLDriver API Options :start ============================= */

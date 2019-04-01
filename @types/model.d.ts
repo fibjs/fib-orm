@@ -157,7 +157,7 @@ declare namespace FxOrmModel {
         db: FxOrmNS.ORM
         settings: FxOrmSettings.SettingInstance
         driver_name: string
-        driver: FxOrmPatch.PatchedDMLDriver
+        driver: FxOrmDMLDriver.DMLDriver
         table: string
         properties: FxOrmProperty.NormalizedPropertyHash
         extension: boolean

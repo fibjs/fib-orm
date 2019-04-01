@@ -4,16 +4,16 @@
 declare namespace FxOrmNS {
     type IdType = string | number
     
-    interface VoidCallback {
-        (err?: FxOrmError.ExtendedError | null): any
+    interface VoidCallback<T_RESULT = any, T_THIS = any> {
+        (this: T_THIS, err?: FxOrmError.ExtendedError | null): T_RESULT
     }
 
-    interface ExecutionCallback<T> {
-        (err: string | FxOrmError.ExtendedError | FxOrmError.ExtendedError[] | null, result?: T): any
+    interface ExecutionCallback<T, T_RESULT = any, T_THIS = any> {
+        (this: T_THIS, err: string | FxOrmError.ExtendedError | FxOrmError.ExtendedError[] | null, result?: T): T_RESULT
     }
 
-    interface GenericCallback<T> {
-        (err: FxOrmError.ExtendedError | null, result?: T): any
+    interface GenericCallback<T, T_RESULT = any, T_THIS = any> {
+        (this: T_THIS, err: FxOrmError.ExtendedError | null, result?: T): T_RESULT
     }
 
     interface SuccessCallback<T> {

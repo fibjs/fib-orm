@@ -327,7 +327,7 @@ export function patchDriver(driver: FxOrmDMLDriver.DMLDriver) {
 }
 
 export function execQuerySync(
-    this: FxOrmPatch.PatchedDMLDriver,
+    this: FxOrmDMLDriver.DMLDriver,
     query: string,
     opt: FxSqlQuerySql.SqlEscapeArgType[]
 ) {

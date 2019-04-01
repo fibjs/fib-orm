@@ -119,7 +119,7 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 export function extend (
 	Model: FxOrmModel.Model,
 	Instance: FxOrmInstance.Instance,
-	Driver: FxOrmPatch.PatchedDMLDriver,
+	Driver: FxOrmDMLDriver.DMLDriver,
 	associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[],
 	opts: FibOrmNS.ModelExtendOptions
 ) {
@@ -155,7 +155,7 @@ export function autoFetch (
 function extendInstance(
 	Model: FxOrmModel.Model,
 	Instance: FxOrmInstance.Instance,
-	Driver: FxOrmPatch.PatchedDMLDriver,
+	Driver: FxOrmDMLDriver.DMLDriver,
 	association: FxOrmAssociation.InstanceAssociationItem_ExtendTos,
 	opts: FibOrmNS.InstanceExtendOptions
 ) {

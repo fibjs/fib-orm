@@ -220,7 +220,7 @@ export function prepare(db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associatio
 export function extend(
 	Model: FxOrmModel.Model,
 	Instance: FxOrmInstance.Instance,
-	Driver: FxOrmPatch.PatchedDMLDriver,
+	Driver: FxOrmDMLDriver.DMLDriver,
 	associations: FxOrmAssociation.InstanceAssociationItem_HasMany[],
 	opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany,
 	createInstance: Function
@@ -279,7 +279,7 @@ function mapKeysToString (keys: string[], item: FxOrmInstance.Instance) {
 function extendInstance(
 	Model: FxOrmModel.Model,
 	Instance: FxOrmInstance.Instance,
-	Driver: FxOrmPatch.PatchedDMLDriver,
+	Driver: FxOrmDMLDriver.DMLDriver,
 	association: FxOrmAssociation.InstanceAssociationItem_HasMany,
 	opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany,
 	createInstance: Function

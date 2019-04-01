@@ -1,5 +1,6 @@
 declare namespace FxOrmDb {
     interface DatabaseBase {
+        conn: FxOrmNS.IDbConnection;
         on: {
             <T=any>(ev: string, func: FxOrmNS.GenericCallback<T>): void
         };
@@ -27,7 +28,6 @@ declare namespace FxOrmDb {
     }
 
     interface DatabaseBase_MySQL extends DatabaseBase {
-        conn: FxOrmNS.IDbConnection;
         opts: FxOrmNS.IDBConnectionConfig;
 
         ping: {
