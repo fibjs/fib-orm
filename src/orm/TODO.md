@@ -16,6 +16,10 @@
     - [ ] extra: setAccessor
     - [ ] extra: getAccessor
     - [ ] extra: delAccessor
+* [ ] low-level driver usages
+    - [ ] `driver.query`
+    - [ ] `driver.execQuerySync`
+    - [ ] `driver.trans`
 
 ### benchmark
 
@@ -30,3 +34,4 @@
 - [ ] usage about `exports.use`
     - [ ] add `exports.useSync` or make `exports.use` can be used as sync function
 - [ ] usagea about `mysql::ChainFindObject.whereExists`
+- [ ] low-level driver usages about `driver.query`, `driver.execQuerySync`, `driver.trans`, etc.

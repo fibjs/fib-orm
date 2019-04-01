@@ -48,7 +48,7 @@ export function unique (
 		scope?: string[]
 	} = {},
 	msg: string = null
-): FibjsEnforce.ValidationCallback {
+): FxOrmValidators.ValidationCallback {
 	for (let k in arguments) {
 		const arg = arguments[k];
 		if (typeof arg === "string") {
@@ -58,7 +58,7 @@ export function unique (
 		}
 	}
 
-	return function (v, next, ctx) {
+	return function (v: any, next: FxOrmNS.NextCallback, ctx: FxOrmValidators.ValidatorContext) {
 		if (typeof v === "undefined" || v === null) {
 			return next();
 		}
@@ -92,7 +92,7 @@ export function unique (
 			if (!records || records.length === 0) {
 				return next();
 			}
-			if (records.length === 1 && records[0][ctx.model.id] === this[ctx.model.id]) {
+			if (records.length === 1 && records[0][ctx.model.id + ''] === this[ctx.model.id + '']) {
 				return next();
 			}
 			return next(msg || 'not-unique');

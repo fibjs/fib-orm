@@ -9,11 +9,15 @@ declare namespace FxOrmNS {
     }
 
     interface ExecutionCallback<T, T_RESULT = any, T_THIS = any> {
-        (this: T_THIS, err: string | FxOrmError.ExtendedError | FxOrmError.ExtendedError[] | null, result?: T): T_RESULT
+        (this: T_THIS, err?: string | FxOrmError.ExtendedError | FxOrmError.ExtendedError[] | null, result?: T): T_RESULT
     }
 
     interface GenericCallback<T, T_RESULT = any, T_THIS = any> {
         (this: T_THIS, err: FxOrmError.ExtendedError | null, result?: T): T_RESULT
+    }
+
+    interface NextCallback<ERR_T = string, T_RESULT = any, T_THIS = any> {
+        (this: T_THIS, err?: ERR_T): T_RESULT
     }
 
     interface SuccessCallback<T> {

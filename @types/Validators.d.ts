@@ -21,4 +21,14 @@ declare namespace FxOrmValidators {
    interface IValidatorHash {
       [validation: string]: FibjsEnforce.IValidator | FibjsEnforce.IValidator[]
    }
+
+   interface ValidationCallback<T_THIS = any> extends FibjsEnforce.ValidationCallback {
+      (value: any, next: FxOrmNS.NextCallback, thisArg?: T_THIS, contexts?: ValidatorContext): void;
+   }
+
+   interface ValidatorContext extends FibjsEnforce.ContextMap {
+      driver: FibOrmNS.ORM['driver']
+      instance: FxOrmInstance.Instance
+      model: FxOrmModel.Model
+   }
 }
