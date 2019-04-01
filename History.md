@@ -1,7 +1,18 @@
 
-v1.9.4 / 2019-03-27
+v1.9.5 / 2019-04-01
 ==================
 
+  * little fix.
+  * add Helpers.parseDbConfig and apply it internally.
+  * config adjust for typescript debug.
+  * fix typo about validator.
+  * fix typo about DMLDriver.
+  * typo fix.
+
+v1.9.4 / 2019-03-27
+===================
+
+  * Release v1.9.4
   * better implements for patch on Model and model's hooks.
 
 v1.9.3 / 2019-03-26
