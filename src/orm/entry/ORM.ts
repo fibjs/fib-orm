@@ -3,7 +3,7 @@ import events         = require("events");
 import uuid			  = require('uuid')
 
 import SqlQuery       = require("@fxjs/sql-query");
-import ormPluginSyncPatch from './patch/plugin'
+import ormPluginSyncPatch from './Patch/plugin'
 
 import { Model }      from "./Model";
 import DriverAliases  = require("./Drivers/aliases");
