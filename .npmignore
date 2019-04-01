@@ -8,3 +8,4 @@ build
 test
 
 /lib.ts
+/tsconfig.json
