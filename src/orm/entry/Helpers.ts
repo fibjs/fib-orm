@@ -23,7 +23,9 @@ export const parseDbConfig: FxOrmHelper.HelperModules['parseDbConfig'] = functio
 	else
 		config = _cloneDeep(config);
 
-	if (config.protocol === 'sqlite:' && config.timezone === undefined)
+    const isSqlite = config.protocol === 'sqlite:';
+
+	if (isSqlite && config.timezone === undefined)
 		config.timezone = 'UTC';
 
 	config.query = config.query || {};
@@ -42,7 +44,7 @@ export const parseDbConfig: FxOrmHelper.HelperModules['parseDbConfig'] = functio
 	if (!config.protocol) {
 		return Utilities.ORM_Error(new ORMError("CONNECTION_URL_NO_PROTOCOL", 'PARAM_MISMATCH'), cb);
 	}
-	if (!config.host) {
+	if (!config.host && !isSqlite) {
 		config.host = config.hostname = "localhost";
 	}
 	if (config.auth) {
