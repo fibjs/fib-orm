@@ -1,7 +1,14 @@
 
-v1.9.5 / 2019-04-01
+v1.9.6 / 2019-04-10
 ==================
 
+  * refactor findBy*() method of model's associations, replace exists with `join on`.
+  * little fix.
+
+v1.9.5 / 2019-04-01
+===================
+
+  * Release v1.9.5
   * little fix.
   * add Helpers.parseDbConfig and apply it internally.
   * config adjust for typescript debug.
