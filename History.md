@@ -1,7 +1,13 @@
 
-v1.9.6 / 2019-04-10
+v1.9.7 / 2019-04-15
 ==================
 
+  * typo and implements normalization about callback/synchronous style arguments in driver's low-level apis.
+
+v1.9.6 / 2019-04-10
+===================
+
+  * Release v1.9.6
   * refactor findBy*() method of model's associations, replace exists with `join on`.
   * little fix.
 
