@@ -45,48 +45,62 @@ const ChainFind = function (
 			if (dataItems.length === 0) {
 				return done(null, []);
 			}
-
+			
+			/**
+			 * only valid for related table based on single foreign key
+			 * @param err 
+			 * @param items 
+			 */
 			var eagerLoad = function (err: Error, items: FxOrmInstance.InstanceDataPayload[]) {
-				var idMap: {[key: string]: number} = {};
+				const associationKey_Item_Map: {[key: string]: typeof items[any]} = {};
 
-				var keys = util.map(items, function (item: FxOrmInstance.InstanceDataPayload, index: number) {
-					var key = item[opts.keys[0]];
-					// Create the association arrays
-					for (let i = 0, association: FxOrmAssociation.InstanceAssociationItem; association = opts.__eager[i]; i++) {
-						item[association.name] = [];
-					}
-					idMap[key] = index;
+				const self_key_field = opts.keys[0];
+
+				const keys = items.map(function (item: FxOrmInstance.InstanceDataPayload) {
+					var key = item[self_key_field];
+					associationKey_Item_Map[key] = item;
 
 					return key;
 				});
 
-				coroutine.parallel(opts.__eager, (association: FxOrmAssociation.InstanceAssociationItem) => {
+				opts.__eager.forEach((association: FxOrmAssociation.InstanceAssociationItem) => {
 					// if err exists, chainRun would finished before this fiber released
-					if (err) return 
+					if (err) return ;
 					
-					const newInstanceSync = util.sync(function (association: FxOrmAssociation.InstanceAssociationItem, cb: FxOrmNS.ExecutionCallback<any>) {
-						opts.driver.eagerQuery<FxOrmInstance.Instance>(association, opts, keys, function (eager_err, instances) {
-							err = eager_err
-	
-							if (eager_err) {
-								done(eager_err)
-								cb(eager_err)
-								return ;
-							}
-	
-							for (let i = 0, instance: FxOrmInstance.Instance; instance = instances[i]; i++) {
-								// Perform a parent lookup with $p, and initialize it as an instance.
-								items[idMap[instance.$p]][association.name].push(association.model(instance));
-							}
-
-							cb(null, null);
+					const fetchAssociatedInstances = util.sync(function (association: FxOrmAssociation.InstanceAssociationItem, cb: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance[]>) {
+						opts.driver.eagerQuery<FxOrmInstance.Instance[]>(association, opts, keys, function (eager_err, instances) {
+							cb(eager_err, instances);
 						});
 					});
 
-					return newInstanceSync(association);
+					let instances: FxOrmInstance.Instance[] = [];
+					
+					try {
+						instances = fetchAssociatedInstances(association);
+					} catch (eager_err) {
+						// TODO: try to test error use fake driver
+						err = eager_err;
+						return ;
+					}
+
+					const association_name = association.name;
+
+					for (
+						let idx = 0, instance: FxOrmInstance.Instance, item = null;
+						instance = instances[idx];
+						idx++
+					) {
+						item = associationKey_Item_Map[instance.$p];
+
+						// Create the association arrays
+						if (!item[association_name])
+							item[association_name] = []
+
+						item[association_name].push(instance);
+					}
 				});
 
-				done(null, items);
+				done(err, items);
 			};
 
 			const items = coroutine.parallel(dataItems, (dataItem: FxOrmInstance.InstanceDataPayload) => {
