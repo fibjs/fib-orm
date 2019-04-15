@@ -662,7 +662,7 @@ export const Model = function (
 	model.create = function () {
 		var itemsParams: FxOrmInstance.InstanceDataPayload[] = []
 		var items: FxOrmInstance.Instance[] = [];
-		var options: FxOrmModel.ModelOptions__Create     = {};
+		// var options: FxOrmModel.ModelOptions__Create     = {};
 		var done: FxOrmNS.ExecutionCallback<FxOrmInstance.Instance | FxOrmInstance.Instance[]>        = null;
 		var create_err: FxOrmError.ExtendedError	= null;
 		var create_single: boolean      = false;
@@ -675,8 +675,8 @@ export const Model = function (
 					} else if (i === 0) {
 						create_single = true;
 						itemsParams.push(arguments[i]);
-					} else {
-						options = arguments[i];
+					// } else {
+					// 	options = arguments[i];
 					}
 					break;
 				case "function":
@@ -685,11 +685,8 @@ export const Model = function (
 			}
 		}
 
-		const { parallel = false } = options || {};
-
-		function throw_if_catch_err (err: FxOrmNS.ExtensibleError, index: number, item: FxOrmInstance.Instance) {
+		function throw_if_catch_err (err: FxOrmNS.ExtensibleError, item: FxOrmInstance.InstanceDataPayload) {
 			if (create_err = err) {
-				err.index    = index;
 				err.instance = item;
 				
 				done(err);
@@ -698,40 +695,32 @@ export const Model = function (
 			}
 		}
 
-		const actions = itemsParams.map(
-			(data: FxOrmInstance.InstanceDataPayload, index: number) => {
-				return () => {
-					if (create_err)
-						return ;
+		items = itemsParams.map(
+			(data: FxOrmInstance.InstanceDataPayload) => {
+				if (create_err)
+					return ;
 
-					let item: FxOrmInstance.Instance = null;
-					try {
-						item = createInstanceSync(data, {
-							is_new    : true,
-							autoSave  : m_opts.autoSave,
-							// not fetch associated instance on its creation.
-							autoFetch : false
-						});
-					} catch (err) {
-						throw_if_catch_err(err, index, item);
-					}
-
-					try {
-						item.saveSync();
-					} catch (err) {
-						throw_if_catch_err(err, index, item);
-					}
-
-					items[index] = item;
+				let item: FxOrmInstance.Instance = null;
+				try {
+					item = createInstanceSync(data, {
+						is_new    : true,
+						autoSave  : m_opts.autoSave,
+						// not fetch associated instance on its creation.
+						autoFetch : false
+					});
+				} catch (err) {
+					throw_if_catch_err(err, data);
 				}
+
+				try {
+					item.saveSync();
+				} catch (err) {
+					throw_if_catch_err(err, item);
+				}
+
+				return item
 			}
 		);
-
-		// TODO: try to test it.
-		if (parallel)
-			coroutine.parallel(actions);
-		else
-			actions.forEach(act => act());
 
 		const results = create_single ? items[0] : items;
 

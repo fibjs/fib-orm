@@ -103,26 +103,20 @@ const ChainFind = function (
 				done(err, items);
 			};
 
-			const items = coroutine.parallel(dataItems, (dataItem: FxOrmInstance.InstanceDataPayload) => {
-				const newInstanceSync = util.sync(function(obj: FxOrmInstance.InstanceDataPayload, cb: Function) {
-					opts.newInstance(obj, function (err: Error, data: FxOrmInstance.Instance) {
-						if (err) {
-							done(err)
-							cb(err)
-							return ;
-						}
+			const items = dataItems.map<FxOrmInstance.Instance>((dataItem: FxOrmInstance.InstanceDataPayload) => {
+				const newInstanceSync = util.sync(opts.newInstance);
 
-						cb(null, data)
-					})
-				})
-
-				return newInstanceSync(dataItem)
+				try {
+					return newInstanceSync(dataItem);
+				} catch (new_err) {
+					err = new_err;
+				}
 			});
 
 			if (opts.__eager && opts.__eager.length)
-				eagerLoad(null, items);
+				eagerLoad(err, items);
 			else
-				done(null, items);
+				done(err, items);
 		});
 	}
 
