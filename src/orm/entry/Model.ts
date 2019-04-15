@@ -708,14 +708,10 @@ export const Model = function (
 						// not fetch associated instance on its creation.
 						autoFetch : false
 					});
-				} catch (err) {
-					throw_if_catch_err(err, data);
-				}
 
-				try {
 					item.saveSync();
 				} catch (err) {
-					throw_if_catch_err(err, item);
+					throw_if_catch_err(err, item || data);
 				}
 
 				return item
