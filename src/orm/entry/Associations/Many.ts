@@ -276,7 +276,8 @@ function extendInstance(
 
 			association.model.find(conditions, options, function (err, foundItems) {
 				if (err) return cb(err);
-				if (util.isEmpty(Instances)) return cb(null, false);
+
+				if (util.isEmpty(Instances)) return cb(null, foundItems.length > 0);
 
 				var foundItemsIDs = Array.from( new Set (
 					foundItems.map(item => mapKeysToString(association.model.keys, item))
@@ -285,7 +286,7 @@ function extendInstance(
 					Instances.map(item => mapKeysToString(association.model.keys, item))
 				));
 
-				var sameLength = foundItemsIDs.length == InstancesIDs.length;
+				var sameLength = foundItemsIDs.length === InstancesIDs.length;
 				var sameContents = sameLength && util.isEmpty(util.difference(foundItemsIDs, InstancesIDs));
 
 				return cb(null, sameContents);

@@ -212,25 +212,17 @@ describe("hasMany", function () {
                 assert.ok(has_pets);
             });
 
-            // xit("should return true if not passing any instance and has associated items", function (done) {
-            //     Person.find({ name: "Jane" }).first(function (err, Jane) {
-            //         assert.equal(err, null);
+            it("should return true if not passing any instance and has associated items", function (done) {
+                Person.find({ name: "Jane" }).first(function (err, Jane) {
+                    assert.equal(err, null);
 
-            //         Jane.hasPets(function (err, has_pets) {
-            //             assert.equal(err, null);
-            //             assert.ok(has_pets);
+                    Jane.hasPets(function (err, has_pets) {
+                        assert.equal(err, null);
+                        assert.ok(has_pets);
 
-            //             return done();
-            //         });
-            //     });
-            // });
-
-            it("should return false if not passing any instance", function () {
-                var Jane = Person.find({
-                    name: "Jane"
-                }).firstSync();
-                var has_pets = Jane.hasPetsSync();
-                assert.notOk(has_pets);
+                        return done();
+                    });
+                });
             });
 
             it("should return true if all passed instances are associated", function () {
