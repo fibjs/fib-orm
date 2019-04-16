@@ -1,7 +1,17 @@
 
-v1.9.7 / 2019-04-15
+v1.9.8 / 2019-04-16
 ==================
 
+  * feat, model: little robust change.
+  * feat, model: improve implementation of model creeate & eagerLoad.
+  * feat, model: simplify implementation of `eagerLoad`
+  * feat, model: fix typo and add TODO about model's `create`
+  * fix, model: add `ModelOptions__Create` and apply it, fix default parallel strategy when creating items;
+
+v1.9.7 / 2019-04-15
+===================
+
+  * Release v1.9.7
   * typo and implements normalization about callback/synchronous style arguments in driver's low-level apis.
 
 v1.9.6 / 2019-04-10
