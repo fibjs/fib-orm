@@ -564,7 +564,8 @@ export const Instance = function (
 
 				/*if (opts.autoSave) {
 					saveInstanceProperty(key, val);
-				}*/if (opts.extrachanges.indexOf(key) === -1) {
+				}*/
+				if (opts.extrachanges.indexOf(key) === -1) {
 					opts.extrachanges.push(key);
 				}
 			},
@@ -580,9 +581,7 @@ export const Instance = function (
 	}
 
 	for (let k in opts.methods) {
-		Utilities.addHiddenPropertyToInstance(instance, k, opts.methods[k].bind(instance), {
-			writable: true
-		});
+		Utilities.addHiddenPropertyToInstance(instance, k, opts.methods[k].bind(instance), { writable: true });
 	}
 
 	for (let k in opts.extra) {
@@ -644,15 +643,10 @@ export const Instance = function (
 		});
 		args = args.filter(x => x !== cb);
 
-		// const waitor = cb ? new coroutine.Event() : undefined
 		process.nextTick(() => {
 			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(instance.saveSync, args);
-			// if (waitor) waitor.set();
-
 			Utilities.throwErrOrCallabckErrResult({ error: syncResponse.error, result: instance }, { no_throw: !!cb, callback: cb });
 		});
-
-		// if (waitor) waitor.wait();
 
 		return this;
 	})
