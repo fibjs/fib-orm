@@ -1,7 +1,46 @@
 
-v1.9.8 / 2019-04-16
+v1.10.0-alpha / 2019-04-22
 ==================
 
+  * code clean.
+  * feat, model: support specify parallel option when creating.
+  * code, clean: ChainFind.ts
+  * code, format: remove unnecessary event lock in autoFetch of association get.
+  * fix, test: add test cases about callback-style function in extendsTo association.
+  * fix, test: add test cases about callback-style function in hasMany association.
+  * fix, test: fix wrong return-value in chain style usage for hasOne association.
+  * test, config: update ci config.
+  * fix, one: fix implementation about getAccessor/getSyncAccessor
+  * code clean.
+  * feat, instance: refactor internal events on/emit by native EventEmitter.
+  * clean, code: instance.d.ts
+  * feat, parallel: speed by do parallel actions  when possible.
+  * feat, patch: migrate execQuerySync to driver's shared method function.
+  * feat, patch: deprecate patchFindBy, patchModelAfterDefine.
+  * feat, patch: try to deprecate patchObject, patchHooksInModelOptions.
+  * feat, associations: finish syncifying for hasOne, hasMany associations accessor
+  * feat, ExtendsTo: syncify internal implementation.
+  * fix, package.json: peerDependencies
+  * tuning, instance: `.save()` without callback
+  * feat, test: add test environment variable `FX_ORM_TEST_DEBUG`.
+  * fix, db: robust of sqlite's driver/dml
+  * feat, instance: syncify internal implementation.
+  * feat, patch: deprecate patchInsert, patchDriver, patchIChainFindLikeRs, patchAggregate, patchResult.
+  * feat, patch: try to deprecate patchResult.
+  * feat, aggregation: normalize typo, syncify internal implementation.
+  * feat, model: finish syncifying basic methods.
+  * feat, db: syncify internal implementation, support pool executation.
+  * feat, Model: syncify internal implementation.
+  * feat, ChainFind: syncify internal implementation.
+  * Syncify internal API about Model.
+  * use @fxjs/sql-query@0.4.0
+  * test, orm: add test about orm exports(ignore unsupported drivers).
+  * feat, model: recover feature of passing empty instances to `hasAccessor` in many association.
+
+v1.9.8 / 2019-04-16
+===================
+
+  * Release v1.9.8
   * feat, model: little robust change.
   * feat, model: improve implementation of model creeate & eagerLoad.
   * feat, model: simplify implementation of `eagerLoad`
