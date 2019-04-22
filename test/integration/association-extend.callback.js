@@ -1,7 +1,7 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.extendsTo()", function () {
+describe("Model.extendsTo() - callback", function () {
     var db = null;
     var Person = null;
     var PersonAddress = null;

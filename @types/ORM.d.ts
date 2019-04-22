@@ -276,12 +276,9 @@ declare namespace FxOrmNS {
 
         use(connection: FxOrmDb.DatabaseBase, protocol: string, options: IUseOptions, callback: (err: Error, db?: FxOrmNS.ORM) => void): any;
         connect: {
-            (uri: string): FxOrmNS.ORMLike;
-            (uri: string, callback: IConnectionCallback): FxOrmNS.ORMLike;
-            (options: FxOrmNS.IConnectionOptions): FxOrmNS.ORMLike;
-            (options: FxOrmNS.IConnectionOptions, callback: IConnectionCallback): FxOrmNS.ORMLike;
+            (uri: string | FxOrmNS.IConnectionOptions, callback?: IConnectionCallback): FxOrmNS.ORMLike;
         };
-        connectSync(opts: FibORMIConnectionOptions | string): FibORM;
+        connectSync(uriOrOpts: FibORMIConnectionOptions | string): FibORM;
 
         [extra: string]: any
     }

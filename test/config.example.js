@@ -36,6 +36,8 @@ exports.mongodb = {
 };
 exports.sqlite = {
   protocol  : "sqlite:",
+  // comment line below to enable memory mode
+  database  : 'test',
   query    : {
     pool     : false
   }

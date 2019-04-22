@@ -94,7 +94,8 @@ common.getConnectionString = function (opts) {
         ).replace(':@','@');
       }
     case 'sqlite':
-      return util.format("%s://%s?%s", protocol, config.pathname, query);
+      var dbname = config.pathname || config.database;
+      return util.format("%s://%s?%s", protocol, `${dbname ? `${dbname}.db`: ''}`, query);
     default:
       throw new Error("Unknown protocol " + protocol);
   }

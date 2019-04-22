@@ -36,7 +36,7 @@ class Database extends EventEmitter implements FxOrmDb.DatabaseBase_MySQL {
     }
 
     connect(cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>) {
-        return this.conn = db.openMySQL.call(db.openMySQL, this.opts, cb)
+        return this.conn = db.openMySQL.call(db, this.opts, cb)
     }
 
     execute(sql: string, ...args: any[]) {

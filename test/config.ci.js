@@ -38,6 +38,7 @@ exports.mongodb = {
 };
 exports.sqlite = {
   protocol  : "sqlite:",
+  database  : 'test',
   query    : {
     pool     : Boolean(process.env.FX_ORM_TEST_POOL),
   }

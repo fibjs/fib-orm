@@ -57,8 +57,8 @@ const FALLBACK_CONNECT_CFG = {
 	database: ''
 }
 
-function isParsedDbConfigLikeORM (parsedDBConfig: FxOrmNS.IDBConnectionConfig | FxOrmNS.ORMLike): parsedDBConfig is FxOrmNS.ORMLike {
-	return !parsedDBConfig.hasOwnProperty('host')
+function isOrmLikeErrorEmitter (parsedDBConfig: FxOrmNS.IDBConnectionConfig | FxOrmNS.ORMLike): parsedDBConfig is FxOrmNS.ORMLike {
+	return !parsedDBConfig.hasOwnProperty('host') && parsedDBConfig instanceof events.EventEmitter
 }
 
 const connect: FxOrmNS.ExportModule['connect'] = function () {
@@ -78,17 +78,16 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 
 	const cfg = Helpers.parseDbConfig(opts, cb);
 
-	if (isParsedDbConfigLikeORM(cfg))
+	if (isOrmLikeErrorEmitter(cfg))
 		return cfg;
 	
 	let proto  = cfg.protocol.replace(/:$/, '');
 	let orm: FxOrmNS.ORMLike;
-	let err: ORMError = null;
 	if (DriverAliases[proto]) {
 		proto = DriverAliases[proto];
 	}
 
-	try {
+	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
 		const Driver = adapters.get(proto);
 		const settings = Settings.Container(SettingsInstance.get('*'));
 		const driver   = new Driver(cfg, null, {
@@ -97,30 +96,29 @@ const connect: FxOrmNS.ExportModule['connect'] = function () {
 			settings : settings
 		});
 
-		driver.connect(conn_err => {
-			if (conn_err)
-				throw conn_err;
-		});
+		driver.connect();
 
 		orm = new ORM(proto, driver, settings);
-	} catch (ex) {
-		err = ex;
 
-		if (Utilities.isDriverNotSupportedError(err)) {
-			err = new ORMError("Connection protocol not supported - have you installed the database driver for " + proto + "?", 'NO_SUPPORT');
-			orm = Utilities.ORM_Error(err, cb);
-		}
+		return orm;
+	});
 
-		orm = Utilities.ORM_Error(err, cb);
+	if (syncResponse.error && Utilities.isDriverNotSupportedError(syncResponse.error)) {
+		syncResponse.error = new ORMError("Connection protocol not supported - have you installed the database driver for " + proto + "?", 'NO_SUPPORT');
 	}
 
-	process.nextTick(() => {
-		orm.emit("connect", err, !err ? orm : null);
+	if (syncResponse.error)
+		orm = Utilities.ORM_Error(syncResponse.error, cb);
 
-		if (typeof cb === 'function') {
-			cb(err, orm);
-		};
+	Utilities.throwErrOrCallabckErrResult(syncResponse, {
+		// no throw it, it could be processed with event handler
+		no_throw: true,
+		callback: cb
 	});
+
+	process.nextTick(() => {
+		orm.emit("connect", syncResponse.error, !syncResponse.error ? orm : null);
+	})
 
 	return orm;
 };

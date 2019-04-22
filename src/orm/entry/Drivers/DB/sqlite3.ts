@@ -6,6 +6,10 @@ import * as Utilities from '../../Utilities';
 const events = require('events')
 const EventEmitter: typeof Class_EventEmitter = events.EventEmitter
 
+function isMemoryMode (href: string) {
+    return href === ':memory:'
+}
+
 export class Database extends EventEmitter implements FxOrmDb.DatabaseBase_SQLite {
     conn: FxOrmNS.IDbConnection;
     opts: FxOrmDb.DatabaseBaseConfig;
@@ -13,10 +17,10 @@ export class Database extends EventEmitter implements FxOrmDb.DatabaseBase_SQLit
         if (this.use_memory)
             return this.opts.href;
 
-        return url.format(this.opts);
+        return this.opts.href;
     }
     get use_memory () {
-        return this.opts.href === ':memory:'
+        return isMemoryMode(this.opts.href)
     }
 
     pool: FibPoolNS.FibPoolFunction<FxOrmDb.DatabaseBase_SQLite['conn']>
@@ -30,17 +34,15 @@ export class Database extends EventEmitter implements FxOrmDb.DatabaseBase_SQLit
         } else if (typeof conn_opts === 'string') {
             this.opts = url.parse(conn_opts, false, true) as any;
         }
+        
+        if (!this.use_memory)
+            this.opts.protocol = 'sqlite:'
 
         mountPoolToDb(this);
     }
 
     connect(cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): any {
-        const syncResult = Utilities.exposeErrAndResultFromSyncMethod(
-            () => this.conn = db.openSQLite(this.uri)
-        )
-        Utilities.throwErrOrCallabckErrResult(syncResult, { callback: cb });
-
-        return syncResult.result;
+        return this.conn = db.openSQLite.call(db, this.opts);
     }
 
     execute(sql: string, ...args: any[]) {
