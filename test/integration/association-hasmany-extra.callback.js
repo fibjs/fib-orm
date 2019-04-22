@@ -35,7 +35,7 @@ describe("hasMany extra properties - callback", function () {
     describe("if passed to addAccessor", function () {
         before(setup());
 
-        it("should be added to association", function () {
+        it("should be added to association", function (done) {
             Person.create([{
                 name: "John"
             }], function (err, people) {
@@ -65,6 +65,8 @@ describe("hasMany extra properties - callback", function () {
 
                             assert.equal(typeof John.pets[0].extra.data, 'object');
                             assert.equal(JSON.stringify(data), JSON.stringify(John.pets[0].extra.data));
+
+                            done();
                         });
                     });
                 });
