@@ -1,7 +1,14 @@
 
-v1.10.0-alpha / 2019-04-22
+v1.10.0-alpha.1 / 2019-04-22
 ==================
 
+  * code, literal: ORM/DB, config; use file mode in sqlite's test cases.
+  * fix, test: fix lack of async-return-signal.
+
+v1.10.0-alpha / 2019-04-22
+==========================
+
+  * Release v1.10.0-alpha
   * code clean.
   * feat, model: support specify parallel option when creating.
   * code, clean: ChainFind.ts
