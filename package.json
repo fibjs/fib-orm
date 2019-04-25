@@ -1,6 +1,6 @@
 {
     "name": "@fxjs/orm",
-    "version": "1.10.0-alpha.1",
+    "version": "1.10.0",
     "description": "Object Relational Mapping for fibjs",
     "main": "lib",
     "types": "@types/index.d.ts",

@@ -1,7 +1,29 @@
 
-v1.10.0-alpha.1 / 2019-04-22
+v1.10.0 / 2019-04-25
 ==================
 
+  * feat, instance: remove unnecessary `util.sync` in instance's creation.
+  * test, model: add test case model-create.callback.js
+  * test, model: add test case model-remove[.callback].js
+  * fix, model: add test case property-lazyload.callback.js
+  * test, model: add test case model-sync.callback.js
+  * test, model: add test case model-count.callback.js
+  * fix, model: add test case model-save.callback.js
+  * test, model: add test case model-find.callback.js
+  * test, model: add test case model-one.callback.js
+  * fix, model: add test case model-get.callback.js
+  * feat, Singleton: refactor with model.caches.
+  * feat, Singleton: simplify inner implementaion.
+  * code clean.
+  * feat, orm: syncify findby about APIs.
+  * feat, orm: syncify ORM.connect()
+  * feat, types: replace `@types/fibjs` with `@fibjs/types`
+  * fix, typo: add `fib-pool`.
+
+v1.10.0-alpha.1 / 2019-04-22
+============================
+
+  * Release v1.10.0-alpha.1
   * code, literal: ORM/DB, config; use file mode in sqlite's test cases.
   * fix, test: fix lack of async-return-signal.
 
