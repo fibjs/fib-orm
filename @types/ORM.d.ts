@@ -174,6 +174,8 @@ declare namespace FxOrmNS {
         load: Function
 
         driver?: FxOrmDMLDriver.DMLDriver
+
+        [k: string]: any
     }
 
     interface ORM extends ORMLike, FxOrmSynchronous.SynchronizedORMInstance, FxOrmPatch.PatchedORMInstance {

@@ -255,7 +255,7 @@ export const preReplaceHook: FxOrmHelper.HelperModules['preReplaceHook'] = funct
             next();
     });
 }
-/* hooks: start */
+/* hooks: end */
 
 /* arguments input :start */
 export const selectArgs: FxOrmHelper.HelperModules['selectArgs'] = function (args, callback) {
