@@ -82,7 +82,9 @@ declare namespace FxOrmInstance {
             (callback: FxOrmNS.ValidatorCallback): void
         };
         on(event: InstanceEventType | string, callback: FxOrmNS.GenericCallback<any>): Instance;
-        emit(event: string, ...args: any[]): Instance;
+        $on: Class_EventEmitter['on']
+        $off: Class_EventEmitter['off']
+        $emit: Class_EventEmitter['emit']
         
         save(callback?: FxOrmNS.VoidCallback): Instance;
         save(data: InstanceDataPayload, callback?: FxOrmNS.VoidCallback): Instance;

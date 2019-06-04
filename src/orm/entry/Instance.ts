@@ -587,16 +587,20 @@ export const Instance = function (
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "on", function (event: string, cb: FxOrmNS.VoidCallback) {
 		eventor.on(event, cb);
-
 		return this;
 	});
 
-	Utilities.addHiddenUnwritableMethodToInstance(instance, "emit", function (event: string, ...args: any[]) {
-		eventor.emit(event, ...args);
-
-		return this;
+	Utilities.addHiddenUnwritableMethodToInstance(instance, "$on", function (...args: any) {
+		return eventor.on(...args);
 	});
 
+	Utilities.addHiddenUnwritableMethodToInstance(instance, "$off", function (...args: any) {
+		return eventor.off(...args);
+	});
+
+	Utilities.addHiddenUnwritableMethodToInstance(instance, "$emit", function (event: string, ...args: any[]) {
+		return eventor.emit(event, ...args);
+	});
 
 	const collectParamsForSave = function (args: any[]) {
 		var objCount = 0;
