@@ -1,16 +1,16 @@
 /// <reference path="instance.d.ts" />
 
 declare namespace FxOrmHook {
-    interface HookActionNextFunction {
-        (err?: Error|null): any
+    interface HookActionNextFunction<TTHIS = FxOrmInstance.Instance> {
+        (this: TTHIS, err?: Error|null): any
     }
 
-    interface HookActionCallback {
-        (next?: HookActionNextFunction): any
+    interface HookActionCallback<TTHIS = FxOrmInstance.Instance> {
+        (this: TTHIS, next?: HookActionNextFunction): any
     }
 
-    interface HookResultCallback {
-        (success?: boolean): any
+    interface HookResultCallback<TTHIS = FxOrmInstance.Instance> {
+        (this: TTHIS, success?: boolean): any
     }
 
     interface HookTrigger<CTX_SELF = FxOrmInstance.Instance>{
