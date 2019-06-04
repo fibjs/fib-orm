@@ -217,6 +217,7 @@ declare namespace FxOrmModel {
         hooks: Hooks
         methods: {[method_name: string]: Function}
         validations: FxOrmValidators.IValidatorHash
+        ievents: FxOrmInstance.InstanceConstructorOptions['events']
     }
     
     interface ModelDefineOptions {
@@ -238,6 +239,7 @@ declare namespace FxOrmModel {
         methods?: { [name: string]: Function };
         identityCache?: ModelConstructorOptions['identityCache']
         cascadeRemove?: ModelConstructorOptions['cascadeRemove']
+        ievents?: ModelConstructorOptions['ievents']
 
         [extensibleProperty: string]: any;
     }

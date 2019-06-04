@@ -248,6 +248,7 @@ ORM.prototype.define = function (
 		hooks          : opts.hooks || {},
 		methods        : opts.methods || {},
 		validations    : opts.validations || {},
+		ievents		   : opts.ievents || {},
 
 		instanceCacheSize : opts.hasOwnProperty("instanceCacheSize") ? opts.instanceCacheSize : this.settings.get("instance.cacheSize"),
 	});

@@ -147,7 +147,7 @@ export const Model = function (
 			setupAssociations      : setupAssociations,
 			fieldToPropertyMap     : fieldToPropertyMap,
 			keyProperties          : keyProperties,
-			events				   : {}
+			events				   : m_opts.ievents
 		});
 		
 		if (model_fields !== null) {
