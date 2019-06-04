@@ -81,7 +81,9 @@ declare namespace FxOrmInstance {
         validate: {
             (callback: FxOrmNS.ValidatorCallback): void
         };
-        on(event: InstanceEventType, callback: FxOrmNS.GenericCallback<any>): Instance;
+        on(event: InstanceEventType | string, callback: FxOrmNS.GenericCallback<any>): Instance;
+        emit(event: string, ...args: any[]): Instance;
+        
         save(callback?: FxOrmNS.VoidCallback): Instance;
         save(data: InstanceDataPayload, callback?: FxOrmNS.VoidCallback): Instance;
         save(data: InstanceDataPayload, options: SaveOptions, callback?: FxOrmNS.VoidCallback): Instance;

@@ -35,10 +35,7 @@ export const Instance = function (
 	var instance_saving = false;
 	var instance: FxOrmInstance.Instance = {} as FxOrmInstance.Instance;
 
-	var emitEvent: EmitEventFunctionInInstance = function () {
-		var args = Array.prototype.slice.apply(arguments);
-		var event = args.shift();
-
+	var emitCallbackStyleEvent: EmitEventFunctionInInstance = function (event: string, ...args: any[]) {
 		eventor.emit(event, ...args);
 	};
 	var rememberKeys = function () {
@@ -116,7 +113,7 @@ export const Instance = function (
 	) {
 		instance_saving = false;
 
-		emitEvent("save", err, instance);
+		emitCallbackStyleEvent("save", err, instance);
 
 		Hook.trigger(instance, opts.hooks.afterSave, false);
 
@@ -166,7 +163,7 @@ export const Instance = function (
 	const runSyncAfterSaveActions = function (is_create?: boolean, err?: Error) {
 		instance_saving = false;
 
-		emitEvent("save", err, instance);
+		emitCallbackStyleEvent("save", err, instance);
 
 		if (is_create)
 			Hook.trigger(instance, opts.hooks.afterCreate, !err);
@@ -446,7 +443,7 @@ export const Instance = function (
 		Hook.wait(instance, opts.hooks.beforeSave, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				Hook.trigger(instance, opts.hooks.afterSave, false);
-				emitEvent("save", err, instance);
+				emitCallbackStyleEvent("save", err, instance);
 				return;
 			}
 
@@ -456,7 +453,7 @@ export const Instance = function (
 				opts.data[key] = value;
 
 			Hook.trigger(instance, opts.hooks.afterSave, !syncReponse.error);
-			emitEvent("save", syncReponse.error, instance);
+			emitCallbackStyleEvent("save", syncReponse.error, instance);
 		});
 	};
 	const setInstanceProperty = function (key: string, value: any) {
@@ -594,6 +591,12 @@ export const Instance = function (
 		return this;
 	});
 
+	Utilities.addHiddenUnwritableMethodToInstance(instance, "emit", function (event: string, ...args: any[]) {
+		eventor.emit(event, ...args);
+
+		return this;
+	});
+
 
 	const collectParamsForSave = function (args: any[]) {
 		var objCount = 0;
@@ -677,20 +680,20 @@ export const Instance = function (
 
 		Hook.wait(instance, opts.hooks.beforeRemove, function (err: FxOrmError.ExtendedError) {
 			if (err) {
-				emitEvent("remove", err, instance);
+				emitCallbackStyleEvent("remove", err, instance);
 
 				removeErr = err;
 				return ;
 			}
 
-			emitEvent("beforeRemove", instance);
+			emitCallbackStyleEvent("beforeRemove", instance);
 			
 			Utilities.filterWhereConditionsInput(conditions, instance.model());
 			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => opts.driver.remove(opts.table, conditions));
 
 			Hook.trigger(instance, opts.hooks.afterRemove, !syncResponse.error);
 
-			emitEvent("remove", syncResponse.error, instance);
+			emitCallbackStyleEvent("remove", syncResponse.error, instance);
 
 			removeErr = syncResponse.error;
 
@@ -802,7 +805,7 @@ export const Instance = function (
 
 	Hook.wait(instance, opts.hooks.afterLoad, function (err: Error) {
 		process.nextTick(() => {
-			emitEvent("ready", err, instance);
+			emitCallbackStyleEvent("ready", err, instance);
 		});
 	});
 
