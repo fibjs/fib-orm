@@ -396,12 +396,22 @@ function extendInstance(
 	Utilities.addHiddenUnwritableMethodToInstance(Instance, association.setSyncAccessor, function (this: typeof Instance) {
 		var items = _flatten(arguments);
 
+		Instance.$emit(`before:${association.setAccessor}`, items)
+
+		Instance.$emit(`before-del-extension:${association.setAccessor}`, items)
 		Instance[association.delSyncAccessor]();
+		Instance.$emit(`after-del-extension:${association.setAccessor}`, items)
 
 		if (!items.length)
 			return ;
 
-		return Instance[association.addSyncAccessor](items);
+		Instance.$emit(`before-add-extension:${association.setAccessor}`, items)
+		const results = Instance[association.addSyncAccessor](items);
+		Instance.$emit(`after-add-extension:${association.setAccessor}`, items)
+		
+		Instance.$emit(`after:${association.setAccessor}`, items)
+
+		return results;
 	});
 
 	Utilities.addHiddenUnwritableMethodToInstance(Instance, association.setAccessor, function (this: typeof Instance) {
@@ -459,6 +469,7 @@ function extendInstance(
 		if (!this.saved())
 			this.saveSync();
 
+		Instance.$emit(`before:${association.delAccessor}`, Associations)
 		if (Driver.hasMany) {
 			return Driver.hasMany(Model, association).del(Instance, Associations);
 		}
@@ -472,6 +483,7 @@ function extendInstance(
 		}
 
 		Driver.remove(association.mergeTable, conditions);
+		Instance.$emit(`after:${association.delAccessor}`)
 
 		return this;
 	});
@@ -512,6 +524,7 @@ function extendInstance(
 
 		const savedAssociations: FxOrmAssociation.InstanceAssociatedInstance[] = [];
 
+		Instance.$emit(`before:${association.addAccessor}`)
 		Utilities.parallelQueryIfPossible(
 			Driver.isPool,
 			Associations,
@@ -539,17 +552,20 @@ function extendInstance(
 					savedAssociations.push(Association);
 				};
 				
+				Instance.$emit(`before-association-save:${association.addAccessor}`, Associations)
 				if (isExtraNonEmpty()) {
 					Hook.wait(Association, association.hooks.beforeSave, saveAssociation, add_opts);
 				} else {
 					Hook.wait(Association, association.hooks.beforeSave, saveAssociation);
 				}
+				Instance.$emit(`after-association-save:${association.addAccessor}`, savedAssociations)
 			}
 		)
 
 		if (!this.saved())
 			this.saveSync();
 
+		Instance.$emit(`after:${association.addAccessor}`)
 		return savedAssociations;
 	});
 
