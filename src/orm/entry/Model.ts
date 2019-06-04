@@ -43,12 +43,36 @@ export const Model = function (
 	const allProperties: FxOrmProperty.NormalizedPropertyHash = {};
 	const keyProperties: FxOrmProperty.NormalizedProperty[] = [];
 
+	const initialHooks = Object.assign({}, m_opts.hooks)
+
 	var createHookHelper = function (hook: keyof FxOrmModel.Hooks) {
-		return function (cb: FxOrmHook.HookActionCallback) {
+		return function (
+			cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback,
+			opts?: FxOrmModel.ModelHookPatchOptions
+		) {
 			if (typeof cb !== "function") {
 				delete m_opts.hooks[hook];
-			} else {
-				m_opts.hooks[hook] = cb;
+				return this;
+			}
+			
+			const { oldhook = undefined } = opts || {}
+			switch (oldhook) {
+				default:
+				case 'initial':
+					m_opts.hooks[hook] = initialHooks[hook];
+					break
+				case 'overwrite':
+				case undefined:
+					m_opts.hooks[hook] = cb;
+					break
+				case 'append':
+					const old_cb = m_opts.hooks[hook] || function () {};
+					m_opts.hooks[hook] = cb;
+					Helpers.prependHook(m_opts.hooks, hook, old_cb);
+					break
+				case 'prepend':
+					Helpers.prependHook(m_opts.hooks, hook, cb);
+					break
 			}
 			return this;
 		};

@@ -689,4 +689,61 @@ describe("Hook", function () {
             assert.equal(people[0].name, "beforeSave");
         });
     });
+
+    describe("keepable hook", function () {
+        let count = 0, str = count + ''
+        const tester = function (mode) {
+            Array.apply(null, {length: 3}).slice(0).forEach((_, idx) => {
+                Person.beforeCreate(() => {
+                    count += idx;
+                    str = str + idx;
+                }, {oldhook: mode})
+            });
+        }
+        before(setup({
+            beforeCreate: function () {
+                count = 999; str = 'initial';
+            }
+        }));
+
+        beforeEach(() => {
+            count = 0;
+            str = count + '';
+        })
+        afterEach(() => {
+            Person.beforeCreate(null)
+        })
+
+        it('default: overwrite', () => {
+            tester();
+
+            Person.createSync([{ name: -1 }]);
+            assert.equal(count, 2);
+            assert.equal(str, '02');
+        });
+
+        it('default: prepend', () => {
+            tester('prepend');
+
+            Person.createSync([{ name: -1 }]);
+            assert.equal(count, 3)
+            assert.equal(str, '0210');
+        });
+
+        it('default: append', () => {
+            tester('append');
+
+            Person.createSync([{ name: -1 }]);
+            assert.equal(count, 3)
+            assert.equal(str, '0012');
+        });
+
+        it('default: initial', () => {
+            tester('initial');
+
+            Person.createSync([{ name: -1 }]);
+            assert.equal(count, 999)
+            assert.equal(str, 'initial');
+        });
+    });
 });

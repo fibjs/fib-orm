@@ -256,33 +256,43 @@ declare namespace FxOrmModel {
     }
     type keyofHooks = keyof Hooks
 
+    interface ModelHookPatchOptions {
+        /** 
+         * @default false
+         * 'prepend': prepend old oldhook to new hook
+         * 'append': append old oldhook to new hook
+         * undefined: overwrite oldhook
+         */
+        oldhook?: 'prepend' | 'append' | 'initial' | 'overwrite' | undefined
+    }
+
     interface ModelHooks {
         beforeValidation?: {
-            (func: FxOrmHook.HookActionCallback): any
+            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any
         };
         beforeCreate?: {
-            (func: FxOrmHook.HookActionCallback): any
+            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any
         };
         afterCreate?: {
-            (func: FxOrmHook.HookActionCallback): any
+            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any
         };
         beforeSave?: {
-            (func: FxOrmHook.HookActionCallback): any
+            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any
         };
         afterSave?: {
-            (func: FxOrmHook.HookResultCallback): any
+            (func: FxOrmHook.HookResultCallback, opts?: ModelHookPatchOptions): any
         };
         afterLoad?: {
-            (func: FxOrmHook.HookResultCallback): any
+            (func: FxOrmHook.HookResultCallback, opts?: ModelHookPatchOptions): any
         };
         afterAutoFetch?: {
-            (func: FxOrmHook.HookActionCallback): any
+            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any
         };
         beforeRemove?: {
-            (func: FxOrmHook.HookActionCallback): any
+            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any
         };
         afterRemove?: {
-            (func: FxOrmHook.HookResultCallback): any
+            (func: FxOrmHook.HookResultCallback, opts?: ModelHookPatchOptions): any
         };
     }
 
