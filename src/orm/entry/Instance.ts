@@ -2,7 +2,7 @@
 
 import util 	 = require('util');
 import coroutine 	 = require('coroutine');
-const events = require('events');
+import events = require('events');
 const EventEmitter = events.EventEmitter;
 
 import Utilities = require("./Utilities");
@@ -586,16 +586,36 @@ export const Instance = function (
 	}
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "on", function (event: string, cb: FxOrmNS.VoidCallback) {
+		cb = Utilities.bindInstance(instance, cb);
 		eventor.on(event, cb);
 		return this;
 	});
 
+	const eventEmitterArgsToMap = function (restArgs: any[]): {[k: string]: Function} | string {
+		let map = restArgs[0]
+		if (typeof map === 'string' && typeof restArgs[1] === 'function')
+			map = {[map]: restArgs[1]}
+
+		if (typeof map === 'object')
+			Object.keys(map).forEach(evt => map[evt] = Utilities.bindInstance(instance, map[evt]))
+			
+		return map;
+	}
+
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "$on", function (...args: any) {
-		return eventor.on(...args);
+		const mapOrString = eventEmitterArgsToMap(args);
+		if (typeof mapOrString === 'string')
+			return ;
+
+		return eventor.on(mapOrString);
 	});
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "$off", function (...args: any) {
-		return eventor.off(...args);
+		const mapOrString = eventEmitterArgsToMap(args);
+		if (typeof mapOrString === 'string')
+			return eventor.off(mapOrString);
+
+		return eventor.off(mapOrString);
 	});
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "$emit", function (event: string, ...args: any[]) {

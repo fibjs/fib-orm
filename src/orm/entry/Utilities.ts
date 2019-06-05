@@ -828,3 +828,7 @@ export function generateUID4Model (
 export function makeIdForDriverTable (driver_uid: string, table: string) {
 	return `${driver_uid}/${table}`
 }
+
+export function bindInstance (instance: FxOrmInstance.Instance, fn: Function) {
+	return fn.bind(instance)
+}

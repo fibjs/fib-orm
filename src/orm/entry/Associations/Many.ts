@@ -1,7 +1,6 @@
 /// <reference lib="es5" />
 
 import util = require('util');
-import coroutine = require('coroutine')
 
 import _flatten = require('lodash.flatten')
 
