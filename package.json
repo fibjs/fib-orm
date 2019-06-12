@@ -55,7 +55,7 @@
     },
     "devDependencies": {
         "@fibjs/ci": "^2.2.0",
-        "@fibjs/types": "0.0.3",
+        "@fibjs/types": "^0.27.1",
         "@types/lodash.clonedeep": "^4.5.6",
         "@types/lodash.flatten": "^4.4.6",
         "@types/lodash.merge": "^4.6.6",
