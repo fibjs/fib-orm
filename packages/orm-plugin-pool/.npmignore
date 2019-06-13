@@ -11,3 +11,4 @@ test
 /tsconfig.json
 
 /index.ts
+*.db*
