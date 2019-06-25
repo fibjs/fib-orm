@@ -1,10 +1,14 @@
 import util = require('util')
+import uuid = require('uuid')
 import coroutine = require('coroutine')
 import events         = require("events");
 
 import _cloneDeep = require('lodash.clonedeep')
 
 import { Helpers as QueryHelpers } from '@fxjs/sql-query';
+import { selectArgs } from './Helpers';
+
+function noOperation () {};
 
 /**
  * Order should be a String (with the property name assumed ascending)
@@ -722,6 +726,23 @@ export function filterWhereConditionsInput (
 	return conditions;
 }
 
+export function addUnwritableProperty (
+	obj: any,
+	property: string,
+	value: any,
+	propertyConfiguration: PropertyDescriptor = {}
+) {
+	Object.defineProperty(
+		obj,
+		property,
+		{
+			value,
+			...propertyConfiguration,
+			writable: false
+		}
+	)
+}
+
 export function addHiddenUnwritableMethodToInstance (
 	instance: FxOrmInstance.Instance,
 	method_name: 'save' | 'saveSync' | string,
@@ -798,6 +819,22 @@ export function fillSyncVersionAccessorForAssociation (
 	return association;
 }
 
+
+const AvailableHooks = [
+	'beforeSet', 'afterSet',
+	'beforeRemove', 'afterRemove',
+	'beforeAdd', 'afterAdd'
+]
+export function addHookPatchHelperForAssociation (
+	association: FxOrmAssociation.InstanceAssociationItem,
+	// { for = 'hasOne' }: Fibjs.AnyObject = {}
+) {
+	// setup hooks
+	for (let k in AvailableHooks) {
+		association[AvailableHooks[k]] = createHookHelper(association.hooks, AvailableHooks[k], { initialHooks: Object.assign({}, association.hooks) });
+	}
+}
+
 export function generateUID4SoloGet (
 	m_opts: FxOrmModel.ModelConstructorOptions,
 	ids: (string | number)[]
@@ -831,4 +868,203 @@ export function makeIdForDriverTable (driver_uid: string, table: string) {
 
 export function bindInstance (instance: FxOrmInstance.Instance, fn: Function) {
 	return fn.bind(instance)
+}
+
+export function buildAssociationActionHooksPayload (
+	hookName: keyof FxOrmAssociation.InstanceAssociationItem['hooks'],
+	payload: {
+		instance?: FxOrmInstance.Instance,
+		association?: FxOrmInstance.InstanceDataPayload,
+		associations?: FxOrmInstance.InstanceDataPayload[],
+		association_ids?: any[],
+		removeConditions?: Fibjs.AnyObject,
+		$ref: Fibjs.AnyObject,
+
+		useChannel?: Function
+	}
+): Fibjs.AnyObject {
+	const {
+		$ref = {},
+	} = payload;
+
+	const {
+		instance = $ref.instance || null,
+		association = $ref.association || null,
+		associations = $ref.associations || [],
+		association_ids = $ref.associations || [],
+		removeConditions = $ref.removeConditions || {},
+		useChannel = $ref.useChannel || reusableChannelGenerator()
+	} = payload;
+
+	if (!instance)
+		throw `[buildAssociationActionHooksPayload] instance is required`
+
+	if (!$ref || typeof $ref !== 'object')
+		throw `[buildAssociationActionHooksPayload]$ref must be valid Object`
+
+	const self = $ref;
+	if (!self.hasOwnProperty('$ref') || Object.getOwnPropertyDescriptor(self, '$ref').configurable)
+		Object.defineProperty(self, '$ref', { get () { return self }, configurable: false, enumerable: true})
+
+	self.association = association
+	self.associations = associations
+	self.association_ids = association_ids
+
+	self.useChannel = useChannel
+
+	switch (hookName) {
+		case 'beforeSet':
+		case 'afterSet':
+			break
+		case 'beforeAdd':
+		case 'afterAdd':
+			break
+		case 'beforeRemove':
+			self.removeConditions = removeConditions
+			break
+		case 'afterRemove':
+			self.removeConditions = removeConditions
+			break
+	}
+
+	return self
+}
+
+export function hookHandlerDecorator (
+	{
+		thisArg = null,
+		onlyOnce = true
+	}:
+	{
+		thisArg?: any
+		onlyOnce?: boolean
+	} = {}
+) {
+	return (hdlr: Function): any => {
+		let finishOnce = false
+
+		return (err: any) => {
+			if (onlyOnce && finishOnce) {
+				console.warn(`[hookHandlerDecorator] this function was once only`)
+				return ;
+			}
+			
+			finishOnce === true;
+
+			if (err)
+				throw err;
+
+			if (err === false) return ;
+
+			return hdlr.call(thisArg)
+		}
+	}
+}
+
+function getChannelInfo () {
+	return {
+		id: uuid.snowflake().hex(),
+		executed: false,
+		fn: null as Function
+	}
+}
+
+export function reusableChannelGenerator () {
+	const DEFAULT_KEY = `$$default`
+	const channelInfos: {[k: string]: Fibjs.AnyObject } = {
+		[DEFAULT_KEY]: getChannelInfo()
+	}
+
+	return function useChannel () {
+		let name: string, _channel: Function
+
+		selectArgs(Array.prototype.slice.apply(arguments), (arg_type, arg) => {
+			switch (arg_type) {
+				case 'string':
+					name = arg
+					break
+				case 'function':
+					_channel = arg
+					break
+			}
+		})
+		if (!name)
+			name = DEFAULT_KEY
+		
+		if (!channelInfos.hasOwnProperty(name))
+			channelInfos[name] = getChannelInfo()
+
+		const channelInfo = channelInfos[name]
+
+		_channel = _channel || channelInfo.fn
+		if (!_channel)
+			throw `[useChannel] channel is required and must be function type`
+			
+		if (!channelInfo.fn && _channel)
+			channelInfo.fn = _channel
+
+		return [
+			function (...args: any) {
+				if (channelInfo.executed)
+					return ;
+
+				channelInfo.executed = true;
+
+				if (typeof channelInfo.fn !== 'function')
+					throw `[reusableChannelGenerator/useChannel] channel with name ${name} haven't been set 'fn'!`
+
+				channelInfo.fn.apply(null, args)
+			},
+			function (fn: Function) {
+				if (typeof fn !== 'function')
+					throw `[reusableChannelGenerator/useChannel::setChannel] new channel must be function!`
+
+				channelInfo.fn = fn
+			}
+		]
+	}
+}
+
+export const createHookHelper = function (
+	hooks: Fibjs.AnyObject,
+	hook: keyof FxOrmModel.Hooks | keyof FxOrmAssociation.InstanceAssociationItem['hooks'],
+	{ initialHooks = [] }: Fibjs.AnyObject = {}
+) {
+	return function (
+		cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback,
+		opts?: FxOrmModel.ModelHookPatchOptions
+	) {
+		if (typeof cb !== "function") {
+			delete hooks[hook];
+			return this;
+		}
+		
+		const { oldhook = undefined } = opts || {}
+		let tmp = null as any
+		switch (oldhook) {
+			default:
+			case 'initial':
+				hooks[hook] = initialHooks[hook] as any;
+				break
+			case 'overwrite':
+			case undefined:
+				hooks[hook] = cb as any;
+				break
+			case 'prepend':
+				tmp = arraify(hooks[hook]);
+				tmp.push(cb)
+				hooks[hook] = tmp;
+				break
+			case 'append':
+				tmp = arraify(hooks[hook]);
+				tmp.unshift(cb)
+				hooks[hook] = tmp;
+				break
+		}
+		return this;
+	};
+};
+
+export function arraify<T = any> (item: T | T[]): T[] {
+	return Array.isArray(item) ? item : [item]
 }

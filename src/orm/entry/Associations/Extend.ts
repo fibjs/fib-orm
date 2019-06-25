@@ -1,14 +1,14 @@
 import util = require('util')
-import coroutine = require('coroutine')
 
-import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName, ACCESSOR_KEYS, addAssociationInfoToModel } from "./_utils";
-
+import Hook = require("../Hook");
 import _cloneDeep = require('lodash.clonedeep');
 import ORMError   = require("../Error");
 import Singleton  = require("../Singleton");
 import Utilities  = require("../Utilities");
 import Helpers  = require("../Helpers");
+
 import { listFindByChainOrRunSync } from '../Model';
+import { defineDefaultExtendsToTableName, defineAssociationAccessorMethodName, ACCESSOR_KEYS, addAssociationInfoToModel } from "./_utils";
 
 function noOperation (...args: any[]) {};
 
@@ -18,7 +18,20 @@ function noOperation (...args: any[]) {};
  * @param Model model
  * @param associations association definitions
  */
-export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[]) {
+export function prepare (
+	Model: FxOrmModel.Model,
+	assocs: {
+		one_associations: FxOrmAssociation.InstanceAssociationItem_HasOne[],
+		many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[],
+		extend_associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[],
+	},
+	opts: {
+		db: FibOrmNS.FibORM
+	}
+) {
+	const { extend_associations } = assocs;
+	const { db } = opts
+
 	Model.extendsTo = function (
 		name: string,
 		properties: FxOrmModel.DetailedPropertyDefinitionHash,
@@ -26,11 +39,23 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 	) {
 		assoc_options = assoc_options || {};
 
+		for (let i = 0; i < db.plugins.length; i++) {
+			if (typeof db.plugins[i].beforeExtendsTo === "function") {
+				db.plugins[i].beforeExtendsTo(Model, {
+					association_name: name,
+					properties: properties,
+					assoc_options
+				});
+			}
+		}
+
 		const associationSemanticNameCore = assoc_options.name || Utilities.formatNameFor("assoc:extendsTo", name);
 		const association = <FxOrmAssociation.InstanceAssociationItem_ExtendTos>{
 			name           : name,
+			model		   : null,
 			table          : assoc_options.table || defineDefaultExtendsToTableName(Model.table, name),
-			reversed       : assoc_options.reversed,
+			reverse        : assoc_options.reverse,
+			// reversed       : assoc_options.reversed,
 			autoFetch      : assoc_options.autoFetch || false,
 			autoFetchLimit : assoc_options.autoFetchLimit || 2,
 			field          : Utilities.wrapFieldObject({
@@ -50,10 +75,11 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 			delAccessor    : assoc_options.delAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.del, associationSemanticNameCore),
 			modelFindByAccessor: assoc_options.modelFindByAccessor || defineAssociationAccessorMethodName(ACCESSOR_KEYS.modelFindBy, associationSemanticNameCore),
 
-			model: null
+			hooks: {...assoc_options.hooks},
 		};
 		Utilities.fillSyncVersionAccessorForAssociation(association);
-
+		Utilities.addHookPatchHelperForAssociation(association);
+		
 		const newProperties: FxOrmModel.DetailedPropertyDefinitionHash = _cloneDeep(properties);
 		const assoc_field = association.field as FxOrmProperty.NormalizedPropertyHash
 
@@ -65,14 +91,21 @@ export function prepare (db: FibOrmNS.FibORM, Model: FxOrmModel.Model, associati
 			util.pick(assoc_options, 'identityCache', 'autoSave', 'cascadeRemove', 'hooks', 'methods', 'validations'),
 			{
 				id        : Object.keys(assoc_field),
-				extension : true,
+				__for_extension : true,
 			}
 		);
 
 		association.model = db.define(association.table, newProperties, modelOpts);
-		association.model.hasOne(Model.table, Model, { extension: true, field: assoc_field });
+		
+		association.model.hasOne(association.reverse || Model.table, Model, {
+			__for_extension: true,
+			field: assoc_field,
+			reverse: null,
+			reversed: false,
+			hooks: assoc_options.reverseHooks
+		});
 
-		associations.push(association);
+		extend_associations.push(association);
 
 		const findByAccessorChainOrRunSync = function (is_sync: boolean = false) {
 			return function () {
@@ -131,10 +164,13 @@ export function extend (
 	Instance: FxOrmInstance.Instance,
 	Driver: FxOrmDMLDriver.DMLDriver,
 	associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[],
-	opts: FibOrmNS.ModelExtendOptions
+	cfg: {
+		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasOne,
+		genHookHandlerForInstance: Function
+	}
 ) {
 	for (let i = 0; i < associations.length; i++) {
-		extendInstance(Model, Instance, Driver, associations[i], opts);
+		extendInstance(Model, Instance, Driver, associations[i], cfg);
 	}
 };
 
@@ -160,13 +196,23 @@ function extendInstance(
 	Instance: FxOrmInstance.Instance,
 	Driver: FxOrmDMLDriver.DMLDriver,
 	association: FxOrmAssociation.InstanceAssociationItem_ExtendTos,
-	opts: FibOrmNS.InstanceExtendOptions
+	cfg: {
+		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasOne,
+		genHookHandlerForInstance: Function
+	}
 ) {
+	const { genHookHandlerForInstance } = cfg
+
 	Utilities.addHiddenPropertyToInstance(Instance, association.hasSyncAccessor, function () {
 		if (!Instance[Model.id + ''])
 			throw new ORMError("Instance not saved, cannot get extension", 'NOT_DEFINED', { model: Model.table });
 			
-		return !!association.model.getSync(Utilities.values(Instance, Model.id));
+		try {
+			return !!association.model.getSync(Utilities.values(Instance, Model.id));
+		} catch (error) {
+			if (!Model.settings.get('extendsTo.throwWhenNotFound') && error.literalCode === 'NOT_FOUND') return false
+			throw error
+		}
 	});
 
 	Utilities.addHiddenPropertyToInstance(Instance, association.hasAccessor, function (cb: FxOrmNS.GenericCallback<boolean>) {
@@ -183,7 +229,12 @@ function extendInstance(
 		if (!Instance[Model.id + ''])
 			throw new ORMError("Instance not saved, cannot get extension", 'NOT_DEFINED', { model: Model.table });
 		
-		return association.model.getSync(Utilities.values(Instance, Model.id), opts);
+		try {
+			return association.model.getSync(Utilities.values(Instance, Model.id), opts);
+		} catch (error) {
+			if (!Model.settings.get('extendsTo.throwWhenNotFound') && error.literalCode === 'NOT_FOUND') return null
+			throw error
+		}
 	});
 
 	Utilities.addHiddenPropertyToInstance(Instance, association.getAccessor, function () {
@@ -213,31 +264,46 @@ function extendInstance(
 	Utilities.addHiddenPropertyToInstance(Instance, association.setSyncAccessor, function (
 		Extension: FxOrmInstance.Instance | FxOrmInstance.InstanceDataPayload
 	) {
-		Instance.$emit(`before:${association.setAccessor}`, Extension);
+		const $ref = <Fibjs.AnyObject>{
+			instance: Instance,
+			association: Extension,
+			useChannel: Utilities.reusableChannelGenerator()
+		};
+		Hook.wait(
+			Instance,
+			association.hooks[`beforeSet`],
+			genHookHandlerForInstance(() => {
+				let Extension = $ref.association
+				Instance.$emit(`before:set:${association.name}`, Extension);
 
-		Instance.saveSync();
+				Instance.saveSync();
+				
+				Instance.$emit(`before-del-extension:${association.setAccessor}`);
+				Instance[association.delSyncAccessor]();
+				Instance.$emit(`after-del-extension:${association.setAccessor}`);
+
+				const fields = Object.keys(association.field);
+
+				if (!Extension.isInstance) {
+					$ref.association = Extension = new association.model(Extension);
+				}
+
+				for (let i = 0; i < Model.id.length; i++) {
+					Extension[fields[i]] = Instance[Model.id[i]];
+				}
+
+				Instance.$emit(`before-save-extension:${association.setAccessor}`, Extension);
+				Extension.saveSync();
+				Instance.$emit(`after-save-extension:${association.setAccessor}`, Extension);
+				
+				Instance.$emit(`after:set:${association.name}`, Extension);
+			}),
+			Utilities.buildAssociationActionHooksPayload('beforeSet', { $ref })
+		);
 		
-		Instance.$emit(`before-del-extension:${association.setAccessor}`);
-		Instance[association.delSyncAccessor]();
-		Instance.$emit(`after-del-extension:${association.setAccessor}`);
+		Hook.trigger(Instance, association.hooks['afterSet'], Utilities.buildAssociationActionHooksPayload('afterSet', { $ref }));
 
-		const fields = Object.keys(association.field);
-
-		if (!Extension.isInstance) {
-			Extension = new association.model(Extension);
-		}
-
-		for (let i = 0; i < Model.id.length; i++) {
-			Extension[fields[i]] = Instance[Model.id[i]];
-		}
-
-		Instance.$emit(`before-save-extension:${association.setAccessor}`, Extension);
-		Extension.saveSync();
-		Instance.$emit(`after-save-extension:${association.setAccessor}`, Extension);
-		
-		Instance.$emit(`after:${association.setAccessor}`, Extension);
-
-		return Extension;
+		return $ref.association;
 	});
 
 	Utilities.addHiddenPropertyToInstance(Instance, association.setAccessor, function (
@@ -263,14 +329,28 @@ function extendInstance(
 			conditions[fields[i]] = Instance[Model.id[i]];
 		}
 
-		const extensions = association.model.findSync(conditions)
+		const $ref = <Fibjs.AnyObject>{
+			instance: Instance,
+			removeConditions: conditions,
+			useChannel: Utilities.reusableChannelGenerator()
+		};
+		Hook.wait(
+			Instance,
+			association.hooks[`beforeRemove`],
+			genHookHandlerForInstance(() => {
+				const extensions = association.model.findSync($ref.removeConditions)
 
-		Instance.$emit(`before:${association.delAccessor}`, extensions);
-		for (let i = 0; i < extensions.length; i++) {
-			Singleton.clear(extensions[i].__singleton_uid() + '');
-			extensions[i].removeSync();
-		}
-		Instance.$emit(`after:${association.delAccessor}`, extensions);
+				Instance.$emit(`before:del:${association.name}`, extensions);
+				for (let i = 0; i < extensions.length; i++) {
+					Singleton.clear(extensions[i].__singleton_uid() + '');
+					extensions[i].removeSync();
+				}
+				Instance.$emit(`after:del:${association.name}`, extensions);
+			}),
+			Utilities.buildAssociationActionHooksPayload('beforeRemove', { $ref })
+		);
+
+		Hook.trigger(Instance, association.hooks['afterRemove'], Utilities.buildAssociationActionHooksPayload('afterRemove', { $ref }));
 
 		return ;
 	});

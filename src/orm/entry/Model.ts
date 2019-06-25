@@ -42,41 +42,9 @@ export const Model = function (
 	const fieldToPropertyMap: FxOrmProperty.FieldToPropertyMapType = {};
 	const allProperties: FxOrmProperty.NormalizedPropertyHash = {};
 	const keyProperties: FxOrmProperty.NormalizedProperty[] = [];
-
+	
 	const initialHooks = Object.assign({}, m_opts.hooks)
-
-	var createHookHelper = function (hook: keyof FxOrmModel.Hooks) {
-		return function (
-			cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback,
-			opts?: FxOrmModel.ModelHookPatchOptions
-		) {
-			if (typeof cb !== "function") {
-				delete m_opts.hooks[hook];
-				return this;
-			}
-			
-			const { oldhook = undefined } = opts || {}
-			switch (oldhook) {
-				default:
-				case 'initial':
-					m_opts.hooks[hook] = initialHooks[hook];
-					break
-				case 'overwrite':
-				case undefined:
-					m_opts.hooks[hook] = cb;
-					break
-				case 'append':
-					const old_cb = m_opts.hooks[hook] || function () {};
-					m_opts.hooks[hook] = cb;
-					Helpers.prependHook(m_opts.hooks, hook, old_cb);
-					break
-				case 'prepend':
-					Helpers.prependHook(m_opts.hooks, hook, cb);
-					break
-			}
-			return this;
-		};
-	};
+	
 	const createInstanceSync = function (
 		data: FxOrmInstance.InstanceDataPayload,
 		inst_opts: FxOrmInstance.CreateOptions,
@@ -121,9 +89,11 @@ export const Model = function (
 		};
 
 		const setupAssociations = function (instance: FxOrmInstance.Instance) {
-			OneAssociation.extend(model, instance, m_opts.driver, one_associations);
-			ManyAssociation.extend(model, instance, m_opts.driver, many_associations, assoc_opts);
-			ExtendAssociation.extend(model, instance, m_opts.driver, extend_associations, assoc_opts);
+			const genHookHandlerForInstance = Utilities.hookHandlerDecorator({ thisArg: instance })
+
+			OneAssociation.extend(model, instance, m_opts.driver, one_associations, { assoc_opts, genHookHandlerForInstance });
+			ManyAssociation.extend(model, instance, m_opts.driver, many_associations, { assoc_opts, genHookHandlerForInstance });
+			ExtendAssociation.extend(model, instance, m_opts.driver, extend_associations, { assoc_opts, genHookHandlerForInstance });
 		};
 
 		const instance = new Instance(model, {
@@ -215,15 +185,15 @@ export const Model = function (
 	    });
 	} as FxOrmModel.Model;
 
-	model.allProperties = allProperties;
-	model.properties    = m_opts.properties;
-	model.settings      = m_opts.settings;
-	model.keys          = m_opts.keys;
-
-	model.caches		= new util.LruCache(
+	Utilities.addUnwritableProperty(model, 'name', m_opts.name || m_opts.table, { configurable: false })
+	Utilities.addUnwritableProperty(model, 'allProperties', allProperties, { configurable: false })
+	Utilities.addUnwritableProperty(model, 'properties', m_opts.properties, { configurable: false })
+	Utilities.addUnwritableProperty(model, 'settings', m_opts.settings, { configurable: false })
+	Utilities.addUnwritableProperty(model, 'keys', m_opts.keys, { configurable: false })
+	Utilities.addUnwritableProperty(model, 'caches', new util.LruCache(
 		m_opts.instanceCacheSize > 0 && Number.isInteger(m_opts.instanceCacheSize) ? m_opts.instanceCacheSize : m_opts.settings.get('instance.defaultCacheSize'),
 		(typeof m_opts.identityCache === 'number' ? m_opts.identityCache : 1) * 1000
-	)
+	), { configurable: false })
 
 	model.dropSync = function (
 		this:FxOrmModel.Model,
@@ -252,7 +222,7 @@ export const Model = function (
 
 	model.syncSync = function () {
 		m_opts.driver.sync({
-			extension           : m_opts.extension,
+			extension           : m_opts.__for_extension,
 			id                  : m_opts.keys,
 			table               : m_opts.table,
 			properties          : m_opts.properties,
@@ -956,13 +926,14 @@ export const Model = function (
 
 	// setup hooks
 	for (let k in AvailableHooks) {
-		model[AvailableHooks[k]] = createHookHelper(AvailableHooks[k]);
+		model[AvailableHooks[k]] = Utilities.createHookHelper(m_opts.hooks, AvailableHooks[k], { initialHooks });
 	}
 
-	model.associations = {};
-	OneAssociation.prepare(model, one_associations);
-	ManyAssociation.prepare(m_opts.db, model, many_associations);
-	ExtendAssociation.prepare(m_opts.db, model, extend_associations);
+	Utilities.addUnwritableProperty(model, 'associations', {}, { configurable: false })
+	
+	OneAssociation.prepare(model, { one_associations, many_associations, extend_associations }, { db: m_opts.db });
+	ManyAssociation.prepare(model, { one_associations, many_associations, extend_associations }, { db: m_opts.db });
+	ExtendAssociation.prepare(model, { one_associations, many_associations, extend_associations }, { db: m_opts.db });
 
 	return model;
 } as any as FxOrmModel.ModelConstructor;

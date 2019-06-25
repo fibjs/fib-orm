@@ -29,6 +29,7 @@ function t() {
     run('./integration/event.js');
 
     run('./integration/hook.js');
+    run('./integration/association-hook.js');
 
     run('./integration/instance.js');
     run('./integration/model-aggregate.js');
@@ -39,6 +40,7 @@ function t() {
     run('./integration/model-create.callback.js');
     run('./integration/model-exists.js');
     run('./integration/model-find-chain.js');
+    run('./integration/model-find-chain.callback.js');
     run('./integration/model-find-mapsto.js');
     run('./integration/model-find.js');
     run('./integration/model-find.callback.js');

@@ -1,4 +1,5 @@
 /// <reference types="@fxjs/sql-query" />
+/// <reference path="_common.d.ts" />
 /// <reference path="Validators.d.ts" />
 /// <reference path="assoc.d.ts" />
 /// <reference path="patch.d.ts" />
@@ -19,6 +20,7 @@ declare namespace FxOrmModel {
 
     type OrderListOrLimitOffer = number | string | string[]
     interface Model extends ModelInstanceConstructor, ModelHooks, FxOrmSynchronous.SynchronizedModel {
+        name: string;
         properties: FxOrmProperty.NormalizedPropertyHash;
         settings: FxOrmSettings.SettingInstance;
 
@@ -60,7 +62,7 @@ declare namespace FxOrmModel {
             (assoc_name: string, ext_model: Model, assoc_props: ModelPropertyDefinitionHash, assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_HasMany): FxOrmModel.Model
         }
         extendsTo: {
-            (name: string, properties: FxOrmModel.DetailedPropertyDefinitionHash, assoc_options: FxOrmAssociation.AssociationDefinitionOptions_ExtendsTo): Model
+            (name: string, properties: ModelPropertyDefinitionHash, assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_ExtendsTo): Model
         };
 
         associations: {
@@ -92,7 +94,7 @@ declare namespace FxOrmModel {
 
         /* data operation api :start */
         create: {
-            (data: FxOrmInstance.InstanceDataPayload): Model;
+            (data: FxOrmInstance.InstanceDataPayload, callback?: ModelMethodCallback__CreateItem): Model;
             (data: FxOrmInstance.InstanceDataPayload, options?: ModelOptions__Create, callback?: ModelMethodCallback__CreateItem): Model;
         }
         clear: {
@@ -197,13 +199,14 @@ declare namespace FxOrmModel {
     }
 
     interface ModelConstructorOptions {
+        name: string
         db: FxOrmNS.ORM
         settings: FxOrmSettings.SettingInstance
         driver_name: string
         driver: FxOrmDMLDriver.DMLDriver
         table: string
         properties: FxOrmProperty.NormalizedPropertyHash
-        extension: boolean
+        __for_extension: boolean
         indexes: string[]
         
         identityCache: boolean
@@ -227,9 +230,9 @@ declare namespace FxOrmModel {
         table?: ModelConstructorOptions['table']
         collection?: ModelConstructorOptions['table']
 
-        extension?: ModelConstructorOptions['extension']
+        __for_extension?: ModelConstructorOptions['__for_extension']
         indexes?: ModelConstructorOptions['indexes']
-        // keys composition, it's array-liket
+        // keys composition, it's array-like
         id?: ModelConstructorOptions['keys']
         autoSave?: ModelConstructorOptions['autoSave']
         autoFetch?: ModelConstructorOptions['autoFetch']
@@ -246,26 +249,19 @@ declare namespace FxOrmModel {
     type ModelOptions = ModelDefineOptions
 
     interface Hooks {
-        beforeValidation?: FxOrmHook.HookActionCallback;
-        beforeCreate?: FxOrmHook.HookActionCallback;
-        afterCreate?: FxOrmHook.HookResultCallback;
-        beforeSave?: FxOrmHook.HookActionCallback;
-        afterSave?: FxOrmHook.HookResultCallback;
-        afterLoad?: FxOrmHook.HookActionCallback;
-        afterAutoFetch?: FxOrmHook.HookActionCallback;
-        beforeRemove?: FxOrmHook.HookActionCallback;
-        afterRemove?: FxOrmHook.HookResultCallback;
+        beforeValidation?: FxOrmNS.Arraible<FxOrmHook.HookActionCallback>;
+        beforeCreate?: FxOrmNS.Arraible<FxOrmHook.HookActionCallback>;
+        afterCreate?: FxOrmNS.Arraible<FxOrmHook.HookResultCallback>;
+        beforeSave?: FxOrmNS.Arraible<FxOrmHook.HookActionCallback>;
+        afterSave?: FxOrmNS.Arraible<FxOrmHook.HookResultCallback>;
+        afterLoad?: FxOrmNS.Arraible<FxOrmHook.HookActionCallback>;
+        afterAutoFetch?: FxOrmNS.Arraible<FxOrmHook.HookActionCallback>;
+        beforeRemove?: FxOrmNS.Arraible<FxOrmHook.HookActionCallback>;
+        afterRemove?: FxOrmNS.Arraible<FxOrmHook.HookResultCallback>;
     }
     type keyofHooks = keyof Hooks
 
-    interface ModelHookPatchOptions {
-        /** 
-         * @default false
-         * 'prepend': prepend old oldhook to new hook
-         * 'append': append old oldhook to new hook
-         * undefined: overwrite oldhook
-         */
-        oldhook?: 'prepend' | 'append' | 'initial' | 'overwrite' | undefined
+    interface ModelHookPatchOptions extends FxOrmHook.HookPatchOptions {
     }
 
     interface ModelHooks {
@@ -311,14 +307,17 @@ declare namespace FxOrmModel {
     type OrigDetailedModelProperty = FxOrmProperty.NormalizedProperty
     type OrigDetailedModelPropertyHash = FxOrmProperty.NormalizedPropertyHash
 
-    type PrimitiveConstructor = String & Boolean & Number & Date & Class_Buffer & Object
-    interface PrimitiveConstructorModelPropertyDefinition extends PrimitiveConstructor {
-        name: string
-    }
-    type EumTypeValues = any[]
+    type PrimitiveConstructor = String | Boolean | Number | Date | Object | Class_Buffer
+    type EnumTypeValues = any[]
     type PropTypeStrPropertyDefinition = string
     
-    type ComplexModelPropertyDefinition = ModelPropertyDefinition | PrimitiveConstructorModelPropertyDefinition | EumTypeValues | PropTypeStrPropertyDefinition
+    type ComplexModelPropertyDefinition = 
+        ModelPropertyDefinition
+        | (PrimitiveConstructor & {
+            name: string
+        })
+        | EnumTypeValues
+        | PropTypeStrPropertyDefinition
 
     type ModelPropertyDefinitionHash = {
         [key: string]: ComplexModelPropertyDefinition

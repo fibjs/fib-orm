@@ -6,24 +6,16 @@ import * as Utilities from '../../Utilities';
 const events = require('events')
 const EventEmitter: typeof Class_EventEmitter = events.EventEmitter
 
-function isMemoryMode (href: string) {
-    return href === ':memory:'
-}
+declare var setImmediate: any;
 
-export class Database extends EventEmitter implements FxOrmDb.DatabaseBase_SQLite {
+class Database extends EventEmitter implements FxOrmDb.DatabaseBase_Redis {
     conn: FxOrmNS.IDbConnection;
     opts: FxOrmDb.DatabaseBaseConfig;
     get uri () {
-        if (this.use_memory)
-            return this.opts.href;
-
-        return this.opts.href;
-    }
-    get use_memory () {
-        return isMemoryMode(this.opts.href)
+        return url.format(this.opts.toJSON());
     }
 
-    pool: FibPoolNS.FibPoolFunction<FxOrmDb.DatabaseBase_SQLite['conn']>
+    pool: FibPoolNS.FibPoolFunction<FxOrmDb.DatabaseBase_Redis['conn']>
     
     constructor(conn_opts: string | FxOrmDb.DatabaseBaseConfig) {
         super();
@@ -34,15 +26,17 @@ export class Database extends EventEmitter implements FxOrmDb.DatabaseBase_SQLit
         } else if (typeof conn_opts === 'string') {
             this.opts = url.parse(conn_opts, false, true) as any;
         }
-        
-        if (!this.use_memory)
-            this.opts.protocol = 'sqlite:'
 
         mountPoolToDb(this);
     }
 
-    connect(cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): any {
-        return this.conn = db.openSQLite.call(db, this.opts);
+    ping(cb?: FxOrmNS.VoidCallback) {
+        if (typeof cb === 'function')
+            setImmediate(cb);
+    }
+
+    connect(cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>) {
+        return this.conn = db.openMySQL.call(db, this.opts, cb)
     }
 
     execute(sql: string, ...args: any[]) {
@@ -59,7 +53,7 @@ export class Database extends EventEmitter implements FxOrmDb.DatabaseBase_SQLit
         return this.execute(sql, cb);
     }
 
-    close<T=void>(cb?: FxOrmNS.GenericCallback<T>) {
+    close(cb?: FxOrmNS.VoidCallback) {
         if (this.pool)
             this.pool.clear();
 
@@ -69,16 +63,15 @@ export class Database extends EventEmitter implements FxOrmDb.DatabaseBase_SQLit
         Utilities.throwErrOrCallabckErrResult({ error: null }, { callback: cb });
     }
 
-    all<T = any>(sql: string, cb?: FxOrmNS.GenericCallback<T>) {
-        return this.query(sql, cb);
+    end(cb?: FxOrmNS.VoidCallback) {
+        return this.close(cb);
     }
+}
 
-    get<T = any>(sql: string, cb?: FxOrmNS.GenericCallback<T>) {
-        const results = this.all(sql)[0];
+export const createConnection = function (conn_opts: string | FxOrmDb.DatabaseBaseConfig): FxOrmDb.DatabaseBase_MySQL {
+    return new Database(conn_opts);
+};
 
-        if (typeof cb === 'function')
-            return cb(null, results);
+export const createPool = function (conn_opts: FxOrmDb.DatabaseBaseConfig) {
 
-        return results;
-    }
 }

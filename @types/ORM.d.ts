@@ -160,6 +160,37 @@ declare namespace FxOrmNS {
         define?: {
             (model?: FxOrmModel.Model, orm?: ORM): void
         }
+        beforeHasOne?: {
+            (
+                model?: FxOrmModel.Model,
+                opts?: {
+                    association_name?: string,
+                    ext_model?: Model,
+                    assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_HasOne
+                }
+            ): void
+        }
+        beforeHasMany?: {
+            (
+                model?: FxOrmModel.Model,
+                opts?: {
+                    association_name?: string,
+                    ext_model?: Model,
+                    assoc_props?: ModelPropertyDefinitionHash,
+                    assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_HasMany
+                }
+            ): void
+        }
+        beforeExtendsTo?: {
+            (
+                model?: FxOrmModel.Model,
+                opts?: {
+                    association_name?: string,
+                    properties?: FxOrmModel.DetailedPropertyDefinitionHash,
+                    assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_ExtendsTo
+                }
+            ): void
+        }
     }
 
     interface ORMConstructor {
