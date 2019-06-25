@@ -1,7 +1,13 @@
 
-v1.10.1 / 2019-06-25
+v1.10.2 / 2019-06-25
 ==================
 
+  * add packages to .npmignore
+
+v1.10.1 / 2019-06-25
+====================
+
+  * Release v1.10.1
   * literal change.
   * feat: add features about hook, use them drive orm-plugin-uacl. (#24)
   * update .npmignore.

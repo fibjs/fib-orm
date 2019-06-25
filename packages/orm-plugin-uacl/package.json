@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "fib-typify": "^0.6.0"
+  },
+  "peerDependencies": {
+    "@fxjs/orm": ">= 1.10.1 < 2"
   }
 }
