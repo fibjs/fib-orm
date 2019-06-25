@@ -50,3 +50,30 @@ define('project', {}, {
 })
 
 ```
+
+## TODOs
+
+### Features
+
+- [ ] Node Expire: `{TIMEOUT: number, DEFAULT: 100}`
+    - (unit) millisecond
+    - [ ] set expire when node generated, default as 0(means never expire)
+    - [ ] (db:storage)storage as timestamp
+    - [ ] (json) GMT string
+    - [ ] auto-update from remote synchronously when it's expired
+        - [ ] Auto self-revoking synchronously when it's idle(expired after TIMEOUT)
+- [ ]
+### Other
+- [ ] create 1st version README.md
+- [ ] add doc
+    - [ ] paragraph about `tree.$grant`
+    - [ ] paragraph about `tree.$revoke`
+    - [ ] paragraph about `tree.$persist`
+    - [ ] paragraph about `tree.$load`
+    - [ ] paragraph about `tree.find`
+    - [ ] paragraph about `tree.addChildNode`
+    - [ ] paragraph about `tree.removeChildNode`
+- [ ] test cases
+    - [ ] :if grant
+- [ ] sample app
+    - [ ] simple grant with orm

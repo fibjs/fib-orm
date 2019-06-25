@@ -223,6 +223,10 @@ export class ACLTree extends Tree<ACLNode> implements FxORMPluginUACLNS.ACLTree 
 
         return this;
     }
+
+    find ({ uaci = '' } : { uaci: string }): FxORMPluginUACLNS.ACLNode | null {
+        return findACLNode(this, uaci)
+    }
 }
 
 export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements FxORMPluginUACLNS.ACLNode {
@@ -378,8 +382,7 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
         }
 
         coroutine.start(() => {
-            mq.invoke(this.root.tree.routing, msg, 
-            );
+            mq.invoke(this.root.tree.routing, msg);
 
             handler()
         })

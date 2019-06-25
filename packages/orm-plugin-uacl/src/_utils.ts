@@ -174,9 +174,12 @@ export function generateLoadMessage (
 export function encodeGrantTareget (type: FxORMPluginUACLInternal.GRANT_TYPE, id = '0') {
     return `${type}:${id}`
 }
-export function decodeGrantTareget (value: string): [string, string] {
+export function decodeGrantTareget (value: string): FxORMPluginUACLInternal.ACLStorageItem['target'] {
     const tuple = (value || '').split(':')
-    return [tuple[0], tuple[1]]
+    return {
+        type: tuple[0] as any,
+        id: tuple[1]
+    }
 }
 
 export function compuateUaciDepth (uaci: string = '') {

@@ -162,13 +162,19 @@ declare namespace FxORMPluginUACLNS {
 
         can (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields?: string[]): boolean
 
+        find(opts?: ACLTreeFindOptions): ACLNode | null
+        
         load (opts?: ACLTreeLoadOptions): this
         persist(opts?: ACLTreePersistOptions): this
         revoke (opts?: FxORMPluginUACLNS.ACLTreeRevokeOptions): this
         grant (uaci: string, oacl: FxORMPluginUACLNS.ACLNode['oacl']): this
+        
         reset(): this
     }
 
+    type ACLTreeFindOptions = {
+        uaci?: ACLNode['id']   
+    }
     type ACLTreeLoadOptions = {
         uaci?: ACLNode['id']   
         sync?: ACLNodePushOpts['sync']
@@ -264,6 +270,8 @@ declare namespace FxOrmModel {
 
 interface FxOrmPluginUACLOptions {
     orm?: FxOrmNS.ORM
+    
+    defineUACLInMainORM?: boolean
 }
 interface FxOrmPluginUACL extends FxOrmNS.PluginConstructCallback<
     FxOrmNS.ORM, FxOrmNS.PluginOptions & FxOrmPluginUACLOptions

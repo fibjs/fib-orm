@@ -92,7 +92,7 @@ describe('Basic Persistence', () => {
                 write: true,
                 read: false
             })
-            .persist()
+            .persist({ sync: true })
 
         ;[
             [ [user$1, 'write'  , project$1,                                           ], true ],

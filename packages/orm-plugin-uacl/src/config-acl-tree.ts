@@ -5,22 +5,22 @@ import uuid = require('uuid')
 
 import * as UTILS from './_utils'
 
-function defineORMTypes (UACLOrm: FxOrmNS.ORM) {
-    UACLOrm.defineType('tuacl:uaci', {
+function defineORMTypes (targetORM: FxOrmNS.ORM) {
+    targetORM.defineType('tuacl:uaci', {
         datastoreType (prop) {
             return 'text'
         },
         valueToProperty (value, prop) {
-            return value
+            return value + ''
         },
         propertyToValue (value, prop) {
-            return value
+            return value + ''
         }
     })
 
-    UACLOrm.defineType('tuacl:boolean', {
+    targetORM.defineType('tuacl:boolean', {
         datastoreType (prop) {
-            return 'integer'
+            return 'INT'
         },
         valueToProperty (value, prop) {
             if (typeof value === 'boolean')
@@ -33,35 +33,24 @@ function defineORMTypes (UACLOrm: FxOrmNS.ORM) {
         }
     })
 
-    UACLOrm.defineType('tuacl:field_array', {
+    targetORM.defineType('tuacl:grant_target', {
         datastoreType (prop) {
             return 'text'
         },
         valueToProperty (value, prop) {
-            if (Array.isArray(value)) {
+            if (util.isBuffer(value))
+                value = value + ''
+            else if (util.isObject(value))
                 return value;
-            } else {
-                return value.split(',')
-            }
-        },
-        propertyToValue (value, prop) {
-            return value.join(',')
-        }
-    })
 
-    UACLOrm.defineType('tuacl:grant_target', {
-        datastoreType (prop) {
-            return 'text'
-        },
-        valueToProperty (value, prop) {
             let type, id
             try {
-                const tuple = UTILS.decodeGrantTareget(value)
-                type = tuple[0]
-                id = tuple[1]
+                const target = UTILS.decodeGrantTareget(value)
+                type = target.type
+                id = target.id
             } catch (error) {}
 
-            if (!['user', 'role'].includes)
+            if (!['user', 'role'].includes(type))
                 type = 'user'
 
             id = id || 0
@@ -82,7 +71,27 @@ function defineORMTypes (UACLOrm: FxOrmNS.ORM) {
         }
     })
 
-    UACLOrm.defineType('tuacl:boolean_or_allowed_fields', {
+    targetORM.defineType('tuacl:field_array', {
+        datastoreType (prop) {
+            return 'text'
+        },
+        valueToProperty (value, prop) {
+            if (Array.isArray(value)) {
+                return value;
+            }
+            // TODO: add more test
+            try {
+                return value.split(',')
+            } catch (error) {
+                return []
+            }
+        },
+        propertyToValue (value, prop) {
+            return value.join(',')
+        }
+    })
+
+    targetORM.defineType('tuacl:boolean_or_allowed_fields', {
         datastoreType (prop) {
             return 'text'
         },
@@ -102,10 +111,7 @@ function defineORMTypes (UACLOrm: FxOrmNS.ORM) {
         },
         propertyToValue (value, prop) {
             let val = null
-            try {
-                val = JSON.stringify(value)
-            } catch (error) {
-            }
+            val = JSON.stringify(value)
 
             if (!util.isString(val) && !util.isBoolean(val))
                 val = false
@@ -114,12 +120,11 @@ function defineORMTypes (UACLOrm: FxOrmNS.ORM) {
         }
     })
 }
-export function configUACLOrm (UACLOrm: FxOrmNS.ORM) {
+export function configUACLOrm (targetORM: FxOrmNS.ORM) {
     // enable connection pool for UACL's orm
-    UACLOrm.settings.set('connection.pool', true)
 
-    defineORMTypes(UACLOrm)
-    UACLOrm.define('uacl', {
+    defineORMTypes(targetORM)
+    targetORM.define('uacl', {
         uacl_id: {
             type: 'text',
             key: true,
@@ -197,7 +202,7 @@ export function configUACLOrm (UACLOrm: FxOrmNS.ORM) {
         }
     })
 
-    UACLOrm.syncSync()
+    targetORM.syncSync()
 }
 
 const VERBS: FxORMPluginUACLInternal.ACLMessagePayload['verb'][] = [
@@ -426,39 +431,66 @@ export const getConfigStorageServiceRouting = ({
         switch (verb) {
             case 'GRANT': {
                 exec(() => {
-                    orm.models.uacl.create([]
-                        .concat(
-                            uids.map(uid => ({
-                                uaci,
-                                target: UTILS.encodeGrantTareget('user', uid),
-                                read: oacl.read,
-                                write: oacl.write,
-                                delete: oacl.delete 
-                            }))
-                        )
-                        .concat(
-                            roles.map(role => ({
-                                uaci,
-                                target: UTILS.encodeGrantTareget('role', role),
-                                read: oacl.read,
-                                write: oacl.write,
-                                delete: oacl.delete 
-                            }))
-                        )
-                    , (err, uaclItems) => {
-                        if (!err)
-                            _msg.json(getACLMessageResult({
-                                data: uaclItems,
-                                msg: 'grant success!'
-                            }))
-                        else
-                            _msg.json(getACLMessageResult({
-                                literalCode: 'DB_OPERATION_ERROR',
-                                msg: err.message
-                            }))
+                    const items = []
+                    .concat(
+                        uids.map(uid => ({
+                            uaci,
+                            target: UTILS.encodeGrantTareget('user', uid),
+                            read: oacl.read,
+                            write: oacl.write,
+                            delete: oacl.delete 
+                        }))
+                    )
+                    .concat(
+                        roles.map(role => ({
+                            uaci,
+                            target: UTILS.encodeGrantTareget('role', role),
+                            read: oacl.read,
+                            write: oacl.write,
+                            delete: oacl.delete 
+                        }))
+                    )
+                    
+                    let err;
+                    let uaclItems = []
 
-                        _msg.end()
-                    })
+                    try {
+                        uaclItems = coroutine.parallel(items, (raw: FxOrmInstance.Instance) => {
+                            const target = UTILS.decodeGrantTareget(raw.target)
+
+                            let instance = orm.models.uacl.findSync({
+                                uaci: raw.uaci,
+                                target: raw.target
+                            })[0]
+                            
+                            if (!instance) {
+                                instance = orm.models.uacl.createSync({
+                                    ...raw,
+                                    target: target
+                                })
+                            } else {
+                                instance.saveSync()
+                            }
+
+                            return instance
+                        }) as any[]
+                    } catch (error) {
+                        err = error
+                        uaclItems = []
+                    }
+
+                    if (!err)
+                        _msg.json(getACLMessageResult({
+                            data: uaclItems,
+                            msg: 'grant success!'
+                        }))
+                    else
+                        _msg.json(getACLMessageResult({
+                            literalCode: 'DB_OPERATION_ERROR',
+                            msg: err.message
+                        }))
+
+                    _msg.end()
                 })
 
                 break
@@ -466,26 +498,33 @@ export const getConfigStorageServiceRouting = ({
 
             case 'QUERY': {
                 exec(() => {
-                    orm.models.uacl.find({
-                        uaci: uacis,
-                        target: [].concat(
-                            uids.map(uid => UTILS.encodeGrantTareget('user', uid))
-                        ).concat(
-                            roles.map(role => UTILS.encodeGrantTareget('role', role))
-                        )
-                    }, (err, uaclItems) => {
-                        if (!err)
-                            _msg.json(getACLMessageResult({
-                                data: uaclItems,
-                                msg: 'query success!'
-                            }))
-                        else
-                            _msg.json(getACLMessageResult({
-                                literalCode: 'DB_OPERATION_ERROR',
-                                msg: err.message
-                            }))
-                        _msg.end()
-                    })
+                    let err;
+                    let uaclItems = [] as any[]
+                    
+                    try {
+                        uaclItems = orm.models.uacl.findSync({
+                            uaci: uacis,
+                            target: {
+                                in: []
+                                .concat(uids.map(uid => UTILS.encodeGrantTareget('user', uid)))
+                                .concat(roles.map(role => UTILS.encodeGrantTareget('role', role)))
+                            }
+                        })
+                    } catch (error) {
+                        err = error;
+                    }
+
+                    if (!err)
+                        _msg.json(getACLMessageResult({
+                            data: uaclItems,
+                            msg: 'query success!'
+                        }))
+                    else
+                        _msg.json(getACLMessageResult({
+                            literalCode: 'DB_OPERATION_ERROR',
+                            msg: err.message
+                        }))
+                    _msg.end()
                 })
 
                 break

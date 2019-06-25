@@ -1,6 +1,7 @@
 import { ACLTree } from './acl-tree';
 
 import { Helpers } from '@fxjs/orm'
+import * as ORM from '@fxjs/orm'
 import { configUACLOrm, getConfigStorageServiceRouting } from './config-acl-tree';
 
 function attachMethodsToModel (m_opts: FxOrmModel.ModelDefineOptions) {
@@ -12,6 +13,9 @@ function attachMethodsToModel (m_opts: FxOrmModel.ModelDefineOptions) {
             prefix?: string
         } = {}) {
             prefix = prefix || this.$uaclPrefix() || ''
+
+            if (!this.id)
+                throw Error(`instance's id is required`)
 
             return {
                 objectless: `${prefix}/${this.model().table}/0`,
@@ -100,7 +104,22 @@ function UACLConstructorGenerator (uaclORM: FxOrmNS.ORM) {
 const Plugin: FxOrmPluginUACL = function (orm, plugin_opts) {
     plugin_opts = plugin_opts || {};
 
-    const { orm: UACLOrm = orm } = plugin_opts;
+    const { defineUACLInMainORM = true } = plugin_opts;
+
+    const {
+        orm: UACLOrm = ORM.connectSync({
+            ...orm.driver.config,
+            pool: {}
+        }) as FxOrmNS.ORM
+    } = plugin_opts;
+
+    if (orm === UACLOrm)
+        throw Error(`UACLOrm cannot be orm`)
+
+    if (defineUACLInMainORM) {
+        configUACLOrm(orm)
+        orm.models.uacl.syncSync()
+    }
 
     configUACLOrm(UACLOrm)
 
