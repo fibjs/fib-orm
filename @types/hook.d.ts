@@ -20,7 +20,7 @@ declare namespace FxOrmHook {
     }
 
     interface HookWait<CTX_SELF = FxOrmInstance.Instance, TNEXT=any>{
-        (self: CTX_SELF, cur: FxOrmNS.Arraible<HookActionCallback | FxOrmNS.Arraible<HookActionCallback>>, saveAssociation: FxOrmNS.GenericCallback<void>, opts: object): void
+        (self: CTX_SELF, cur: FxOrmNS.Arraible<HookActionCallback | FxOrmNS.Arraible<HookActionCallback>>, next: FxOrmNS.GenericCallback<void>, opts: Fibjs.AnyObject): void
         (self: CTX_SELF, cur: FxOrmNS.Arraible<HookActionCallback | FxOrmNS.Arraible<HookActionCallback>>, next: FxOrmNS.GenericCallback<TNEXT>): void
     }
 

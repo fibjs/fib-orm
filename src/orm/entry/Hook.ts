@@ -81,7 +81,7 @@ export const wait: FxOrmHook.HookWait = function () {
 	
 	const errWaitor = Utilities.getErrWaitor(true);
 	/**
-	 * `restArgs[restArgs.length - 1]` maybe called in another fiber,
+	 * `restArgs[restArgs.length - 1]`, or to say, `next` maybe called in another fiber,
 	 * we should catch probabe error from it, and throw it in main fiber
 	 */
 	restArgs[restArgs.length - 1] = function () {
