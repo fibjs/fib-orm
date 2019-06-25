@@ -1,7 +1,28 @@
 
-v1.10.0 / 2019-04-25
+v1.10.1 / 2019-06-25
 ==================
 
+  * literal change.
+  * feat: add features about hook, use them drive orm-plugin-uacl. (#24)
+  * update .npmignore.
+  * plugin, feat: add orm-plugin-pool
+  * typo robust.
+  * helpers, feat: expose hookWait/hookTrigger in Helpers.
+  * upgrade types.
+  * bind Instance to event handler.
+  * feat, instance: emitt events about association operations.
+  * feat, instance: open `ievents` when model definition to pass `events` as instance's initial options.
+  * feat, instance: support event $on, $emit, $off.
+  * feat, instance: support `instance.emit`.
+  * typo robust.
+  * feat, hook: support keepable hook.
+  * typo fix.
+  * code format.
+
+v1.10.0 / 2019-04-25
+====================
+
+  * Release v1.10.0
   * feat, instance: remove unnecessary `util.sync` in instance's creation.
   * test, model: add test case model-create.callback.js
   * test, model: add test case model-remove[.callback].js
