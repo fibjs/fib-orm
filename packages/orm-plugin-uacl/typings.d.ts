@@ -242,11 +242,23 @@ declare namespace FxORMPluginUACLNS {
     ) => Class_Routing | Fibjs.AnyObject
 }
 
-declare namespace FxOrmNS {
-    interface ORM {
+declare namespace FxOrmInstance {
+    interface Instance {
+        $uacl(
+            cfg: {
+                uid?: FxORMPluginUACLNS.ACLNode['id'],
+                role?: FxORMPluginUACLNS.ACLNode['id']
+            }
+        ): FxORMPluginUACLNS.ACLTree
     }
+}
 
-    interface ExportModule {
+declare namespace FxOrmModel {
+    interface ModelOptions {
+        uacl: boolean | ({
+            userModel?: FxOrmModel.Model,
+            roleModel?: FxOrmModel.Model
+        } & Fibjs.AnyObject)
     }
 }
 

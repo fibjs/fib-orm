@@ -119,11 +119,11 @@ const Plugin: FxOrmPluginUACL = function (orm, plugin_opts) {
             if (!m_opts.uacl)
                 return ;
 
-            m_opts.uacl = { ...m_opts.uacl };
+            const uaclCfg = m_opts.uacl = { ...m_opts.uacl };
 
             uacl_models_config.set(name, {
-                userModel: Helpers.valueOrComputeFunction(m_opts.userModel || defaultUserModel),
-                roleModel: Helpers.valueOrComputeFunction(m_opts.roleModel || defaultRoleModel),
+                userModel: Helpers.valueOrComputeFunction(uaclCfg.userModel || defaultUserModel),
+                roleModel: Helpers.valueOrComputeFunction(uaclCfg.roleModel || defaultRoleModel),
             });
         },
         define (model) {
