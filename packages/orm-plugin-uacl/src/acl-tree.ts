@@ -59,8 +59,6 @@ export class ACLTree extends Tree<ACLNode> implements FxORMPluginUACLNS.ACLTree 
         let { uaci = null, sync: is_sync = true } = opts || {}
 
         if (!uaci) {
-            // const uacis = this.nonRootNodes.map(x => x.id)
-            // const msg = generateBatchPullMessage(uacis, { uids: this. })
             this.nonRootNodes.forEach(node => node.pull({ sync: is_sync }))
             return this;
         }
@@ -145,7 +143,7 @@ export class ACLTree extends Tree<ACLNode> implements FxORMPluginUACLNS.ACLTree 
      * 
      * verb: CAN
      */
-    can (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields: any[]) {
+    can (action: FxORMPluginUACLNS.ACLKeyType, uaci: string, askedFields: any[]) {
         const node = findACLNode(this, uaci)
 
         if (!node)
@@ -222,7 +220,6 @@ function _setOACL (node: FxORMPluginUACLNS.ACLNode, newOACL: ACLNode['oacl']) {
 
 export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements FxORMPluginUACLNS.ACLNode {
     data: FxORMPluginUACLNS.ACLNode['data']
-    acl: FxORMPluginUACLNS.ACLNode['acl']
     oacl: FxORMPluginUACLNS.ACLNode['oacl']
 
     root: FxORMPluginUACLNS.Node<any, FxORMPluginUACLNS.ACLTree>['root']
@@ -235,22 +232,8 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
     }
     
     constructor (cfg: FxORMPluginUACLNS.ACLNodeConstructorOptions) {
-        if (!cfg.data /* || !cfg.data.hasOwnProperty('id') || !cfg.data.hasOwnProperty('roles') */)
-            throw `[ACLNode] valid 'data' is missing in config!`
-
-        const acl: ACLNode['acl'] = {
-            create: undefined,
-            clear: undefined,
-            find: undefined,
-            ...cfg.acl
-        }
-        const oacl: ACLNode['oacl'] = {
-            write: undefined,
-            read: undefined,
-            delete: undefined,
-            ...cfg.oacl
-        }
-
+        cfg.data = {...cfg.data}
+        
         super({
             id: cfg.id,
             parent: cfg.parent,
@@ -258,8 +241,7 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
             data: cfg.data
         })
 
-        this.acl = acl
-        _setOACL(this, oacl)
+        _setOACL(this, cfg.oacl)
     }
 
     /**
@@ -424,7 +406,7 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
     /**
      * @local_computation
      */
-    could (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields: any[]) {
+    could (action: FxORMPluginUACLNS.ACLKeyType, uaci: string, askedFields: any[]) {
         const node = this;
 
         const oacl = node.oacl[action as keyof ACLNode['oacl']]

@@ -160,7 +160,7 @@ declare namespace FxORMPluginUACLNS {
          */
         readonly routing: Class_Routing
 
-        can (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields?: string[]): boolean
+        can (action: FxORMPluginUACLNS.ACLKeyType, uaci: string, askedFields?: string[]): boolean
 
         find(opts?: ACLTreeFindOptions): ACLNode | null
         
@@ -196,7 +196,6 @@ declare namespace FxORMPluginUACLNS {
 
     interface ACLNodeConstructorOptions extends NodeConstructorOptions<ACLNode> {
         data: FxOrmNS.InstanceDataPayload
-        acl?: ACLNode['acl']
         oacl?: ACLNode['oacl']
     }
 
@@ -214,19 +213,13 @@ declare namespace FxORMPluginUACLNS {
 
         static looseNodeOf (tree: ACLTree, cfg: ACLNodeConstructorOptions): ACLNode;
 
-        acl: {
-            create?: boolean | string[]
-            find?: boolean | string[]
-            clear?: boolean | string[]
-        }
-
         oacl: {
             write?: boolean | string[]
             read?: boolean | string[]
             delete?: boolean | string[]
         }
         
-        could (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields?: string[]): boolean
+        could (action: FxORMPluginUACLNS.ACLKeyType, uaci: string, askedFields?: string[]): boolean
         push (
             target: {
                 type: FxORMPluginUACLInternal.ACLStorageItem['target']['type'],
@@ -239,8 +232,8 @@ declare namespace FxORMPluginUACLNS {
         pull (opts?: ACLNodePullOpts): void;
     }
 
-    type ACLType = keyof ACLNode['acl'] | keyof ACLNode['oacl']
-    type ACLDescriptor = boolean | string[]
+    type ACLKeyType = keyof ACLNode['oacl']
+    type ACLValueType = boolean | ACLKeyType[]
 
     type ACLTreeStorageRoutingConfigurationGenerator = (
         cfg?: {
