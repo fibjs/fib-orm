@@ -100,11 +100,9 @@ function defineORMTypes (targetORM: FxOrmNS.ORM) {
                 return value;
                 
             let val = false
-            if (util.isString(value)) {
-                try {
-                    val = JSON.parse(value)
-                } catch (error) {
-                }
+            try {
+                val = JSON.parse(value)
+            } catch (error) {
             }
 
             return val
