@@ -15,34 +15,22 @@ export function normalizeUaci (uaci: string = '') {
     return uaci
 }
 
-export function findNodeForUser (
-	aclTree: FxORMPluginUACLNS.ACLTree,
-	uaci: string,
-	uid: FxORMPluginUACLNS.ACLNode['data']['uid']
-): FxORMPluginUACLNS.ACLNode {
-    let node: FxORMPluginUACLNS.ACLNode = null
-
-    for (let x of aclTree.nodeSet) {
-        if (x.isRoot)
-            continue ;
-
-        if (x.id === uaci && x.data.uid === uid) {
-            node = x as FxORMPluginUACLNS.ACLNode;            
-            break ;
-        }
-    }
-
-    return node;
-}
-
 export function findACLNode (
 	aclTree: FxORMPluginUACLNS.ACLTree,
 	uaci: string,
 ): FxORMPluginUACLNS.ACLNode {
     let node: FxORMPluginUACLNS.ACLNode = null
 
+    if (!uaci || typeof uaci !== 'string')
+        throw Error('[findACLNode]invalid uaci')
+
+    const depth = compuateUaciDepth(uaci)
+
     for (let x of aclTree.nodeSet) {
         if (x.isRoot)
+            continue ;
+
+        if (x.layer - 1 !== depth)
             continue ;
 
         if (x.id === uaci) {

@@ -81,11 +81,6 @@ function isRoot (node: Node['root'] | Node): node is RootNode {
     return node instanceof RootNode
 }
 
-function initializeDataOfNode (this: Node) {
-    this.leftEdge = -Infinity
-    this.rightEdge = +Infinity
-}
-
 export class Node<DTYPE = any> implements FxORMPluginUACLNS.Node<DTYPE> {
     id: FxORMPluginUACLNS.Node['id']
     parent: FxORMPluginUACLNS.Node['parent']
@@ -97,26 +92,40 @@ export class Node<DTYPE = any> implements FxORMPluginUACLNS.Node<DTYPE> {
 
     data?: FxORMPluginUACLNS.Node['data']
 
+    readonly _depth: number = null;
+
     get descendantCount () {
         return Math.floor(
             (this.rightEdge - this.leftEdge - 1) / 2
         )
     }
 
-    get layer () {
-        if (isRoot(this))
-            return 1;
-            
-        let layer = 0;
-        const lft = this.leftEdge
-        const rgt = this.rightEdge
+    get layer (): number {
+        if (this._depth !== null)
+            return this._depth + 1;
 
-        this.root.tree.nodeSet.forEach(node => {
-            if (node.leftEdge <= lft && node.rightEdge >= rgt)
-                layer++;
-        })
+        if (isRoot(this)) {
+            Object.defineProperty(
+                this, '_depth',
+                { value: 0, writable: false, configurable: false }
+            )
+        } else {
+            let layer = 0;
+            const lft = this.leftEdge
+            const rgt = this.rightEdge
+    
+            this.root.tree.nodeSet.forEach(node => {
+                if (node.leftEdge <= lft && node.rightEdge >= rgt)
+                    layer++;
+            })
 
-        return layer
+            Object.defineProperty(
+                this, '_depth',
+                { value: layer - 1, writable: false, configurable: false }
+            )
+        }
+
+        return this._depth + 1
     }
 
     get isRoot (): boolean {
