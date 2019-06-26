@@ -417,26 +417,25 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
         if (!node.oacl && !node.acl)
             return false;
 
-        const acl = node.acl[action as keyof ACLNode['acl']]
+        // const acl = node.acl[action as keyof ACLNode['acl']]
         const oacl = node.oacl[action as keyof ACLNode['oacl']]
 
-        if (acl || oacl) {
-            if (!askedFields || !askedFields.length) {
+        if (/* acl ||  */oacl) {
+            if (/* acl === true ||  */oacl === true) {
                 return true;
             }
 
             let permissonedFields = []
-            if (acl === true || oacl === true) {
-                return true;
-            } else {
-                permissonedFields = []
-                    .concat(
-                        Array.isArray(acl) ? acl : []
-                    )
-                    .concat(
-                        Array.isArray(oacl) ? oacl : []
-                    )
+                // .concat(Array.isArray(acl) ? acl : [])
+                .concat(
+                    Array.isArray(oacl) ? oacl : []
+                )
+
+            if (!permissonedFields.length) {
+                return false;
             }
+
+            askedFields = askedFields || []
 
             const diff = util.difference(askedFields, permissonedFields)
             return !diff.length;
