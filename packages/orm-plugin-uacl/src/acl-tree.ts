@@ -3,7 +3,7 @@ import util = require('util')
 import mq = require('mq')
 
 import { Tree, Node } from './tree'
-import { findACLNode, generateGrantMessage, generateLoadMessage, normalizeUaci, generateRevokeByUACIMessage } from './_utils';
+import { findACLNode, generateGrantMessage, generateLoadMessage, normalizeUaci, generateRevokeByUACIMessage, getIdsFromTree } from './_utils';
 
 function nOop () { return null as any }
 
@@ -373,7 +373,8 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
         
         const { sync = true } = opts || {};
 
-        const msg = generateRevokeByUACIMessage(this)
+        const { uids: uid, roles: role } = getIdsFromTree(tree)
+        const msg = generateRevokeByUACIMessage(this, {uid, role})
 
         const evt = new coroutine.Event()
 

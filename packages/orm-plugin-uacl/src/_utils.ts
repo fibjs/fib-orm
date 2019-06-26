@@ -62,12 +62,10 @@ export function generateGrantMessage (
     node: FxORMPluginUACLNS.ACLNode,
     {
         uid = null,
-        type = 'user',
         role = []
     }: {
         uid: FxOrmNS.Arraible<string>,
         role: FxOrmNS.Arraible<string>,
-        type: FxORMPluginUACLInternal.GRANT_TYPE
     }
 ) {
     const msg = new mq.Message()
@@ -94,27 +92,48 @@ export function generateGrantMessage (
 export function generateRevokeByUACIMessage (
     node: FxORMPluginUACLNS.ACLNode,
     {
-        // uid = null,
-        // role = []
+        uid = null,
+        role = []
     }: {
-        // uid: FxOrmNS.Arraible<string>,
-        // role: FxOrmNS.Arraible<string>,
-    } = {}
+        uid: FxOrmNS.Arraible<string>,
+        role: FxOrmNS.Arraible<string>,
+    }
 ) {
     const msg = new mq.Message()
     msg.type = 1
 
     msg.value = node.id
 
+    const uids = arraify(uid)
+    const roles = arraify(role)
+
     msg.json({
         verb: 'REVOKE_BY_UACI',
         date: (new Date()).toUTCString(),
-        uids: [],
-        roles: [],
+        uids: uids,
+        roles: roles,
         oacl: null,
     } as FxORMPluginUACLInternal.ACLMessagePayloadGrant)
 
     return msg
+}
+
+export function getIdsFromTree (tree: FxORMPluginUACLNS.ACLTree) {
+    let uids = <string[]>[]
+    let roles = <string[]>[]
+    switch (tree.type) {
+        case 'user':
+            uids = arraify(tree.name)
+           break
+        case 'role':
+            roles = arraify(tree.name)
+            break
+    }
+
+    return {
+        uids,
+        roles
+    }
 }
 
 /**

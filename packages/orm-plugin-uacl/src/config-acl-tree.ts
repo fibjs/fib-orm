@@ -533,7 +533,12 @@ export const getConfigStorageServiceRouting = ({
                     let err = null, uaclItems = null
                     try {
                         orm.models.uacl.where({
-                            uaci: uacis
+                            uaci: uacis,
+                            target: {
+                                in: []
+                                .concat(uids.map(uid => UTILS.encodeGrantTareget('user', uid)))
+                                .concat(roles.map(role => UTILS.encodeGrantTareget('role', role)))
+                            }
                         })
                         .removeSync()
                     } catch (error) {

@@ -70,6 +70,7 @@ describe('Basic Persistence', () => {
 
         const [
             user$1,
+            user$2
         ] = coroutine.parallel([
             new orm.models.user(),
             new orm.models.user(),
@@ -174,6 +175,12 @@ describe('Basic Persistence', () => {
             [ [user$1, 'read'   , project$readableonly, ['name', 'description']        ], false ],
         ].forEach(check_handler)
 
+        project$1.$uacl({ uid: user$2.id })
+            .grant(project$1.$getUacis().object, {
+                write: true,
+                read: true
+            }, {sync: true })
+        
         project$1.$uacl({ uid: user$1.id })
             .revoke({ uaci: project$1.$getUacis().object, sync: true })
             .load({ uaci: project$1.$getUacis().object, sync: true })
@@ -182,7 +189,29 @@ describe('Basic Persistence', () => {
             [ [user$1, 'write'  , project$1,                                           ], false ],
             [ [user$1, 'read'   , project$1, ['name']                                  ], false ],
             [ [user$1, 'read'   , project$1, ['name', 'description']                   ], false ],
+            [ [user$2, 'write'  , project$1,                                           ], true ],
+            [ [user$2, 'read'   , project$1, ['name']                                  ], true ],
+            [ [user$2, 'read'   , project$1, ['name', 'description']                   ], true ],
         ].forEach(check_handler)
+
+        project$1.$uacl({ uid: user$1.id })
+            .grant(project$1.$getUacis().object, {
+                write: true,
+                read: true
+            }, {sync: true })
+        
+        project$1.$uacl({ uid: user$2.id })
+            .revoke({ uaci: project$1.$getUacis().object, sync: true })
+            .load({ uaci: project$1.$getUacis().object, sync: true })
+
+            ;[
+                [ [user$1, 'write'  , project$1,                                           ], true ],
+                [ [user$1, 'read'   , project$1, ['name']                                  ], true ],
+                [ [user$1, 'read'   , project$1, ['name', 'description']                   ], true ],
+                [ [user$2, 'write'  , project$1,                                           ], false ],
+                [ [user$2, 'read'   , project$1, ['name']                                  ], false ],
+                [ [user$2, 'read'   , project$1, ['name', 'description']                   ], false ],
+            ].forEach(check_handler)
         /* revoke test :end */
     })
 
