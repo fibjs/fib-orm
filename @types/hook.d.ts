@@ -11,8 +11,9 @@ declare namespace FxOrmHook {
         (this: TTHIS, arg1?: TPAYLOAD, next?: HookActionNextFunction): any
     }
 
-    interface HookResultCallback<TTHIS = FxOrmInstance.Instance> {
+    interface HookResultCallback<TTHIS = FxOrmInstance.Instance, TPAYLOAD = any> {
         (this: TTHIS, success?: boolean): any
+        (this: TTHIS, arg1?: TPAYLOAD, success?: boolean): any
     }
 
     interface HookTrigger<CTX_SELF = FxOrmInstance.Instance, RESULT_TYPE = boolean>{

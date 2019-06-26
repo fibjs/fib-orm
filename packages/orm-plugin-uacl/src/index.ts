@@ -118,7 +118,6 @@ const Plugin: FxOrmPluginUACL = function (orm, plugin_opts) {
 
     if (defineUACLInMainORM) {
         configUACLOrm(orm)
-        orm.models.uacl.syncSync()
     }
 
     configUACLOrm(UACLOrm)

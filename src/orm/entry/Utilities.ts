@@ -891,7 +891,7 @@ export function buildAssociationActionHooksPayload (
 		instance = $ref.instance || null,
 		association = $ref.association || null,
 		associations = $ref.associations || [],
-		association_ids = $ref.associations || [],
+		association_ids = $ref.associations_ids || [],
 		removeConditions = $ref.removeConditions || {},
 		useChannel = $ref.useChannel || reusableChannelGenerator()
 	} = payload;
