@@ -63,6 +63,7 @@ describe('Basic local only', () => {
 
         tree.grant('project/1', { write: false, read: ['name', 'description'] })
 
+        assert.isFalse(tree.can('read', '/project/1'))
         assert.isTrue(tree.can('read', '/project/1', ['name']))
         assert.isFalse(tree.can('read', '/project/1', ['lalala']))
 
@@ -131,34 +132,39 @@ describe('Basic local only', () => {
         project$1.setMembersSync([user$3])
 
         ;[
-            [ [user$1, 'write'  , project$1 ], false ],
-            [ [user$2, 'read'   , project$1 ], false ],
-            [ [user$3, 'write'  , project$1 ], true ],
-            [ [user$3, 'read'   , project$1 ], true ],
+            [ [user$1, 'write'  , project$1                                             ], false ],
+            [ [user$2, 'read'   , project$1                                             ], false ],
+            [ [user$3, 'write'  , project$1                                             ], true ],
+            [ [user$3, 'read'   , project$1                                             ], false ],
+            [ [user$3, 'read'   , project$1, ['name']                                   ], true ],
         ].forEach(check_handler)
 
         project$1.addStages([stage$1])
 
         ;[
-            [ [user$1, 'write'  , stage$1   ], false ],
-            [ [user$1, 'read'   , stage$1   ], false ],
-            [ [user$2, 'write'  , stage$1   ], false ],
-            [ [user$2, 'read'   , stage$1   ], false ],
+            [ [user$1, 'write'  , stage$1                                               ], false ],
+            [ [user$1, 'read'   , stage$1                                               ], false ],
+            [ [user$2, 'write'  , stage$1                                               ], false ],
+            [ [user$2, 'read'   , stage$1                                               ], false ],
             
-            [ [user$3, 'write'  , stage$1   ], false ],
-            [ [user$3, 'read'   , stage$1   ], true ],
+            [ [user$3, 'write'  , stage$1                                               ], false ],
+            [ [user$3, 'read'   , stage$1                                               ], false ],
+            [ [user$3, 'read'   , stage$1, ['name']                                     ], true ],
         ].forEach(check_handler)
 
         project$1.setMembersSync([user$1, user$2, user$3])
         
         ;[
-            [ [user$1, 'write', stage$1, [], `/project/${project$1.id}` ], false ],
-            [ [user$1, 'read' , stage$1, [], `/project/${project$1.id}` ], true ],
-            [ [user$2, 'write', stage$1, [], `/project/${project$1.id}` ], false ],
-            [ [user$2, 'read' , stage$1, [], `/project/${project$1.id}` ], true ],
+            [ [user$1, 'write'  , stage$1, []               , `/project/${project$1.id}` ], false ],
+            [ [user$1, 'read'   , stage$1, []               , `/project/${project$1.id}` ], false ],
+            [ [user$1, 'read'   , stage$1, ['name']         , `/project/${project$1.id}` ], true ],
+            [ [user$2, 'write'  , stage$1, []               , `/project/${project$1.id}` ], false ],
+            [ [user$2, 'read'   , stage$1, []               , `/project/${project$1.id}` ], false ],
+            [ [user$2, 'read'   , stage$1, ['name']         , `/project/${project$1.id}` ], true ],
             
-            [ [user$3, 'write', stage$1, [], `/project/${project$1.id}` ], false ],
-            [ [user$3, 'read' , stage$1, [], `/project/${project$1.id}` ], true ],
+            [ [user$3, 'write'  , stage$1, []               , `/project/${project$1.id}` ], false ],
+            [ [user$3, 'read'   , stage$1, []               , `/project/${project$1.id}` ], false ],
+            [ [user$3, 'read'   , stage$1, ['name']         , `/project/${project$1.id}` ], true ],
         ].forEach(check_handler)
 
         // users all has one acl-tree which records /project/PROJECT1_ID/stage/STAGE1_ID

@@ -184,7 +184,7 @@ export class ACLTree extends Tree<ACLNode> implements FxORMPluginUACLNS.ACLTree 
                     })
                 ) as ACLNode;
 
-            node.oacl = oacl
+            _setOACL(node, oacl)
         });
 
         return this;
@@ -199,6 +199,25 @@ export class ACLTree extends Tree<ACLNode> implements FxORMPluginUACLNS.ACLTree 
     find ({ uaci = '' } : { uaci: string }): FxORMPluginUACLNS.ACLNode | null {
         return findACLNode(this, uaci)
     }
+}
+
+function _setOACL (node: FxORMPluginUACLNS.ACLNode, newOACL: ACLNode['oacl']) {
+    const {
+        write = undefined,
+        read = undefined,
+        delete: _del = undefined,
+    } = {
+        ...node.oacl,
+        ...newOACL
+    }
+
+    const oacl: ACLNode['oacl'] = {
+        write: write,
+        read: read,
+        delete: _del,
+    }
+
+    node.oacl = oacl
 }
 
 export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements FxORMPluginUACLNS.ACLNode {
@@ -240,13 +259,7 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
         })
 
         this.acl = acl
-        this.oacl = oacl
-    }
-
-    /**
-     * @description update local acl information
-     */
-    updateAcl () {
+        _setOACL(this, oacl)
     }
 
     /**
@@ -414,33 +427,30 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
     could (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields: any[]) {
         const node = this;
 
-        if (!node.oacl && !node.acl)
-            return false;
-
-        // const acl = node.acl[action as keyof ACLNode['acl']]
         const oacl = node.oacl[action as keyof ACLNode['oacl']]
 
-        if (/* acl ||  */oacl) {
-            if (/* acl === true ||  */oacl === true) {
-                return true;
-            }
-
-            let permissonedFields = []
-                // .concat(Array.isArray(acl) ? acl : [])
-                .concat(
-                    Array.isArray(oacl) ? oacl : []
-                )
-
-            if (!permissonedFields.length) {
-                return false;
-            }
-
-            askedFields = askedFields || []
-
-            const diff = util.difference(askedFields, permissonedFields)
-            return !diff.length;
-        }
+        if (!oacl)
+            return false;
         
-        return false;
+        if (oacl === true)
+            return true;
+
+        if (!askedFields || !askedFields.length)
+            return false;
+
+        let permissonedFields = []
+            .concat(
+                Array.isArray(oacl) ? oacl : []
+            )
+
+        if (!permissonedFields.length)
+            return false;
+
+        if (askedFields.length > permissonedFields.length)
+            return false
+
+        const diff = util.difference(askedFields, permissonedFields)
+            
+        return !diff.length;
     }
 }
