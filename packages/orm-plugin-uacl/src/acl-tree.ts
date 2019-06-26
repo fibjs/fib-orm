@@ -151,35 +151,7 @@ export class ACLTree extends Tree<ACLNode> implements FxORMPluginUACLNS.ACLTree 
         if (!node)
             return false;
 
-        if (!node.oacl && !node.acl)
-            return false;
-
-        const acl = node.acl[action as keyof ACLNode['acl']]
-        const oacl = node.oacl[action as keyof ACLNode['oacl']]
-
-        if (acl || oacl) {
-            if (!askedFields || !askedFields.length) {
-                return true;
-            }
-
-            let permissonedFields = []
-            if (acl === true || oacl === true) {
-                return true;
-            } else {
-                permissonedFields = []
-                    .concat(
-                        Array.isArray(acl) ? acl : []
-                    )
-                    .concat(
-                        Array.isArray(oacl) ? oacl : []
-                    )
-            }
-
-            const diff = util.difference(askedFields, permissonedFields)
-            return !diff.length;
-        }
-        
-        return false;
+        return node.could(action, uaci, askedFields)
     }
 
     grant (
@@ -434,5 +406,42 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
         })
 
         if (sync) evt.wait()
+    }
+
+    /**
+     * @local_computation
+     */
+    could (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields: any[]) {
+        const node = this;
+
+        if (!node.oacl && !node.acl)
+            return false;
+
+        const acl = node.acl[action as keyof ACLNode['acl']]
+        const oacl = node.oacl[action as keyof ACLNode['oacl']]
+
+        if (acl || oacl) {
+            if (!askedFields || !askedFields.length) {
+                return true;
+            }
+
+            let permissonedFields = []
+            if (acl === true || oacl === true) {
+                return true;
+            } else {
+                permissonedFields = []
+                    .concat(
+                        Array.isArray(acl) ? acl : []
+                    )
+                    .concat(
+                        Array.isArray(oacl) ? oacl : []
+                    )
+            }
+
+            const diff = util.difference(askedFields, permissonedFields)
+            return !diff.length;
+        }
+        
+        return false;
     }
 }

@@ -225,7 +225,8 @@ declare namespace FxORMPluginUACLNS {
             read?: boolean | string[]
             delete?: boolean | string[]
         }
-
+        
+        could (action: FxORMPluginUACLNS.ACLType, uaci: string, askedFields?: string[]): boolean
         push (
             target: {
                 type: FxORMPluginUACLInternal.ACLStorageItem['target']['type'],

@@ -55,14 +55,18 @@ define('project', {}, {
 
 ### Features
 
-- [ ] Node Expire: `{TIMEOUT: number, DEFAULT: 100}`
+- Node Expire: `{TIMEOUT: number, DEFAULT: 1000}`
     - (unit) millisecond
     - [ ] set expire when node generated, default as 0(means never expire)
     - [ ] (db:storage)storage as timestamp
     - [ ] (json) GMT string
     - [ ] auto-update from remote synchronously when it's expired
         - [ ] Auto self-revoking synchronously when it's idle(expired after TIMEOUT)
-- [ ]
+- Node Revoke
+    - [ ] check wether remote existed this node if specified (default check: `true`)
+- Tree Persist
+    - [ ] one cache for revoked nodes, when persist, reovke nodes in this cache
+
 ### Other
 - [ ] create 1st version README.md
 - [ ] add doc
@@ -77,3 +81,8 @@ define('project', {}, {
     - [ ] :if grant
 - [ ] sample app
     - [ ] simple grant with orm
+
+## Draft Todos
+- Strategy for Tree Persist/Pull
+    - [ ] 'local', when local data conflict about existence/value with remote, keep 'local'.
+    - [ ] 'remote', when local data conflict about existence/value with remote, use 'remote'
