@@ -1,8 +1,10 @@
-import { ACLTree } from './acl-tree';
-
+import util = require('util')
 import FibPool = require('fib-pool')
 import { Helpers } from '@fxjs/orm'
 import * as ORM from '@fxjs/orm'
+
+import { ACLTree } from './acl-tree';
+
 import { configUACLOrm, getConfigStorageServiceRouting } from './config-acl-tree';
 import { decodeGrantTareget, encodeGrantTareget } from './_utils';
 
@@ -87,20 +89,21 @@ function UACLTreeGenerator (
 
     if (!orm.hasOwnProperty('_uaclTreeStores'))
         Object.defineProperty(orm, '_uaclTreeStores', {
-            value: {},
+            value: new util.LruCache(10000, 30 * 1e3),
             configurable: false,
             writable: false,
             enumerable: false
         })
 
-    if (!orm._uaclTreeStores[treeName])
-        orm._uaclTreeStores[treeName] = new ACLTree({
+    const _uaclTreeStores = orm._uaclTreeStores as Class_LruCache
+    if (!_uaclTreeStores.has(treeName))
+        _uaclTreeStores.set(treeName, new ACLTree({
             name: initialData.name,
             type: initialData.type,
             configStorageServiceRouting: getConfigStorageServiceRouting({ orm })
-        })
+        }))
 
-    return orm._uaclTreeStores[treeName]
+    return _uaclTreeStores.get(treeName)
 }
 
 function UACLConstructorGenerator (uaclORM: FxOrmNS.ORM, pool?: FibPoolNS.FibPoolFunction<FxORMPluginUACLNS.ACLTree>) {
