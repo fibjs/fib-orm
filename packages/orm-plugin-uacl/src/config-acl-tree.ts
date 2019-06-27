@@ -293,6 +293,107 @@ function getACLMessageResult ({
     }
 }
 
+const payload_filter = (_msg: FxORMPluginUACLInternal.ACLMessage) => {
+    _msg.payload = _msg.json()
+    _msg.json({ success: { code: 'pending', data: null } })
+    
+    const { verb = null } = _msg.payload
+
+    if (!VERBS.includes(verb)) {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_VERB',
+            error_msg: GRANT_ERRCODE['INVALID_VERB'].message
+        }))
+        _msg.end()
+    }
+
+    // if (_msg.payload.via && !['user', 'role'].includes(_msg.payload.via)) {
+    //     _msg.json(getACLMessageResult({
+    //         literalCode: 'INVALID_VIA',
+    //         error_msg: GRANT_ERRCODE['INVALID_VIA'].message
+    //     }))
+    //     _msg.end()
+    // }
+    
+    if (!_msg.payload.date || typeof _msg.payload.date !== 'string') {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_DATE',
+            error_msg: GRANT_ERRCODE['INVALID_DATE'].message
+        }))
+        _msg.end()
+    } else {
+        _msg.payload.date = new Date(_msg.payload.date)
+    }
+
+    _msg.payload.uids = _msg.payload.uids || []
+    if (_msg.payload.uids && !Array.isArray(_msg.payload.uids)) {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_UIDS',
+            error_msg: GRANT_ERRCODE['INVALID_UIDS'].message
+        }))
+        _msg.end()
+    }
+
+    _msg.payload.roles = _msg.payload.roles || []
+    if (_msg.payload.uids && !Array.isArray(_msg.payload.roles)) {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_ROLES',
+            error_msg: GRANT_ERRCODE['INVALID_ROLES'].message
+        }))
+        _msg.end()
+    }
+}
+
+const level1_filter = (
+    _msg: FxORMPluginUACLInternal.ACLMessage,
+    model_name: string,
+    id: string
+) => {
+    if (!model_name) {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_ROUTE_MODEL_NAME',
+            error_msg: GRANT_ERRCODE['INVALID_ROUTE_MODEL_NAME'].message
+        }))
+        _msg.end()
+        return 
+    }
+
+    if (!id) {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_ROUTE_MODEL_ID',
+            error_msg: GRANT_ERRCODE['INVALID_ROUTE_MODEL_ID'].message
+        }))
+        _msg.end()
+        return 
+    }
+}
+
+const level2_filter = (
+    _msg: FxORMPluginUACLInternal.ACLMessage,
+    model_name: string,
+    id: string,
+    association_name: string,
+    aid: string
+) => {
+    if (!association_name) {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_ROUTE_SUB_MODEL_NAME',
+            error_msg: GRANT_ERRCODE['INVALID_ROUTE_SUB_MODEL_NAME'].message
+        }))
+        _msg.end()
+        return 
+    }
+
+    if (!aid) {
+        _msg.json(getACLMessageResult({
+            literalCode: 'INVALID_ROUTE_SUB_MODEL_ID',
+            error_msg: GRANT_ERRCODE['INVALID_ROUTE_SUB_MODEL_ID'].message
+        }))
+        _msg.end()
+        return 
+    }
+}
+
 export const getConfigStorageServiceRouting = ({
     orm = null
 }: {
@@ -302,107 +403,6 @@ export const getConfigStorageServiceRouting = ({
     assert.exist(orm, `[getConfigStorageServiceRouting] orm for uacl is required`)
     // uacl model
     assert.property(orm.models, 'uacl', `[getConfigStorageServiceRouting] model 'uacl' is required`)
-    
-    const payload_filter = (_msg: FxORMPluginUACLInternal.ACLMessage) => {
-        _msg.payload = _msg.json()
-        _msg.json({ success: { code: 'pending', data: null } })
-        
-        const { verb = null } = _msg.payload
-
-        if (!VERBS.includes(verb)) {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_VERB',
-                error_msg: GRANT_ERRCODE['INVALID_VERB'].message
-            }))
-            _msg.end()
-        }
-
-        // if (_msg.payload.via && !['user', 'role'].includes(_msg.payload.via)) {
-        //     _msg.json(getACLMessageResult({
-        //         literalCode: 'INVALID_VIA',
-        //         error_msg: GRANT_ERRCODE['INVALID_VIA'].message
-        //     }))
-        //     _msg.end()
-        // }
-        
-        if (!_msg.payload.date || typeof _msg.payload.date !== 'string') {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_DATE',
-                error_msg: GRANT_ERRCODE['INVALID_DATE'].message
-            }))
-            _msg.end()
-        } else {
-            _msg.payload.date = new Date(_msg.payload.date)
-        }
-
-        _msg.payload.uids = _msg.payload.uids || []
-        if (_msg.payload.uids && !Array.isArray(_msg.payload.uids)) {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_UIDS',
-                error_msg: GRANT_ERRCODE['INVALID_UIDS'].message
-            }))
-            _msg.end()
-        }
-
-        _msg.payload.roles = _msg.payload.roles || []
-        if (_msg.payload.uids && !Array.isArray(_msg.payload.roles)) {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_ROLES',
-                error_msg: GRANT_ERRCODE['INVALID_ROLES'].message
-            }))
-            _msg.end()
-        }
-    }
-
-    const level1_filter = (
-        _msg: FxORMPluginUACLInternal.ACLMessage,
-        model_name: string,
-        id: string
-    ) => {
-        if (!model_name) {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_ROUTE_MODEL_NAME',
-                error_msg: GRANT_ERRCODE['INVALID_ROUTE_MODEL_NAME'].message
-            }))
-            _msg.end()
-            return 
-        }
-
-        if (!id) {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_ROUTE_MODEL_ID',
-                error_msg: GRANT_ERRCODE['INVALID_ROUTE_MODEL_ID'].message
-            }))
-            _msg.end()
-            return 
-        }
-    }
-
-    const level2_filter = (
-        _msg: FxORMPluginUACLInternal.ACLMessage,
-        model_name: string,
-        id: string,
-        association_name: string,
-        aid: string
-    ) => {
-        if (!association_name) {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_ROUTE_SUB_MODEL_NAME',
-                error_msg: GRANT_ERRCODE['INVALID_ROUTE_SUB_MODEL_NAME'].message
-            }))
-            _msg.end()
-            return 
-        }
-
-        if (!aid) {
-            _msg.json(getACLMessageResult({
-                literalCode: 'INVALID_ROUTE_SUB_MODEL_ID',
-                error_msg: GRANT_ERRCODE['INVALID_ROUTE_SUB_MODEL_ID'].message
-            }))
-            _msg.end()
-            return 
-        }
-    }
     
     const app_filter = (
         _msg: FxORMPluginUACLInternal.ACLMessage,

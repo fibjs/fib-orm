@@ -11,7 +11,7 @@ const coroutine = require('coroutine')
 const ORM = require('@fxjs/orm');
 const ORMPluginUACL = require('../../');
 
-const { check_handler } = require('../spec_helpers')
+const { check_handler, check_handler2 } = require('../spec_helpers')
 
 const root = path.resolve(__dirname, '../..')
 
@@ -55,7 +55,7 @@ describe('Basic Persistence', () => {
         // Object.values(uaclORM.models).forEach(model => model.dropSync())
     })
 
-    it('UACLModel', () => {
+    it('$uacl', () => {
         const [
             project$1,
             project$readableonly,
@@ -213,6 +213,174 @@ describe('Basic Persistence', () => {
                 [ [user$2, 'read'   , project$1, ['name', 'description']                   ], false ],
             ].forEach(check_handler)
         /* revoke test :end */
+    })
+
+    it('$uaclPool', () => {
+        const [
+            project$1,
+            project$readableonly,
+            project$writableonly,
+        ] = coroutine.parallel([
+            new orm.models.project(),
+            new orm.models.project(),
+            new orm.models.project(),
+            new orm.models.project(),
+            new orm.models.project(),
+        ], (instance) => instance.saveSync())
+
+        const [
+            user$1,
+            user$2
+        ] = coroutine.parallel([
+            new orm.models.user(),
+            new orm.models.user(),
+        ], (instance) => instance.saveSync())
+
+        project$1.$uaclPool({ uid: user$1.id })(user1tree => {
+            user1tree
+                .grant(project$1.$getUacis().objectless, {
+                    write: true,
+                    read: ['name']
+                })
+                .grant(project$1.$getUacis().object, {
+                    write: true,
+                    read: ['name']
+                })
+                .grant(project$readableonly.$getUacis().object, {
+                    write: false,
+                    read: true
+                })
+                .grant(project$writableonly.$getUacis().object, {
+                    write: true,
+                    read: false
+                })
+                .persist({ sync: true })
+
+            ;[
+                [ [user1tree, 'write'  , project$1,                                           ], true ],
+                [ [user1tree, 'read'   , project$1, ['name']                                  ], true ],
+                [ [user1tree, 'read'   , project$1, ['name', 'description']                   ], false ],
+                [ [user1tree, 'read'   , project$readableonly, ['name', 'description']        ], true ],
+                [ [user1tree, 'read'   , project$writableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'write'  , project$writableonly, ['name', 'description']        ], true ],
+            ].forEach(check_handler2)
+
+            user1tree.reset()
+
+            ;[
+                [ [user1tree, 'write'  , project$1,                                           ], false ],
+                [ [user1tree, 'read'   , project$1, ['name']                                  ], false ],
+                [ [user1tree, 'read'   , project$1, ['name', 'description']                   ], false ],
+                [ [user1tree, 'read'   , project$readableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'read'   , project$writableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'write'  , project$writableonly, ['name', 'description']        ], false ],
+            ].forEach(check_handler2)
+
+            assert.equal(
+                project$1.$uacl({ uid: user$1.id }),
+                project$1.$uacl({ uid: user$1.id })
+            )
+
+            user1tree
+                .load({ uaci: project$1.$getUacis().objectless, sync: true })
+                .load({ uaci: project$1.$getUacis().object, sync: true })
+    
+            ;[
+                [ [user1tree, 'write'  , project$1,                                           ], true ],
+                [ [user1tree, 'read'   , project$1, ['name']                                  ], true ],
+                [ [user1tree, 'read'   , project$1, ['name', 'description']                   ], false ],
+                [ [user1tree, 'read'   , project$readableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'read'   , project$writableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'write'  , project$writableonly, ['name', 'description']        ], false ],
+            ].forEach(check_handler2)
+    
+            user1tree
+                .load({ uaci: project$readableonly.$getUacis().object, sync: true })
+
+            ;[
+                [ [user1tree, 'write'  , project$1,                                           ], true ],
+                [ [user1tree, 'read'   , project$1, ['name']                                  ], true ],
+                [ [user1tree, 'read'   , project$1, ['name', 'description']                   ], false ],
+                [ [user1tree, 'read'   , project$readableonly, ['name', 'description']        ], true ],
+                [ [user1tree, 'read'   , project$writableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'write'  , project$writableonly, ['name', 'description']        ], false ],
+            ].forEach(check_handler2)
+    
+            user1tree
+                .load({ uaci: project$writableonly.$getUacis().object, sync: true })
+
+            ;[
+                [ [user1tree, 'write'  , project$1,                                           ], true ],
+                [ [user1tree, 'read'   , project$1, ['name']                                  ], true ],
+                [ [user1tree, 'read'   , project$1, ['name', 'description']                   ], false ],
+                [ [user1tree, 'read'   , project$readableonly, ['name', 'description']        ], true ],
+                [ [user1tree, 'read'   , project$writableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'write'  , project$writableonly, ['name', 'description']        ], true ],
+            ].forEach(check_handler2)
+    
+            /* revoke test :start */
+            user1tree
+                .revoke({ uaci: project$writableonly.$getUacis().object, sync: true })
+                .load({ uaci: project$writableonly.$getUacis().object, sync: true })
+    
+            ;[
+                [ [user1tree, 'read'   , project$writableonly, ['name', 'description']        ], false ],
+                [ [user1tree, 'write'  , project$writableonly, ['name', 'description']        ], false ],
+            ].forEach(check_handler2)
+    
+            user1tree
+                .revoke({ uaci: project$readableonly.$getUacis().object, sync: true })
+                .load({ uaci: project$readableonly.$getUacis().object, sync: true })
+    
+            ;[
+                [ [user1tree, 'read'   , project$readableonly, ['name', 'description']        ], false ],
+            ].forEach(check_handler2)
+            
+            project$1.$uacl({ uid: user$2.id })
+                .grant(project$1.$getUacis().object, {
+                    write: true,
+                    read: true
+                }, {sync: true })
+            
+            user1tree
+                .revoke({ uaci: project$1.$getUacis().object, sync: true })
+                .load({ uaci: project$1.$getUacis().object, sync: true })
+
+            ;[
+                [ [user1tree, 'write'  , project$1,                                           ], false ],
+                [ [user1tree, 'read'   , project$1, ['name']                                  ], false ],
+                [ [user1tree, 'read'   , project$1, ['name', 'description']                   ], false ],
+            ].forEach(check_handler2)
+
+            ;[
+                [ [user$2, 'write'  , project$1,                                           ], true ],
+                [ [user$2, 'read'   , project$1, ['name']                                  ], true ],
+                [ [user$2, 'read'   , project$1, ['name', 'description']                   ], true ],
+            ].forEach(check_handler)
+
+            user1tree
+                .grant(project$1.$getUacis().object, {
+                    write: true,
+                    read: true
+                }, {sync: true })
+            
+            project$1.$uacl({ uid: user$2.id })
+                .revoke({ uaci: project$1.$getUacis().object, sync: true })
+                .load({ uaci: project$1.$getUacis().object, sync: true })
+
+                ;[
+                    [ [user1tree, 'write'  , project$1,                                           ], true ],
+                    [ [user1tree, 'read'   , project$1, ['name']                                  ], true ],
+                    [ [user1tree, 'read'   , project$1, ['name', 'description']                   ], true ],
+                ].forEach(check_handler2)
+
+                ;[
+                    [ [user$2, 'write'  , project$1,                                           ], false ],
+                    [ [user$2, 'read'   , project$1, ['name']                                  ], false ],
+                    [ [user$2, 'read'   , project$1, ['name', 'description']                   ], false ],
+                ].forEach(check_handler)
+            /* revoke test :end */
+        })
     })
 
     xit('persist with instances (push of node)', () => {

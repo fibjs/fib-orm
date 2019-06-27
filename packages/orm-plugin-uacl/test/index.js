@@ -22,3 +22,4 @@ describe('orm-plugin-uacl', () => {
 })
 
 test.run(console.DEBUG);
+process.exit();

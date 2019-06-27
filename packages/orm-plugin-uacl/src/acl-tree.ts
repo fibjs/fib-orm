@@ -268,7 +268,6 @@ export class ACLNode extends Node<FxORMPluginUACLNS.ACLNode['data']> implements 
         const msg = generateGrantMessage(this, {
             uid: data.id,
             role: data.role,
-            type: this.root.tree.type,
         })
 
         const evt = new coroutine.Event()

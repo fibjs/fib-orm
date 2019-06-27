@@ -1,8 +1,10 @@
 import { ACLTree } from './acl-tree';
 
+import FibPool = require('fib-pool')
 import { Helpers } from '@fxjs/orm'
 import * as ORM from '@fxjs/orm'
 import { configUACLOrm, getConfigStorageServiceRouting } from './config-acl-tree';
+import { decodeGrantTareget, encodeGrantTareget } from './_utils';
 
 function attachMethodsToModel (m_opts: FxOrmModel.ModelDefineOptions) {
     m_opts.methods = m_opts.methods || {};
@@ -53,18 +55,18 @@ function attachMethodsToModel (m_opts: FxOrmModel.ModelDefineOptions) {
  */
 
 function UACLTreeGenerator (
-    // this: FxOrmInstance.Instance,
-    this: any,
-    { uid = '', role = '', orm = null }: {
+    { uid = '', role = '', orm = null, pool = null }: {
         uid: string,
         role: string,
-        orm: FxOrmPluginUACLOptions['orm']
+        /* UACL orm, not host/main orm */
+        orm: FxOrmPluginUACLOptions['orm'],
+        pool?: FibPoolNS.FibPoolFunction<FxORMPluginUACLNS.ACLTree>
     }
-): FxORMPluginUACLNS.ACLTree {
+): FxORMPluginUACLNS.ACLTree | Function {
     if (!orm)
-        throw `[UACLTreeGenerator] orm is required`
+        throw Error(`[UACLTreeGenerator] orm is required`)
     if (!uid && !role)
-        throw `[UACLTreeGenerator] there must be existed at least one in uid or role`
+        throw Error(`[UACLTreeGenerator] there must be existed at least one in uid or role`)
 
     const initialData = {
         type: null as FxORMPluginUACLNS.ACLTree['type'],
@@ -77,26 +79,36 @@ function UACLTreeGenerator (
     if (!initialData.type)
         initialData.type = !!role ? 'role' : null
 
-    const key = `uaclTree$${initialData.type}$${initialData.name}`
-    if (!orm.hasOwnProperty(key))
-        Object.defineProperty(orm, key, {
-            value: new ACLTree({
-                name: initialData.name,
-                type: initialData.type,
-                configStorageServiceRouting: getConfigStorageServiceRouting({ orm })
-            }),
+    const treeName = encodeGrantTareget(initialData.type, initialData.name)
+
+    if (pool) {
+        return (cb: any) => pool(treeName, cb)
+    }
+
+    if (!orm.hasOwnProperty('_uaclTreeStores'))
+        Object.defineProperty(orm, '_uaclTreeStores', {
+            value: {},
             configurable: false,
             writable: false,
             enumerable: false
         })
 
-    return orm[key]
+    if (!orm._uaclTreeStores[treeName])
+        orm._uaclTreeStores[treeName] = new ACLTree({
+            name: initialData.name,
+            type: initialData.type,
+            configStorageServiceRouting: getConfigStorageServiceRouting({ orm })
+        })
+
+    return orm._uaclTreeStores[treeName]
 }
 
-function UACLConstructorGenerator (uaclORM: FxOrmNS.ORM) {
+function UACLConstructorGenerator (uaclORM: FxOrmNS.ORM, pool?: FibPoolNS.FibPoolFunction<FxORMPluginUACLNS.ACLTree>) {
     return function (cfg: any) {
         cfg = {...cfg}
         cfg.orm = uaclORM
+        cfg.pool = pool
+
         return UACLTreeGenerator(cfg)
     }
 }
@@ -130,6 +142,28 @@ const Plugin: FxOrmPluginUACL = function (orm, plugin_opts) {
     const defaultUserModel = () => orm.models.user
     const defaultRoleModel = () => orm.models.role
 
+    const uaclPool = FibPool<FxORMPluginUACLNS.ACLTree>({
+        create: (treeName) => {
+            const { id, type } = decodeGrantTareget(treeName)
+            
+            return new ACLTree({
+                name: id,
+                type: type,
+                configStorageServiceRouting: getConfigStorageServiceRouting({ orm: UACLOrm })
+            })
+        },
+        destroy: (tree) => {
+            tree.reset()
+        },
+        timeout: 30 * 1000,
+        maxsize: 1000
+    });
+
+    const [ $uacl, $uaclPool ] = [
+        UACLConstructorGenerator(UACLOrm),
+        UACLConstructorGenerator(UACLOrm, uaclPool)
+    ]
+
     return {
         beforeDefine (name, props, m_opts) {
             attachMethodsToModel(m_opts)
@@ -154,7 +188,14 @@ const Plugin: FxOrmPluginUACL = function (orm, plugin_opts) {
             model.afterLoad(function () {
                 if (!this.$uacl)
                     Object.defineProperty(this, '$uacl', {
-                        value: UACLConstructorGenerator(UACLOrm).bind(this),
+                        value: $uacl,
+                        writable: false,
+                        configurable: false,
+                        enumerable: false
+                    })
+                if (!this.$uaclPool)
+                    Object.defineProperty(this, '$uaclPool', {
+                        value: $uaclPool,
                         writable: false,
                         configurable: false,
                         enumerable: false
