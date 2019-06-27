@@ -12,3 +12,5 @@ test
 
 /index.ts
 *.db*
+
+tmp
