@@ -16,5 +16,8 @@
         "typeRoots": [
             "@types/index.d.ts"
         ]
-    }
+    },
+    "exclude": [
+        "packages/**"
+    ]
 }
