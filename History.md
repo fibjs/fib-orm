@@ -1,7 +1,29 @@
 
-v1.10.2 / 2019-06-25
+v1.10.3 / 2019-06-30
 ==================
 
+  * support $hookRef for instance.
+  * typo fix.
+  * [orm-plugin-uacl] use LruCache as ACLTree storage.
+  * publish @fxjs/orm-plugin-uacl
+  * [orm-plugin-uacl] add test cases.
+  * [orm-plugin-uacl] support instance $uaclPool
+  * [orm-plugin-uacl] fix bug when revoke permissions with `REVOKE_BY_UACI`.
+  * [orm-plugin-uacl] typo clean, remove pointless props.
+  * [orm-plugin-uacl] fix  ACLNode::could and add test case.
+  * better ACLNode::could
+  * [orm-plugin-uacl] add method `could` to ACLNode
+  * little fix.
+  * [orm-plugin-uacl] little fix about custom field type.
+  * [orm-plugin-uacl] robust.
+  * [orm-plugin-uacl] robust change and add README.md
+  * [orm-plugin-uacl] test fix.
+  * [orm-plugin-uacl] add typos.
+
+v1.10.2 / 2019-06-25
+====================
+
+  * Release v1.10.2
   * add packages to .npmignore
 
 v1.10.1 / 2019-06-25
