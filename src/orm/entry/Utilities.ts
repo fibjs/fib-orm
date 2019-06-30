@@ -1003,7 +1003,7 @@ export function reusableChannelGenerator () {
 		if (!channelInfo.fn && _channel)
 			channelInfo.fn = _channel
 
-		return [
+		const results = [
 			function (...args: any) {
 				if (channelInfo.executed)
 					return ;
@@ -1021,7 +1021,16 @@ export function reusableChannelGenerator () {
 
 				channelInfo.fn = fn
 			}
-		]
+		] as any as FxOrmHook.HookChannelResults
+
+		results.run = (...args: any[]) => {
+			return results[0].apply(null, args)
+		}
+		results.set = (fn, ...args: any[]) => {
+			return results[1].apply(null, [fn].concat(args))
+		}
+
+		return results
 	}
 }
 
@@ -1064,6 +1073,35 @@ export const createHookHelper = function (
 		return this;
 	};
 };
+
+export function attachOnceTypedHookRefToInstance (
+	instance: FxOrmInstance.Instance,
+	type: 
+		'save'
+		| 'create'
+		| 'remove'
+		,
+	typedHookRef: Fibjs.AnyObject,
+) {
+	// ensure instance.$hookRef existed
+	if (!instance.hasOwnProperty('$hookRef')) {
+		const hookRef = <FxOrmInstance.Instance['$hookRef']>{}
+		addHiddenReadonlyPropertyToInstance(
+			instance,
+			'$hookRef',
+			() => hookRef,
+			{
+				configurable: false
+			}
+		)
+	}
+
+	typedHookRef = {...typedHookRef}
+	typedHookRef.instance = instance
+	typedHookRef.useChannel = reusableChannelGenerator()
+
+	instance.$hookRef[type] = typedHookRef as FxOrmInstance.Instance['$hookRef'][typeof type]
+}
 
 export function arraify<T = any> (item: T | T[]): T[] {
 	return Array.isArray(item) ? item : [item]

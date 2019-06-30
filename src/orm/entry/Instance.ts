@@ -140,6 +140,8 @@ export const Instance = function (
 		}
 		
 		if (opts.is_new) {
+			Utilities.attachOnceTypedHookRefToInstance(instance, 'create', {});
+			Utilities.attachOnceTypedHookRefToInstance(instance, 'save', {});
 			Hook.wait(instance, [ opts.hooks['beforeCreate'], opts.hooks['beforeSave'] ], function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					saveError(err);
@@ -149,6 +151,7 @@ export const Instance = function (
 				saveNewSync(saveOptions, getInstanceData());
 			});
 		} else {
+			Utilities.attachOnceTypedHookRefToInstance(instance, 'save', {});
 			Hook.wait(instance, [ opts.hooks['beforeSave'] ], function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					saveError(err);
@@ -409,7 +412,7 @@ export const Instance = function (
 		opts.driver.update(opts.extra_info.table, data, conditions);
 
 		return instance;
-	};;
+	};
 
 	const saveInstanceProperty = function (key: string, value: any) {
 		const changes: FxOrmInstance.InstanceDataPayload = {},
@@ -424,6 +427,7 @@ export const Instance = function (
 			conditions[opts.keys[i]] = opts.data[opts.keys[i]];
 		}
 
+		Utilities.attachOnceTypedHookRefToInstance(instance, 'save', {});
 		Hook.wait(instance, opts.hooks.beforeSave, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				Hook.trigger(instance, opts.hooks.afterSave, false);
@@ -686,6 +690,7 @@ export const Instance = function (
 
 		let removeErr = null as FxOrmError.ExtendedError;
 
+		Utilities.attachOnceTypedHookRefToInstance(instance, 'remove', {});
 		Hook.wait(instance, opts.hooks.beforeRemove, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				emitCallbackStyleEvent("remove", err, instance);

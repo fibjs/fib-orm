@@ -33,4 +33,17 @@ declare namespace FxOrmHook {
          */
         oldhook?: 'prepend' | 'append' | 'initial' | 'overwrite' | undefined
     }
+
+    interface HookChannel<FTYPE = Function> {
+        (name: string, handler: FTYPE): HookChannelResults
+        (handler: FTYPE): HookChannelResults
+        (name?: string): HookChannelResults
+    }
+
+    type HookTuple<FTYPE = Function> = [FTYPE, (fn: FTYPE, ...args: any) => any]
+
+    interface HookChannelResults<FTYPE = Function> extends HookTuple<FTYPE> {
+        run: (...args: any) => any
+        set: (fn: Function, ...args: any) => any
+    }
 }

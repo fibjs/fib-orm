@@ -128,6 +128,27 @@ declare namespace FxOrmInstance {
         // model: Model;
         model(): FxOrmModel.Model;
 
+        /**
+         * @warn only valid in corresponding hook
+         */
+        readonly $hookRef: {
+            // for beforeCreate/afterCreate
+            create: {
+                instance: Instance,
+                useChannel: FxOrmHook.HookChannel
+            },
+            // for beforeSave/afterSave
+            save: {
+                instance: Instance,
+                useChannel: FxOrmHook.HookChannel
+            },
+            // for beforeRemove/afterRemove
+            remove: {
+                instance: Instance,
+                useChannel: FxOrmHook.HookChannel
+            },
+        }
+
         [extraProperty: string]: any;
     }
 }
