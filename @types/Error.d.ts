@@ -18,6 +18,12 @@ declare namespace FxOrmError {
         [ext: string]: any
     }
 
+    interface ValidateError extends FibjsEnforce.ValidationError {
+        code?: number | string
+    }
+
+    type ValidateErrorResult = ValidateError | ValidateError[]
+
     interface ErrorWaitor {
         evt?: Class_Event,
         err: FxOrmError.ExtendedError

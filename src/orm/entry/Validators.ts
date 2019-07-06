@@ -1,18 +1,18 @@
-import enforce = require("@fibjs/enforce");
+import Enforce = require("@fibjs/enforce");
 import util    = require("util");
 
-export const required       : FibjsEnforce.enforcementValidation = enforce.required
-export const notEmptyString : FibjsEnforce.enforcementValidation = enforce.notEmptyString
+export const required       : FibjsEnforce.enforcementValidation = Enforce.required
+export const notEmptyString : FibjsEnforce.enforcementValidation = Enforce.notEmptyString
 
-export const rangeNumber    : FibjsEnforce.enforcementValidation = enforce.ranges.number
-export const rangeLength    : FibjsEnforce.enforcementValidation = enforce.ranges.length
+export const rangeNumber    : FibjsEnforce.enforcementValidation = Enforce.ranges.number
+export const rangeLength    : FibjsEnforce.enforcementValidation = Enforce.ranges.length
 
-export const insideList     : FibjsEnforce.enforcementValidation = enforce.lists.inside
-export const outsideList    : FibjsEnforce.enforcementValidation = enforce.lists.outside
+export const insideList     : FibjsEnforce.enforcementValidation = Enforce.lists.inside
+export const outsideList    : FibjsEnforce.enforcementValidation = Enforce.lists.outside
 
-export const password       : FibjsEnforce.enforcementValidation = enforce.security.password
+export const password       : FibjsEnforce.enforcementValidation = Enforce.security.password
 
-export const patterns       : FibjsEnforce.enforcementsContainer = enforce.patterns
+export const patterns       : FibjsEnforce.enforcementsContainer = Enforce.patterns
 
 /**
  * Check if a value is the same as a value
@@ -105,7 +105,7 @@ export function unique (
 				let scopeProp = opts.scope[s];
 
 				// In SQL unique index land, NULL values are not considered equal.
-				if (typeof ctx.instance[scopeProp] == 'undefined' || ctx.instance[scopeProp] === null) {
+				if (ctx.instance[scopeProp] === undefined || ctx.instance[scopeProp] === null) {
 					return next();
 				}
 

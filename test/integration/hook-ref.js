@@ -1,6 +1,6 @@
 var helper = require('../support/spec_helper');
 
-odescribe("Hook Ref On Instance", function () {
+describe("Hook Ref On Instance", function () {
     var db = null;
     var Person = null;
 
@@ -44,7 +44,7 @@ odescribe("Hook Ref On Instance", function () {
         };
     }
 
-    odescribe("hasOne - trigger", function () {
+    describe("hasOne - trigger", function () {
         var triggered = null;
         const resetTriggered = () => triggered = getTrigged()
         beforeEach(() => resetTriggered())

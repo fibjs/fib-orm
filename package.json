@@ -43,7 +43,7 @@
         ]
     },
     "dependencies": {
-        "@fibjs/enforce": "0.0.8",
+        "@fibjs/enforce": "^0.1.1",
         "@fxjs/knex": "^0.1.1",
         "@fxjs/sql-ddl-sync": "^0.3.8",
         "@fxjs/sql-query": "^0.4.0",
@@ -68,7 +68,7 @@
     "peerDependencies": {
         "@fxjs/sql-ddl-sync": ">= 0.4 <= 0.5",
         "@fxjs/sql-query": ">= 0.4 < 0.5",
-        "@fibjs/enforce": ">= 0.0.8 < 0.1",
+        "@fibjs/enforce": ">= 0.1.1 < 0.2",
         "@fxjs/knex": ">= 0.1.1 < 0.2"
     }
 }

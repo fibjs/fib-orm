@@ -57,7 +57,7 @@ export const Instance = function (
 	};
 	const handleValidationsSync = function (): FxOrmError.ExtendedError | FxOrmError.ExtendedError[] {
 		let required: boolean,
-				alwaysValidate: boolean;
+			alwaysValidate: boolean;
 
 		let validationErr: FxOrmError.ExtendedError | FxOrmError.ExtendedError[]
 		Hook.wait(instance, opts.hooks.beforeValidation, function (err: FxOrmError.ExtendedError) {
@@ -67,7 +67,8 @@ export const Instance = function (
 				return ;
 			}
 
-			const checks = new enforce.Enforce({ returnAllErrors : Model.settings.get("instance.returnAllErrors") });
+			const returnAllErrors = Model.settings.get("instance.returnAllErrors");
+			const checks = new enforce.Enforce({ returnAllErrors });
 
 			for (let k in opts.validations) {
 				required = false;
@@ -78,7 +79,7 @@ export const Instance = function (
 				} else {
 					for (let i = 0; i < opts.one_associations.length; i++) {
 						/* non-normalized `field` maybe string now */
-						if (opts.one_associations[i].field as any === k) {
+						if (opts.one_associations[i].field === k) {
 							required = opts.one_associations[i].required;
 							break;
 						}
@@ -87,9 +88,9 @@ export const Instance = function (
 				if (!alwaysValidate && !required && instance[k] == null) {
 					continue; // avoid validating if property is not required and is "empty"
 				}
-				const validation = opts.validations[k] as FibjsEnforce.IValidator[]
-				for (let i = 0; i < validation.length; i++) {
-					checks.add(k, validation[i]);
+				
+				for (const validator of opts.validations[k] as FibjsEnforce.IValidator[]) {
+					checks.add(k, validator);
 				}
 			}
 
@@ -97,12 +98,9 @@ export const Instance = function (
 			checks.context("model", Model);
 			checks.context("driver", opts.driver);
 
-			const lock = new coroutine.Event();
-			checks.check(instance, function (err) {
-				validationErr = err;
-				lock.set();
-			});
-			lock.wait();
+			const errors = checks.checkSync(instance);
+			if (errors && errors.length)
+				validationErr = returnAllErrors ? errors : errors[0]
 		});
 
 		return validationErr;
