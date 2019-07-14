@@ -1,6 +1,7 @@
 var util        = require("util");
 var SQL         = require("../SQL");
-var Queue       = require("../Queue").Queue;
+// one fifo process queue, pointless now, just write synchronously
+var Queue       = null;
 var columnSizes = {
 	integer:  { 2: 'SMALLINT', 4: 'INTEGER', 8: 'BIGINT' },
 	floating: {                4: 'REAL',    8: 'DOUBLE PRECISION' }

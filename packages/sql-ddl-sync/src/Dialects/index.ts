@@ -1,12 +1,5 @@
-import * as mysql from './mysql'
+export import mysql = require('./mysql')
+export import sqlite = require('./sqlite')
 
-const postgresql: any = require('./postgresql')
-
-import * as sqlite from './sqlite'
-
-export = {
-    mysql: mysql as FxOrmSqlDDLSync__Dialect.Dialect,
-    postgresql: postgresql as FxOrmSqlDDLSync__Dialect.Dialect,
-    sqlite: sqlite as FxOrmSqlDDLSync__Dialect.Dialect,
-    mssql: null as FxOrmSqlDDLSync__Dialect.Dialect,
-}
+export const postgresql = require('./postgresql') as FxOrmSqlDDLSync__Dialect.Dialect
+export const mssql = null as FxOrmSqlDDLSync__Dialect.Dialect

@@ -1,3 +1,4 @@
+/// <reference types="@fxjs/orm-core" />
 /// <reference path="_common.d.ts" />
 
 declare namespace FxOrmSqlDDLSync__Driver {
@@ -48,15 +49,18 @@ declare namespace FxOrmSqlDDLSync__Driver {
          * @description base query
          */
         execSimpleQuery: {
-            <T = any>(query_string: string, cb: FxOrmSqlDDLSync.ExecutionCallback<T>): void
+            <T = any>(query_string: string): T
+            <T = any>(query_string: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void
         }
         
         /**
          * @description do query
          */
         execQuery: {
-            <T = any>(query_string: string, cb: FxOrmSqlDDLSync.ExecutionCallback<T>): void
-            <T = any>(query_string: string, query_args: object, cb: FxOrmSqlDDLSync.ExecutionCallback<T>): void
+            <T = any>(query_string: string): T
+            <T = any>(query_string: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void
+            <T = any>(query_string: string, query_args: Fibjs.AnyObject): T
+            <T = any>(query_string: string, query_args: Fibjs.AnyObject, cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void
         }
         
         /**
@@ -67,8 +71,13 @@ declare namespace FxOrmSqlDDLSync__Driver {
                 association: any,
                 opts: any,
                 keys: any,
-                cb: FxOrmSqlDDLSync.ExecutionCallback<T>
+                cb: FxOrmCoreCallbackNS.ExecutionCallback<T>
             ): void
+            <T = any>(
+                association: any,
+                opts: any,
+                keys: any
+            ): T
         }
 
         customTypes: {

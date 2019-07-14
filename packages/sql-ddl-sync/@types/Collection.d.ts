@@ -8,8 +8,4 @@ declare namespace FxOrmSqlDDLSync__Collection {
         
         [ext_k: string]: any
     }
-
-    interface CollectionIndexInfo {
-
-    }
 }

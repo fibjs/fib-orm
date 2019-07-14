@@ -91,6 +91,10 @@ declare namespace FxOrmSqlDDLSync__Column {
 
     interface OpResult__CreateColumn extends FxOrmSqlDDLSync__Dialect.DialectResult {
         value: string
+        /**
+         * @description hook function before column synced, pointless
+         * @deprecated
+         */
         before?: false | Function
     }
 }

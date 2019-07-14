@@ -34,6 +34,7 @@ ORM.connect(process.env.URI, function (err, db) {
 });
 
 function runTest () {
+	require('./integration/db.callback')
 	require('./integration/db')
 
 	test.run(console.DEBUG)

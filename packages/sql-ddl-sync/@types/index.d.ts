@@ -1,4 +1,5 @@
 /// <reference types="@fibjs/types" />
+/// <reference types="@fxjs/orm-core" />
 
 /// <reference path="_common.d.ts" />
 /// <reference path="SQL.d.ts" />
@@ -15,14 +16,12 @@ declare namespace FxOrmSqlDDLSync {
         debug?: Function | false
         suppressColumnDrop?: boolean
     }
-    interface SyncConstructor {
-        (options: SyncOptions): void
-        prototype: Sync
-    }
     interface SyncResult {
         changes: number
     }
-    interface Sync {
+    class Sync {
+        constructor (options: FxOrmSqlDDLSync.SyncOptions)
+
         defineCollection: {
             (collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties']): Sync
         }
@@ -30,14 +29,13 @@ declare namespace FxOrmSqlDDLSync {
             (type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType): Sync
         }
         sync: {
-            (cb?: FxOrmSqlDDLSync.ExecutionCallback<SyncResult>): void
+            (cb: FxOrmCoreCallbackNS.ExecutionCallback<SyncResult>): void
+            (): SyncResult
         }
         forceSync: Sync['sync']
 
         [ext: string]: any
     }
-    // compatible
-    type SyncInstance = Sync
 
     interface ExportModule {
         dialect(name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDDLSync__Dialect.Dialect

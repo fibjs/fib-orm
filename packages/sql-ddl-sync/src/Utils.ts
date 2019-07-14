@@ -7,20 +7,6 @@ import util = require('util');
 //     'createCollection': debug('@fxjs/sql-ddl-sync:createCollection')
 // } as { [k: string]: debug.Debugger }
 
-export function syncObject (o: {[k: string]: Function}, method_names: string[], self: any = o) {
-    method_names.forEach(m => {
-        if (typeof o[m] !== 'function')
-            return
-
-        const func = o[m]
-        o[`${m}Sync`] = util.sync(func).bind(self)
-    })
-}
-
-export function syncifyFunc (func: FxOrmSqlDDLSync.NextCallbackWrapper, self: any) {
-    return util.sync(func).bind(self)
-}
-
 export function logJson (group: string, detail: any) {
     let json = null;
     try {

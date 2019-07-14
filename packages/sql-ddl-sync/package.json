@@ -1,5 +1,4 @@
 {
-	"author": "Richard <richardo2016@gmail.com>",
 	"name": "@fxjs/sql-ddl-sync",
 	"version": "0.3.9",
 	"description": "Fibjs SQL DDL Synchronization",
@@ -11,6 +10,7 @@
 		"postgres",
 		"sqlite"
 	],
+	"author": "Richard <richardo2016@gmail.com>",
 	"license": "MIT",
 	"repository": "http://github.com/fxjs-modules/sql-ddl-sync.git",
 	"types": "@types/index.d.ts",
@@ -29,7 +29,9 @@
 		"fibjs": "*"
 	},
 	"analyse": false,
-	"dependencies": {},
+	"dependencies": {
+		"@fxjs/orm-core": "0.0.1"
+	},
 	"peerDependencies": {
 		"@fxjs/sql-query": ">= 0.2.5 < 0.4"
 	},

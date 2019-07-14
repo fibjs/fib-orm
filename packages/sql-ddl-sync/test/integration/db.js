@@ -34,28 +34,26 @@ sync.defineCollection(common.table, {
 // These will fail because autosync has been disabled pending data integrity concerns.
 
 function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
-	describe(`db: in ${use_force_sync ? 'forceSync' : 'sync'}`, function () {
+	describe(`db: in ${use_force_sync ? 'forceSync' : 'sync'} - synchronous style`, function () {
 		before(common.dropTable())
 
 		describe("Syncing", function () {
 			it("should create the table", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
-					should.exist(info);
-					info.should.have.property("changes");
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
-					return done();
-				});
+				should.exist(info);
+				info.should.have.property("changes");
+
+				return done();
 			});
 
 			it("should have no changes on second call", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
-					should.exist(info);
-					info.should.have.property("changes", 0);
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
-					return done();
-				});
+				should.exist(info);
+				info.should.have.property("changes", 0);
+
+				return done();
 			});
 		});
 
@@ -64,118 +62,8 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 				before(common.dropColumn('born'));
 
 				it("should recreate it on first call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						if (use_force_sync)
-							info.should.have.property("changes", 1);
-						else
-							info.should.have.property("changes", 0);
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
-						return done();
-					});
-				});
-
-				it("should have no changes on second call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						info.should.have.property("changes", 0);
-
-						return done();
-					});
-				});
-			});
-
-			describe("Dropping a column that has an index", function () {
-				before(common.dropColumn('born2'));
-
-				it("should recreate column and index on first call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						if (use_force_sync)
-							// info.should.have.property("changes", 2);
-							info.should.have.property("changes", 1);
-						else
-							info.should.have.property("changes", 0);
-
-						return done();
-					});
-				});
-
-				it("should have no changes on second call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						info.should.have.property("changes", 0);
-
-						return done();
-					});
-				});
-			});
-
-			describe("Adding a column", function () {
-				before(common.addColumn('unknown_col'));
-
-				it("should drop column on first call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						if (use_force_sync)
-							info.should.have.property("changes", 1);
-						else
-							info.should.have.property("changes", 0);
-
-						return done();
-					});
-				});
-
-				it("should have no changes on second call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						info.should.have.property("changes", 0);
-
-						return done();
-					});
-				});
-			});
-
-			describe("Changing a column", function () {
-				before(common.changeColumn('int4'));
-
-				it("should update column on first call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						if (use_force_sync)
-							info.should.have.property("changes", 1);
-						else
-							info.should.have.property("changes", 0);
-
-						return done();
-					});
-				});
-
-				it("should have no changes on second call", function (done) {
-					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-						should.not.exist(err);
-						should.exist(info);
-						info.should.have.property("changes", 0);
-
-						return done();
-					});
-				});
-			});
-		}
-
-		describe("Adding an index", function () {
-			before(common.addIndex(`xpto`, 'int4'));
-
-			it("should drop index on first call", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
 					should.exist(info);
 					if (use_force_sync)
 						info.should.have.property("changes", 1);
@@ -184,16 +72,116 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 
 					return done();
 				});
-			});
 
-			it("should have no changes on second call", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
+				it("should have no changes on second call", function (done) {
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
 					should.exist(info);
 					info.should.have.property("changes", 0);
 
 					return done();
 				});
+			});
+
+			describe("Dropping a column that has an index", function () {
+				before(common.dropColumn('born2'));
+
+				it("should recreate column and index on first call", function (done) {
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+					should.exist(info);
+					if (use_force_sync)
+						// info.should.have.property("changes", 2);
+						info.should.have.property("changes", 1);
+					else
+						info.should.have.property("changes", 0);
+
+					return done();
+				});
+
+				it("should have no changes on second call", function (done) {
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+					should.exist(info);
+					info.should.have.property("changes", 0);
+
+					return done();
+				});
+			});
+
+			describe("Adding a column", function () {
+				before(common.addColumn('unknown_col'));
+
+				it("should drop column on first call", function (done) {
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+					should.exist(info);
+					if (use_force_sync)
+						info.should.have.property("changes", 1);
+					else
+						info.should.have.property("changes", 0);
+
+					return done();
+				});
+
+				it("should have no changes on second call", function (done) {
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+					should.exist(info);
+					info.should.have.property("changes", 0);
+
+					return done();
+				});
+			});
+
+			describe("Changing a column", function () {
+				before(common.changeColumn('int4'));
+
+				it("should update column on first call", function (done) {
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+					should.exist(info);
+					if (use_force_sync)
+						info.should.have.property("changes", 1);
+					else
+						info.should.have.property("changes", 0);
+
+					return done();
+				});
+
+				it("should have no changes on second call", function (done) {
+					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+					should.exist(info);
+					info.should.have.property("changes", 0);
+
+					return done();
+				});
+			});
+		}
+
+		describe("Adding an index", function () {
+			before(common.addIndex(`xpto`, 'int4'));
+
+			it("should drop index on first call", function (done) {
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+				should.exist(info);
+				if (use_force_sync)
+					info.should.have.property("changes", 1);
+				else
+					info.should.have.property("changes", 0);
+
+				return done();
+			});
+
+			it("should have no changes on second call", function (done) {
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
+
+				should.exist(info);
+				info.should.have.property("changes", 0);
+
+				return done();
 			});
 		});
 
@@ -202,26 +190,24 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 			after(common.dropIndex('idx2'))
 
 			it("should drop index on first call", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
-					should.exist(info);
-					if (use_force_sync)
-						info.should.have.property("changes", 0);
-					else
-						info.should.have.property("changes", 0);
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
-					return done();
-				});
+				should.exist(info);
+				if (use_force_sync)
+					info.should.have.property("changes", 0);
+				else
+					info.should.have.property("changes", 0);
+
+				return done();
 			});
 
 			it("should have no changes on second call", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
-					should.exist(info);
-					info.should.have.property("changes", 0);
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
-					return done();
-				});
+				should.exist(info);
+				info.should.have.property("changes", 0);
+
+				return done();
 			});
 		});
 
@@ -233,26 +219,24 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 			});
 
 			it("should drop index and recreate it on first call", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
-					should.exist(info);
-					if (use_force_sync)
-						info.should.have.property("changes", 2);
-					else
-						info.should.have.property("changes", 0);
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
-					return done();
-				});
+				should.exist(info);
+				if (use_force_sync)
+					info.should.have.property("changes", 2);
+				else
+					info.should.have.property("changes", 0);
+
+				return done();
 			});
 
 			it("should have no changes on second call", function (done) {
-				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
-					should.not.exist(err);
-					should.exist(info);
-					info.should.have.property("changes", 0);
+				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
-					return done();
-				});
+				should.exist(info);
+				info.should.have.property("changes", 0);
+
+				return done();
 			});
 		});
 

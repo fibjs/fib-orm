@@ -15,12 +15,20 @@ npm install @fxjs/sql-ddl-sync
 ## Dialects
 
 - MySQL
-- PostgreSQL
+- SQLite
 
 ## About
 
 This module is part of [@fxjs/orm](https://github.com/fxjs-modules/orm). It's used synchronize model tables in supported dialects.
 Sorry there is no API documentation for now but there are a couple of tests you can read and find out how to use it if you want.
+
+**Version Match**
+
+`sql-ddl-sync` Version | required `orm` Version |
+:-----------|:--------|
+sql-ddl-sync <= 0.3.x  |  orm < 1.10.3	|
+sql-ddl-sync >= 0.4.x  |  orm >= 1.10.3	|
+
 
 ## Example
 
@@ -29,48 +37,48 @@ Run once and you'll see table `ddl_sync_test` appear in your database. Then make
 and run the code again. Your table should always return to the same structure.
 
 ```js
-var ORM   = require("@fxjs/orm");
-var mysql = require("mysql");
-var Sync  = require("@fxjs/sql-ddl-sync").Sync;
+const ORM   = require("@fxjs/orm");
+const mysql = require("mysql");
+const Sync  = require("@fxjs/sql-ddl-sync").Sync;
 
-ORM.connect("mysql://username:password@localhost/database", function (err, db) {
-	if (err) throw err;
-	var driver = db.driver;
+const db = ORM.connectSync("mysql://username:password@localhost/database");
 
-	var sync = new Sync({
-		dialect : "mysql",
-		driver  : driver,
-		debug   : function (text) {
-			console.log("> %s", text);
-		}
-	});
+const driver = db.driver;
 
-	sync.defineCollection("ddl_sync_test", {
-		id     : { type: "serial", key: true, serial: true },
-		name   : { type: "text", required: true },
-		age    : { type: "integer" },
-		male   : { type: "boolean" },
-		born   : { type: "date", time: true },
-		born2  : { type: "date" },
-		int2   : { type: "integer", size: 2 },
-		int4   : { type: "integer", size: 4 },
-		int8   : { type: "integer", size: 8 },
-		float4 : { type: "number",  size: 4 },
-		float8 : { type: "number",  size: 8 },
-		photo  : { type: "binary" }
-	});
-
-	sync.sync(function (err) {
-		if (err) {
-			console.log("> Sync Error");
-			console.log(err);
-		} else {
-			console.log("> Sync Done");
-		}
-		process.exit(0);
-	});
+const sync = new Sync({
+	dialect : "mysql",
+	driver  : driver,
+	debug   : function (text) {
+		console.log("> %s", text);
+	}
 });
 
+sync.defineCollection("ddl_sync_test", {
+	id     : { type: "serial", key: true, serial: true },
+	name   : { type: "text", required: true },
+	age    : { type: "integer" },
+	male   : { type: "boolean" },
+	born   : { type: "date", time: true },
+	born2  : { type: "date" },
+	int2   : { type: "integer", size: 2 },
+	int4   : { type: "integer", size: 4 },
+	int8   : { type: "integer", size: 8 },
+	float4 : { type: "number",  size: 4 },
+	float8 : { type: "number",  size: 8 },
+	photo  : { type: "binary" }
+});
+
+try {
+	sync.sync()
+	console.log("> Sync Done");
+} catch (err) {
+	if (err) {
+		console.log("> Sync Error");
+		console.log(err);
+	}
+}
+
+process.exit(0);
 ```
 ## Test
 
