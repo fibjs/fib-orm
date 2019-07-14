@@ -105,7 +105,7 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 			if (m) {
 				column.defaultValue = m[1];
 			} else {
-				column.defaultValue = m[0];
+				column.defaultValue = null;
 			}
 		}
 

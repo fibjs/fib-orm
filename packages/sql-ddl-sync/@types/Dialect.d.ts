@@ -100,7 +100,7 @@ declare namespace FxOrmSqlDDLSync__Dialect{
             (driver: FxOrmSqlDDLSync__Driver.Driver<DRIVER_QUERY_TYPE>, name: string, collection: FxOrmSqlDDLSync.TableName): any
         }
         getType: {
-            (collection: FxOrmSqlDDLSync.TableName, property: FxOrmSqlDDLSync__Column.Property, driver: FxOrmSqlDDLSync__Driver.Driver<DRIVER_QUERY_TYPE>): false | string | FxOrmSqlDDLSync__Column.OpResult__CreateColumn
+            (collection: FxOrmSqlDDLSync.TableName, property: FxOrmSqlDDLSync__Column.Property, driver: FxOrmSqlDDLSync__Driver.Driver<DRIVER_QUERY_TYPE>): false | TypeResult
         }
 
         /**
@@ -123,8 +123,10 @@ declare namespace FxOrmSqlDDLSync__Dialect{
         [extra: string]: any
     }
 
-    interface DialectResult<T = any> {
+    interface TypeResult<T = any> {
 		value: T,
 		before?: false | Function
 	}
+
+    type DialectResult<T = any> = TypeResult<T>
 }
