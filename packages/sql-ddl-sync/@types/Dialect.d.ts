@@ -1,4 +1,4 @@
-/// <reference types="fibjs" />
+/// <reference types="@fibjs/types" />
 
 /// <reference path="_common.d.ts" />
 /// <reference path="Query.d.ts" />

@@ -1,7 +1,4 @@
-var ORM     = require("@fxjs/orm");
-var url     = require("url");
-
-exports.driver	= null;
+exports.dialect = null;
 exports.table   = "sql_ddl_sync_test_table";
 
 exports.fakeDriver = {
@@ -97,32 +94,4 @@ exports.dropTable = function (name) {
 
 function unknownProtocol() {
 	return new Error("Unknown protocol - " + exports.driver.dialect);
-}
-
-exports.protocol = function (input = process.env.URI) {
-	var uri = url.parse(input, true);
-
-	return uri.protocol.replace(':', '');
-}
-
-exports.getORM = function () {
-	if (!process.env.URI) {
-		console.error('no URI provided')
-		process.exit(1)
-	}
-
-	var uri = url.parse(process.env.URI, true);
-
-	if (!uri.protocol) {
-		console.error(
-			'invlid URI provided: ',
-			process.env.URI
-		)
-		process.exit(1);
-	}
-
-	const db = ORM.connect(process.env.URI);
-	exports.driver = db.driver;
-	
-	return db;
 }

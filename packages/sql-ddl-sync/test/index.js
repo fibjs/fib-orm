@@ -1,4 +1,5 @@
-const assert = require('assert');
+const test = require('test');
+test.setup();
 
 ;[
     [0, { ENTRY_SUFFIX: '',         URI: 'sqlite:test.db' }],
@@ -6,9 +7,11 @@ const assert = require('assert');
 ].forEach(([ep, envs]) => {
     const result_p = process.run(
         process.execPath,
-        [ require.resolve('./vbox') ], {
+        [
+            require.resolve('./vbox')
+        ], {
         env: envs
-    });
+    })
 
     assert.equal(result_p, ep)
 })

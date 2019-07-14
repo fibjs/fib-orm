@@ -1,4 +1,3 @@
-const util = require('util');
 const path = require('path');
 const builtinModules = require('@fibjs/builtin-modules')
 
@@ -18,7 +17,7 @@ const bundle = await rollup.rollup({
         commonjs(),
         plugins['rollup-plugin-uglify-es']()
     ]
-}).catch(e => console.error(e));
+}).catch(e => console.error(e.stack));
 
 // write bundled result with `bundle.write`
 await bundle.write({

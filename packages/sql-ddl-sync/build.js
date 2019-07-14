@@ -6,6 +6,9 @@ const typify = require('fib-typify')
 typify.compileDirectoryTo(
     path.resolve(__dirname, './src'),
     path.resolve(__dirname, './lib'),
+    {
+        compilerOptions: require('./tsconfig.json').compilerOptions
+    }
 )
 
 if (util.buildInfo().fibjs >= '0.26.0') {

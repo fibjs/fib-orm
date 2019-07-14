@@ -8,6 +8,6 @@ require('./integration/mysql')
 require('./integration/sqlite')
 
 if (process.env.URI)
-    require('./integration/db')
+    require('./run-db')
 
 test.run(console.DEBUG)

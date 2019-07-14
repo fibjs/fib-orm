@@ -1,7 +1,14 @@
 
-v0.3.8 / 2019-03-18
+v0.3.9 / 2019-07-11
 ==================
 
+  * upgrade dependencies and ci config.
+  * typo robust.
+
+v0.3.8 / 2019-03-18
+===================
+
+  * Release v0.3.8
   * robust for typo.
 
 v0.3.7 / 2019-03-18

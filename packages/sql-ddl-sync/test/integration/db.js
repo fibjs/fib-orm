@@ -2,55 +2,40 @@ const test = require('test')
 test.setup()
 
 require("should");
-
-var common = require("../common");
+var common  = require("../common");
 var Sync = require('../../').Sync;
+
+var sync    = new Sync({
+	driver  : common.driver,
+	debug   : function (text) {
+		process.env.DEBUG_SYNC && console.log("> %s", text);
+	}
+});
+
+function is_sqlite () {
+	return common.dialect === "sqlite"
+}
+
+sync.defineCollection(common.table, {
+  id     : { type: "serial", key: true, serial: true },
+  name   : { type: "text", required: true },
+  age    : { type: "integer" },
+  male   : { type: "boolean" },
+  born   : { type: "date", time: true },
+  born2  : { type: "date" },
+  int2   : { type: "integer", size: 2, index: [ "idx1", "idx2" ] },
+  int4   : { type: "integer", size: 4 },
+  int8   : { type: "integer", size: 8, index: [ "idx2" ] },
+  float4 : { type: "number",  size: 4 },
+  float8 : { type: "number",  size: 8, index: [ "index" ] },
+  photo  : { type: "binary" }
+});
 
 // These will fail because autosync has been disabled pending data integrity concerns.
 
 function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
-	var db = null;
-	var driver = null;
-	var dialect = null;
-	var sync = null;
-
-	function prepare () {
-		db = common.getORM();
-		driver = db.driver;
-		dialect = driver.dialect;
-
-		sync    = new Sync({
-			driver  : driver,
-			debug   : function (text) {
-				process.env.DEBUG_SYNC && console.log("> %s", text);
-			}
-		});
-
-		sync.defineCollection(common.table, {
-			id     : { type: "serial", key: true, serial: true },
-			name   : { type: "text", required: true },
-			age    : { type: "integer" },
-			male   : { type: "boolean" },
-			born   : { type: "date", time: true },
-			born2  : { type: "date" },
-			int2   : { type: "integer", size: 2, index: [ "idx1", "idx2" ] },
-			int4   : { type: "integer", size: 4 },
-			int8   : { type: "integer", size: 8, index: [ "idx2" ] },
-			float4 : { type: "number",  size: 4 },
-			float8 : { type: "number",  size: 8, index: [ "index" ] },
-			photo  : { type: "binary" }
-		});
-	}
-	
 	describe(`db: in ${use_force_sync ? 'forceSync' : 'sync'}`, function () {
-		before(() => {
-			prepare()
-			common.dropTable()()
-		})
-
-		after(() => {
-			db.closeSync()
-		})
+		before(common.dropTable())
 
 		describe("Syncing", function () {
 			it("should create the table", function (done) {
@@ -74,7 +59,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 			});
 		});
 
-		if (common.protocol() != "sqlite") {
+		if (common.dialect != "sqlite") {
 			describe("Dropping a column", function () {
 				before(common.dropColumn('born'));
 
@@ -270,6 +255,8 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 				});
 			});
 		});
+
+
 	});
 }
 
@@ -277,5 +264,5 @@ testOnUseSync(true);
 testOnUseSync(false);
 
 if (require.main === module) {
-	test.run(console.DEBUG)
+  test.run(console.DEBUG)
 }
