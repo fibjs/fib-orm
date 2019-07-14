@@ -33,7 +33,7 @@
 		"@fxjs/orm-core": "0.0.1"
 	},
 	"peerDependencies": {
-		"@fxjs/sql-query": ">= 0.2.5 < 0.4"
+		"@fxjs/sql-query": ">= 0.4 < 0.5"
 	},
 	"devDependencies": {
 		"@fibjs/ci": "^2.2.0",
