@@ -5,6 +5,7 @@ import events         = require("events");
 
 import _cloneDeep = require('lodash.clonedeep')
 
+import FxORMCore = require('@fxjs/orm-core');
 import { Helpers as QueryHelpers } from '@fxjs/sql-query';
 import { selectArgs } from './Helpers';
 
@@ -578,54 +579,8 @@ export function isDriverNotSupportedError (err: FxOrmError.ExtendedError) {
 	return false;
 }
 
-export function exposeErrAndResultFromSyncMethod<T = any> (
-	exec: Function,
-	args: any[] = [],
-	opts?: {
-		thisArg?: any,
-	}
-): FxOrmNS.ExposedResult<T> {
-	let error: FxOrmError.ExtendedError,
-		result: T
-
-	const { thisArg = null } = opts || {};
-
-	try {
-		result = exec.apply(thisArg, args);
-	} catch (ex) {
-		error = ex
-	}
-
-	return { error, result }
-}
-
-export function throwErrOrCallabckErrResult<RESULT_T = any> (
-	input: FxOrmNS.ExposedResult<RESULT_T>,
-	opts?: {
-		no_throw?: boolean
-		callback?: FibOrmNS.ExecutionCallback<any, RESULT_T>,
-		use_tick?: boolean
-	}
-) {
-
-	const {
-		use_tick = false,
-		callback = null,
-	} = opts || {}
-
-	const { no_throw = false } = opts || {};
-
-	if (!no_throw && input.error)
-		throw input.error;
-
-	if (typeof callback === 'function')
-		if (use_tick)
-			process.nextTick(() => {
-				callback(input.error, input.result);
-			});
-		else
-			callback(input.error, input.result);
-}
+export const exposeErrAndResultFromSyncMethod = FxORMCore.Utils.exposeErrAndResultFromSyncMethod
+export const throwErrOrCallabckErrResult = FxORMCore.Utils.throwErrOrCallabckErrResult
 
 export function doWhenErrIs (
 	compare: {
@@ -720,7 +675,6 @@ export function filterWhereConditionsInput (
 ): FxSqlQuerySubQuery.SubQueryConditions {
 	if (typeof conditions === 'object') {
 		filter_date_for_where_conditions(conditions, m);
-
 	}
 
 	return conditions;
