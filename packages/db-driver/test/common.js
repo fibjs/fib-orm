@@ -22,3 +22,21 @@ exports.fakeDriver = {
 function unknownProtocol() {
 	return new Error("Unknown protocol - " + exports.driver.type);
 }
+
+exports.getKnexInstance = (driver, opts) => {
+	var FibKnex  = require("@fxjs/knex");
+
+	var type = driver.type;
+	switch (type) {
+		default:
+			break
+		case 'mysql':
+			type = 'mysql2'
+	}
+
+	return FibKnex({
+		...opts,
+		client: driver.type,
+		// useNullAsDefault: true
+	})
+}

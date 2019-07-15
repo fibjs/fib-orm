@@ -13,12 +13,11 @@ export function driverUUid () {
 
 export function filterDriverType (protocol: any): FxDbDriver__Driver.DriverType {
     switch (protocol) {
-        case 'sqlite://':
         case 'sqlite:':
             return 'sqlite';
-        case 'mysql://':
+        case 'mysql:':
             return 'mysql';
-        case 'redis://':
+        case 'redis:':
             return 'redis';
         default:
             return 'unknown'
@@ -63,6 +62,16 @@ function unPrefix (str: string = '', prefix: string = '/') {
     return str
 }
 
+export function ensureSuffix (str: string = '', suffix: string = '//') {
+    if (!str || typeof str !== 'string') return ''
+
+    const lidx = str.lastIndexOf(suffix)
+    if (str.slice(lidx) !== suffix)
+        str += suffix
+
+    return str
+}
+
 export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnectionConfig {
     input = input || {};
     let urlObj = input instanceof net.Url ? input : null;
@@ -72,6 +81,7 @@ export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnect
         
         input = <FxDbDriver__Driver.DBConnectionConfig>{
             protocol: urlObj.protocol || null,
+            slashes: urlObj.slashes || '',
             query: urlObj.query || null,
             username: urlObj.username || null,
             password: urlObj.password || null,
@@ -97,6 +107,7 @@ export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnect
     input = Object.assign({}, input);
     input = util.pick(input, [
         'protocol',
+        'slashes',
         'query',
         'database',
         'username',
@@ -105,6 +116,8 @@ export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnect
         'href',
         'pathname',
     ])
+
+    input.slashes = !!input.slashes
 
     return input
 }

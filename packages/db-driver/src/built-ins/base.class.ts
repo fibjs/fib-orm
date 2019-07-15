@@ -54,7 +54,8 @@ export class Driver<ConnType = any> implements FxDbDriver__Driver.Driver<ConnTyp
 	
 	uid: FxDbDriver__Driver.Driver['uid'];
     get uri () {
-        return url.format(this.config);
+
+        return url.format({ ...this.config });
     }
 	config: FxDbDriver__Driver.Driver['config'];
 	extend_config: FxDbDriver__Driver.Driver['extend_config'] = {
@@ -128,6 +129,9 @@ export class Driver<ConnType = any> implements FxDbDriver__Driver.Driver<ConnTyp
 }
 
 export class SQLDriver<ConnType> extends Driver<ConnType> implements FxDbDriver__Driver.SQLDriver {
+    currentDb: FxDbDriver__Driver.SQLDriver['currentDb'] = null;
+    switchDb (targetDb: string): void {};
+
 	/**
 	 * @override
 	 */
@@ -151,7 +155,7 @@ export class SQLDriver<ConnType> extends Driver<ConnType> implements FxDbDriver_
 	execute<T> (sql: string): T { return }
 }
 
-class MySQLDriver extends Driver<Class_MySQL> implements FxDbDriver__Driver.SQLDriver {
+class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriver__Driver.SQLDriver {
     get isBuilt() {
         return !!this.connection
     }
@@ -161,12 +165,26 @@ class MySQLDriver extends Driver<Class_MySQL> implements FxDbDriver__Driver.SQLD
 
         this.connection = null
     }
+
+    switchDb (targetDb: string) {
+        this.execute(
+            db.formatMySQL("use `" + db.escape(targetDb) + "`")
+        );
+    }
+
+    reopen (): void {
+        try { this.close() } catch (error) {}
+        this.open()
+    }
     
     open (): void {
+        this.close()
+
         this.connection = db.openMySQL(this.uri)
     }
     close (): void {
-        this.connection.close()
+        if (this.connection)
+            this.connection.close()
     }
     ping (): void { return }
     begin (): void { return this.connection.begin() }
@@ -178,11 +196,11 @@ class MySQLDriver extends Driver<Class_MySQL> implements FxDbDriver__Driver.SQLD
         if (this.isPool)
             return this.pool(conn => conn.execute(sql));
 
-        return this.connection.execute(this.sql) as any;
+        return this.connection.execute(sql) as any;
     }
 }
 
-class SQLiteDriver extends Driver<Class_SQLite> implements FxDbDriver__Driver.SQLDriver {
+class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriver__Driver.SQLDriver {
     get isBuilt() {
         return !!this.connection
     }
@@ -191,13 +209,20 @@ class SQLiteDriver extends Driver<Class_SQLite> implements FxDbDriver__Driver.SQ
         super(conn);
 
         this.connection = null
+    }
+
+    reopen (): void {
+        try { this.close() } catch (error) {}
+        this.open()
     }
     
     open (): void {
         this.connection = db.openSQLite(this.uri)
     }
+
     close (): void {
-        this.connection.close()
+        if (this.connection)
+            this.connection.close()
     }
     ping (): void { return }
     begin (): void { return this.connection.begin() }
@@ -209,7 +234,7 @@ class SQLiteDriver extends Driver<Class_SQLite> implements FxDbDriver__Driver.SQ
         if (this.isPool)
             return this.pool(conn => conn.execute(sql));
 
-        return this.connection.execute(this.sql) as any;
+        return this.connection.execute(sql) as any;
     }
 }
 
@@ -223,13 +248,22 @@ class RedisDriver extends Driver<Class_Redis> implements FxDbDriver__Driver.Redi
 
         this.connection = null
     }
-    
+
+    reopen (): void {
+        try { this.close() } catch (error) {}
+        this.open()
+    }
+
     open (): void {
+        this.close()
+        
         this.connection = db.openRedis(this.uri)
     }
     close (): void {
-        this.connection.close()
+        if (this.connection)
+            this.connection.close()
     }
+    
     ping (): void {}
 
     command<T = any> (cmd: string): T {

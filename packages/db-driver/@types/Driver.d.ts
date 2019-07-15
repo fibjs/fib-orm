@@ -42,6 +42,7 @@ declare namespace FxDbDriver__Driver {
      */
     interface DBConnectionConfig {
         protocol: ConnectionInputArgs['protocol']
+        slashes: string
         query: ConnectionInputArgs['query']
         database: ConnectionInputArgs['database']
         username: ConnectionInputArgs['username']
@@ -157,6 +158,9 @@ declare namespace FxDbDriver__Driver_SQLShared {
 
 declare namespace FxDbDriver__Driver {
     interface SQLDriver extends Driver, DriverExtendTransaction {
+        currentDb: string
+        switchDb (targetDb: string): void
+
         execute: {
             <T=any>(sql: string): T;
         }

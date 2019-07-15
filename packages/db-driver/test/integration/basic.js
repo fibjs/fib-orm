@@ -63,6 +63,7 @@ describe("DBDriver", function () {
         'sqlite:test-driver.db',
         {
           "protocol": "sqlite:",
+          "slashes": false,
           "query": {},
           "database": "test-driver.db",
           "username": null,
@@ -82,6 +83,7 @@ describe("DBDriver", function () {
         'sqlite:test-driver.db?pool=1',
         {
           "protocol": "sqlite:",
+          "slashes": false,
           "query": {
             "pool": "1"
           },
@@ -98,6 +100,7 @@ describe("DBDriver", function () {
         'sqlite:test-driver.db?pool.maxsize=50&pool.timeout=800',
         {
           "protocol": "sqlite:",
+          "slashes": false,
           "query": {
             "pool": {
               maxsize: "50",
@@ -121,6 +124,7 @@ describe("DBDriver", function () {
         'sqlite:test-driver.db?debug=y',
         {
           "protocol": "sqlite:",
+          "slashes": false,
           "query": {
             "debug": "y"
           },
@@ -138,10 +142,33 @@ describe("DBDriver", function () {
         }
       ],
       [
+        '[mysql] full connection string',
+        'mysql://root:123456@localhost:3306/test_tb',
+        {
+          "protocol": "mysql:",
+          "slashes": true,
+          "query": {
+          },
+          "database": "test_tb",
+          "username": "root",
+          "password": "123456",
+          "host": "localhost:3306",
+          "href": "mysql://root:123456@localhost:3306/test_tb",
+          "pathname": "/test_tb"
+        },
+        (driver) => {
+          assert.deepEqual(driver.extend_config.debug, false)
+          assert.deepEqual(driver.extend_config.pool, false)
+
+          assert.deepEqual(driver.uri, "mysql://root:123456@localhost:3306/test_tb")
+        }
+      ],
+      [
         '[mysql] change query:pool',
         'mysql://localhost:3306/test_tb',
         {
           "protocol": "mysql:",
+          "slashes": true,
           "query": {
           },
           "database": "test_tb",
