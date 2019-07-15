@@ -181,4 +181,12 @@ declare namespace FxDbDriver__Driver {
             <T=any>(cmds: Fibjs.AnyObject, opts?: CommandDriverCommandOptions): T;
         }
     }
+
+    interface ServiceDriver extends Driver {
+        /**
+         * @description is this service support rest api
+         * @sample elasticsearch, tdengine
+         */
+        readonly isRest: boolean
+    }
 }
