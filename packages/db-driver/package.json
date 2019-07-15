@@ -1,0 +1,55 @@
+{
+	"name": "@fxjs/db-driver",
+	"version": "0.0.1",
+	"description": "Fibjs Db Driver",
+	"keywords": [
+		"mysql",
+		"redis",
+		"sqlite",
+		"adapater"
+	],
+	"author": "Richard <richardo2016@gmail.com>",
+	"license": "MIT",
+	"repository": "http://github.com/fxjs-modules/db-driver.git",
+	"types": "@types/index.d.ts",
+	"main": "./lib",
+	"unpkg": "./lib/index.cjs.js",
+	"jsdelivr": "./lib/index.cjs.js",
+	"scripts": {
+		"build": "fibjs build.js",
+		"test-db": "fibjs test/run-db",
+		"test-db-mysql": "cross-env URI=mysql://root:@localhost:3306/db-driver npm run test-db",
+		"test": "fibjs test",
+		"ci": "npm run build && npm run test",
+		"prepublishOnly": "npm run build"
+	},
+	"engines": {
+		"fibjs": "*"
+	},
+	"analyse": false,
+	"dependencies": {
+		"@fxjs/orm-core": "0.0.1",
+		"parse-querystring-dotkey": "^1.0.3"
+	},
+	"devDependencies": {
+		"@fibjs/types": "^0.27.1",
+		"cross-env": "^5.2.0",
+		"fib-rollup": "^0.4.0",
+		"fib-typify": "^0.6.0",
+		"rollup-plugin-commonjs": "^9.2.1",
+		"should": "^13.2.3"
+	},
+	"ci": {
+		"type": "travis, appveyor",
+		"version": [
+			"0.21.0",
+			"0.22.0",
+			"0.23.0",
+			"0.24.0",
+			"0.25.0",
+			"0.26.0",
+			"0.26.1",
+			"0.27.0"
+		]
+	}
+}
