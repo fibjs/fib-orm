@@ -13,6 +13,7 @@ describe("DBDriver", function () {
       assert.isFunction(DBDriver.getDriver('mysql'));
       assert.isFunction(DBDriver.getDriver('sqlite'));
       assert.isFunction(DBDriver.getDriver('redis'));
+      assert.isFunction(DBDriver.getDriver('mongodb'));
 
       assert.equal(DBDriver.getDriver('error'), DBDriver);
     });
@@ -20,9 +21,10 @@ describe("DBDriver", function () {
 
   describe("#driver", function () {
     [
-      [ 'mysql' , 'mysql://user:@localhost:3306/db' ],
-      [ 'sqlite', 'sqlite:test.db'                  ],
-      [ 'redis' , 'redis://localhost:33061/db'      ],
+      [ 'mysql' , 'mysql://user:@localhost:3306/db'     ],
+      [ 'sqlite', 'sqlite:test.db'                      ],
+      [ 'redis' , 'redis://localhost:6379/db'           ],
+      [ 'mongodb' , 'mongodb://localhost:27017/db'       ],
     ].forEach(function ([driverType, driverConnString]) {
       describe(`should expose ${driverType} driver`, function () {
         var driver = new (DBDriver.getDriver(driverType))(driverConnString);
@@ -38,14 +40,17 @@ describe("DBDriver", function () {
         ]
         .concat(
           driver.isSql ? [
+            'switchDb',
+            
             'begin',
             'commit',
             'rollback',
             'execute'
           ] : []
         ).concat(
-          driverType === 'redis' ? [
-            'command'
+          driver.isCommand ? [
+            'command',
+            'commands'
           ] : []
         )
         .forEach(driver_func => {
@@ -69,6 +74,8 @@ describe("DBDriver", function () {
           "username": null,
           "password": null,
           "host": null,
+          "hostname": null,
+          "port": null,
           "href": "sqlite:test-driver.db",
           "pathname": "test-driver.db"
         },
@@ -91,6 +98,8 @@ describe("DBDriver", function () {
           "username": null,
           "password": null,
           "host": null,
+          "hostname": null,
+          "port": null,
           "href": "sqlite:test-driver.db?pool=1",
           "pathname": "test-driver.db"
         }
@@ -111,6 +120,8 @@ describe("DBDriver", function () {
           "username": null,
           "password": null,
           "host": null,
+          "hostname": null,
+          "port": null,
           "href": "sqlite:test-driver.db?pool.maxsize=50&pool.timeout=800",
           "pathname": "test-driver.db"
         },
@@ -132,6 +143,8 @@ describe("DBDriver", function () {
           "username": null,
           "password": null,
           "host": null,
+          "hostname": null,
+          "port": null,
           "href": "sqlite:test-driver.db?debug=y",
           "pathname": "test-driver.db"
         },
@@ -153,6 +166,8 @@ describe("DBDriver", function () {
           "username": "root",
           "password": "123456",
           "host": "localhost:3306",
+          "hostname": "localhost",
+          "port": 3306,
           "href": "mysql://root:123456@localhost:3306/test_tb",
           "pathname": "/test_tb"
         },
@@ -175,6 +190,8 @@ describe("DBDriver", function () {
           "username": null,
           "password": null,
           "host": "localhost:3306",
+          "hostname": "localhost",
+          "port": 3306,
           "href": "mysql://localhost:3306/test_tb",
           "pathname": "/test_tb"
         },
@@ -188,6 +205,28 @@ describe("DBDriver", function () {
           assert.deepEqual(driver.extend_config.pool.timeout, 1000)
 
           driver.extend_config.pool = null
+          assert.deepEqual(driver.extend_config.pool, false)
+        }
+      ],
+      [
+        '[redis] general',
+        'redis://127.0.0.1:6379',
+        {
+          "protocol": "redis:",
+          "slashes": true,
+          "query": {},
+          "database": null,
+          "username": null,
+          "password": null,
+          "host": "127.0.0.1:6379",
+          "hostname": "127.0.0.1",
+          "port": 6379,
+          "href": "redis://127.0.0.1:6379",
+          "pathname": null
+        },
+        (driver) => {
+          assert.deepEqual(driver.extend_config.debug, false)
+
           assert.deepEqual(driver.extend_config.pool, false)
         }
       ],

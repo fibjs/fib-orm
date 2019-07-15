@@ -3,7 +3,7 @@
 /// <reference path="_common.d.ts" />
 
 declare namespace FxDbDriver__Driver {
-    type DriverType = 'mysql' | 'sqlite' | 'redis' | 'unknown'
+    type DriverType = 'mysql' | 'sqlite' | 'redis' | 'mongodb' | 'unknown'
 
     interface ConnectionInputArgs {
         protocol?: string;
@@ -88,13 +88,17 @@ declare namespace FxDbDriver__Driver {
         readonly uid: string
         readonly isPool: boolean;
         /**
-         * @description whether driver is based sql
+         * @description whether driver is based on sql query
          */
         readonly isSql: boolean
         /**
-         * @description whether driver is based nosql
+         * @description whether driver is nosql
          */
         readonly isNoSql: boolean
+        /**
+         * @description whether driver is based on command
+         */
+        readonly isCommand: boolean
 
         type: DriverType
         config: DBConnectionConfig
@@ -166,9 +170,15 @@ declare namespace FxDbDriver__Driver {
         }
     }
 
-    interface RedisDriver extends Driver {
+    interface CommandDriverCommandOptions {
+        parallel?: boolean
+    }
+    interface CommandDriver extends Driver {
         command: {
-            <T=any>(cmd: string): T;
+            <T=any>(cmd: string, ...args: any[]): T;
+        }
+        commands: {
+            <T=any>(cmds: Fibjs.AnyObject, opts?: CommandDriverCommandOptions): T;
         }
     }
 }

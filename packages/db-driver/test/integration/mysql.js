@@ -1,7 +1,7 @@
 var common  = require("../common");
 var Driver = require("../..").getDriver('mysql');
 
-describe("SQLite", function () {
+describe("MySQL", function () {
 	describe("basic operation", () => {
 		var driver
 		var knex

@@ -19,6 +19,8 @@ export function filterDriverType (protocol: any): FxDbDriver__Driver.DriverType 
             return 'mysql';
         case 'redis:':
             return 'redis';
+        case 'mongodb:':
+            return 'mongodb';
         default:
             return 'unknown'
     }
@@ -86,6 +88,8 @@ export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnect
             username: urlObj.username || null,
             password: urlObj.password || null,
             host: urlObj.host || null,
+            hostname: urlObj.hostname || null,
+            port: urlObj.port || null,
             href: urlObj.href || null,
             database: unPrefix(urlObj.pathname, '/') || null,
             pathname: urlObj.pathname || null,
@@ -113,11 +117,14 @@ export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnect
         'username',
         'password',
         'host',
+        'hostname',
+        'port',
         'href',
         'pathname',
     ])
 
     input.slashes = !!input.slashes
+    input.port = forceInteger(input.port, null)
 
     return input
 }
@@ -155,4 +162,8 @@ export function mountPoolToDb (driver: FxDbDriver__Driver.Driver) {
             },
             ...parsePoolConfig(driver.config.pool)
         })
+}
+
+export function arraify<T = any> (item: T | T[]): T[] {
+	return Array.isArray(item) ? item : [item]
 }

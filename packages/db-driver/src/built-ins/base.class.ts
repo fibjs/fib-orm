@@ -1,6 +1,7 @@
+import db = require('db')
 import url = require('url');
 import assert = require('assert');
-import db = require('db')
+import coroutine = require('coroutine')
 
 import Utils = require('../utils')
 
@@ -33,6 +34,8 @@ export class Driver<ConnType = any> implements FxDbDriver__Driver.Driver<ConnTyp
                 return SQLiteDriver
             case 'redis':
                 return RedisDriver
+            case 'mongodb':
+                return MongoDriver
             default:
                 if (name) {
                     const type = Utils.filterDriverType(url.parse(name).protocol)
@@ -75,7 +78,7 @@ export class Driver<ConnType = any> implements FxDbDriver__Driver.Driver<ConnTyp
 		const p = this.config.protocol || ''
 
 		return (
-			(p === 'mysql://')
+			(p === 'mysql:')
 			|| (p.startsWith('sqlite:'))
 		)
 	}
@@ -83,7 +86,15 @@ export class Driver<ConnType = any> implements FxDbDriver__Driver.Driver<ConnTyp
 		const p = this.config.protocol || ''
 
 		return (
-			(p === 'mongo://')
+			(p === 'mongodb:')
+		)
+	}
+	get isCommand () {
+		const p = this.config.protocol || ''
+
+		return (
+			(p === 'mongodb:')
+            || (p === 'redis:')
 		)
 	}
 
@@ -156,10 +167,6 @@ export class SQLDriver<ConnType> extends Driver<ConnType> implements FxDbDriver_
 }
 
 class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriver__Driver.SQLDriver {
-    get isBuilt() {
-        return !!this.connection
-    }
-
     constructor (conn: FxDbDriver__Driver.ConnectionInputArgs) {
         super(conn);
 
@@ -201,10 +208,6 @@ class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriver__Driver.S
 }
 
 class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriver__Driver.SQLDriver {
-    get isBuilt() {
-        return !!this.connection
-    }
-
     constructor (conn: FxDbDriver__Driver.ConnectionInputArgs) {
         super(conn);
 
@@ -238,11 +241,7 @@ class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriver__Driver
     }
 }
 
-class RedisDriver extends Driver<Class_Redis> implements FxDbDriver__Driver.RedisDriver {
-    get isBuilt() {
-        return !!this.connection
-    }
-
+class RedisDriver extends Driver<Class_Redis> implements FxDbDriver__Driver.CommandDriver {
     constructor (conn: FxDbDriver__Driver.ConnectionInputArgs) {
         super(conn);
 
@@ -255,8 +254,6 @@ class RedisDriver extends Driver<Class_Redis> implements FxDbDriver__Driver.Redi
     }
 
     open (): void {
-        this.close()
-        
         this.connection = db.openRedis(this.uri)
     }
     close (): void {
@@ -266,10 +263,65 @@ class RedisDriver extends Driver<Class_Redis> implements FxDbDriver__Driver.Redi
     
     ping (): void {}
 
-    command<T = any> (cmd: string): T {
+    command<T = any> (cmd: string, ...args: any[]): T {
         if (this.isPool)
-            return this.pool(conn => conn.command(cmd));
+            return this.pool(conn => conn.command(cmd, ...args));
 
-        return this.connection.command(this.sql) as any;
+        return this.connection.command(cmd, ...args) as any;
+    }
+
+    commands<T = any> (
+        cmds: Fibjs.AnyObject,
+        opts?: FxDbDriver__Driver.CommandDriverCommandOptions
+    ): T {
+        const { parallel = false } = opts || {};
+        const keys = Object.keys(cmds)
+
+        if (parallel)
+            return coroutine.parallel(keys, (cmd: string) => {
+                return { cmd, result: this.command(cmd, ...Utils.arraify(cmds[cmd])) }
+            }) as any
+        else
+            return Object.keys(cmds).map((cmd: string) => {
+                return { cmd, result: this.command(cmd, ...Utils.arraify(cmds[cmd])) }
+            }) as any
     }
 }
+
+class MongoDriver extends Driver<Class_MongoDB> implements FxDbDriver__Driver.CommandDriver {
+    constructor (conn: FxDbDriver__Driver.ConnectionInputArgs) {
+        super(conn);
+
+        this.connection = null
+    }
+
+    reopen (): void {
+        try { this.close() } catch (error) {}
+        this.open()
+    }
+
+    open (): void {
+        this.connection = db.openMongoDB(this.uri)
+    }
+    close (): void {
+        if (this.connection)
+            this.connection.close()
+    }
+    
+    ping (): void {}
+
+    command<T = any> (cmd: string, arg: any): T {
+        return this.commands({ [cmd]: arg })
+    }
+
+    commands<T = any> (
+        cmds: Fibjs.AnyObject,
+        opts?: FxDbDriver__Driver.CommandDriverCommandOptions
+    ): T {
+        if (this.isPool)
+            return this.pool(conn => conn.runCommand(cmds));
+
+        return this.connection.runCommand(cmds) as any;
+    }
+}
+
