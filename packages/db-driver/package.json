@@ -28,7 +28,6 @@
 	},
 	"analyse": false,
 	"dependencies": {
-		"@fxjs/orm-core": "0.0.1",
 		"parse-querystring-dotkey": "^1.0.3"
 	},
 	"devDependencies": {
@@ -40,6 +39,9 @@
 		"knex": "^0.16.5",
 		"rollup-plugin-commonjs": "^9.2.1",
 		"should": "^13.2.3"
+	},
+	"peerDependencies": {
+		"@fxjs/orm-core": "*"
 	},
 	"ci": {
 		"type": "travis, appveyor",

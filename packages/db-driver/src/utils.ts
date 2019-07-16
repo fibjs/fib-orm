@@ -11,7 +11,7 @@ export function driverUUid () {
     return uuid.node().hex()
 }
 
-export function filterDriverType (protocol: any): FxDbDriver__Driver.DriverType {
+export function filterDriverType (protocol: any): FxDbDriverNS.DriverType {
     switch (protocol) {
         case 'sqlite:':
             return 'sqlite';
@@ -74,14 +74,14 @@ export function ensureSuffix (str: string = '', suffix: string = '//') {
     return str
 }
 
-export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnectionConfig {
+export function parseConnectionString (input: any): FxDbDriverNS.DBConnectionConfig {
     input = input || {};
     let urlObj = input instanceof net.Url ? input : null;
 
     if (typeof input === 'string') {
         urlObj = url.parse(input);
         
-        input = <FxDbDriver__Driver.DBConnectionConfig>{
+        input = <FxDbDriverNS.DBConnectionConfig>{
             protocol: urlObj.protocol || null,
             slashes: urlObj.slashes || '',
             query: urlObj.query || null,
@@ -130,8 +130,8 @@ export function parseConnectionString (input: any): FxDbDriver__Driver.DBConnect
 }
 
 export function parsePoolConfig (
-    input: boolean | FxDbDriver__Driver.ConnectionPoolOptions | any
-): FxDbDriver__Driver.ConnectionPoolOptions {
+    input: boolean | FxDbDriverNS.ConnectionPoolOptions | any
+): FxDbDriverNS.ConnectionPoolOptions {
     if (!input || input === true)
         return {};
 
@@ -142,7 +142,7 @@ export function parsePoolConfig (
         maxsize = undefined,
         timeout = undefined,
         retry = undefined
-    } = <FxDbDriver__Driver.ConnectionPoolOptions>(input || {})
+    } = <FxDbDriverNS.ConnectionPoolOptions>(input || {})
 
     return {
         maxsize,
@@ -151,13 +151,13 @@ export function parsePoolConfig (
     }
 }
 
-export function mountPoolToDb (driver: FxDbDriver__Driver.Driver) {
+export function mountPoolToDb (driver: FxDbDriverNS.Driver) {
     if (driver.config.pool)
-        driver.pool = FibPool<FxDbDriver__Driver.Driver>({
+        driver.pool = FibPool<FxDbDriverNS.Driver>({
             create: () => {
                 return driver.connect()
             },
-            destroy: (conn: FxDbDriver__Driver.Driver) => {
+            destroy: (conn: FxDbDriverNS.Driver) => {
                 return conn.close()
             },
             ...parsePoolConfig(driver.config.pool)
