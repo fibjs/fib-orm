@@ -1,9 +1,8 @@
 declare namespace FxOrmSqlDDLSync__Column {
-    interface PropertyDescriptor {
-    }
+    interface PropertyDescriptor {}
 
-    type StringType<ENUM_T = string> = string | ENUM_T
-    type ColumnType = StringType
+    type __StringType<ENUM_T = string> = string | ENUM_T
+    type ColumnType = __StringType
 
     type ColumnInfo = Property
 
@@ -11,11 +10,11 @@ declare namespace FxOrmSqlDDLSync__Column {
         [col: string]: FxOrmSqlDDLSync__Column.ColumnInfo
     }
 
-    type PropertyType = StringType<'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point'>
+    type PropertyType = __StringType<'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point'>
 
     type PropertyType_MySQL = PropertyType
     type ColumnType_MySQL =
-        StringType<'TEXT' | 'INT' | 'TINYINT' | 'DATE' | 'DATETIME' | 'LONGBLOB' | 'BLOB' | 'ENUM' | 'POINT'>
+        __StringType<'TEXT' | 'INT' | 'TINYINT' | 'DATE' | 'DATETIME' | 'LONGBLOB' | 'BLOB' | 'ENUM' | 'POINT'>
 
     interface PropertyDescriptor__MySQL {
         Field: string
@@ -38,7 +37,6 @@ declare namespace FxOrmSqlDDLSync__Column {
          * extra description such as `AUTO_INCREMENT`
          */
         Extra: string
-
         /**
          * @example `PRI`
          */
@@ -66,7 +64,11 @@ declare namespace FxOrmSqlDDLSync__Column {
         unsigned?: boolean
         primary?: boolean
         required?: boolean
-        defaultValue?: any
+        defaultValue?: (opts?: {
+            collection: string,
+            property: Property,
+            driver: FxDbDriverNS.Driver,
+        }) => any | any
         size?: number | string
         rational?: boolean // whether float typ
         time?: boolean
@@ -77,12 +79,11 @@ declare namespace FxOrmSqlDDLSync__Column {
         [ext_k: string]: any
     }
 
-    interface PropertyMySQL extends Property {
-    }
+    interface PropertyMySQL extends Property {}
 
     type PropertyType_SQLite = PropertyType
     type ColumnType_SQLite =
-        StringType<'TEXT' | 'INTEGER' | 'REAL' | 'SERIAL' | 'INTEGER UNSIGNED' | 'DATE' | 'DATETIME' | 'BLOB' | 'ENUM' | 'POINT'>
+        __StringType<'TEXT' | 'INTEGER' | 'REAL' | 'SERIAL' | 'INTEGER UNSIGNED' | 'DATE' | 'DATETIME' | 'BLOB' | 'ENUM' | 'POINT'>
 
     interface PropertySQLite extends Property {
         key: boolean

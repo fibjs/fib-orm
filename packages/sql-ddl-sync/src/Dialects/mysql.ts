@@ -5,8 +5,13 @@ import SQL = require("../SQL");
 import { getDialect } from '../Utils';
 
 const columnSizes = {
-	integer: { 2: 'SMALLINT', 4: 'INTEGER', 8: 'BIGINT' } as {[k: string]: string},
-	floating: { 4: 'FLOAT', 8: 'DOUBLE' } as {[k: string]: string}
+	integer: {
+		2: 'SMALLINT', 4: 'INTEGER', 8: 'BIGINT'
+	} as {[k: string]: string},
+	floating: {
+		4: 'FLOAT',
+		8: 'DOUBLE'
+	} as {[k: string]: string}
 };
 
 export const hasCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionSync'] = function (
@@ -347,14 +352,13 @@ export const dropCollectionColumn: FxOrmSqlDDLSync__Dialect.Dialect['dropCollect
 export const getCollectionIndexesSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionIndexesSync'] = function (
 	dbdriver, name
 ) {
-	var q = "";
-	q += "SELECT index_name, column_name, non_unique ";
-	q += "FROM information_schema.statistics ";
-	q += "WHERE table_schema = ? AND table_name = ?";
-
 	const rows = dbdriver.execute(
 		getDialect('mysql').escape(
-			q,
+			[
+				"SELECT index_name, column_name, non_unique ",
+				"FROM information_schema.statistics ",
+				"WHERE table_schema = ? AND table_name = ?",
+			].join(''),
 			[dbdriver.config.database, name]
 		)
 	)
@@ -433,10 +437,10 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			}
 			break;
 		case "integer":
-			type = columnSizes.integer[property.size || 4];
+			type = columnSizes.integer[property.size] || columnSizes.integer[4];
 			break;
 		case "number":
-			type = columnSizes.floating[property.size || 4];
+			type = columnSizes.floating[property.size] || columnSizes.floating[4];
 			break;
 		case "serial":
 			property.type = "number";
@@ -493,7 +497,13 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 		type += " AUTO_INCREMENT";
 	}
 	if (property.hasOwnProperty("defaultValue")) {
-		type += " DEFAULT " + getDialect(driver.type).escapeVal(property.defaultValue);
+		const defaultValue = typeof property.defaultValue === 'function' ? property.defaultValue({
+			collection,
+			property,
+			driver
+		}) : property.defaultValue
+
+		type += " DEFAULT " + getDialect(driver.type).escapeVal(defaultValue);
 	}
 
 	return {

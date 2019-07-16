@@ -98,6 +98,9 @@ declare namespace FxOrmSqlDDLSync__Dialect{
         removeIndexSync: {
             (driver: FxDbDriverNS.Driver<ConnType>, name: string, collection: FxOrmSqlDDLSync.TableName): any
         }
+        /**
+         * transform semantic property to raw string in db
+         */
         getType: {
             (collection: FxOrmSqlDDLSync.TableName, property: FxOrmSqlDDLSync__Column.Property, driver: FxDbDriverNS.Driver<ConnType>): false | TypeResult
         }

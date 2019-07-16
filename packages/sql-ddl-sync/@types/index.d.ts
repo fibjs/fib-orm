@@ -13,7 +13,6 @@
 
 declare namespace FxOrmSqlDDLSync {
     interface SyncOptions<DRIVER_QUERY_TYPE extends FxOrmSqlDDLSync__Query.BasicDriverQueryObject = any> {
-        driver: FxOrmSqlDDLSync__Driver.Driver<DRIVER_QUERY_TYPE>
         dbdriver: FxDbDriverNS.Driver
         debug?: Function | false
         suppressColumnDrop?: boolean

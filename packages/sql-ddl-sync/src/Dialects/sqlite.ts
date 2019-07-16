@@ -475,7 +475,12 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 		type += " AUTOINCREMENT";
 	}
 	if (property.hasOwnProperty("defaultValue")) {
-		type += " DEFAULT " + getDialect(driver.type).escapeVal(property.defaultValue);
+		const defaultValue = typeof property.defaultValue === 'function' ? property.defaultValue({
+			collection,
+			property,
+			driver
+		}) : property.defaultValue
+		type += " DEFAULT " + getDialect(driver.type).escapeVal(defaultValue);
 	}
 
 	return {
