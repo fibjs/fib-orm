@@ -124,7 +124,15 @@ export class Driver<ConnType = any> implements FxDbDriverNS.Driver<ConnType> {
 	/**
 	 * @override
 	 */
-	open (): void {}
+	reopen () {
+        try { this.close() } catch (error) {}
+        return this.open()
+    }
+
+	/**
+	 * @override
+	 */
+	open (): ConnType { return null }
 
 	/**
 	 * @override
@@ -179,19 +187,18 @@ class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriverNS.SQLDriv
         );
     }
 
-    reopen (): void {
+    reopen () {
         try { this.close() } catch (error) {}
-        this.open()
+        return this.open()
     }
     
-    open (): void {
+    open (): Class_MySQL {
         this.close()
 
-        this.connection = db.openMySQL(this.uri)
+        return this.connection = db.openMySQL(this.uri)
     }
     close (): void {
-        if (this.connection)
-            this.connection.close()
+        if (this.connection) this.connection.close()
     }
     ping (): void { return }
     begin (): void { return this.connection.begin() }
@@ -215,18 +222,17 @@ class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriverNS.SQLDr
         this.connection = null
     }
 
-    reopen (): void {
+    reopen () {
         try { this.close() } catch (error) {}
-        this.open()
+        return this.open()
     }
     
-    open (): void {
-        this.connection = db.openSQLite(this.uri)
+    open (): Class_SQLite {
+        return this.connection = db.openSQLite(this.uri)
     }
 
     close (): void {
-        if (this.connection)
-            this.connection.close()
+        if (this.connection) this.connection.close()
     }
     ping (): void { return }
     begin (): void { return this.connection.begin() }
@@ -250,17 +256,17 @@ class RedisDriver extends Driver<Class_Redis> implements FxDbDriverNS.CommandDri
         this.connection = null
     }
 
-    reopen (): void {
+    reopen () {
         try { this.close() } catch (error) {}
-        this.open()
+        return this.open()
     }
 
-    open (): void {
-        this.connection = db.openRedis(this.uri)
+    open (): Class_Redis {
+        return this.connection = db.openRedis(this.uri)
     }
+
     close (): void {
-        if (this.connection)
-            this.connection.close()
+        if (this.connection) this.connection.close()
     }
     
     ping (): void {}
@@ -298,17 +304,16 @@ class MongoDriver extends Driver<Class_MongoDB> implements FxDbDriverNS.CommandD
         this.connection = null
     }
 
-    reopen (): void {
+    reopen () {
         try { this.close() } catch (error) {}
-        this.open()
+        return this.open()
     }
 
-    open (): void {
-        this.connection = db.openMongoDB(this.uri)
+    open (): Class_MongoDB {
+        return this.connection = db.openMongoDB(this.uri)
     }
     close (): void {
-        if (this.connection)
-            this.connection.close()
+        if (this.connection) this.connection.close()
     }
     
     ping (): void {}

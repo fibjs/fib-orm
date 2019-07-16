@@ -108,11 +108,18 @@ declare namespace FxDbDriverNS {
         pool?: FibPoolNS.FibPoolFunction<ConnType>
 
         // knex: FXJSKnex.FXJSKnexModule.KnexInstance
+
+        /**
+         * @description re open db connection
+         */
+        reopen: {
+            (): ConnType
+        }
         /**
          * @description open db connection
          */
         open: {
-            (): void
+            (): ConnType
         }
         /**
          * @description close db connection
