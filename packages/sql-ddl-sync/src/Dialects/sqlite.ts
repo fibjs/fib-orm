@@ -1,92 +1,121 @@
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
 
+import { getDialect } from '../Utils';
+
 // @see https://www.sqlite.org/lang_altertable.html
 export const hasCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionSync'] = function (
-	driver, name
+	dbdriver, name
 ) {
-	const rows = driver.execQuery("SELECT * FROM sqlite_master WHERE type = 'table' and name = ?", [name])
+	const rows = dbdriver.execute(
+		getDialect('sqlite').escape(
+			"SELECT * FROM sqlite_master WHERE type = 'table' and name = ?", [name]
+		)
+	)
 
 	return rows.length > 0;
 };
 
 export const hasCollection: FxOrmSqlDDLSync__Dialect.Dialect['hasCollection'] = function (
-	driver, name, cb
+	dbdriver, name, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => hasCollectionSync(driver, name)
+		() => hasCollectionSync(dbdriver, name)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
+/**
+ * @no_test
+ */
 export const addPrimaryKeySync: FxOrmSqlDDLSync__Dialect.Dialect['addPrimaryKeySync'] = function (
-	driver, tableName, columnName
+	dbdriver, tableName, columnName
 ) {
-	const sql = "ALTER TABLE ?? ADD CONSTRAINT ?? PRIMARY KEY(??);";
-	return driver.execQuery(sql, [tableName, columnName + "PK", columnName]);
+	return dbdriver.execute(
+		getDialect('sqlite').escape(
+			"ALTER TABLE ?? ADD CONSTRAINT ?? PRIMARY KEY(??);",
+			[tableName, columnName + "PK", columnName]
+		)
+	)
 };
 
 export const addPrimaryKey: FxOrmSqlDDLSync__Dialect.Dialect['addPrimaryKey'] = function (
-	driver, tableName, columnName, cb
+	dbdriver, tableName, columnName, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => addPrimaryKeySync(driver, tableName, columnName)
+		() => addPrimaryKeySync(dbdriver, tableName, columnName)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const dropPrimaryKeySync: FxOrmSqlDDLSync__Dialect.Dialect['dropPrimaryKeySync'] = function (
-	driver, tableName, columnName
+	dbdriver, tableName, columnName
 ) {
-	const sql = "ALTER TABLE ?? DROP CONSTRAINT ??;"
-	return driver.execQuery(sql, [tableName, columnName + "PK"]);
+	return dbdriver.execute(
+		getDialect('sqlite').escape(
+			"ALTER TABLE ?? DROP CONSTRAINT ??;",
+			[tableName, columnName + "PK"]
+		)
+	)
 };
 
 export const dropPrimaryKey: FxOrmSqlDDLSync__Dialect.Dialect['dropPrimaryKey'] = function (
-	driver, tableName, columnName, cb
+	dbdriver, tableName, columnName, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => dropPrimaryKeySync(driver, tableName, columnName)
+		() => dropPrimaryKeySync(dbdriver, tableName, columnName)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const addForeignKeySync: FxOrmSqlDDLSync__Dialect.Dialect['addForeignKeySync'] = function (
-	driver, tableName, options
+	dbdriver, tableName, options
 ) {
-	const sql = "ALTER TABLE ?? ADD FOREIGN KEY(??) REFERENCES ??(??);";
-	return driver.execQuery(sql, [tableName, options.name, options.references.table, options.references.column]);
+	return dbdriver.execute(
+		getDialect('sqlite').escape(
+			"ALTER TABLE ?? ADD FOREIGN KEY(??) REFERENCES ??(??);",
+			[tableName, options.name, options.references.table, options.references.column]
+		)
+	)
 };
 
 export const addForeignKey: FxOrmSqlDDLSync__Dialect.Dialect['addForeignKey'] = function (
-	driver, tableName, options, cb
+	dbdriver, tableName, options, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => addForeignKeySync(driver, tableName, options)
+		() => addForeignKeySync(dbdriver, tableName, options)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const dropForeignKeySync: FxOrmSqlDDLSync__Dialect.Dialect['dropForeignKeySync'] = function (
-	driver, tableName, columnName
+	dbdriver, tableName, columnName
 ) {
-	const sql = "ALTER TABLE ?? DROP CONSTRAINT ??;"
-	return driver.execQuery(sql, [tableName, tableName + "_" + columnName + "_fkey"]);
+	return dbdriver.execute(
+		getDialect('sqlite').escape(
+			"ALTER TABLE ?? DROP CONSTRAINT ??;",
+			[tableName, tableName + "_" + columnName + "_fkey"]
+		)
+	)
 };
 
 export const dropForeignKey: FxOrmSqlDDLSync__Dialect.Dialect['dropForeignKey'] = function (
-	driver, tableName, columnName, cb
+	dbdriver, tableName, columnName, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => dropForeignKeySync(driver, tableName, columnName)
+		() => dropForeignKeySync(dbdriver, tableName, columnName)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionPropertiesSync'] = function (
-	driver, name
+	dbdriver, name
 ) {
-	const cols = driver.execQuery("PRAGMA table_info(??)", [name]);
+	const cols = dbdriver.execute(
+		getDialect('sqlite').escape(
+			"PRAGMA table_info(??)", [name]
+		)
+	)
 	let columns = <{ [col: string]: FxOrmSqlDDLSync__Column.PropertySQLite }>{}, m;
 
 	for (let i = 0; i < cols.length; i++) {
@@ -145,134 +174,147 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 		columns[dCol.name] = column;
 	}
 
-	driver.execQuery("PRAGMA table_info(??)", [name]);
+	dbdriver.execute(
+		getDialect('sqlite').escape(
+			"PRAGMA table_info(??)", [name]
+		)
+	)
 
 	return columns;
 };
 
 export const getCollectionProperties: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionProperties'] = function (
-	driver, name, cb
+	dbdriver, name, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => getCollectionPropertiesSync(driver, name)
+		() => getCollectionPropertiesSync(dbdriver, name)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const createCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['createCollectionSync'] = function (
-	driver, name, columns, keys
+	dbdriver, name, columns, keys
 ) {
-	return driver.execQuery(SQL.CREATE_TABLE({
-		name: name,
-		columns: columns,
-		keys: keys
-	}, driver));
+	return dbdriver.execute(
+		SQL.CREATE_TABLE({
+			name: name,
+			columns: columns,
+			keys: keys
+		}, 'sqlite')
+	)
 };
 
 export const createCollection: FxOrmSqlDDLSync__Dialect.Dialect['createCollection'] = function (
-	driver, name, columns, keys, cb
+	dbdriver, name, columns, keys, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => createCollectionSync(driver, name, columns, keys)
+		() => createCollectionSync(dbdriver, name, columns, keys)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const dropCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['dropCollectionSync'] = function (
-	driver, name
+	dbdriver, name
 ) {
-	return driver.execQuery(SQL.DROP_TABLE({ name: name }, driver));
+	return dbdriver.execute(
+		SQL.DROP_TABLE({ name: name }, 'sqlite')
+	)
 };
 
 export const dropCollection: FxOrmSqlDDLSync__Dialect.Dialect['dropCollection'] = function (
-	driver, name, cb
+	dbdriver, name, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => dropCollectionSync(driver, name)
+		() => dropCollectionSync(dbdriver, name)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const addCollectionColumnSync: FxOrmSqlDDLSync__Dialect.Dialect['addCollectionColumnSync'] = function (
-	driver, name, column, after_column
+	dbdriver, name, column, after_column
 ) {
-	return driver.execQuery(SQL.ALTER_TABLE_ADD_COLUMN({
-		name: name,
-		column: column,
-		after: after_column
-	}, driver));
+	return dbdriver.execute(
+		SQL.ALTER_TABLE_ADD_COLUMN({
+			name: name,
+			column: column,
+			after: after_column
+		}, 'sqlite')
+	)
 };
 
 export const addCollectionColumn: FxOrmSqlDDLSync__Dialect.Dialect['addCollectionColumn'] = function (
-	driver, name, column, after_column, cb
+	dbdriver, name, column, after_column, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => addCollectionColumnSync(driver, name, column, after_column)
+		() => addCollectionColumnSync(dbdriver, name, column, after_column)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const renameCollectionColumnSync: FxOrmSqlDDLSync__Dialect.Dialect['renameCollectionColumnSync'] = function (
-	driver, name,
+	dbdriver, name,
 	oldColName: string,
 	newColName: string
 ) {
-	const sql = SQL.ALTER_TABLE_RENAME_COLUMN({
-		name: name, oldColName: oldColName, newColName: newColName
-	}, driver);
-
-	return driver.execQuery(sql);
+	return dbdriver.execute(
+		SQL.ALTER_TABLE_RENAME_COLUMN({
+			name: name, oldColName: oldColName, newColName: newColName
+		}, 'sqlite')
+	)
 };
 
 export const renameCollectionColumn: FxOrmSqlDDLSync__Dialect.Dialect['renameCollectionColumn'] = function (
-	driver, name,
+	dbdriver, name,
 	oldColName: string,
 	newColName: string, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => renameCollectionColumnSync(driver, name, oldColName, newColName)
+		() => renameCollectionColumnSync(dbdriver, name, oldColName, newColName)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const modifyCollectionColumnSync: FxOrmSqlDDLSync__Dialect.Dialect['modifyCollectionColumnSync'] = function (
-	driver, name, column
+	dbdriver, name, column
 ) {
-	return driver.execQuery(SQL.ALTER_TABLE_MODIFY_COLUMN({
-		name: name,
-		column: column
-	}, driver));
+	return dbdriver.execute(
+		SQL.ALTER_TABLE_MODIFY_COLUMN({
+			name: name,
+			column: column
+		}, 'sqlite')
+	)
 };
 
 export const modifyCollectionColumn: FxOrmSqlDDLSync__Dialect.Dialect['modifyCollectionColumn'] = function (
-	driver, name, column, cb
+	dbdriver, name, column, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => modifyCollectionColumnSync(driver, name, column)
+		() => modifyCollectionColumnSync(dbdriver, name, column)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const dropCollectionColumnSync: FxOrmSqlDDLSync__Dialect.Dialect['dropCollectionColumnSync'] = function (
-	driver, name, column
+	dbdriver, name, column
 ) {
 	throw Error('sqlite does not support dropping columns')
 };
 
 export const dropCollectionColumn: FxOrmSqlDDLSync__Dialect.Dialect['dropCollectionColumn'] = function (
-	driver, name, column, cb
+	dbdriver, name, column, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		// () => dropCollectionColumnSync(driver, name, column)
-		() => undefined as any
+		() => dropCollectionColumnSync(dbdriver, name, column)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const getCollectionIndexesSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionIndexesSync'] = function (
-	driver, name
+	dbdriver, name
 ) {
-	const rows = driver.execQuery("PRAGMA index_list(" + driver.query.escapeId(name) + ")")
+	const rows = dbdriver.execute(
+		"PRAGMA index_list(" + getDialect('sqlite').escapeId(name) + ")"
+	)
 
 	const indexes = convertIndexRows(rows);
 
@@ -282,7 +324,9 @@ export const getCollectionIndexesSync: FxOrmSqlDDLSync__Dialect.Dialect['getColl
 			continue;
 		}
 
-		const rows = driver.execQuery(`PRAGMA index_info(${driver.query.escapeVal(k)})`);
+		const rows = dbdriver.execute(
+			`PRAGMA index_info(${getDialect('sqlite').escapeVal(k)})`
+		)
 
 		for (let i = 0; i < rows.length; i++) {
 			indexes[k].columns.push(rows[i].name);
@@ -293,45 +337,50 @@ export const getCollectionIndexesSync: FxOrmSqlDDLSync__Dialect.Dialect['getColl
 };
 
 export const getCollectionIndexes: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionIndexes'] = function (
-	driver, name, cb
+	dbdriver, name, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => getCollectionIndexesSync(driver, name)
+		() => getCollectionIndexesSync(dbdriver, name)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const addIndexSync: FxOrmSqlDDLSync__Dialect.Dialect['addIndexSync'] = function (
-	driver, name, unique, collection, columns
+	dbdriver, name, unique, collection, columns
 ) {
-	return driver.execQuery(SQL.CREATE_INDEX({
-		name: name,
-		unique: unique,
-		collection: collection,
-		columns: columns
-	}, driver));
+	return dbdriver.execute(
+		SQL.CREATE_INDEX({
+			name: name,
+			unique: unique,
+			collection: collection,
+			columns: columns
+		}, 'sqlite')
+	)
 };
 
 export const addIndex: FxOrmSqlDDLSync__Dialect.Dialect['addIndex'] = function (
-	driver, name, unique, collection, columns, cb
+	dbdriver, name, unique, collection, columns, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => addIndexSync(driver, name, unique, collection, columns)
+		() => addIndexSync(dbdriver, name, unique, collection, columns)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
 export const removeIndexSync: FxOrmSqlDDLSync__Dialect.Dialect['removeIndexSync'] = function (
-	driver, collection, name
+	dbdriver, collection, name
 ) {
-	return driver.execQuery(`DROP INDEX IF EXISTS ${driver.query.escapeId(name)}`);
+
+	return dbdriver.execute(
+		`DROP INDEX IF EXISTS ${getDialect('sqlite').escapeId(name)}`
+	)
 };
 
 export const removeIndex: FxOrmSqlDDLSync__Dialect.Dialect['removeIndex'] = function (
-	driver, collection, name, cb
+	dbdriver, collection, name, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
-		() => removeIndexSync(driver, collection, name)
+		() => removeIndexSync(dbdriver, collection, name)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
@@ -397,8 +446,10 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			type = "POINT";
 			break;
 		default:
-			customType = driver.customTypes[property.type];
-			if (customType) {
+			if (
+				driver.customTypes && 
+				(customType = driver.customTypes[property.type])
+			) {
 				type = customType.datastoreType(property, { collection, driver })
 			}
 	}
@@ -424,7 +475,7 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 		type += " AUTOINCREMENT";
 	}
 	if (property.hasOwnProperty("defaultValue")) {
-		type += " DEFAULT " + driver.query.escapeVal(property.defaultValue);
+		type += " DEFAULT " + getDialect(driver.type).escapeVal(property.defaultValue);
 	}
 
 	return {

@@ -29,17 +29,15 @@
 		"fibjs": "*"
 	},
 	"analyse": false,
-	"dependencies": {
-		"@fxjs/orm-core": "0.0.1"
-	},
 	"peerDependencies": {
-		"@fxjs/sql-query": ">= 0.4 < 0.5"
+		"@fxjs/sql-query": ">= 0.4 < 0.6",
+		"@fxjs/db-driver": "*"
 	},
 	"devDependencies": {
 		"@fibjs/ci": "^2.2.0",
 		"@fibjs/types": "^0.27.1",
-		"@fxjs/orm": "^1.10.3",
-		"@types/debug": "^4.1.2",
+		"@fxjs/db-driver": "0.0.1",
+		"@fxjs/sql-query": "^0.4.0",
 		"cross-env": "^5.2.0",
 		"fib-rollup": "^0.4.0",
 		"fib-typify": "^0.6.0",

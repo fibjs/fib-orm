@@ -1,7 +1,7 @@
 const test = require('test')
 test.setup()
 
-var ORM     = require("@fxjs/orm");
+var DBDriver     = require("@fxjs/db-driver");
 var common  = require("./common");
 var url     = require("url");
 
@@ -20,22 +20,17 @@ if (!uri.protocol) {
 	process.exit(1);
 }
 
-ORM.connect(process.env.URI, function (err, db) {
-	if (err) throw err;
+common.dbdriver = DBDriver.create(process.env.URI);
+common.dialect = common.dbdriver.type;
+runTest();
 
-	common.driver = db.driver;
-	common.dialect = db.driver.dialect;
-
-	runTest();
-
-	db.closeSync();
-
-	process.exit(0);
-});
+process.exit(0);
 
 function runTest () {
 	require('./integration/db.callback')
 	require('./integration/db')
 
 	test.run(console.DEBUG)
+
+	common.dbdriver.close()
 }

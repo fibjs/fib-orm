@@ -1,5 +1,6 @@
 /// <reference types="@fibjs/types" />
 /// <reference types="@fxjs/orm-core" />
+/// <reference types="@fxjs/db-driver" />
 
 /// <reference path="_common.d.ts" />
 /// <reference path="SQL.d.ts" />
@@ -13,6 +14,7 @@
 declare namespace FxOrmSqlDDLSync {
     interface SyncOptions<DRIVER_QUERY_TYPE extends FxOrmSqlDDLSync__Query.BasicDriverQueryObject = any> {
         driver: FxOrmSqlDDLSync__Driver.Driver<DRIVER_QUERY_TYPE>
+        dbdriver: FxDbDriverNS.Driver
         debug?: Function | false
         suppressColumnDrop?: boolean
     }

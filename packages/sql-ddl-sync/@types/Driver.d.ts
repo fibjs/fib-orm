@@ -2,14 +2,12 @@
 /// <reference path="_common.d.ts" />
 
 declare namespace FxOrmSqlDDLSync__Driver {
-    interface CustomPropertyType<
-        DRIVER_QUERY_TYPE extends FxOrmSqlDDLSync__Query.BasicDriverQueryObject = any
-    > {
+    interface CustomPropertyType<ConnType = any> {
         datastoreType(
             prop?: FxOrmSqlDDLSync__Column.Property,
             opts?: {
                 collection: string
-                driver: FxOrmSqlDDLSync__Driver.Driver<DRIVER_QUERY_TYPE>
+                driver: FxDbDriverNS.Driver<ConnType>
             }
         ): string
         valueToProperty?(value?: any, prop?: any): any

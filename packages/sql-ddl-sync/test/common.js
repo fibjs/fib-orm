@@ -1,15 +1,20 @@
+const FxOrmCore = require('@fxjs/orm-core')
+
 exports.dialect = null;
 exports.table   = "sql_ddl_sync_test_table";
 
-exports.fakeDriver = {
-	query: {
-		escapeId  : function (id) {
-			return "$$" + id + "$$";
-		},
-		escapeVal : function (val) {
-			return "^^" + val + "^^";
-		}
+const Dialects = require('@fxjs/sql-query/lib/Dialects')
+Dialects['fake'] = {
+	escapeId  : function (id) {
+		return "$$" + id + "$$";
 	},
+	escapeVal : function (val) {
+		return "^^" + val + "^^";
+	}
+}
+
+exports.fakeDriver = {
+	type: 'fake',
 	customTypes: {
 		json: {
 			datastoreType: function (prop, opts) {
@@ -21,10 +26,15 @@ exports.fakeDriver = {
 
 exports.dropColumn = function (column) {
 	return function (done) {
-		switch (exports.driver.dialect) {
+		switch (exports.dbdriver.type) {
 			case "mysql":
 			case "postgresql":
-				return exports.driver.execQuery("ALTER TABLE ?? DROP ??", [ exports.table, column ], done);
+				exports.dbdriver.execute(
+					Dialects[exports.dbdriver.type].escape(
+						"ALTER TABLE ?? DROP ??", [ exports.table, column ]
+					)
+				);
+				return done();
 		}
 		return done(unknownProtocol());
 	};
@@ -32,13 +42,34 @@ exports.dropColumn = function (column) {
 
 exports.addColumn = function (column) {
 	return function (done) {
-		switch (exports.driver.dialect) {
+		switch (exports.dbdriver.type) {
 			case "mysql":
-				return exports.driver.execQuery("ALTER TABLE ?? ADD ?? INTEGER NOT NULL", [ exports.table, column ], done);
+				var exposedErrResult = FxOrmCore.Utils.exposeErrAndResultFromSyncMethod(
+					() => exports.dbdriver.execute(
+						Dialects[exports.dbdriver.type].escape(
+							"ALTER TABLE ?? ADD ?? INTEGER NOT NULL", [ exports.table, column ]
+						)
+					)
+				)
+				return FxOrmCore.Utils.throwErrOrCallabckErrResult(exposedErrResult, { no_throw: true, callback: done })
 			case "postgresql":
-				return exports.driver.execQuery("ALTER TABLE " + exports.table + " ADD " + column + " INTEGER NOT NULL", done);
+				var exposedErrResult = FxOrmCore.Utils.exposeErrAndResultFromSyncMethod(
+					() => exports.dbdriver.execute(
+						Dialects[exports.dbdriver.type].escape(
+							"ALTER TABLE " + exports.table + " ADD " + column + " INTEGER NOT NULL"
+						)
+					)
+				)
+				return FxOrmCore.Utils.throwErrOrCallabckErrResult(exposedErrResult, { no_throw: true, callback: done })
 			case "sqlite":
-				return exports.driver.execQuery("ALTER TABLE " + exports.table + " ADD " + column + " INTEGER", done);
+				var exposedErrResult = FxOrmCore.Utils.exposeErrAndResultFromSyncMethod(
+					() => exports.dbdriver.execute(
+						Dialects[exports.dbdriver.type].escape(
+							"ALTER TABLE " + exports.table + " ADD " + column + " INTEGER"
+						)
+					)
+				)
+				return FxOrmCore.Utils.throwErrOrCallabckErrResult(exposedErrResult, { no_throw: true, callback: done })
 		}
 		return done(unknownProtocol());
 	};
@@ -46,13 +77,28 @@ exports.addColumn = function (column) {
 
 exports.changeColumn = function (column) {
 	return function (done) {
-		switch (exports.driver.dialect) {
+		switch (exports.dbdriver.type) {
 			case "mysql":
-				return exports.driver.execQuery("ALTER TABLE ?? MODIFY ?? INTEGER NOT NULL", [ exports.table, column ], done);
+				exports.dbdriver.execute(
+					Dialects[exports.dbdriver.type].escape(
+						"ALTER TABLE ?? MODIFY ?? INTEGER NOT NULL", [ exports.table, column ]
+					)
+				);
+				return done();
 			case "postgresql":
-				return exports.driver.execQuery("ALTER TABLE " + exports.table + " ALTER " + column + " TYPE DOUBLE PRECISION", done);
+				exports.dbdriver.execute(
+					Dialects[exports.dbdriver.type].escape(
+						"ALTER TABLE " + exports.table + " ALTER " + column + " TYPE DOUBLE PRECISION"
+					)
+				);
+				return done();
 			case "sqlite":
-				return exports.driver.execQuery("ALTER TABLE " + exports.table + " MODIFY " + column + " INTEGER NOT NULL", done);
+				exports.dbdriver.execute(
+					Dialects[exports.dbdriver.type].escape(
+						"ALTER TABLE " + exports.table + " MODIFY " + column + " INTEGER NOT NULL"
+					)
+				);
+				return done();
 		}
 		return done(unknownProtocol());
 	};
@@ -60,13 +106,28 @@ exports.changeColumn = function (column) {
 
 exports.addIndex = function (name, column, unique) {
 	return function (done) {
-		switch (exports.driver.dialect) {
+		switch (exports.dbdriver.type) {
 			case "mysql":
-				return exports.driver.execQuery("CREATE " + (unique ? "UNIQUE" : "") + " INDEX ?? ON ?? (??)", [ name, exports.table, column ], done);
+				exports.dbdriver.execute(
+					Dialects[exports.dbdriver.type].escape(
+						"CREATE " + (unique ? "UNIQUE" : "") + " INDEX ?? ON ?? (??)", [ name, exports.table, column ]
+					)
+				);
+				return done();
 			case "postgresql":
-				return exports.driver.execQuery("CREATE " + (unique ? "UNIQUE" : "") + " INDEX " + exports.table + "_" + name + " ON " + exports.table + " (" + column + ")", done);
+				exports.dbdriver.execute(
+					Dialects[exports.dbdriver.type].escape(
+						"CREATE " + (unique ? "UNIQUE" : "") + " INDEX " + exports.table + "_" + name + " ON " + exports.table + " (" + column + ")"
+					)
+				);
+				return done();
 			case "sqlite":
-				return exports.driver.execQuery("CREATE " + (unique ? "UNIQUE" : "") + " INDEX " + name + " ON " + exports.table + " (" + column + ")", done);
+				exports.dbdriver.execute(
+					Dialects[exports.dbdriver.type].escape(
+						"CREATE " + (unique ? "UNIQUE" : "") + " INDEX " + name + " ON " + exports.table + " (" + column + ")"
+					)
+				);
+				return done();
 		}
 		return done(unknownProtocol());
 	};
@@ -74,13 +135,34 @@ exports.addIndex = function (name, column, unique) {
 
 exports.dropIndex = function (name) {
 	return function (done) {
-		switch (exports.driver.dialect) {
+		switch (exports.dbdriver.type) {
 			case "mysql":
-				return exports.driver.execQuery("DROP INDEX ?? ON ??", [ name, exports.table ], done);
+				var exposedErrResult = FxOrmCore.Utils.exposeErrAndResultFromSyncMethod(
+					() => exports.dbdriver.execute(
+						Dialects[exports.dbdriver.type].escape(
+							"DROP INDEX ?? ON ??", [ name, exports.table ]
+						)
+					)
+				)
+				return FxOrmCore.Utils.throwErrOrCallabckErrResult(exposedErrResult, { no_throw: true, callback: done })
 			case "postgresql":
-				return exports.driver.execQuery("DROP INDEX " + exports.table + "_" + name, done);
+				var exposedErrResult = FxOrmCore.Utils.exposeErrAndResultFromSyncMethod(
+					() => exports.dbdriver.execute(
+						Dialects[exports.dbdriver.type].escape(
+							"DROP INDEX " + exports.table + "_" + name
+						)
+					)
+				)
+				return FxOrmCore.Utils.throwErrOrCallabckErrResult(exposedErrResult, { no_throw: true, callback: done })
 			case "sqlite":
-				return exports.driver.execQuery("DROP INDEX " + name, done);
+				var exposedErrResult = FxOrmCore.Utils.exposeErrAndResultFromSyncMethod(
+					() => exports.dbdriver.execute(
+						Dialects[exports.dbdriver.type].escape(
+							"DROP INDEX " + name
+						)
+					)
+				)
+				return FxOrmCore.Utils.throwErrOrCallabckErrResult(exposedErrResult, { no_throw: true, callback: done })
 		}
 		return done(unknownProtocol());
 	};
@@ -88,10 +170,15 @@ exports.dropIndex = function (name) {
 
 exports.dropTable = function (name) {
 	return function (done) {
-		exports.driver.execQuery("DROP TABLE IF EXISTS ??", [exports.table], done);
+		exports.dbdriver.execute(
+			Dialects[exports.dbdriver.type].escape(
+				"DROP TABLE IF EXISTS ??", [exports.table]
+			)
+		);
+		return done();
 	};
 }
 
 function unknownProtocol() {
-	return new Error("Unknown protocol - " + exports.driver.dialect);
+	return new Error("Unknown protocol - " + exports.dbdriver.type);
 }

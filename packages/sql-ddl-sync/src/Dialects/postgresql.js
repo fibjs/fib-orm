@@ -1,4 +1,9 @@
-var util        = require("util");
+/**
+ * @TODO: driver.execQuery -> 
+ * dbdriver.execute(
+ * 	dbdriver.execute(getDialect(dbdriver.type)).escape
+ * )
+ */ 
 var SQL         = require("../SQL");
 // one fifo process queue, pointless now, just write synchronously
 var Queue       = null;
@@ -314,11 +319,6 @@ exports.getType = function (collection, property, driver) {
 						                "AS ENUM (" + values + ")", cb);
 					});
 				};
-
-				// return {
-				// 	value  : type,
-				// 	before : before
-				// };
 				break;
 			case "point":
 				type = "POINT";

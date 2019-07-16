@@ -3,7 +3,7 @@
 
 import FxORMCore = require("@fxjs/orm-core");
 import util  = require('util')
-import { logJson } from './Utils';
+import { logJson, getDialect } from './Utils';
 
 const noOp = () => {};
 
@@ -28,9 +28,7 @@ function makeSyncIteration (syncInstnace: Sync, force_sync: boolean = false): Fx
 	};
 }
 
-export class Sync<
-	DRIVER_QUERY_TYPE extends FxOrmSqlDDLSync__Query.BasicDriverQueryObject = any
-> implements FxOrmSqlDDLSync.Sync {
+export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync {
 	/**
 	 * @description total changes count in this time `Sync`
 	 * @deprecated
@@ -41,14 +39,15 @@ export class Sync<
 	constructor (
 		options: FxOrmSqlDDLSync.SyncOptions,
 		private debug: Function = options.debug || noOp,
-		private driver: FxOrmSqlDDLSync__Driver.Driver<DRIVER_QUERY_TYPE> = options.driver,
-		private Dialect: FxOrmSqlDDLSync__Dialect.Dialect = dialect(driver.dialect),
+		private dbdriver: FxDbDriverNS.Driver<ConnType> = options.dbdriver,
+		private Dialect: FxOrmSqlDDLSync__Dialect.Dialect = dialect(dbdriver.type as any),
 		private suppressColumnDrop = options.suppressColumnDrop,
 		/**
 		 * @description customTypes
 		 */
 		private types = <FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash>{}
 	) {
+		// this.dbdriver.dbdriver = dbdriver
 	}
 
 	[sync_method: string]: any
@@ -91,7 +90,7 @@ export class Sync<
 		let is_processed: boolean = false;
 
 		try {
-			has = this.Dialect.hasCollectionSync(this.driver, collection.name)
+			has = this.Dialect.hasCollectionSync(this.dbdriver, collection.name)
 		} catch (err) {
 			throw err
 		}
@@ -105,7 +104,7 @@ export class Sync<
 			// not process, callback `false`
 			return is_processed
 
-		const columns: FxOrmSqlDDLSync__Column.ColumnInfoHash = this.Dialect.getCollectionPropertiesSync(this.driver, collection.name)
+		const columns: FxOrmSqlDDLSync__Column.ColumnInfoHash = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name)
 		this.syncCollection(collection, columns)
 
 		// processed, callback `true`
@@ -153,11 +152,11 @@ export class Sync<
 
 		for (let _before of before) {
 			// error maybe throwed from here
-			_before(this.driver);
+			_before(this.dbdriver);
 		}
 		
 		const result_1 = this.Dialect.createCollectionSync(
-			this.driver,
+			this.dbdriver,
 			collection.name, columns, keys
 		);
 
@@ -182,7 +181,7 @@ export class Sync<
 		if (this.types.hasOwnProperty(prop.type)) {
 			type = this.types[prop.type].datastoreType(prop);
 		} else { // fallback to driver's types
-			type = this.Dialect.getType(collection_name, prop, this.driver);
+			type = this.Dialect.getType(collection_name, prop, this.dbdriver);
 		}
 
 		if (!type)
@@ -197,7 +196,7 @@ export class Sync<
 		}
 
 		return {
-			value  : this.driver.query.escapeId(prop.mapsTo) + " " + type.value,
+			value  : getDialect(this.dbdriver.type).escapeId(prop.mapsTo) + " " + type.value,
 			before : type.before
 		};
 	}
@@ -228,16 +227,16 @@ export class Sync<
 				if (col.before) {
 					const _before = col.before.bind(col);
 					// error maybe throwed from here
-					_before(this.driver);
+					_before(this.dbdriver);
 				}
 				
 				this.Dialect.addCollectionColumnSync(
-					this.driver,
+					this.dbdriver,
 					collection.name,
 					col.value,
 					last_k
 				)
-			} else if (this.driver.dialect !== 'sqlite' && this.needToSync(prop, columns[k])) {
+			} else if (this.dbdriver.type !== 'sqlite' && this.needToSync(prop, columns[k])) {
 				// var col = this.createColumn(collection.name, k/* prop */);
 				const col = this.createColumn(collection.name, prop);
 
@@ -253,11 +252,11 @@ export class Sync<
 				if (col.before) {
 					const _before = col.before.bind(col);
 					// error maybe throwed from here
-					_before(this.driver);
+					_before(this.dbdriver);
 				}
 				
 				this.Dialect.modifyCollectionColumnSync(
-					this.driver,
+					this.dbdriver,
 					collection.name,
 					col.value
 				);
@@ -273,7 +272,7 @@ export class Sync<
 
 					this.total_changes += 1;
 
-					return this.Dialect.dropCollectionColumnSync(this.driver, collection.name, k);
+					return this.Dialect.dropCollectionColumnSync(this.dbdriver, collection.name, k);
                 }
             }
         }
@@ -296,7 +295,7 @@ export class Sync<
 	) {
 		var post = prop.unique ? 'unique' : 'index';
 
-		if (this.driver.dialect == 'sqlite') {
+		if (this.dbdriver.dialect == 'sqlite') {
 			return collection.name + '_' + prop.name + '_' + post;
 		} else {
 			return prop.name + '_' + post;
@@ -398,7 +397,7 @@ export class Sync<
 	): string|FxOrmSqlDDLSync__DbIndex.DbIndexInfo {
 		if (indexes.length == 0) return ;
 
-		const db_indexes = this.Dialect.getCollectionIndexesSync(this.driver, collection_name);
+		const db_indexes = this.Dialect.getCollectionIndexesSync(this.dbdriver, collection_name);
 
 		for (let i = 0; i < indexes.length; i++) {
 			if (!db_indexes.hasOwnProperty(indexes[i].name)) {
@@ -407,7 +406,7 @@ export class Sync<
 				this.total_changes += 1;
 
 				const index = indexes[i];
-				this.Dialect.addIndexSync(this.driver, index.name, index.unique, collection_name, index.columns);
+				this.Dialect.addIndexSync(this.dbdriver, index.name, index.unique, collection_name, index.columns);
 				continue;
 			} else if (!db_indexes[indexes[i].name].unique != !indexes[i].unique) {
 				this.debug("Replacing index " + collection_name + "." + indexes[i].name);
@@ -415,8 +414,8 @@ export class Sync<
 				this.total_changes += 1;
 
 				const index = indexes[i];
-				this.Dialect.removeIndexSync(this.driver, index.name, collection_name);
-				this.Dialect.addIndexSync(this.driver, index.name, index.unique, collection_name, index.columns);
+				this.Dialect.removeIndexSync(this.dbdriver, index.name, collection_name);
+				this.Dialect.addIndexSync(this.dbdriver, index.name, index.unique, collection_name, index.columns);
 			}
 			delete db_indexes[indexes[i].name];
 		}
@@ -426,7 +425,7 @@ export class Sync<
 
 			this.total_changes += 1;
 
-			this.Dialect.removeIndexSync(this.driver, collection_name, idx);
+			this.Dialect.removeIndexSync(this.dbdriver, collection_name, idx);
 		}
 	}
 

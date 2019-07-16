@@ -6,15 +6,11 @@ var common  = require("../common");
 var Sync = require('../../').Sync;
 
 var sync    = new Sync({
-	driver  : common.driver,
+	dbdriver: common.dbdriver,
 	debug   : function (text) {
 		process.env.DEBUG_SYNC && console.log("> %s", text);
 	}
 });
-
-function is_sqlite () {
-	return common.dialect === "sqlite"
-}
 
 sync.defineCollection(common.table, {
   id     : { type: "serial", key: true, serial: true },

@@ -19,7 +19,9 @@ npm install @fxjs/sql-ddl-sync
 
 ## About
 
-This module is part of [@fxjs/orm](https://github.com/fxjs-modules/orm). It's used synchronize model tables in supported dialects.
+Originally, this module is part of [@fxjs/orm]. It's used synchronize model tables in supported dialects.
+
+But now, it could run without [@fxjs/orm], just install [@fxjs/db-driver] instead 🚀
 Sorry there is no API documentation for now but there are a couple of tests you can read and find out how to use it if you want.
 
 **Version Match**
@@ -27,27 +29,25 @@ Sorry there is no API documentation for now but there are a couple of tests you 
 `sql-ddl-sync` Version | required `orm` Version |
 :-----------|:--------|
 sql-ddl-sync <= 0.3.x  |  orm < 1.10.3	|
-sql-ddl-sync >= 0.4.x  |  orm >= 1.10.3	|
+sql-ddl-sync = 0.4.x  |  orm >= 1.10.3	|
+sql-ddl-sync >= 0.5.x  |  **don't need!**	|
 
 
 ## Example
 
-Install `@fxjs/orm`. Create a file with the contents below and change insert your database credentials.
+Install [@fxjs/db-driver]. Create a file with the contents below and change insert your database credentials.
 Run once and you'll see table `ddl_sync_test` appear in your database. Then make some changes to it (add/drop/change columns)
 and run the code again. Your table should always return to the same structure.
 
 ```js
-const ORM   = require("@fxjs/orm");
+const DBDriver   = require("@fxjs/db-driver");
 const mysql = require("mysql");
 const Sync  = require("@fxjs/sql-ddl-sync").Sync;
 
-const db = ORM.connectSync("mysql://username:password@localhost/database");
-
-const driver = db.driver;
+const dbdriver = DBDriver.create("mysql://username:password@localhost/database");
 
 const sync = new Sync({
-	dialect : "mysql",
-	driver  : driver,
+	dbdriver: dbdriver,
 	debug   : function (text) {
 		console.log("> %s", text);
 	}
@@ -109,3 +109,5 @@ This repo is checked out from [Diogo Resende]'s [node-sql-ddl-sync], which is on
 
 [Diogo Resende]:dresende@thinkdigital.pt
 [node-sql-ddl-sync]:./README_orig.md
+[@fxjs/db-driver]:https://npmjs.org/@fxjs/db-driver
+[@fxjs/orm]:https://github.com/fxjs-modules/orm
