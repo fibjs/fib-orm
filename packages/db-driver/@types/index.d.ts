@@ -2,8 +2,6 @@
 /// <reference types="@fxjs/orm-core" />
 /// <reference types="fib-pool" />
 
-/// <reference path="Driver.d.ts" />
-
 declare namespace FxDbDriverNS {
     type DriverType = 'mysql' | 'sqlite' | 'redis' | 'mongodb' | 'unknown'
 
@@ -194,10 +192,7 @@ declare namespace FxDbDriverNS {
 }
 
 declare namespace FxDbDriverNS {
-    interface ExportModule {
-        Driver: typeof FxDbDriverNS.Driver
-        SQLDriver: typeof FxDbDriverNS.Driver
-    }
+    type ExportModule = typeof FxDbDriverNS.Driver
 }
 
 declare module "@fxjs/db-driver" {
