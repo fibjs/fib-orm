@@ -4,53 +4,7 @@ declare namespace FxOrmSqlDDLSync__Column {
     type __StringType<ENUM_T = string> = string | ENUM_T
     type ColumnType = __StringType
 
-    type ColumnInfo = Property
-
-    interface ColumnInfoHash {
-        [col: string]: FxOrmSqlDDLSync__Column.ColumnInfo
-    }
-
-    type PropertyType = __StringType<'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point'>
-
-    type PropertyType_MySQL = PropertyType
-    type ColumnType_MySQL =
-        __StringType<'TEXT' | 'INT' | 'TINYINT' | 'DATE' | 'DATETIME' | 'LONGBLOB' | 'BLOB' | 'ENUM' | 'POINT'>
-
-    interface PropertyDescriptor__MySQL {
-        Field: string
-        Type: string
-            | 'smallint'
-            | 'integer'
-            | 'bigint'
-            | 'int'
-            | 'float'
-            | 'double'
-            | 'tinyint'
-            | 'datetime'
-            | 'date'
-            | 'longblob'
-            | 'blob'
-            | 'varchar'
-        SubType?: string[]
-        Size: number | string
-        /**
-         * extra description such as `AUTO_INCREMENT`
-         */
-        Extra: string
-        /**
-         * @example `PRI`
-         */
-        Key: string
-        /**
-         * @example `no`
-         */
-        Null: string
-        /**
-         * @example null
-         */
-        Default?: any
-    }
-
+    /* mysql about :start */
     interface Property {
         type: PropertyType
 
@@ -78,9 +32,65 @@ declare namespace FxOrmSqlDDLSync__Column {
 
         [ext_k: string]: any
     }
+    
+    interface PropertyHash {
+        [col: string]: FxOrmSqlDDLSync__Column.Property
+    }
+
+    type PropertyType = __StringType<'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point'>
+
+    type PropertyType_MySQL = PropertyType
+    type ColumnType_MySQL =
+        __StringType<PropertyType_MySQL>
+
+    interface ColumnInfo__MySQL {
+        Field: string
+        Type: Class_Buffer | __StringType<
+            'smallint'
+            | 'integer'
+            | 'bigint'
+            | 'int'
+            | 'float'
+            | 'double'
+            | 'tinyint'
+            | 'datetime'
+            | 'date'
+            | 'longblob'
+            | 'blob'
+            | 'varchar'
+        >
+        Size: number | string
+        /**
+         * extra description such as `AUTO_INCREMENT`
+         */
+        Extra: string
+        /**
+         * @example `PRI`
+         */
+        Key: __StringType<'PRI' | 'MUL'>
+        /**
+         * @example `NO`
+         */
+        Null: __StringType<'NO' | 'YES'>
+        SubType?: string[]
+        /**
+         * @example null
+         */
+        Default?: any
+    }
+    /* mysql about :end */
 
     interface PropertyMySQL extends Property {}
 
+    /* sqlite about :start */
+    interface ColumnInfo__SQLite {
+        cid: number
+		dflt_value: string
+		name: string
+		notnull: 1 | 0
+		pk: 1 | 0
+		type: ColumnType_SQLite
+	}
     type PropertyType_SQLite = PropertyType
     type ColumnType_SQLite =
         __StringType<'TEXT' | 'INTEGER' | 'REAL' | 'SERIAL' | 'INTEGER UNSIGNED' | 'DATE' | 'DATETIME' | 'BLOB' | 'ENUM' | 'POINT'>
@@ -89,6 +99,8 @@ declare namespace FxOrmSqlDDLSync__Column {
         key: boolean
         type: PropertyType_SQLite
     }
+    /* sqlite about :end */
+
 
     interface OpResult__CreateColumn extends FxOrmSqlDDLSync__Dialect.DialectResult {
         value: string

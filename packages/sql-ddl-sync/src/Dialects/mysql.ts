@@ -2,7 +2,7 @@
 
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
-import { getDialect } from '../Utils';
+import { getDialect, arraify } from '../Utils';
 
 const columnSizes = {
 	integer: {
@@ -114,31 +114,48 @@ export const dropForeignKey: FxOrmSqlDDLSync__Dialect.Dialect['dropForeignKey'] 
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
-export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionPropertiesSync'] = function (
+export const getCollectionColumnsSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionColumnsSync'] = function (
 	dbdriver, name
 ) {
-
-	const cols: FxOrmSqlDDLSync__Column.PropertyDescriptor__MySQL[] = dbdriver.execute(
+	return dbdriver.execute(
 		getDialect('mysql').escape(
 			"SHOW COLUMNS FROM ??", [name]
 		)
 	)
-	const columns = <{ [col: string]: FxOrmSqlDDLSync__Column.ColumnInfo }>{};
+}
+
+export const getCollectionColumns: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionColumns'] = function (
+	dbdriver, name, cb
+) {
+	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
+		() => getCollectionColumnsSync(dbdriver, name)
+	)
+	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
+};
+
+export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionPropertiesSync'] = function (
+	dbdriver, name
+) {
+
+	const cols: FxOrmSqlDDLSync__Column.ColumnInfo__MySQL[] = getCollectionColumnsSync(dbdriver, name)
+
+	const columns = <{ [col: string]: FxOrmSqlDDLSync__Column.Property }>{};
 
 	for (let i = 0; i < cols.length; i++) {
 		let column = <FxOrmSqlDDLSync__Column.Property>{};
 		colInfoBuffer2Str(cols[i]);
 
-		if (cols[i].Type.indexOf(" ") > 0) {
-			cols[i].SubType = cols[i].Type.substr(cols[i].Type.indexOf(" ") + 1).split(/\s+/);
-			cols[i].Type = cols[i].Type.substr(0, cols[i].Type.indexOf(" "));
+		let Type = cols[i].Type + ''
+		if (Type.indexOf(" ") > 0) {
+			cols[i].SubType = Type.substr(Type.indexOf(" ") + 1).split(/\s+/);
+			Type = Type.substr(0, Type.indexOf(" "));
 		}
 
 		// match_result
-		let m = cols[i].Type.match(/^(.+)\((\d+)\)$/);
+		let m = Type.match(/^(.+)\((\d+)\)$/);
 		if (m) {
 			cols[i].Size = parseInt(m[2], 10);
-			cols[i].Type = m[1];
+			Type = m[1];
 		}
 
 		if (cols[i].Extra.toUpperCase() == "AUTO_INCREMENT") {
@@ -157,7 +174,7 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 			column.defaultValue = cols[i].Default;
 		}
 
-		switch (cols[i].Type.toUpperCase()) {
+		switch (Type.toUpperCase()) {
 			case "SMALLINT":
 			case "INTEGER":
 			case "BIGINT":
@@ -165,7 +182,7 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 				column.type = "integer";
 				column.size = 4; // INT
 				for (let k in columnSizes.integer) {
-					if (columnSizes.integer[k] == cols[i].Type.toUpperCase()) {
+					if (columnSizes.integer[k] == Type.toUpperCase()) {
 						column.size = k;
 						break;
 					}
@@ -176,7 +193,7 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 				column.type = "number";
 				column.rational = true;
 				for (let k in columnSizes.floating) {
-					if (columnSizes.floating[k] == cols[i].Type.toUpperCase()) {
+					if (columnSizes.floating[k] == Type.toUpperCase()) {
 						column.size = k;
 						break;
 					}
@@ -206,13 +223,13 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 				}
 				break;
 			default:
-				m = cols[i].Type.match(/^enum\('(.+)'\)$/);
+				m = Type.match(/^enum\('(.+)'\)$/);
 				if (m) {
 					column.type = "enum";
 					column.values = m[1].split(/'\s*,\s*'/);
 					break;
 				}
-				throw new Error(`Unknown column type '${cols[i].Type}'`);
+				throw new Error(`Unknown column type '${Type}'`);
 		}
 
 		if (column.serial) {
@@ -268,6 +285,25 @@ export const dropCollection: FxOrmSqlDDLSync__Dialect.Dialect['dropCollection'] 
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
 		() => dropCollectionSync(dbdriver, name)
+	)
+	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
+};
+
+export const hasCollectionColumnsSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionColumnsSync'] = function (
+	dbdriver, name, column
+) {
+	const cols = getCollectionColumnsSync<FxOrmSqlDDLSync__Column.ColumnInfo__MySQL>(dbdriver, name)
+
+	return arraify(column).every(
+		column_name => cols.find(col => col.Field === column_name)
+	)
+};
+
+export const hasCollectionColumns: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionColumns'] = function (
+	dbdriver, name, column, cb
+) {
+	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
+		() => hasCollectionColumnsSync(dbdriver, name, column)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
@@ -534,7 +570,7 @@ function convertIndexRows(
 	return indexes;
 }
 
-function colInfoBuffer2Str (col: FxOrmSqlDDLSync__Column.PropertyDescriptor__MySQL) {
+function colInfoBuffer2Str (col: FxOrmSqlDDLSync__Column.ColumnInfo__MySQL) {
 	col.Type += '';
 	col.Size += '';
 	col.Extra += '';

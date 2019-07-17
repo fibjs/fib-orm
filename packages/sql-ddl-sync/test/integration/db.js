@@ -3,6 +3,7 @@ test.setup()
 
 require("should");
 var common  = require("../common");
+var Dialect = require('../../').dialect(common.dbdriver.type);
 var Sync = require('../../').Sync;
 
 var sync    = new Sync({
@@ -48,6 +49,19 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 
 				should.exist(info);
 				info.should.have.property("changes", 0);
+
+				return done();
+			});
+
+			it("should has it after sync", function (done) {
+				const has = Dialect.hasCollectionColumnsSync(
+					common.dbdriver,
+					common.table,
+					'id'
+				)
+
+				should.exist(has);
+				has.should.equal(true);
 
 				return done();
 			});
@@ -235,8 +249,6 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 				return done();
 			});
 		});
-
-
 	});
 }
 

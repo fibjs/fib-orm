@@ -1,7 +1,7 @@
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
 
-import { getDialect } from '../Utils';
+import { getDialect, arraify } from '../Utils';
 
 // @see https://www.sqlite.org/lang_altertable.html
 export const hasCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionSync'] = function (
@@ -108,14 +108,30 @@ export const dropForeignKey: FxOrmSqlDDLSync__Dialect.Dialect['dropForeignKey'] 
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };
 
-export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionPropertiesSync'] = function (
+export const getCollectionColumnsSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionColumnsSync'] = function (
 	dbdriver, name
 ) {
-	const cols = dbdriver.execute(
+	return dbdriver.execute(
 		getDialect('sqlite').escape(
 			"PRAGMA table_info(??)", [name]
 		)
 	)
+}
+
+export const getCollectionColumns: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionColumns'] = function (
+	dbdriver, name, cb
+) {
+	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
+		() => getCollectionColumnsSync(dbdriver, name)
+	)
+	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
+};
+
+export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getCollectionPropertiesSync'] = function (
+	dbdriver, name
+) {
+	const cols = getCollectionColumnsSync(dbdriver, name)
+
 	let columns = <{ [col: string]: FxOrmSqlDDLSync__Column.PropertySQLite }>{}, m;
 
 	for (let i = 0; i < cols.length; i++) {
@@ -174,12 +190,6 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 		columns[dCol.name] = column;
 	}
 
-	dbdriver.execute(
-		getDialect('sqlite').escape(
-			"PRAGMA table_info(??)", [name]
-		)
-	)
-
 	return columns;
 };
 
@@ -226,6 +236,25 @@ export const dropCollection: FxOrmSqlDDLSync__Dialect.Dialect['dropCollection'] 
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
 		() => dropCollectionSync(dbdriver, name)
+	)
+	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
+};
+
+export const hasCollectionColumnsSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionColumnsSync'] = function (
+	dbdriver, name, column
+) {
+	const cols = getCollectionColumnsSync<FxOrmSqlDDLSync__Column.ColumnInfo__SQLite>(dbdriver, name)
+
+	return arraify(column).every(
+		column_name => cols.find(col => col.name === column_name)
+	)
+};
+
+export const hasCollectionColumns: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionColumns'] = function (
+	dbdriver, name, column, cb
+) {
+	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
+		() => hasCollectionColumnsSync(dbdriver, name, column)
 	)
 	FxORMCore.Utils.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: true, callback: cb });
 };

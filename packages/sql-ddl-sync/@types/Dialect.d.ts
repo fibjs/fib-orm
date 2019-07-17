@@ -38,11 +38,17 @@ declare namespace FxOrmSqlDDLSync__Dialect{
         dropForeignKeySync: {
             (driver: FxDbDriverNS.Driver<ConnType>, tableName: string, columnName: string): any
         }
+        getCollectionColumns: {
+            <T = any>(driver: FxDbDriverNS.Driver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<T[]>): void
+        }
+        getCollectionColumnsSync: {
+            <T = any>(driver: FxDbDriverNS.Driver<ConnType>, name: string): T[]
+        }
         getCollectionProperties: {
-            (driver: FxDbDriverNS.Driver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<FxOrmSqlDDLSync__Column.ColumnInfoHash>): void
+            (driver: FxDbDriverNS.Driver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<FxOrmSqlDDLSync__Column.PropertyHash>): void
         }
         getCollectionPropertiesSync: {
-            (driver: FxDbDriverNS.Driver<ConnType>, name: string): FxOrmSqlDDLSync__Column.ColumnInfoHash
+            (driver: FxDbDriverNS.Driver<ConnType>, name: string): FxOrmSqlDDLSync__Column.PropertyHash
         }
         createCollection: {
             (driver: FxDbDriverNS.Driver<ConnType>, name: string, columns: string[], keys: string[], cb: FxOrmCoreCallbackNS.ExecutionCallback<any>): void
@@ -55,6 +61,12 @@ declare namespace FxOrmSqlDDLSync__Dialect{
         }
         dropCollectionSync: {
             (driver: FxDbDriverNS.Driver<ConnType>, name: string): any
+        }
+        hasCollectionColumnsSync: {
+            (driver: FxDbDriverNS.Driver<ConnType>, name: string, column: string | string[]): boolean
+        }
+        hasCollectionColumns: {
+            (driver: FxDbDriverNS.Driver<ConnType>, name: string, column: string | string[], cb: FxOrmCoreCallbackNS.ExecutionCallback<boolean>): any
         }
         addCollectionColumn: {
             (driver: FxDbDriverNS.Driver<ConnType>, name: string, column: string, after_column: string|false, cb: FxOrmCoreCallbackNS.ExecutionCallback<any>): void

@@ -36,18 +36,23 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync {
 	total_changes: number
 	collections: FxOrmSqlDDLSync__Collection.Collection[] = []
 
+	private dbdriver: FxDbDriverNS.Driver<ConnType>
+	private Dialect: FxOrmSqlDDLSync__Dialect.Dialect
+	private suppressColumnDrop: boolean
+	private debug: Exclude<FxOrmSqlDDLSync.SyncOptions['debug'], false>
+
 	constructor (
 		options: FxOrmSqlDDLSync.SyncOptions,
-		private debug: Function = options.debug || noOp,
-		private dbdriver: FxDbDriverNS.Driver<ConnType> = options.dbdriver,
-		private Dialect: FxOrmSqlDDLSync__Dialect.Dialect = dialect(dbdriver.type as any),
-		private suppressColumnDrop = options.suppressColumnDrop,
 		/**
 		 * @description customTypes
 		 */
 		private types = <FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash>{}
 	) {
-		// this.dbdriver.dbdriver = dbdriver
+		const dbdriver = this.dbdriver = options.dbdriver
+		this.Dialect = dialect(dbdriver.type as any)
+
+		this.suppressColumnDrop = options.suppressColumnDrop
+		this.debug = options.debug || noOp
 	}
 
 	[sync_method: string]: any
@@ -104,7 +109,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync {
 			// not process, callback `false`
 			return is_processed
 
-		const columns: FxOrmSqlDDLSync__Column.ColumnInfoHash = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name)
+		const columns: FxOrmSqlDDLSync__Column.PropertyHash = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name)
 		this.syncCollection(collection, columns)
 
 		// processed, callback `true`
@@ -203,8 +208,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync {
 
 	private syncCollection (
 		collection: FxOrmSqlDDLSync__Collection.Collection,
-		// columns: FxOrmSqlDDLSync__Column.ColumnInfo[] | FxOrmSqlDDLSync__Column.ColumnInfoHash,
-		columns: FxOrmSqlDDLSync__Column.ColumnInfoHash
+		columns: FxOrmSqlDDLSync__Column.PropertyHash
 	) {
 		let last_k: string  = null;
 
@@ -431,7 +435,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync {
 
 	private needToSync (
 		property: FxOrmSqlDDLSync__Column.Property,
-		column: FxOrmSqlDDLSync__Column.ColumnInfo
+		column: FxOrmSqlDDLSync__Column.Property
 	): boolean {
 		if (property.serial && property.type == "number") {
 			property.type = "serial";

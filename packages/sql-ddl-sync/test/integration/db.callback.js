@@ -3,6 +3,7 @@ test.setup()
 
 require("should");
 var common  = require("../common");
+var Dialect = require('../../').dialect(common.dbdriver.type);
 var Sync = require('../../').Sync;
 
 var sync    = new Sync({
@@ -219,6 +220,21 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 					return done();
 				});
 			});
+
+			it("should has it after sync", function (done) {				
+				Dialect.hasCollectionColumns(
+					common.dbdriver,
+					common.table,
+					'id',
+					function (err, has) {
+						should.not.exist(err);
+						should.exist(has);
+						has.should.equal(true);
+
+						return done();
+					}
+				)
+			});
 		});
 
 		describe("Changing index to unique index", function () {
@@ -251,8 +267,6 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 				});
 			});
 		});
-
-
 	});
 }
 

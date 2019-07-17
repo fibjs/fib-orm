@@ -12,16 +12,16 @@
 /// <reference path="Dialect.d.ts" />
 
 declare namespace FxOrmSqlDDLSync {
-    interface SyncOptions<DRIVER_QUERY_TYPE extends FxOrmSqlDDLSync__Query.BasicDriverQueryObject = any> {
-        dbdriver: FxDbDriverNS.Driver
+    interface SyncOptions<ConnType = any> {
+        dbdriver: FxDbDriverNS.Driver<ConnType>
         debug?: Function | false
         suppressColumnDrop?: boolean
     }
     interface SyncResult {
         changes: number
     }
-    class Sync {
-        constructor (options: FxOrmSqlDDLSync.SyncOptions)
+    class Sync<ConnType = any> {
+        constructor (options: FxOrmSqlDDLSync.SyncOptions<ConnType>)
 
         defineCollection: {
             (collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties']): Sync
@@ -40,10 +40,7 @@ declare namespace FxOrmSqlDDLSync {
 
     interface ExportModule {
         dialect(name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDDLSync__Dialect.Dialect
-        Sync: {
-            new (options: SyncOptions): Sync
-            (options: SyncOptions): Sync
-        }
+        Sync: typeof Sync
     }
 }
 
