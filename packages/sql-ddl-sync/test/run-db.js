@@ -30,6 +30,8 @@ function runTest () {
 	require('./integration/db.callback')
 	require('./integration/db')
 
+	require('./integration/db.sync')
+
 	test.run(console.DEBUG)
 
 	common.dbdriver.close()

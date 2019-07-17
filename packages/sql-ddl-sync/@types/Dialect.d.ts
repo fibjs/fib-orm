@@ -7,6 +7,11 @@
 
 declare namespace FxOrmSqlDDLSync__Dialect{
     type DialectType = 'mysql' | 'mssql' | 'sqlite' | 'postgresql'
+
+    interface DielectGetTypeOpts {
+        for?: 'alter_table' | 'create_table' | 'add_column' | 'alter_column'
+    }
+
     interface Dialect<ConnType=any> {
         hasCollection: {
             (driver: FxDbDriverNS.Driver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<boolean>): void
@@ -113,9 +118,12 @@ declare namespace FxOrmSqlDDLSync__Dialect{
         /**
          * transform semantic property to raw string in db
          */
-        getType: {
-            (collection: FxOrmSqlDDLSync.TableName, property: FxOrmSqlDDLSync__Column.Property, driver: FxDbDriverNS.Driver<ConnType>): false | TypeResult
-        }
+        getType: (
+            collection: FxOrmSqlDDLSync.TableName,
+            property: FxOrmSqlDDLSync__Column.Property,
+            driver: FxDbDriverNS.Driver<ConnType>,
+            opts?: DielectGetTypeOpts
+        ) => false | TypeResult
 
         /**
          * process composite keys

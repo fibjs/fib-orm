@@ -143,35 +143,36 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 
 	for (let i = 0; i < cols.length; i++) {
 		let column = <FxOrmSqlDDLSync__Column.Property>{};
-		colInfoBuffer2Str(cols[i]);
+		const colInfo = cols[i];
+		colInfoBuffer2Str(colInfo);
 
-		let Type = cols[i].Type + ''
+		let Type = colInfo.Type + ''
 		if (Type.indexOf(" ") > 0) {
-			cols[i].SubType = Type.substr(Type.indexOf(" ") + 1).split(/\s+/);
+			colInfo.SubType = Type.substr(Type.indexOf(" ") + 1).split(/\s+/);
 			Type = Type.substr(0, Type.indexOf(" "));
 		}
 
 		// match_result
-		let m = Type.match(/^(.+)\((\d+)\)$/);
-		if (m) {
-			cols[i].Size = parseInt(m[2], 10);
-			Type = m[1];
+		let [_, _type, _size] = Type.match(/^(.+)\((\d+)\)$/) || [] as any[];
+		if (_) {
+			colInfo.Size = parseInt(_size, 10);
+			Type = _type;
 		}
 
-		if (cols[i].Extra.toUpperCase() == "AUTO_INCREMENT") {
+		if (colInfo.Extra.toUpperCase() == "AUTO_INCREMENT") {
 			column.serial = true;
 			column.unsigned = true;
 		}
 
-		if (cols[i].Key == "PRI") {
+		if (colInfo.Key == "PRI") {
 			column.primary = true;
 		}
 
-		if (cols[i].Null.toUpperCase() == "NO") {
+		if (colInfo.Null.toUpperCase() == "NO") {
 			column.required = true;
 		}
-		if (cols[i].Default !== null) {
-			column.defaultValue = cols[i].Default;
+		if (colInfo.Default !== "null") {
+			column.defaultValue = colInfo.Default;
 		}
 
 		switch (Type.toUpperCase()) {
@@ -200,7 +201,7 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 				}
 				break;
 			case "TINYINT":
-				if (cols[i].Size == 1) {
+				if (colInfo.Size == 1) {
 					column.type = "boolean";
 				} else {
 					column.type = "integer";
@@ -218,15 +219,15 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 				break;
 			case "VARCHAR":
 				column.type = "text";
-				if (cols[i].Size) {
-					column.size = cols[i].Size;
+				if (colInfo.Size) {
+					column.size = colInfo.Size;
 				}
 				break;
 			default:
-				m = Type.match(/^enum\('(.+)'\)$/);
-				if (m) {
+				let [_2, _enum_value_str] = Type.match(/^enum\('(.+)'\)$/);
+				if (_2) {
 					column.type = "enum";
-					column.values = m[1].split(/'\s*,\s*'/);
+					column.values = _enum_value_str.split(/'\s*,\s*'/);
 					break;
 				}
 				throw new Error(`Unknown column type '${Type}'`);
@@ -236,7 +237,7 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 			column.type = "serial";
 		}
 
-		columns[cols[i].Field] = column;
+		columns[colInfo.Field] = column;
 	}
 
 	return columns;
@@ -539,7 +540,14 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			driver
 		}) : property.defaultValue
 
-		type += " DEFAULT " + getSqlQueryDialect(driver.type).escapeVal(defaultValue);
+		type += (
+			[
+				" DEFAULT ",
+				property.type === 'date'
+				&& (['CURRENT_TIMESTAMP'].includes(defaultValue)) ? defaultValue
+				: getSqlQueryDialect(driver.type).escapeVal(defaultValue)
+			]
+		).filter(x => x).join('');
 	}
 
 	return {

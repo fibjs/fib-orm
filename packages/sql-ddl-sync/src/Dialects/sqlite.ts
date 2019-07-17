@@ -153,8 +153,10 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 				column.defaultValue = null;
 			}
 		}
+		
+		const TYPE_UPPER = dCol.type.toUpperCase()
 
-		switch (dCol.type.toUpperCase()) {
+		switch (TYPE_UPPER) {
 			case "INTEGER":
 				// In sqlite land, integer primary keys are autoincrement by default
 				// weather you asked for this behaviour or not.
@@ -184,7 +186,21 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 				column.type = "text";
 				break;
 			default:
-				throw new Error("Unknown column type '" + dCol.type + "'");
+				let [_, type, _before, field] = dCol.type.toUpperCase().match(/(.*)\s(AFTER|BEFORE)\s`(.*)`$/) || [] as any[]
+
+				if (_) {
+					switch (_before && field) {
+						case 'BEFORE':
+							column.before = field
+						case 'AFTER':
+							column.after = field
+							break
+					}
+					column.type = type;
+					break;
+				}
+
+				throw new Error(`Unknown column type '${dCol.type}'`);
 		}
 
 		columns[dCol.name] = column;
@@ -326,7 +342,7 @@ export const modifyCollectionColumn: FxOrmSqlDDLSync__Dialect.Dialect['modifyCol
 export const dropCollectionColumnSync: FxOrmSqlDDLSync__Dialect.Dialect['dropCollectionColumnSync'] = function (
 	dbdriver, name, column
 ) {
-	throw Error('sqlite does not support dropping columns')
+	throw new Error('sqlite does not support dropping columns')
 };
 
 export const dropCollectionColumn: FxOrmSqlDDLSync__Dialect.Dialect['dropCollectionColumn'] = function (
@@ -432,8 +448,10 @@ export const supportsType: FxOrmSqlDDLSync__Dialect.Dialect['supportsType'] = fu
 };
 
 export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
-	collection, property: FxOrmSqlDDLSync__Column.PropertySQLite, driver
+	collection, property: FxOrmSqlDDLSync__Column.PropertySQLite, driver, opts
 ) {
+	const { for: _for = 'create_table' } = opts || {}
+
 	let type: false | FxOrmSqlDDLSync__Column.ColumnType_SQLite = false;
 	let customType = null;
 
@@ -461,6 +479,8 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			type = "INTEGER UNSIGNED";
 			break;
 		case "datetime":
+			property.type = "date";
+			property.time = true;
 		case "date":
 			type = "DATETIME";
 			break;
@@ -509,12 +529,31 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			property,
 			driver
 		}) : property.defaultValue
-		type += " DEFAULT " + getSqlQueryDialect(driver.type).escapeVal(defaultValue);
+
+		let defaultV = ''
+
+		// if (!['alter_table', 'add_column', 'alter_column'].includes(_for)) {
+		if (['create_table'].includes(_for)) {
+			defaultV = getSqlQueryDialect(driver.type).escapeVal(defaultValue)
+		}
+		
+		type += (
+			/**
+			 * @description
+			 * 	sqlite doens't support alter column's datetime default value,
+			 * 	you should alter table's schema to change `datetime` type column's default value
+			 * 
+			 * @see https://stackoverflow.com/questions/2614483/how-to-create-a-datetime-column-with-default-value-in-sqlite3
+			 * @see https://stackoverflow.com/questions/25911191/altering-a-sqlite-table-to-add-a-timestamp-column-with-default-value
+			 */
+			[
+				defaultV ? ` DEFAULT ${defaultV} ` : ``
+			]
+		).filter(x => x).join('');
 	}
 
 	return {
-		value: type,
-		before: false
+		value: type
 	};
 };
 
@@ -527,7 +566,6 @@ function convertIndexRows(
 		if (!indexes.hasOwnProperty(rows[i].name)) {
 			indexes[rows[i].name] = {
 				columns: [],
-				// unique: (rows[i].unique == 1)
 				unique: rows[i].unique
 			};
 		}

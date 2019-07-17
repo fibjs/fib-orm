@@ -37,13 +37,12 @@ function processCollection (
 		is_processed = true;
 	}
 
-	if (!force_sync)
-		return is_processed
+	syncInstnace.syncCollection(collection, { strategy: force_sync ? 'hard' : 'solf' })
 
-	const columns = syncInstnace.Dialect.getCollectionPropertiesSync(syncInstnace.dbdriver, collection.name)
-	syncInstnace.syncCollection(collection, columns)
+	// if (!force_sync)
+	// 	return is_processed
 
-	return true;
+	// return true;
 }
 
 /**
@@ -73,9 +72,12 @@ function getIndexName (
 function getColumnTypeRaw (
 	syncInstance: Sync,
 	collection_name: FxOrmSqlDDLSync.TableName,
-	prop: FxOrmSqlDDLSync__Column.Property
+	prop: FxOrmSqlDDLSync__Column.Property,
+	opts?: {
+		for?: FxOrmSqlDDLSync__Dialect.DielectGetTypeOpts['for']
+	}
 ): false | FxOrmSqlDDLSync__Dialect.DialectResult {
-	let type: false | string | FxOrmSqlDDLSync__Dialect.DialectResult;
+	let type: false | string | FxOrmSqlDDLSync__Dialect.TypeResult;
 
 	/**
 	 * get type, customTypes first
@@ -83,19 +85,19 @@ function getColumnTypeRaw (
 	if (syncInstance.types.hasOwnProperty(prop.type)) {
 		type = syncInstance.types[prop.type].datastoreType(prop);
 	} else { // fallback to driver's types
-		type = syncInstance.Dialect.getType(collection_name, prop, syncInstance.dbdriver);
+		const { for: _for = 'create_table' } = opts || {};
+		type = syncInstance.Dialect.getType(collection_name, prop, syncInstance.dbdriver, { for: _for });
 	}
 
 	if (!type)
 		return false;
 		
 	if (typeof type == "string") {
-		type = <FxOrmSqlDDLSync__Dialect.DialectResult>{ value : type };
+		type = { value : type };
 	}
 
-	if (prop.mapsTo === undefined) {
-		console.log("undefined prop.mapsTo", prop, (new Error()).stack)
-	}
+	if (prop.mapsTo === undefined)
+		throw new Error("undefined prop.mapsTo" + JSON.stringify(prop))
 
 	return {
 		value: getSqlQueryDialect(syncInstance.dbdriver.type).escapeId(prop.mapsTo) + " " + type.value,
@@ -171,7 +173,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		const dbdriver = options.dbdriver
 
 		this.suppressColumnDrop = options.suppressColumnDrop || dbdriver.type === 'sqlite'
-		this.debug = options.debug || noOp
+		this.debug = typeof options.debug === 'function' ? options.debug : noOp
 
 		Object.defineProperty(this, 'types', { value: {}, writable: false })
 		Object.defineProperty(this, 'collections', { value: [], writable: false })
@@ -215,7 +217,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 			prop = collection.properties[k];
 			prop.mapsTo = prop.mapsTo || k;
 
-			col = getColumnTypeRaw(this, collection.name, prop);
+			col = getColumnTypeRaw(this, collection.name, prop, { for: 'create_table' });
 
 			if (col === false) {
 				logJson('createCollection', prop);
@@ -228,9 +230,8 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 
 		this.debug("Creating " + collection.name);
 
-		if (typeof this.Dialect.processKeys === "function") {
+		if (typeof this.Dialect.processKeys === "function")
 			keys = this.Dialect.processKeys(keys);
-		}
 
 		this.total_changes += 1;
 		
@@ -245,9 +246,21 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 	}
 
 	syncCollection (
-		collection: FxOrmSqlDDLSync__Collection.Collection,
-		columns: FxOrmSqlDDLSync__Column.PropertyHash
+		_collection: string | FxOrmSqlDDLSync__Collection.Collection,
+		opts?: FxOrmSqlDDLSync.SyncCollectionOptions
 	) {
+		const collection = typeof _collection === 'string' ? this.findCollection(_collection) : _collection;
+
+		if (!collection)
+			throw new Error('[syncCollection] invalid collection')
+
+		let {
+			columns = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name),
+			strategy = 'soft',
+		} = opts || {};
+
+		if (!['soft', 'hard'].includes(strategy)) strategy = 'soft';
+		
 		let last_k: string  = null;
 
 		this.debug("Synchronizing " + collection.name);
@@ -255,7 +268,9 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		for (let k in collection.properties) {
 			const prop = collection.properties[k];
 			if (!columns.hasOwnProperty(k)) {
-				const col = getColumnTypeRaw(this, collection.name, prop);
+				prop.mapsTo = prop.mapsTo || k;
+
+				const col = getColumnTypeRaw(this, collection.name, prop, { for: 'add_column' });
 
 				if (col === false) {
 					logJson('syncCollection', prop);
@@ -273,7 +288,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 					last_k
 				)
 			} else if (this.dbdriver.type !== 'sqlite' && needToSync(this, prop, columns[k])) {
-				const col = getColumnTypeRaw(this, collection.name, prop);
+				const col = getColumnTypeRaw(this, collection.name, prop, { for: 'alter_column' });
 
 				if (col === false) {
 					logJson('syncCollection', prop);
@@ -306,7 +321,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
             }
         }
 
-		var indexes = this.getCollectionIndexes(collection);
+		const indexes = this.getCollectionIndexes(collection);
 
 		if (indexes.length) this.syncIndexes(collection.name, indexes);
 	}
@@ -375,7 +390,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 					} else {
 						found = false;
 
-						for (var j = 0; j < indexes.length; j++) {
+						for (let j = 0; j < indexes.length; j++) {
 							if (indexes[j].name == mixed_arr_index[i]) {
 								found = true;
 								indexes[j].columns.push(k);

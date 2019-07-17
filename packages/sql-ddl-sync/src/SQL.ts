@@ -6,7 +6,7 @@ export function CREATE_TABLE (
 	options: FxOrmSqlDDLSync__SQL.TableOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var sql = "CREATE TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) + " (" + options.columns.join(", ");
+	let sql = "CREATE TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) + " (" + options.columns.join(", ");
 
 	if (options.keys && options.keys.length > 0) {
 		sql += ", PRIMARY KEY (" + options.keys.map(function (val) {
@@ -23,7 +23,7 @@ export function DROP_TABLE (
 	options: FxOrmSqlDDLSync__SQL.TableOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var sql = "DROP TABLE " + getSqlQueryDialect(db_type).escapeId(options.name);
+	const sql = "DROP TABLE " + getSqlQueryDialect(db_type).escapeId(options.name);
 
 	return sql;
 };
@@ -32,14 +32,12 @@ export function ALTER_TABLE_ADD_COLUMN (
 	options: FxOrmSqlDDLSync__SQL.AddColumnOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var sql = "ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) +
-	          " ADD " + options.column;
-
-	if (options.after) {
-		sql += " AFTER " + getSqlQueryDialect(db_type).escapeId(options.after);
-	} else if (options.first) {
-		sql += " FIRST";
-	}
+	let sql = [
+		"ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name),
+		" ADD " + options.column,
+		options.after && " AFTER " + getSqlQueryDialect(db_type).escapeId(options.after),
+		options.first && " FIRST",
+	].filter(x => x).join('')
 
 	return sql;
 };
@@ -48,8 +46,8 @@ export function ALTER_TABLE_RENAME_COLUMN (
 	opts: FxOrmSqlDDLSync__SQL.AlertColumnRenameOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var eid = getSqlQueryDialect(db_type).escapeId;
-	var sql = "ALTER TABLE "	+ eid(opts.name) +
+	const eid = getSqlQueryDialect(db_type).escapeId;
+	const sql = "ALTER TABLE "	+ eid(opts.name) +
 	          " RENAME COLUMN " + eid(opts.oldColName) + " TO " + eid(opts.newColName);
 
   return sql;
@@ -59,7 +57,7 @@ export function ALTER_TABLE_MODIFY_COLUMN (
 	options: FxOrmSqlDDLSync__SQL.AlterColumnOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var sql = "ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) +
+	const sql = "ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) +
 	          " MODIFY " + options.column;
 			  
 	return sql;
@@ -69,7 +67,7 @@ export function ALTER_TABLE_DROP_COLUMN (
 	options: FxOrmSqlDDLSync__SQL.AlterColumnOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var sql = "ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) +
+	const sql = "ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) +
 	          " DROP " + getSqlQueryDialect(db_type).escapeId(options.column);
 
 	return sql;
@@ -79,7 +77,7 @@ export function CREATE_INDEX (
 	options: FxOrmSqlDDLSync__SQL.IndexOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var sql = "CREATE" + (options.unique ? " UNIQUE" : "") + " INDEX " + getSqlQueryDialect(db_type).escapeId(options.name) +
+	const sql = "CREATE" + (options.unique ? " UNIQUE" : "") + " INDEX " + getSqlQueryDialect(db_type).escapeId(options.name) +
 	          " ON " + getSqlQueryDialect(db_type).escapeId(options.collection) +
 	          " (" + options.columns.map(function (col) { return getSqlQueryDialect(db_type).escapeId(col); }) + ")";
 	
@@ -90,12 +88,12 @@ export function DROP_INDEX (
 	options: FxOrmSqlDDLSync__SQL.IndexOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	var sql = "DROP INDEX " + getSqlQueryDialect(db_type).escapeId(options.name) +
+	const sql = "DROP INDEX " + getSqlQueryDialect(db_type).escapeId(options.name) +
 	          " ON " + getSqlQueryDialect(db_type).escapeId(options.collection);
 
 	return sql;
 };
 
 // export function RENAME_TABLE (options, driver: FxOrmSqlDDLSync__Driver.Driver) {
-//  var sql = "ALTER TABLE " + options.oldCollectionName + " RENAME TO " + options.newCollectionName + " ;";
+//  const sql = "ALTER TABLE " + options.oldCollectionName + " RENAME TO " + options.newCollectionName + " ;";
 // }

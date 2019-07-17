@@ -23,6 +23,7 @@
 		"test-db-mysql": "cross-env URI=mysql://root:@localhost:3306/sql-ddl-sync npm run test-db",
 		"test": "fibjs test",
 		"ci": "npm run build && npm run test",
+		"ci-mysql": "npm run build && npm run test-db-mysql",
 		"prepublishOnly": "npm run build"
 	},
 	"engines": {

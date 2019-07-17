@@ -20,6 +20,11 @@ declare namespace FxOrmSqlDDLSync {
     interface SyncResult {
         changes: number
     }
+    interface SyncCollectionOptions {
+        columns?: FxOrmSqlDDLSync__Column.PropertyHash,
+        strategy?: 'solf' | 'hard' 
+    }
+
     class Sync<ConnType = any> {
         constructor (options: FxOrmSqlDDLSync.SyncOptions<ConnType>)
         
@@ -49,11 +54,17 @@ declare namespace FxOrmSqlDDLSync {
          *  then sync column in definition but missing in the real
          * 
          * @param collection collection properties user provided 
-         * @param columns properties from db
+         * @param opts
+         *      - opts.columns: properties from user(default from db)
+         *      - opts.strategy: (default soft) strategy when conflict between local and remote db, see details below
+         * 
+         * @strategy
+         *      - 'solf': never modify existed columns in db, but add missing columns
+         *      - 'hard': modify existed columns in db, add missing columns
          */
         syncCollection (
-            collection: FxOrmSqlDDLSync__Collection.Collection,
-            columns: FxOrmSqlDDLSync__Column.PropertyHash
+            collection: string | FxOrmSqlDDLSync__Collection.Collection,
+            opts?: SyncCollectionOptions
         ): void
 
         syncIndexes (

@@ -168,13 +168,18 @@ exports.dropIndex = function (name) {
 	};
 };
 
-exports.dropTable = function (name) {
+exports.dropTable = function (names = exports.table) {
 	return function (done) {
-		exports.dbdriver.execute(
-			Dialects[exports.dbdriver.type].escape(
-				"DROP TABLE IF EXISTS ??", [exports.table]
-			)
-		);
+		if (!Array.isArray(names))
+			names = [names]
+
+		names.forEach(name => {
+			exports.dbdriver.execute(
+				Dialects[exports.dbdriver.type].escape(
+					"DROP TABLE IF EXISTS ??", [name]
+				)
+			);
+		});
 		return done();
 	};
 }

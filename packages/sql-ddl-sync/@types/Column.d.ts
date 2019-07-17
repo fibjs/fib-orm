@@ -98,6 +98,9 @@ declare namespace FxOrmSqlDDLSync__Column {
     interface PropertySQLite extends Property {
         key: boolean
         type: PropertyType_SQLite
+
+        before?: string
+        after?: string
     }
     /* sqlite about :end */
 }
