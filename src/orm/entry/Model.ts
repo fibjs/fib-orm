@@ -198,11 +198,11 @@ export const Model = function (
 	model.dropSync = function (
 		this:FxOrmModel.Model,
 	) {
-		if (typeof m_opts.driver.drop !== "function") {
+		if (typeof m_opts.driver.doDrop !== "function") {
 			throw new ORMError("Driver does not support Model.drop()", 'NO_SUPPORT', { model: m_opts.table });
 		}
 
-		return m_opts.driver.drop({
+		return m_opts.driver.doDrop({
 			table             : m_opts.table,
 			properties        : m_opts.properties,
 			one_associations  : one_associations,
@@ -221,7 +221,9 @@ export const Model = function (
 	};
 
 	model.syncSync = function () {
-		m_opts.driver.sync({
+		m_opts.driver.doSync({
+			repair_column		: !!model.settings.get('model.repair_column'),
+			allow_drop_column   : !!model.settings.get('model.allow_drop_column'),
 			extension           : m_opts.__for_extension,
 			id                  : m_opts.keys,
 			table               : m_opts.table,

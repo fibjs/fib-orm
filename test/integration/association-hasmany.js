@@ -832,16 +832,19 @@ describe("hasMany", function () {
 
             var cols = db.driver.execQuerySync(sql, ['account_emails', db.driver.config.database]);
 
-            if (protocol == 'sqlite') {
-                assert.equal(cols[0].name, 'account_id');
-                assert.equal(cols[0].type, 'INTEGER');
-                assert.equal(cols[1].name, 'emails_text');
-                assert.equal(cols[1].type, 'TEXT');
-            } else if (protocol == 'mysql') {
-                assert.equal(cols[0].column_name, 'account_id');
-                assert.equal(cols[0].data_type, 'int');
-                assert.equal(cols[1].column_name, 'emails_text');
-                assert.equal(cols[1].data_type, 'varchar');
+            switch (protocol) {
+                case 'sqlite':
+                    assert.equal(cols[0].name, 'account_id');
+                    assert.equal(cols[0].type, 'INTEGER');
+                    assert.equal(cols[1].name, 'emails_text');
+                    assert.equal(cols[1].type, 'TEXT');
+                    break
+                case 'mysql':
+                    assert.equal(cols[0].column_name, 'account_id');
+                    assert.equal(cols[0].data_type, 'int');
+                    assert.equal(cols[1].column_name, 'emails_text');
+                    assert.equal(cols[1].data_type, 'varchar');
+                    break
             }
         });
 

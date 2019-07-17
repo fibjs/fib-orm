@@ -2,6 +2,7 @@ import url 	  = require('url');
 
 import _cloneDeep 	  = require('lodash.clonedeep');
 
+import DbDriver       = require("@fxjs/db-driver");
 import Hook           = require('./Hook');
 import Utilities      = require("./Utilities");
 import ORMError       = require("./Error");
@@ -12,70 +13,33 @@ const SUPPORTED_PROTOCOLS = [
     'mssql:',
 ]
 
-export const parseDbConfig: FxOrmHelper.HelperModules['parseDbConfig'] = function (opts, cb?) {
-    let config: FxOrmNS.IDBConnectionConfig = null;
-
+export const buildDbDriver: FxOrmHelper.HelperModules['buildDbDriver'] = function (opts) {
     if (!opts) {
-        return Utilities.ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
+        return Utilities.ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'));
     } else if (typeof opts === 'string') {
 		if ((opts as string).trim().length === 0) {
-			return Utilities.ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'), cb);
+			return Utilities.ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'));
 		}
-		config = url.parse(opts, true).toJSON();
-	} else if (typeof opts === 'object') {
-        config = url.parse(url.format(opts)).toJSON() as FibOrmNS.IDBConnectionConfig;
+	}
+    let driver: FxDbDriverNS.Driver = null
+    try {
+        driver = DbDriver.create(opts)
+    } catch (error) {
+        if (error.message === '[driver.config] invalid protocol')
+    		return Utilities.ORM_Error(new ORMError("CONNECTION_URL_NO_PROTOCOL", 'PARAM_MISMATCH'));
     }
-
-
-	// support fibjs built-in object
-	if (typeof config.toJSON === 'function')
-		config = config.toJSON()
-	else
-		config = _cloneDeep(config);
+    const config = driver.config
 
     const isSqlite = config.protocol === 'sqlite:';
 
 	if (isSqlite && config.timezone === undefined)
-		config.timezone = 'UTC';
-
-	config.query = config.query || {};
-
-	for(var k in config.query) {
-		config.query[k] = Utilities.queryParamCast(config.query[k]);
-		config[k] = config.query[k];
-	}
+        driver.extend_config.timezone = 'UTC';
     
-    if (!config.protocol) {
-		return Utilities.ORM_Error(new ORMError("CONNECTION_URL_NO_PROTOCOL", 'PARAM_MISMATCH'), cb);
-    }
+	// if (!config.host && !isSqlite) {
+	// 	config.host = config.hostname = "localhost";
+	// }
 
-	if (!config.database) {
-		// if (!config.pathname) {
-        //     return Utilities.ORM_Error(new ORMError("CONNECTION_URL_NO_DATABASE", 'PARAM_MISMATCH'), cb);
-		// }
-		config.database = (config.pathname ? config.pathname.substr(1) : "");
-	}
-	if (!config.host && !isSqlite) {
-		config.host = config.hostname = "localhost";
-	}
-	if (config.auth) {
-		config.user = config.auth.split(":")[0];
-		config.password = config.auth.split(":")[1];
-	}
-	if (config.hasOwnProperty("username") && !config.user) {
-		config.user = config.username
-	}
-	if (!config.hasOwnProperty("user")) {
-		config.user = "root";
-	}
-	if (!config.hasOwnProperty("password")) {
-		config.password = "";
-	}
-	if (config.hasOwnProperty("hostname")) {
-		config.host = config.hostname;
-	}
-
-    return config;
+    return driver;
 }
 
 export const get_many_associations_from_instance_by_extname: FxOrmHelper.HelperModules['get_many_associations_from_instance_by_extname'] = function (instance) {

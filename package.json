@@ -44,9 +44,11 @@
     },
     "dependencies": {
         "@fibjs/enforce": "^0.1.1",
+        "@fxjs/db-driver": "^0.0.3",
         "@fxjs/knex": "^0.1.1",
-        "@fxjs/sql-ddl-sync": "^0.4.0",
-        "@fxjs/sql-query": "^0.4.0",
+        "@fxjs/orm-core": "^0.0.1",
+        "@fxjs/sql-ddl-sync": "^0.5.6",
+        "@fxjs/sql-query": "^0.5.1",
         "fib-pool": "^1.5.3",
         "knex": "^0.16.3",
         "lodash.clonedeep": "^4.5.0",
@@ -61,13 +63,13 @@
         "@types/lodash.merge": "^4.6.6",
         "async": "^2.6.2",
         "cross-env": "^5.2.0",
-        "fib-typify": "^0.5.2",
+        "fib-typify": "^0.6.0",
         "lodash": "^4.17.11",
         "semver": "^5.6.0"
     },
     "peerDependencies": {
-        "@fxjs/sql-ddl-sync": ">= 0.4 <= 0.5",
-        "@fxjs/sql-query": ">= 0.4 < 0.5",
+        "@fxjs/sql-ddl-sync": ">= 0.5 <= 0.6",
+        "@fxjs/sql-query": ">= 0.5 < 0.6",
         "@fibjs/enforce": ">= 0.1.1 < 0.2",
         "@fxjs/knex": ">= 0.1.1 < 0.2"
     }

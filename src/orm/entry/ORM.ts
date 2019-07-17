@@ -2,6 +2,7 @@ import util           = require("util");
 import events         = require("events");
 import uuid			  = require('uuid')
 
+import DbDriver       = require("@fxjs/db-driver");
 import SqlQuery       = require("@fxjs/sql-query");
 import ormPluginSyncPatch from './Patch/plugin'
 
@@ -34,9 +35,9 @@ const use: FxOrmNS.ExportModule['use'] = function (connection, proto, opts, cb) 
 	}
 
 	try {
-		const Driver   = adapters.get(proto);
+		const DMLDriver   = adapters.get(proto);
 		const settings = Settings.Container(SettingsInstance.get('*'));
-		const driver   = new Driver(null, connection, {
+		const driver   = new DMLDriver(null, connection, {
 			debug    : (opts.query && opts.query.debug === 'true'),
 			settings : settings
 		});
@@ -47,17 +48,8 @@ const use: FxOrmNS.ExportModule['use'] = function (connection, proto, opts, cb) 
 	}
 };
 
-const FALLBACK_CONNECT_CFG = {
-	protocol: '',
-	user: '',
-	password: '',
-	host: '',
-	query: {},
-	database: ''
-}
-
-function isOrmLikeErrorEmitter (parsedDBConfig: FxOrmNS.IDBConnectionConfig | FxOrmNS.ORMLike): parsedDBConfig is FxOrmNS.ORMLike {
-	return !parsedDBConfig.hasOwnProperty('host') && parsedDBConfig instanceof events.EventEmitter
+function isOrmLikeErrorEmitter (parsedDBDriver: FxDbDriverNS.Driver | FxOrmNS.ORMLike): parsedDBDriver is FxOrmNS.ORMLike {
+	return !parsedDBDriver.hasOwnProperty('host') && parsedDBDriver instanceof events.EventEmitter
 }
 
 const connectSync: FxOrmNS.ExportModule['connectSync'] = function (opts) {
@@ -69,11 +61,14 @@ const connectSync: FxOrmNS.ExportModule['connectSync'] = function (opts) {
 		}
 	});
 
-	const cfg = Helpers.parseDbConfig(opts);
+	const dbdriver = Helpers.buildDbDriver(opts);
 
-	if (isOrmLikeErrorEmitter(cfg)) {
+	/**
+	 * @pointless
+	 */
+	if (isOrmLikeErrorEmitter(dbdriver)) {
         const errWaitor = Utilities.getErrWaitor(true);
-        cfg.on('connect', (err: FxOrmError.ExtendedError) => {
+        dbdriver.on('connect', (err: FxOrmError.ExtendedError) => {
             errWaitor.err = err;
             errWaitor.evt.set();
         });
@@ -82,21 +77,21 @@ const connectSync: FxOrmNS.ExportModule['connectSync'] = function (opts) {
         if (errWaitor.err)
             throw errWaitor.err;
 
-        return cfg;
+        return dbdriver;
 	}
 	
-	let proto  = cfg.protocol.replace(/:$/, '');
+	let proto  = dbdriver.config.protocol.replace(/:$/, '');
 	let orm: FxOrmNS.ORM;
 	if (DriverAliases[proto]) {
 		proto = DriverAliases[proto];
 	}
 
 	const syncResult = Utilities.exposeErrAndResultFromSyncMethod(() => {
-		const Driver = adapters.get(proto);
+		const DMLDriver = adapters.get(proto);
 		const settings = Settings.Container(SettingsInstance.get('*'));
-		const driver   = new Driver(cfg, null, {
-			debug    : 'debug' in cfg.query ? cfg.query.debug : settings.get("connection.debug"),
-			pool     : 'pool'  in cfg.query ? cfg.query.pool  : settings.get("connection.pool"),
+		const driver   = new DMLDriver(dbdriver.uri, null, {
+			debug    : dbdriver.extend_config.debug ? dbdriver.extend_config.debug : settings.get("connection.debug"),
+			pool     : dbdriver.extend_config.pool ? dbdriver.extend_config.pool  : settings.get("connection.pool"),
 			settings : settings
 		});
 
@@ -116,8 +111,8 @@ const connectSync: FxOrmNS.ExportModule['connectSync'] = function (opts) {
 	return orm;
 }
 
-const connect: FxOrmNS.ExportModule['connect'] = function () {
-	let cb: FxOrmNS.IConnectionCallback;
+const connect: FxOrmNS.ExportModule['connect'] = function <T = any>() {
+	let cb: FxOrmNS.ExecutionCallback<T>;
 
 	let args = Array.prototype.slice.apply(arguments);
 	Helpers.selectArgs(args, function (type, arg) {
@@ -166,14 +161,14 @@ const ORM = function (
 
 	events.EventEmitter.call(this);
 
-	var onError = function (err: Error) {
+	var onError = (err: Error) => {
 		if (this.settings.get("connection.reconnect")) {
 			if (typeof this.driver.reconnect === "undefined") {
 				return this.emit("error", new ORMError("Connection lost - driver does not support reconnection", 'CONNECTION_LOST'));
 			}
-			this.driver.reconnect(function () {
+			this.driver.reconnect(() => {
 				this.driver.on("error", onError);
-			}.bind(this));
+			});
 
 			if (this.listeners("error").length === 0) {
 				// since user want auto reconnect,
@@ -182,7 +177,7 @@ const ORM = function (
 			}
 		}
 		this.emit("error", err);
-	}.bind(this);
+	};
 
 	driver.on("error", onError);
 

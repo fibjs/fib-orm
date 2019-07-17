@@ -3,7 +3,6 @@
 /// <reference types="@fxjs/knex" />
 
 /// <reference path="_common.d.ts" />
-/// <reference path="connect.d.ts" />
 /// <reference path="property.d.ts" />
 /// <reference path="assoc.d.ts" />
 /// <reference path="query.d.ts" />
@@ -28,36 +27,34 @@ declare namespace FxOrmDMLDriver {
     }
 
     interface DMLDriverConstructor {
-        new (config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase, opts: FxOrmDMLDriver.DMLDriverOptions): DMLDriver
+        new (config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase, opts: FxOrmDMLDriver.DMLDriverOptions): DMLDriver
         prototype: DMLDriver
     }
 
-    interface DMLDriver extends DefaultSqlDriver {
-        db: FxOrmDb.DatabaseBase
-        dialect: FxSqlQueryDialect.DialectType
-        config: FxOrmNS.IDBConnectionConfig
-        opts: DMLDriverOptions
-        readonly isPool: boolean;
+    interface DMLDriver<ConnType = any> {
+        // /**
+        //  * @compatible
+        //  */
+        // readonly db: FxOrmDb.DatabaseBase<ConnType>
+        db: FxOrmDb.DatabaseBase<ConnType>
+        readonly config: FxOrmDb.DatabaseBase<ConnType>['config']
 
         customTypes: {[key: string]: FxOrmProperty.CustomPropertyType}
 
         knex: FXJSKnex.FXJSKnexModule.KnexInstance
 
         /* shared :start */
-        sync: {
-            <T>(opts: FxOrmDMLShared.SyncOptions, cb?: FxOrmNS.GenericCallback<FxOrmSqlDDLSync.SyncResult>): DMLDriver            
-        }
-        drop: {
-            <T>(opts: FxOrmDMLShared.DropOptions, cb?: FxOrmNS.GenericCallback<void>): DMLDriver            
-        }
+        doSync <T = any>(opts?: FxOrmDMLShared.SyncOptions): this
+        doDrop <T = any>(opts?: FxOrmDMLShared.DropOptions): this
         /* shared :end */
 
         connect: {
-            (cb: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): void
-            (): FxOrmNS.IDbConnection
+            (cb: FxOrmNS.GenericCallback<FxDbDriverNS.Driver>): void
+            (): FxDbDriverNS.Driver
         }
         reconnect: {
-            (cb?: null | FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>, connection?: null | FxOrmDb.DatabaseBase): FxOrmNS.IDbConnection
+            (cb: FxOrmNS.GenericCallback<FxDbDriverNS.Driver>): void
+            (): FxDbDriverNS.Driver
         }
         ping: {
             (cb?: FxOrmNS.VoidCallback): void
@@ -128,7 +125,7 @@ declare namespace FxOrmDMLDriver {
             (Model: FxOrmModel.Model, association: FxOrmAssociation.InstanceAssociationItem): any
         }
         
-        execQuerySync: (query: string, opt: FxOrmDMLDriver.OrigOrmExecQueryOpts) => any
+        execQuerySync: (query: string, opt: Fibjs.AnyObject) => any
         /* patched :end */
 
         [ext_key: string]: any
@@ -153,16 +150,16 @@ declare namespace FxOrmDMLDriver {
     /* ============================= typed db :start ============================= */
 
     interface DMLDriverConstructor_MySQL extends DMLDriverConstructor {
-        (this: DMLDriver_MySQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_MySQL, opts: FxOrmDMLDriver.DMLDriverOptions): void
+        (this: DMLDriver_MySQL, config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase<Class_MySQL>, opts: FxOrmDMLDriver.DMLDriverOptions): void
         prototype: DMLDriver_MySQL
     }
     interface DMLDriver_MySQL extends DMLDriver {
-        db: FxOrmDb.DatabaseBase_MySQL
+        db: FxOrmDb.DatabaseBase<Class_MySQL>
 
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_MYSQL | FxOrmDb.AGGREGATION_METHOD_TUPLE__MYSQL)[]
     }
     interface DMLDriverConstructor_PostgreSQL extends DMLDriverConstructor {
-        (this: DMLDriver_PostgreSQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_PostgreSQL, opts: FxOrmDMLDriver.DMLDriverOptions): void
+        (this: DMLDriver_PostgreSQL, config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase_PostgreSQL, opts: FxOrmDMLDriver.DMLDriverOptions): void
         prototype: DMLDriver_PostgreSQL
     }
     interface DMLDriver_PostgreSQL extends DMLDriver {
@@ -172,7 +169,7 @@ declare namespace FxOrmDMLDriver {
     }
 
     interface DMLDriverConstructor_SQLite extends DMLDriverConstructor {
-        (this: DMLDriver_SQLite, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_SQLite, opts: FxOrmDMLDriver.DMLDriverOptions): void
+        (this: DMLDriver_SQLite, config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase_SQLite, opts: FxOrmDMLDriver.DMLDriverOptions): void
         prototype: DMLDriver_SQLite
     }
     interface DMLDriver_SQLite extends DMLDriver {
@@ -182,18 +179,8 @@ declare namespace FxOrmDMLDriver {
     }
 
     /* ============================= typed db :end   ============================= */
-
-    /* Connection About Patch :start */
-    interface DbInstanceInOrmConnDriver {
-        conn: FxOrmNS.IDbConnection
-    }
-    export interface OrigOrmExecQueryOpts {
-        [key: string]: any;
-    }
-    /* Connection About Patch :end */
-
-    type DefaultSqlDriver = FxOrmSqlDDLSync__Driver.Driver<FxSqlQuery.Class_Query>
-    type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<FxSqlQuery.Class_Query>
+    // type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<FxSqlQuery.Class_Query>
+    type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect
 }
 
 declare namespace FxOrmDMLShared {
@@ -210,6 +197,15 @@ declare namespace FxOrmDMLShared {
         one_associations: FxOrmAssociation.InstanceAssociationItem_HasOne[]
         many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[]
         extend_associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[]
+
+        /**
+         * @default true
+         */
+        repair_column?: boolean
+        /**
+         * @default false
+         */
+        allow_drop_column?: boolean
     }
 
     interface DropOptions {

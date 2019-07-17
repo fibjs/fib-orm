@@ -72,12 +72,12 @@ var switchableFunctions = {
 };
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor = function (
-	this: FxOrmDMLDriver.DMLDriver_PostgreSQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_PostgreSQL, opts: FxOrmDMLDriver.DMLDriverOptions
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL, config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase_PostgreSQL, opts: FxOrmDMLDriver.DMLDriverOptions
 ) {
 	var functions = switchableFunctions.client;
 
 	this.dialect = 'postgresql';
-	this.config = config || <FxOrmNS.IDBConnectionConfig>{};
+	this.config = config || <FxDbDriverNS.DBConnectionConfig>{};
 	this.opts   = opts || <FxOrmDMLDriver.DMLDriverOptions>{};
 
 	if (!this.config.timezone) {

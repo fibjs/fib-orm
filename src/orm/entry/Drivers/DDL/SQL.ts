@@ -1,5 +1,3 @@
-import coroutine = require('coroutine')
-
 import _merge = require('lodash.merge')
 import { Sync } from "@fxjs/sql-ddl-sync";
 import * as Utilities from '../../Utilities';
@@ -9,13 +7,14 @@ function setIndex (p: FxOrmProperty.NormalizedPropertyHash, v: FxOrmProperty.Nor
 	p[k] = v;
 };
 
-export const sync: FxOrmDMLDriver.DMLDriver['sync'] = function (
+export const doSync: FxOrmDMLDriver.DMLDriver['doSync'] = function (
 	this: FxOrmDMLDriver.DMLDriver,
 	opts,
-	cb?
 ) {
 	const syncInstance = new Sync({
-		driver  : this,
+		...opts.repair_column && { strategy: 'hard' },
+		...opts.allow_drop_column && { suppressColumnDrop: false },
+		dbdriver: this.db,
 		debug: function (text: string) {
 			process.env.DEBUG_SQLDDLSYNC && (global as any).console.log("> %s", text);
 		}
@@ -44,17 +43,13 @@ export const sync: FxOrmDMLDriver.DMLDriver['sync'] = function (
 		);
 	}
 
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmSqlDDLSync.SyncResult>(
-		() => syncInstance.sync()
-	);
-
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	syncInstance.sync();
 
 	return this;
 };
 
-export const drop: FxOrmDMLDriver.DMLDriver['drop'] = function (
-	this: FxOrmDMLDriver.DMLDriver, opts, cb?
+export const doDrop: FxOrmDMLDriver.DMLDriver['doDrop'] = function (
+	this: FxOrmDMLDriver.DMLDriver, opts
 ) {
 	let drop_queries = [], pending: number, err: FxOrmError.ExtendedError;
 
@@ -71,7 +66,6 @@ export const drop: FxOrmDMLDriver.DMLDriver['drop'] = function (
 		if (err || --pending === 0)
 			break
 	}
-	Utilities.throwErrOrCallabckErrResult({ error: err }, { callback: cb });
 
 	return this;
 };

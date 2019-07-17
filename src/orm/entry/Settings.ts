@@ -5,6 +5,12 @@ import _cloneDeep = require('lodash.clonedeep');
 const default_settings = {
 	model      : {
 		namePrefix				  : '',
+		// TODO: add test about it
+		repair_column  		  	  : true,
+		/**
+		 * @dangerous
+		 */
+		allow_drop_column  		  : false,
 	},
 	properties : {
 		primary_key               : "id",

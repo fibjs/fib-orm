@@ -8,34 +8,32 @@ import utils		= require("./_utils");
 import * as Utilities from '../../Utilities';
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function(
-	this: FxOrmDMLDriver.DMLDriver_SQLite, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_SQLite, opts: FxOrmDMLDriver.DMLDriverOptions
+	this: FxOrmDMLDriver.DMLDriver_SQLite,
+	config: FxDbDriverNS.DBConnectionConfig,
+	connection: FxOrmDb.DatabaseBase_SQLite,
+	opts: FxOrmDMLDriver.DMLDriverOptions
 ) {
 	this.dialect = 'sqlite';
-	this.config = config || <FxOrmNS.IDBConnectionConfig>{};
 	this.opts   = opts || <FxOrmDMLDriver.DMLDriverOptions>{};
-
-	if (!this.config.timezone) {
-		this.config.timezone = "local";
-	}
-
-	this.query  = new Query({ dialect: this.dialect, timezone: this.config.timezone });
-	utils.setCouldPool(this);
-	utils.getKnexInstance(this);
 
 	this.customTypes = {};
 
 	if (connection) {
 		this.db = connection;
 	} else {
-		// on Windows, paths have a drive letter which is parsed by
-		// url.parse() as the hostname. If host is defined, assume
-		// it's the drive letter and add ":"
-		if (process.platform == "win32" && config.host && config.host.match(/^[a-z]$/i)) {
-			this.db = new sqlite3.Database(decodeURIComponent((config.host ? config.host + ":" : "") + (config.pathname || "")) || ':memory:');
-		} else {
-			this.db = new sqlite3.Database(decodeURIComponent((config.host ? config.host : "") + (config.pathname || "")) || ':memory:');
-		}
+		this.db = new sqlite3.Database(config)
 	}
+
+	Object.defineProperty(this, 'config', {
+		value: this.db.config,
+		writable: false
+	});
+	
+	if (!this.config.timezone) this.config.timezone = "local";
+	this.query  = new Query({ dialect: this.dialect, timezone: this.config.timezone });
+
+	utils.setCouldPool(this);
+	utils.getKnexInstance(this);
 
 	this.aggregate_functions = [ "ABS", "ROUND",
 	                             "AVG", "MIN", "MAX",
@@ -57,21 +55,31 @@ Driver.prototype.on = function (this: FxOrmDMLDriver.DMLDriver_SQLite,
 	ev, cb?
 ) {
 	if (ev == "error") {
-		this.db.on("error", cb);
+		this.db.eventor.on("error", cb);
 	}
 	return this;
 };
 
 Driver.prototype.connect = function (
-	this: FxOrmDMLDriver.DMLDriver_SQLite, cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>
+	this: FxOrmDMLDriver.DMLDriver_SQLite, cb?: FxOrmNS.GenericCallback<FxDbDriverNS.Driver>
 ) {
-	return this.db.connect(cb);
+	const errResults = Utilities.exposeErrAndResultFromSyncMethod(
+		() => this.db.connect()
+	)
+
+	Utilities.throwErrOrCallabckErrResult(errResults, { no_throw: !!cb, callback: cb });
+	return errResults.result;
 };
 
 Driver.prototype.close = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite, cb?
 ) {
-	return this.db.close(cb);
+	const errResults = Utilities.exposeErrAndResultFromSyncMethod(
+		() => this.db.close()
+	)
+
+	Utilities.throwErrOrCallabckErrResult(errResults, { no_throw: !!cb, callback: cb });
+	return errResults.result;
 };
 
 Driver.prototype.getQuery = function (

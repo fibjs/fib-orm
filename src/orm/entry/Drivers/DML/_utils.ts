@@ -86,7 +86,7 @@ export function setCouldPool (
 ) {
 	Object.defineProperty(driver, 'isPool', {
 		get () {
-			return driver.opts.pool
+			return driver.db.isPool
 		}
 	});
 }

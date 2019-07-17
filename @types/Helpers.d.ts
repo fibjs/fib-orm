@@ -4,7 +4,8 @@ declare namespace FxOrmHelper {
    // type HookTrigger<TTHIS = any> = FxOrmHook.HookTrigger<TTHIS>
    // type HookWait<TTHIS = any, TNEXT = any> = FxOrmHook.HookWait<TTHIS, TNEXT>
    interface HelperModules {
-      parseDbConfig (config: string | FxOrmNS.IConnectionOptions, cb?: FxOrmNS.IConnectionCallback): FxOrmNS.IDBConnectionConfig | FxOrmNS.ORMLike
+      // parseDbConfig (config: string | FxDbDriverNS.DBConnectionConfig, cb?: FxOrmNS.IConnectionCallback): FxDbDriverNS.DriverConfig | FxOrmNS.ORMLike
+      buildDbDriver (config: string | FxDbDriverNS.DBConnectionConfig/* , cb?: FxOrmCoreCallbackNS.ExecutionCallback<T> */): FxOrmNS.ORMLike | FxDbDriverNS.Driver
 
       get_many_associations_from_instance_by_extname (instance: FxOrmNS.Instance): FxOrmAssociation.InstanceAssociationItem_HasMany[]
       get_one_associations_from_instance_by_extname (instance: FxOrmNS.Instance): FxOrmAssociation.InstanceAssociationItem_HasOne[]

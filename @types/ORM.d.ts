@@ -7,7 +7,6 @@
 /// <reference path="3rd.d.ts" />
 
 /// <reference path="_common.d.ts" />
-/// <reference path="connect.d.ts" />
 /// <reference path="settings.d.ts" />
 
 /// <reference path="query.d.ts" />
@@ -92,7 +91,7 @@ declare namespace FxOrmNS {
     // bad annotation but 'db' is used as like 'orm' ever, so we use 'FibOrmDB' to substitute FibORM
     type FibOrmDB = ORM
 
-    interface FibORMIConnectionOptions extends IConnectionOptions {
+    interface FibORMIConnectionOptions extends FxDbDriverNS.ConnectionInputArgs {
         timezone: string;
     }
 
@@ -244,10 +243,10 @@ declare namespace FxOrmNS {
 
         syncSync(): void;
 
-        begin: FxOrmNS.IDbConnection['begin'];
-        commit: FxOrmNS.IDbConnection['commit'];
-        rollback: FxOrmNS.IDbConnection['rollback'];
-        trans: FxOrmNS.IDbConnection['trans'];
+        begin: FxDbDriverNS.SQLDriver['begin'];
+        commit: FxDbDriverNS.SQLDriver['commit'];
+        rollback: FxDbDriverNS.SQLDriver['rollback'];
+        trans: FxDbDriverNS.SQLDriver['trans'];
 
         [extraMember: string]: any;
     }
@@ -325,9 +324,9 @@ declare namespace FxOrmNS {
 
         use(connection: FxOrmDb.DatabaseBase, protocol: string, options: IUseOptions, callback: (err: Error, db?: FxOrmNS.ORM) => void): any;
         connect: {
-            (uri?: string | FxOrmNS.IConnectionOptions, callback?: IConnectionCallback): FxOrmNS.ORMLike;
+            (uri?: string | FxDbDriverNS.DBConnectionConfig, callback?: FxOrmCoreCallbackNS.ExecutionCallback<FxDbDriverNS.Driver>): FxOrmNS.ORMLike;
         };
-        connectSync(uriOrOpts?: string | FxOrmNS.IConnectionOptions): FxOrmNS.ORMLike;
+        connectSync(uriOrOpts?: string | FxDbDriverNS.DBConnectionConfig): FxOrmNS.ORMLike;
 
         [extra: string]: any
     }

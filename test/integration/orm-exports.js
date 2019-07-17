@@ -124,9 +124,9 @@ describe('ORM', function () {
     it('should do not mutate opts', function () {
       var opts = {
         protocol: 'mysql',
-        user: 'notauser',
+        query: { pool: true, debug: true },
+        username: 'notauser',
         password: 'wrong password',
-        query: { pool: true, debug: true }
       }
 
       var expected = JSON.stringify(opts)
@@ -354,7 +354,7 @@ describe('ORM', function () {
     it('should not modify connection opts', function (done) {
       var opts = {
         protocol: 'mysql',
-        user: 'notauser',
+        username: 'notauser',
         password: 'wrong password',
         query: { pool: true, debug: true }
       }

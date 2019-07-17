@@ -327,7 +327,7 @@ export const Instance = function (
 
 				const instances = instance[assoc.name] as FxOrmInstance.Instance[];
 				Utilities.parallelQueryIfPossible(
-					opts.driver.opts.pool,
+					opts.driver.db.isPool,
 					instances,
 					(item) => {
 						if (!item.isInstance) {

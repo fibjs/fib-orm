@@ -1,5 +1,4 @@
 import util = require('util')
-import * as Utilities from '../../Utilities';
 
 export function execQuery <T = any>(
 	this: FxOrmDMLDriver.DMLDriver,

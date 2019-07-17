@@ -1,45 +1,41 @@
 /// <reference types="fib-pool" />
 
 declare namespace FxOrmDb {
-    interface DatabaseBaseConfig extends FxOrmNS.IDBConnectionConfig, Class_UrlObject {
-        pool: FxOrmNS.IConnectionPoolOptions
+    interface DatabaseBaseConfig extends /* FxDbDriverNS.DBConnectionConfig,  */Class_UrlObject {
+        pool: FxDbDriverNS.ConnectionPoolOptions
     }
 
-    interface DatabaseBase extends Class_EventEmitter {
-        conn: FxOrmNS.IDbConnection;
-        readonly uri: string;
+    interface DatabaseBase<ConnType = any> extends FxDbDriverNS.Driver<ConnType> {
+        eventor: Class_EventEmitter
+        // conn: FxDbDriverNS.Driver;
+        conn: ConnType;
+        // readonly uri: string;
 
-        opts: DatabaseBaseConfig;
-
-        execute: {
-            (sql: string, ...args: any[]): any[];
-        }
+        // ping: {
+        //     (cb?: FxOrmNS.VoidCallback): void
+        // }
+        // execute: {
+        //     (sql: string, ...args: any[]): any[];
+        // }
         query: {
             <T=any>(query: string, cb?: FxOrmNS.GenericCallback<T>): T
         }
-        close: {
-            <T=void>(cb?: FxOrmNS.GenericCallback<T>): void
-        }
-        end?: DatabaseBase['close']
         
         connect: {
-            (cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>): FxOrmNS.IDbConnection
+            (cb?: FxOrmNS.GenericCallback<ConnType>): void
+            (): ConnType
         }
-        pool: FibPoolNS.FibPoolFunction<DatabaseBase['conn']>
+        // pool: FibPoolNS.FibPoolFunction<DatabaseBase['conn']>
     }
 
-    interface DatabaseBase_SQLite extends DatabaseBase {
+    interface DatabaseBase_SQLite extends DatabaseBase<Class_SQLite> {
         readonly use_memory: boolean
         
         all: DatabaseBase_SQLite['query']
         get: DatabaseBase_SQLite['query']
     }
 
-    interface DatabaseBase_MySQL extends DatabaseBase {
-        ping: {
-            (cb?: FxOrmNS.VoidCallback): void
-        }
-    }
+    // interface DatabaseBase_MySQL extends DatabaseBase<Class_MySQL> {}
 
     // not supported now.
     interface DatabaseBase_PostgreSQL extends DatabaseBase {

@@ -8,22 +8,32 @@ import utils		= require("./_utils");
 import * as Utilities from "../../Utilities";
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_MySQL = function(
-	this: FxOrmDMLDriver.DMLDriver_MySQL, config: FxOrmNS.IDBConnectionConfig, connection: FxOrmDb.DatabaseBase_MySQL, opts: FxOrmDMLDriver.DMLDriverOptions
+	this: FxOrmDMLDriver.DMLDriver_MySQL,
+	config: FxDbDriverNS.DBConnectionConfig,
+	connection: FxOrmDb.DatabaseBase<Class_MySQL>,
+	opts: FxOrmDMLDriver.DMLDriverOptions
 ) {
 	this.dialect = 'mysql';
-	this.config = config || <FxOrmNS.IDBConnectionConfig>{};
 	this.opts   = opts || <FxOrmDMLDriver.DMLDriverOptions>{};
-	this.customTypes = <{[key: string]: FxOrmProperty.CustomPropertyType}>{};
 
-	if (!this.config.timezone) {
-		this.config.timezone = "local";
+	this.customTypes = {};
+
+	if (connection) {
+		this.db = connection;
+	} else {
+		this.db = new mysql.Database(config)
 	}
 
-	this.query  = new Query({dialect: this.dialect, timezone: this.config.timezone });
+	Object.defineProperty(this, 'config', {
+		value: this.db.config,
+		writable: false
+	});
+
+	if (!this.config.timezone) this.config.timezone = "local";
+	this.query  = new Query({ dialect: this.dialect, timezone: this.config.timezone });
+
 	utils.setCouldPool(this);
 	utils.getKnexInstance(this);
-
-	this.reconnect(null, connection);
 
 	this.aggregate_functions = [ "ABS", "CEIL", "FLOOR", "ROUND",
 	                             "AVG", "MIN", "MAX",
@@ -39,7 +49,11 @@ util.extend(Driver.prototype, shared, DDL);
 Driver.prototype.ping = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, cb: FxOrmNS.VoidCallback
 ) {
-	this.db.ping(cb);
+	this.db.ping();
+
+	if (cb)
+		setImmediate(cb);
+
 	return this;
 };
 
@@ -47,17 +61,15 @@ Driver.prototype.on = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, ev: string, cb?: FxOrmNS.VoidCallback
 ) {
 	if (ev == "error") {
-		this.db.on("error", cb);
-		this.db.on("unhandledError", cb);
+		this.db.eventor.on("error", cb);
+		this.db.eventor.on("unhandledError", cb);
 	}
 	return this;
 };
 
 Driver.prototype.connect = function (
-	this: FxOrmDMLDriver.DMLDriver_MySQL, cb?: FxOrmNS.GenericCallback<FxOrmNS.IDbConnection>
+	this: FxOrmDMLDriver.DMLDriver_MySQL, cb?: FxOrmNS.GenericCallback<FxDbDriverNS.Driver>
 ) {
-	let conn: FxOrmNS.IDbConnection = null;
-
 	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
 		return this.db.connect()
 	})
@@ -68,31 +80,32 @@ Driver.prototype.connect = function (
 };
 
 Driver.prototype.reconnect = function (
-	this: FxOrmDMLDriver.DMLDriver_MySQL, cb?, connection?: FxOrmDb.DatabaseBase_MySQL
+	this: FxOrmDMLDriver.DMLDriver_MySQL,
+	cb?
 ) {
-	var connOpts = this.config.href || this.config;
+	const connOpts = this.config.href || this.config;
 
-	// Prevent noisy mysql driver output
-	if (typeof connOpts == 'object') {
-		connOpts = util.omit(connOpts, 'debug') as any;
-	} else if (typeof connOpts == 'string') {
-		connOpts = connOpts.replace("debug=true", "debug=false");
-	}
+	this.db = new mysql.Database(connOpts);
 
-	this.db = (connection ? connection : mysql.createConnection(connOpts as any));
-
-	const conn = this.connect();
+	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+		return this.connect()
+	})
 
 	if (typeof cb === 'function')
-		cb(null, conn);
+		cb(null, syncResponse.result);
 
-	return conn;
+	return syncResponse.result;
 };
 
 Driver.prototype.close = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, cb: FxOrmNS.VoidCallback
 ) {
-	this.db.end(cb);
+	const errResults = Utilities.exposeErrAndResultFromSyncMethod(
+		() => this.db.close()
+	)
+
+	Utilities.throwErrOrCallabckErrResult(errResults, { no_throw: !!cb, callback: cb });
+	return errResults.result;
 };
 
 Driver.prototype.getQuery = function 
