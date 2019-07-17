@@ -11,7 +11,7 @@ export const dialect: FxOrmSqlDDLSync.ExportModule['dialect'] = function (name) 
 	const Dialects = require('./Dialects')
 
 	if (!Dialects[name])
-		throw `no dialect with name '${name}'`
+		throw new Error(`no dialect with name '${name}'`)
 		
 	return Dialects[name];
 }
