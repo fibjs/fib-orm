@@ -42,7 +42,7 @@ declare namespace FxDbDriverNS {
      */
     interface DBConnectionConfig {
         protocol: ConnectionInputArgs['protocol']
-        slashes: string
+        slashes: Class_UrlObject['slashes']
         query: ConnectionInputArgs['query']
         database: ConnectionInputArgs['database']
         username: ConnectionInputArgs['username']

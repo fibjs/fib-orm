@@ -83,7 +83,7 @@ export function parseConnectionString (input: any): FxDbDriverNS.DBConnectionCon
         
         input = <FxDbDriverNS.DBConnectionConfig>{
             protocol: urlObj.protocol || null,
-            slashes: urlObj.slashes || '',
+            slashes: urlObj.slashes || false,
             query: urlObj.query || null,
             username: urlObj.username || null,
             password: urlObj.password || null,
