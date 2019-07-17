@@ -279,14 +279,17 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 
 				this.debug("Adding column " + collection.name + "." + k + ": " + col.value);
 
-				this.total_changes += 1;
-				
-				this.Dialect.addCollectionColumnSync(
-					this.dbdriver,
-					collection.name,
-					col.value,
-					last_k
-				)
+				// check existence again
+				if (!this.Dialect.hasCollectionColumnsSync(this.dbdriver, collection.name, prop.mapsTo)) {
+					this.Dialect.addCollectionColumnSync(
+						this.dbdriver,
+						collection.name,
+						col.value,
+						last_k
+					)
+
+					this.total_changes += 1;
+				}
 			} else if (strategy === 'hard' && this.dbdriver.type !== 'sqlite' && needToSync(this, prop, columns[k])) {
 				const col = getColumnTypeRaw(this, collection.name, prop, { for: 'alter_column' });
 
@@ -296,14 +299,17 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 				}
 
 				this.debug("Modifying column " + collection.name + "." + k + ": " + col.value);
-
-				this.total_changes += 1;
 				
-				this.Dialect.modifyCollectionColumnSync(
-					this.dbdriver,
-					collection.name,
-					col.value
-				);
+				// check existence again
+				if (this.Dialect.hasCollectionColumnsSync(this.dbdriver, collection.name, prop.mapsTo)) {
+					this.Dialect.modifyCollectionColumnSync(
+						this.dbdriver,
+						collection.name,
+						col.value
+					);
+
+					this.total_changes += 1;
+				}
 			}
 
 			last_k = k;
