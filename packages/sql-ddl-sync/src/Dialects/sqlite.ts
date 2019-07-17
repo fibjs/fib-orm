@@ -1,14 +1,14 @@
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
 
-import { getDialect, arraify } from '../Utils';
+import { getSqlQueryDialect, arraify } from '../Utils';
 
 // @see https://www.sqlite.org/lang_altertable.html
 export const hasCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionSync'] = function (
 	dbdriver, name
 ) {
 	const rows = dbdriver.execute(
-		getDialect('sqlite').escape(
+		getSqlQueryDialect('sqlite').escape(
 			"SELECT * FROM sqlite_master WHERE type = 'table' and name = ?", [name]
 		)
 	)
@@ -32,7 +32,7 @@ export const addPrimaryKeySync: FxOrmSqlDDLSync__Dialect.Dialect['addPrimaryKeyS
 	dbdriver, tableName, columnName
 ) {
 	return dbdriver.execute(
-		getDialect('sqlite').escape(
+		getSqlQueryDialect('sqlite').escape(
 			"ALTER TABLE ?? ADD CONSTRAINT ?? PRIMARY KEY(??);",
 			[tableName, columnName + "PK", columnName]
 		)
@@ -52,7 +52,7 @@ export const dropPrimaryKeySync: FxOrmSqlDDLSync__Dialect.Dialect['dropPrimaryKe
 	dbdriver, tableName, columnName
 ) {
 	return dbdriver.execute(
-		getDialect('sqlite').escape(
+		getSqlQueryDialect('sqlite').escape(
 			"ALTER TABLE ?? DROP CONSTRAINT ??;",
 			[tableName, columnName + "PK"]
 		)
@@ -72,7 +72,7 @@ export const addForeignKeySync: FxOrmSqlDDLSync__Dialect.Dialect['addForeignKeyS
 	dbdriver, tableName, options
 ) {
 	return dbdriver.execute(
-		getDialect('sqlite').escape(
+		getSqlQueryDialect('sqlite').escape(
 			"ALTER TABLE ?? ADD FOREIGN KEY(??) REFERENCES ??(??);",
 			[tableName, options.name, options.references.table, options.references.column]
 		)
@@ -92,7 +92,7 @@ export const dropForeignKeySync: FxOrmSqlDDLSync__Dialect.Dialect['dropForeignKe
 	dbdriver, tableName, columnName
 ) {
 	return dbdriver.execute(
-		getDialect('sqlite').escape(
+		getSqlQueryDialect('sqlite').escape(
 			"ALTER TABLE ?? DROP CONSTRAINT ??;",
 			[tableName, tableName + "_" + columnName + "_fkey"]
 		)
@@ -112,7 +112,7 @@ export const getCollectionColumnsSync: FxOrmSqlDDLSync__Dialect.Dialect['getColl
 	dbdriver, name
 ) {
 	return dbdriver.execute(
-		getDialect('sqlite').escape(
+		getSqlQueryDialect('sqlite').escape(
 			"PRAGMA table_info(??)", [name]
 		)
 	)
@@ -342,7 +342,7 @@ export const getCollectionIndexesSync: FxOrmSqlDDLSync__Dialect.Dialect['getColl
 	dbdriver, name
 ) {
 	const rows = dbdriver.execute(
-		"PRAGMA index_list(" + getDialect('sqlite').escapeId(name) + ")"
+		"PRAGMA index_list(" + getSqlQueryDialect('sqlite').escapeId(name) + ")"
 	)
 
 	const indexes = convertIndexRows(rows);
@@ -354,7 +354,7 @@ export const getCollectionIndexesSync: FxOrmSqlDDLSync__Dialect.Dialect['getColl
 		}
 
 		const rows = dbdriver.execute(
-			`PRAGMA index_info(${getDialect('sqlite').escapeVal(k)})`
+			`PRAGMA index_info(${getSqlQueryDialect('sqlite').escapeVal(k)})`
 		)
 
 		for (let i = 0; i < rows.length; i++) {
@@ -401,7 +401,7 @@ export const removeIndexSync: FxOrmSqlDDLSync__Dialect.Dialect['removeIndexSync'
 ) {
 
 	return dbdriver.execute(
-		`DROP INDEX IF EXISTS ${getDialect('sqlite').escapeId(name)}`
+		`DROP INDEX IF EXISTS ${getSqlQueryDialect('sqlite').escapeId(name)}`
 	)
 };
 
@@ -509,7 +509,7 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			property,
 			driver
 		}) : property.defaultValue
-		type += " DEFAULT " + getDialect(driver.type).escapeVal(defaultValue);
+		type += " DEFAULT " + getSqlQueryDialect(driver.type).escapeVal(defaultValue);
 	}
 
 	return {

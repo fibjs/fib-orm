@@ -2,7 +2,7 @@
 
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
-import { getDialect, arraify } from '../Utils';
+import { getSqlQueryDialect, arraify } from '../Utils';
 
 const columnSizes = {
 	integer: {
@@ -18,7 +18,7 @@ export const hasCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionS
 	dbdriver, name
 ): boolean {
 	const rows = dbdriver.execute(
-		getDialect('mysql').escape(
+		getSqlQueryDialect('mysql').escape(
 			"SHOW TABLES LIKE ?", [name]
 		)
 	)
@@ -38,7 +38,7 @@ export const addPrimaryKeySync: FxOrmSqlDDLSync__Dialect.Dialect['addPrimaryKeyS
 	dbdriver, tableName, columnName
 ) {
 	return dbdriver.execute(
-		getDialect('mysql').escape(
+		getSqlQueryDialect('mysql').escape(
 			"ALTER TABLE ?? ADD CONSTRAINT ?? PRIMARY KEY(??);",
 			[tableName, columnName + "PK", columnName]
 		)
@@ -58,7 +58,7 @@ export const dropPrimaryKeySync: FxOrmSqlDDLSync__Dialect.Dialect['dropPrimaryKe
 	dbdriver, tableName, columnName
 ) {
 	return dbdriver.execute(
-		getDialect('mysql').escape(
+		getSqlQueryDialect('mysql').escape(
 			"ALTER TABLE ?? DROP PRIMARY KEY;",
 			[tableName]
 		)
@@ -78,7 +78,7 @@ export const addForeignKeySync: FxOrmSqlDDLSync__Dialect.Dialect['addForeignKeyS
 	dbdriver, tableName, options
 ) {
 	return dbdriver.execute(
-		getDialect('mysql').escape(
+		getSqlQueryDialect('mysql').escape(
 			"ALTER TABLE ?? ADD CONSTRAINT ?? FOREIGN KEY(??) REFERENCES ??(??)",
 			[tableName, options.name + "_fk", options.name, options.references.table, options.references.column]
 		)
@@ -98,7 +98,7 @@ export const dropForeignKeySync: FxOrmSqlDDLSync__Dialect.Dialect['dropForeignKe
 	dbdriver, tableName, columnName
 ) {
 	return dbdriver.execute(
-		getDialect('mysql').escape(
+		getSqlQueryDialect('mysql').escape(
 			`ALTER TABLE ?? DROP FOREIGN KEY ??;`,
 			[tableName, columnName + '_fk']
 		)
@@ -118,7 +118,7 @@ export const getCollectionColumnsSync: FxOrmSqlDDLSync__Dialect.Dialect['getColl
 	dbdriver, name
 ) {
 	return dbdriver.execute(
-		getDialect('mysql').escape(
+		getSqlQueryDialect('mysql').escape(
 			"SHOW COLUMNS FROM ??", [name]
 		)
 	)
@@ -389,7 +389,7 @@ export const getCollectionIndexesSync: FxOrmSqlDDLSync__Dialect.Dialect['getColl
 	dbdriver, name
 ) {
 	const rows = dbdriver.execute(
-		getDialect('mysql').escape(
+		getSqlQueryDialect('mysql').escape(
 			[
 				"SELECT index_name, column_name, non_unique ",
 				"FROM information_schema.statistics ",
@@ -506,7 +506,7 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			}
 			break;
 		case "enum":
-			type = "ENUM (" + property.values.map((val: any) => getDialect(driver.type).escapeVal(val)) + ")";
+			type = "ENUM (" + property.values.map((val: any) => getSqlQueryDialect(driver.type).escapeVal(val)) + ")";
 			break;
 		case "point":
 			type = "POINT";
@@ -539,7 +539,7 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 			driver
 		}) : property.defaultValue
 
-		type += " DEFAULT " + getDialect(driver.type).escapeVal(defaultValue);
+		type += " DEFAULT " + getSqlQueryDialect(driver.type).escapeVal(defaultValue);
 	}
 
 	return {

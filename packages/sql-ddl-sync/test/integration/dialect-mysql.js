@@ -1,6 +1,6 @@
 require("should");
 var common  = require("../common");
-var Dialect = require("../..").dialect('mysql');
+var Dialect = require("../../").dialect('mysql');
 
 var driver  = common.fakeDriver;
 

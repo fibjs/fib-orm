@@ -1,7 +1,7 @@
 /**
  * @TODO: driver.execQuery -> 
  * dbdriver.execute(
- * 	dbdriver.execute(getDialect(dbdriver.type)).escape
+ * 	dbdriver.execute(getSqlQueryDialect(dbdriver.type)).escape
  * )
  */ 
 var SQL         = require("../SQL");

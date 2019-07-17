@@ -1,6 +1,6 @@
 require("should");
 var common  = require("../common");
-var Dialect = require("../..").dialect('sqlite');
+var Dialect = require("../../").dialect('sqlite');
 var driver  = common.fakeDriver;
 
 describe("SQLite.getType", function () {

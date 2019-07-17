@@ -139,7 +139,6 @@ declare namespace FxOrmSqlDDLSync__Dialect{
 
     interface TypeResult<T = any> {
 		value: T,
-		before?: false | Function
 	}
 
     type DialectResult<T = any> = TypeResult<T>

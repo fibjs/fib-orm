@@ -15,7 +15,7 @@ export function logJson (group: string, detail: any) {
     return json
 }
 
-export function getDialect (type: FxDbDriverNS.DriverType) {
+export function getSqlQueryDialect (type: FxDbDriverNS.DriverType) {
     const Dialects = require('@fxjs/sql-query/lib/Dialects')
 
 	return Dialects[type];
