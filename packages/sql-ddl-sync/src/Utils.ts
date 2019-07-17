@@ -24,3 +24,15 @@ export function getSqlQueryDialect (type: FxDbDriverNS.DriverType) {
 export function arraify<T = any> (item: T | T[]): T[] {
 	return Array.isArray(item) ? item : [item]
 }
+
+export function getCollectionMapsTo_PropertyNameDict (collection: FxOrmSqlDDLSync__Collection.Collection) {
+    const hash = <{[k: string]: string}>{}
+
+    Object.keys(collection.properties).forEach(pname => {
+        const prop = collection.properties[pname]
+        if (prop.mapsTo)
+            hash[prop.mapsTo] = pname
+    })
+
+    return hash;
+}

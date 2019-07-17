@@ -7,7 +7,7 @@ var Sync = require('../../').Sync;
 const testDefinitions = [
 	[
 		'user', {
-			id: { type: "serial", key: true, serial: true },
+			id: { type: "serial", key: true, serial: true, mapsTo: 'userID' },
 			username: { type: "text", reuqired: true },
 			password: { type: "text", reuqired: true },
 			created_at: { type: "datetime", defaultValue: 'CURRENT_TIMESTAMP' },
@@ -50,6 +50,10 @@ const allTableNames = testDefinitions.map(([table, props]) => {
 	return table
 })
 
+function realFieldIdMapper (pname, prop) {
+	return prop.mapsTo || pname
+}
+
 
 describe(`db: Sync`, function () {
 	var sync = null
@@ -64,6 +68,7 @@ describe(`db: Sync`, function () {
 					process.env.DEBUG_SYNC && console.notice("> %s", text);
 				}
 			});
+			sync.strategy = 'hard'
 
 			testDefinitions.forEach(([table, properties]) => {
 				sync.defineCollection(table, {
@@ -76,7 +81,8 @@ describe(`db: Sync`, function () {
 
 		allTableNames.forEach(table => {
 			describe(`db should have table '${table}'`, function () {
-				var allColumns = Object.keys(allTables[table]);
+				var allColumns = Object.keys(allTables[table])
+					.map(pname => [pname, realFieldIdMapper(pname, allTables[table][pname])]);
 
 				it('table exists', () => {
 					assert.equal(
@@ -88,25 +94,25 @@ describe(`db: Sync`, function () {
 					)
 				});
 
-				allColumns.forEach(colName => {
-					it(`${table} should have column '${colName}'`, () => {
+				allColumns.forEach(([colName, rname]) => {
+					it(`${table} should have column '${colName}(${rname})'`, () => {
 						assert.equal(
 							sync.Dialect.hasCollectionColumnsSync(
 								sync.dbdriver,
 								table,
-								colName
+								rname
 							),
 							true
 						)
 					});
 				});
 
-				it(`${table} should have columns '${allColumns.join("', '")}'`, () => {
+				it(`${table} should have columns '${allColumns.map(([colName, rname]) => `${colName}(${rname})`).join("', '")}'`, () => {
 					assert.equal(
 						sync.Dialect.hasCollectionColumnsSync(
 							sync.dbdriver,
 							table,
-							allColumns
+							allColumns.map(([, rname]) => rname)
 						),
 						true
 					)
@@ -134,6 +140,7 @@ describe(`db: Sync`, function () {
 					process.env.DEBUG_SYNC && console.notice("> %s", text);
 				}
 			});
+			sync.strategy = 'hard'
 
 			testDefinitions.forEach(([table, properties]) => {
 				sync.defineCollection(table, {
@@ -220,6 +227,7 @@ describe(`db: Sync`, function () {
 					process.env.DEBUG_SYNC && console.notice("> %s", text);
 				}
 			});
+			sync.strategy = 'hard'
 
 			testDefinitions.forEach(([table, properties]) => {
 				sync.defineCollection(table, {

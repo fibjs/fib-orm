@@ -185,6 +185,9 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 			case "TEXT":
 				column.type = "text";
 				break;
+			case "POINT":
+				column.type = "point";
+				break;
 			default:
 				let [_, type, _before, field] = dCol.type.toUpperCase().match(/(.*)\s(AFTER|BEFORE)\s`(.*)`$/) || [] as any[]
 

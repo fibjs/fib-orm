@@ -3,7 +3,7 @@
 
 import FxORMCore = require("@fxjs/orm-core");
 import util  = require('util')
-import { getSqlQueryDialect, logJson } from './Utils';
+import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict } from './Utils';
 
 const noOp = () => {};
 
@@ -25,7 +25,10 @@ export const dialect: FxOrmSqlDDLSync.ExportModule['dialect'] = function (name) 
 function processCollection (
 	syncInstnace: Sync,
 	collection: FxOrmSqlDDLSync__Collection.Collection,
-	force_sync: boolean,
+	opts?: {
+		force_sync?: boolean,
+		strategy?: FxOrmSqlDDLSync.SyncCollectionOptions['strategy']
+	}
 ) {
 	let has: boolean;
 	let is_processed: boolean = false;
@@ -37,12 +40,14 @@ function processCollection (
 		is_processed = true;
 	}
 
-	syncInstnace.syncCollection(collection, { strategy: force_sync ? 'hard' : 'solf' })
+	const { strategy = 'soft' } = opts || {};
 
-	// if (!force_sync)
-	// 	return is_processed
+	if (strategy !== 'hard')
+		return is_processed
 
-	// return true;
+	syncInstnace.syncCollection(collection, { strategy })
+
+	return true;
 }
 
 /**
@@ -151,6 +156,7 @@ function needToSync (
 }
 
 export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
+	strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy'] = 'soft'
 	/**
 	 * @description total changes count in this time `Sync`
 	 * @deprecated
@@ -256,7 +262,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 
 		let {
 			columns = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name),
-			strategy = 'soft',
+			strategy = this.strategy,
 		} = opts || {};
 
 		if (!['soft', 'hard'].includes(strategy)) strategy = 'soft';
@@ -316,14 +322,17 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		}
 
         if ( !this.suppressColumnDrop ) {
-            for (let k in columns) {
-                if (!collection.properties.hasOwnProperty(k)) {
-                    this.debug("Dropping column " + collection.name + "." + k);
+			const hash = getCollectionMapsTo_PropertyNameDict(collection)
+            for (let colname in columns) {
+				if (collection.properties.hasOwnProperty(colname)) continue ;
+				/* colname maybe mapsTo */
+				if (hash.hasOwnProperty(colname)) continue ;
+				
+				this.debug(`Dropping column ${collection.name}.${colname}`);
 
-					this.total_changes += 1;
+				this.total_changes += 1;
 
-					return this.Dialect.dropCollectionColumnSync(this.dbdriver, collection.name, k);
-                }
+				this.Dialect.dropCollectionColumnSync(this.dbdriver, collection.name, colname);
             }
         }
 
@@ -463,7 +472,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod<FxOrmSqlDDLSync.SyncResult>(
 			() => {
 				this.total_changes = 0;
-				this.collections.forEach(collection => processCollection(this, collection, false))
+				this.collections.forEach(collection => processCollection(this, collection, { strategy: this.strategy }))
 
 				return {
 					changes: this.total_changes
@@ -479,7 +488,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod<FxOrmSqlDDLSync.SyncResult>(
 			() => {
 				this.total_changes = 0;
-				this.collections.forEach(collection => processCollection(this, collection, true))
+				this.collections.forEach(collection => processCollection(this, collection, { strategy: 'hard' }))
 
 				return {
 					changes: this.total_changes

@@ -223,13 +223,20 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 					column.size = colInfo.Size;
 				}
 				break;
+			case "TEXT":
+				column.type = "text";
+				break;
+			case "POINT":
+				column.type = "point";
+				break;
 			default:
-				let [_2, _enum_value_str] = Type.match(/^enum\('(.+)'\)$/);
+				let [_2, _enum_value_str] = Type.match(/^enum\('(.+)'\)$/) || [] as any;
 				if (_2) {
 					column.type = "enum";
 					column.values = _enum_value_str.split(/'\s*,\s*'/);
 					break;
 				}
+				console.log('Type', Type, colInfo);
 				throw new Error(`Unknown column type '${Type}'`);
 		}
 

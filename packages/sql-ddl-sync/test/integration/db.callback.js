@@ -67,7 +67,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 						if (use_force_sync)
 							info.should.have.property("changes", 1);
 						else
-							info.should.have.property("changes", 1);
+							info.should.have.property("changes", 0);
 
 						return done();
 					});
@@ -95,7 +95,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 							// info.should.have.property("changes", 2);
 							info.should.have.property("changes", 1);
 						else
-							info.should.have.property("changes", 1);
+							info.should.have.property("changes", 0);
 
 						return done();
 					});
@@ -122,7 +122,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 						if (use_force_sync)
 							info.should.have.property("changes", 1);
 						else
-							info.should.have.property("changes", 1);
+							info.should.have.property("changes", 0);
 
 						return done();
 					});
@@ -177,7 +177,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 					if (use_force_sync)
 						info.should.have.property("changes", 1);
 					else
-						info.should.have.property("changes", 1);
+						info.should.have.property("changes", 0);
 
 					return done();
 				});
@@ -251,7 +251,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 					if (use_force_sync)
 						info.should.have.property("changes", 2);
 					else
-						info.should.have.property("changes", 2);
+						info.should.have.property("changes", 0);
 
 					return done();
 				});

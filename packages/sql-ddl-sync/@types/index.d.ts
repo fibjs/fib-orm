@@ -22,10 +22,12 @@ declare namespace FxOrmSqlDDLSync {
     }
     interface SyncCollectionOptions {
         columns?: FxOrmSqlDDLSync__Column.PropertyHash,
-        strategy?: 'solf' | 'hard' 
+        strategy?: 'soft' | 'hard' 
     }
 
     class Sync<ConnType = any> {
+        strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy'];
+        
         constructor (options: FxOrmSqlDDLSync.SyncOptions<ConnType>)
         
         // readonly collections: FxOrmSqlDDLSync__Collection.Collection[]
@@ -59,7 +61,7 @@ declare namespace FxOrmSqlDDLSync {
          *      - opts.strategy: (default soft) strategy when conflict between local and remote db, see details below
          * 
          * @strategy
-         *      - 'solf': never modify existed columns in db, but add missing columns
+         *      - 'soft': never modify existed columns in db, but add missing columns
          *      - 'hard': modify existed columns in db, add missing columns
          */
         syncCollection (
