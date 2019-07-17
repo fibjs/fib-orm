@@ -178,7 +178,10 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 	constructor (options: FxOrmSqlDDLSync.SyncOptions) {
 		const dbdriver = options.dbdriver
 
-		this.suppressColumnDrop = options.suppressColumnDrop || dbdriver.type === 'sqlite'
+		this.suppressColumnDrop = (options.suppressColumnDrop !== false)
+		if (dbdriver.type === 'sqlite')
+			this.suppressColumnDrop = true
+			
 		this.debug = typeof options.debug === 'function' ? options.debug : noOp
 
 		Object.defineProperty(this, 'types', { value: {}, writable: false })
