@@ -287,7 +287,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 					col.value,
 					last_k
 				)
-			} else if (this.dbdriver.type !== 'sqlite' && needToSync(this, prop, columns[k])) {
+			} else if (strategy === 'hard' && this.dbdriver.type !== 'sqlite' && needToSync(this, prop, columns[k])) {
 				const col = getColumnTypeRaw(this, collection.name, prop, { for: 'alter_column' });
 
 				if (col === false) {

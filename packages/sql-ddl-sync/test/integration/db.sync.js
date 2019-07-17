@@ -51,7 +51,7 @@ const allTableNames = testDefinitions.map(([table, props]) => {
 })
 
 
-odescribe(`db: Sync`, function () {
+describe(`db: Sync`, function () {
 	var sync = null
 
 	before(common.dropTable(allTableNames))
