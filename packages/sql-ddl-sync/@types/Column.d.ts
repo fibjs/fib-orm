@@ -8,6 +8,7 @@ declare namespace FxOrmSqlDDLSync__Column {
     interface Property {
         type: PropertyType
 
+        key?: boolean
         mapsTo?: string
 
         unique?: boolean | string | string[]

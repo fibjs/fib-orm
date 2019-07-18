@@ -15,8 +15,8 @@
 	"repository": "http://github.com/fxjs-modules/sql-ddl-sync.git",
 	"types": "@types/index.d.ts",
 	"main": "./lib",
-	"unpkg": "./lib/index.cjs.js",
-	"jsdelivr": "./lib/index.cjs.js",
+	"unpkg": "./dist/index.js",
+	"jsdelivr": "./dist/index.js",
 	"scripts": {
 		"build": "fibjs build.js",
 		"test-db": "fibjs test/run-db",
@@ -45,6 +45,9 @@
 		"rollup-plugin-commonjs": "^9.2.1",
 		"should": "^13.2.3"
 	},
+	"rollup.internal": [
+		"@fxjs/sql-query/lib/Dialects"
+	],
 	"ci": {
 		"type": "travis, appveyor",
 		"version": [
