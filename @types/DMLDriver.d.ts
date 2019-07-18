@@ -32,11 +32,7 @@ declare namespace FxOrmDMLDriver {
     }
 
     interface DMLDriver<ConnType = any> {
-        // /**
-        //  * @compatible
-        //  */
-        // readonly db: FxOrmDb.DatabaseBase<ConnType>
-        db: FxOrmDb.DatabaseBase<ConnType>
+        readonly db: FxOrmDb.DatabaseBase<ConnType>
         readonly config: FxOrmDb.DatabaseBase<ConnType>['config']
 
         customTypes: {[key: string]: FxOrmProperty.CustomPropertyType}

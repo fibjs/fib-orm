@@ -19,7 +19,6 @@ export const doSync: FxOrmDMLDriver.DMLDriver['doSync'] = function (
 			process.env.DEBUG_SQLDDLSYNC && (global as any).console.log("> %s", text);
 		}
 	});
-	let props: FxOrmProperty.NormalizedPropertyHash = {};
 
 	if (this.customTypes) {
 		for (let k in this.customTypes) {
@@ -29,7 +28,11 @@ export const doSync: FxOrmDMLDriver.DMLDriver['doSync'] = function (
 
 	syncInstance.defineCollection(opts.table, opts.allProperties);
 
-	for (let i = 0; i < opts.many_associations.length; i++) {
+	for (
+		let i = 0, props = <FxOrmProperty.NormalizedPropertyHash>{};
+		i < opts.many_associations.length;
+		i++
+	) {
 		props = {};
 
 		_merge(props, opts.many_associations[i].mergeId);
@@ -39,7 +42,7 @@ export const doSync: FxOrmDMLDriver.DMLDriver['doSync'] = function (
 
 		syncInstance.defineCollection(
 			opts.many_associations[i].mergeTable,
-			props as FxOrmSqlDDLSync__Collection.Collection['properties']
+			props
 		);
 	}
 
