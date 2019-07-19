@@ -1,7 +1,54 @@
 
-v1.10.3 / 2019-06-30
+v1.11.0 / 2019-07-19
 ==================
 
+  * feat: remove FxOrmDb.DatabaseBase['conn']
+  * travis fix; upgrade dependencies.
+  * packages, sql-ddl-sync: Release v0.5.7
+  * packages, sql-ddl-sync: recover rollup build, fix typo about Property.
+  * orm: use @fxjs/db-driver as backend of Drivers/DB; upgrade dependencies.
+  * packages, sql-ddl-sync: Release v0.5.6
+  * packages, sql-ddl-sync: make SyncOptions['suppressColumnDrop'] near `true`.
+  * packages, sql-ddl-sync: Release v0.5.5
+  * packages, sql-ddl-sync: disable default force-sync, keep same behavior with previous minor version; other robust changes when force-sync.
+  * packages, sql-ddl-sync: Release v0.5.4
+  * packages, sql-ddl-sync: robust change.
+  * packages, sql-ddl-sync: Release v0.5.3
+  * packages, db-driver: Release v0.0.3
+  * packages, db-driver: typo fix.
+  * packages, sql-ddl-sync: Release v0.5.2
+  * packages, sql-ddl-sync: fix test cases.
+  * packages, sql-ddl-sync: upgrade dependencies.
+  * packages, sql-ddl-sync: robust change
+  * packages, sql-ddl-sync: robust change, open more APIs of `Sync`
+  * packages, sql-ddl-sync: Release v0.5.1
+  * packages, sql-ddl-sync: support Dialect['getCollectionColumnsSync'] and Dialect['hasCollectionColumnsSync']
+  * packages, db-driver: robust change.
+  * packages, db-driver: Release v0.0.2
+  * packages, db-driver: typo fix.
+  * packages, sql-ddl-sync: Release v0.5.0
+  * packages, sql-ddl-sync: code clean.
+  * packages, sql-ddl-sync: remove dependency on orm, use db-driver instead.
+  * packages, db-driver: finish 1st version.
+  * packages, db-driver: add typo about ServiceDriver
+  * add test about redis
+  * packages, db-driver: add test about specific db
+  * packages, db-driver: Init.
+  * packages, publish: sql-ddl-sync v0.4.1
+  * packages, sql-ddl-sync: robust fix about Dialect sqlite.
+  * robust change.
+  * peer dependencies version correction.
+  * packages, sql-ddl-sync: release 0.4.0
+  * packages. sql-ddl-sync: synchronous style first, use native coroutine feature of driver in orm
+  * packages, core: Init.
+  * feat, packages: sync sql-ddl-sync from original repo.
+  * feat, packages: integrate @fxjs/sql-ddl-sync as package. (#20)
+  * upgrade @fibjs/enforce, robust change.
+
+v1.10.3 / 2019-06-30
+====================
+
+  * Release v1.10.3
   * support $hookRef for instance.
   * typo fix.
   * [orm-plugin-uacl] use LruCache as ACLTree storage.
