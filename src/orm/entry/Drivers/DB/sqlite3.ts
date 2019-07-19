@@ -24,11 +24,11 @@ export class Database extends Driver implements FxOrmDb.DatabaseBase_SQLite {
 
     connect(cb?: FxOrmNS.GenericCallback<Class_SQLite>) {
         const exposedErrResults = Utilities.exposeErrAndResultFromSyncMethod(
-            () => this.conn = super.open()
+            () => super.open()
         )
         Utilities.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: !!cb, callback: cb});
         
-        return this.conn
+        return this.connection
     }
 
     query<T = any>(sql: string, cb?: FxOrmNS.GenericCallback<T>) {

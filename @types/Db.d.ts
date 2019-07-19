@@ -7,16 +7,7 @@ declare namespace FxOrmDb {
 
     interface DatabaseBase<ConnType = any> extends FxDbDriverNS.Driver<ConnType> {
         eventor: Class_EventEmitter
-        // conn: FxDbDriverNS.Driver;
-        conn: ConnType;
-        // readonly uri: string;
 
-        // ping: {
-        //     (cb?: FxOrmNS.VoidCallback): void
-        // }
-        // execute: {
-        //     (sql: string, ...args: any[]): any[];
-        // }
         query: {
             <T=any>(query: string, cb?: FxOrmNS.GenericCallback<T>): T
         }
@@ -25,7 +16,6 @@ declare namespace FxOrmDb {
             (cb?: FxOrmNS.GenericCallback<ConnType>): void
             (): ConnType
         }
-        // pool: FibPoolNS.FibPoolFunction<DatabaseBase['conn']>
     }
 
     interface DatabaseBase_SQLite extends DatabaseBase<Class_SQLite> {

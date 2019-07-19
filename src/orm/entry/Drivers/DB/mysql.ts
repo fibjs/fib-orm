@@ -9,15 +9,14 @@ const Driver: typeof FxDbDriverNS.Driver = FxDbDriver.getDriver('mysql')
 
 export class Database extends Driver implements FxOrmDb.DatabaseBase<Class_MySQL> {
     eventor: Class_EventEmitter = getEventEmitter();
-    conn: Class_MySQL;
 
     connect(cb?: FxOrmNS.GenericCallback<Class_MySQL>) {
         const exposedErrResults = Utilities.exposeErrAndResultFromSyncMethod(
-            () => this.conn = super.open()
+            () => super.open()
         )
         Utilities.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: !!cb, callback: cb});
         
-        return this.conn
+        return this.connection
     }
 
     query<T = any>(sql: string, cb?: FxOrmNS.GenericCallback<T>) {

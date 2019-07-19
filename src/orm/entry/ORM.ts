@@ -400,24 +400,24 @@ ORM.prototype.queryParamCastserial = function (
 ORM.prototype.begin = function (
 	this: FxOrmNS.ORM,
 ) {
-	return this.driver.db.conn.begin();	
+	return this.driver.db.connection.begin();	
 };
 ORM.prototype.commit = function (
 	this: FxOrmNS.ORM,
 ) {
-	return this.driver.db.conn.commit();	
+	return this.driver.db.connection.commit();	
 };
 ORM.prototype.rollback = function (
 	this: FxOrmNS.ORM,
 ) {
-	return this.driver.db.conn.rollback();	
+	return this.driver.db.connection.rollback();	
 };
 ORM.prototype.trans = function (
 	this: FxOrmNS.ORM,
 	func,
 ) {
-	func = func.bind(this.driver.db.conn);
-	return this.driver.db.conn.trans(func);	
+	const connection = this.driver.db.connection;
+	return connection.trans(func.bind(connection));	
 };
 
 const ORM_Module: FxOrmNS.ExportModule = {
