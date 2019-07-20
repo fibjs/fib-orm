@@ -1,7 +1,13 @@
 
-v1.11.0 / 2019-07-19
+v1.11.1 / 2019-07-20
 ==================
 
+  * expose `ddlDialect` for DMLDriver; fix strategy passing when `doSync`.
+
+v1.11.0 / 2019-07-19
+====================
+
+  * Release v1.11.0
   * feat: remove FxOrmDb.DatabaseBase['conn']
   * travis fix; upgrade dependencies.
   * packages, sql-ddl-sync: Release v0.5.7
