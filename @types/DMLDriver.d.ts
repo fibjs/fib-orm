@@ -39,6 +39,16 @@ declare namespace FxOrmDMLDriver {
 
         knex: FXJSKnex.FXJSKnexModule.KnexInstance
 
+        readonly query: FxSqlQuery.Class_Query
+        /**
+         * @deprecated
+         */
+        getQuery: {
+            (): FxSqlQuery.Class_Query
+        }
+        
+        readonly ddlDialect: FxOrmSqlDDLSync__Dialect.Dialect
+
         /* shared :start */
         doSync <T = any>(opts?: FxOrmDMLShared.SyncOptions): this
         doDrop <T = any>(opts?: FxOrmDMLShared.DropOptions): this
@@ -60,9 +70,6 @@ declare namespace FxOrmDMLDriver {
         }
         close: {
             (cb?: FxOrmNS.VoidCallback): void
-        }
-        getQuery: {
-            (): FxSqlQuery.Class_Query
         }
         /**
          * @description

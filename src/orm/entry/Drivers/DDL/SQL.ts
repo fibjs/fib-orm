@@ -12,13 +12,15 @@ export const doSync: FxOrmDMLDriver.DMLDriver['doSync'] = function (
 	opts,
 ) {
 	const syncInstance = new Sync({
-		...opts.repair_column && { strategy: 'hard' },
 		...opts.allow_drop_column && { suppressColumnDrop: false },
 		dbdriver: this.db,
 		debug: function (text: string) {
 			process.env.DEBUG_SQLDDLSYNC && (global as any).console.log("> %s", text);
 		}
 	});
+
+	if (opts.repair_column)
+		syncInstance.strategy = 'hard'
 
 	if (this.customTypes) {
 		for (let k in this.customTypes) {

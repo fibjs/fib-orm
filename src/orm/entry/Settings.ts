@@ -6,7 +6,7 @@ const default_settings = {
 	model      : {
 		namePrefix				  : '',
 		// TODO: add test about it
-		repair_column  		  	  : true,
+		repair_column  		  	  : false,
 		/**
 		 * @dangerous
 		 */

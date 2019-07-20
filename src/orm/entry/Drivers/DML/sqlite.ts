@@ -4,6 +4,7 @@ import sqlite3 		= require("../DB/sqlite3");
 import shared  		= require("./_shared");
 import DDL     		= require("../DDL/SQL");
 import { Query }	from "@fxjs/sql-query";
+import Sync			= require("@fxjs/sql-ddl-sync");
 import utils		= require("./_utils");
 import * as Utilities from '../../Utilities';
 
@@ -28,9 +29,17 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function(
 		value: this.db.config,
 		writable: false
 	});
-	
 	if (!this.config.timezone) this.config.timezone = "local";
-	this.query  = new Query({ dialect: this.dialect, timezone: this.config.timezone });
+
+	Object.defineProperty(this, 'ddlDialect', {
+		value: Sync.dialect(this.dialect),
+		writable: false
+	});
+
+	Object.defineProperty(this, 'query', {
+		value: new Query({ dialect: this.dialect, timezone: this.config.timezone }),
+		writable: false
+	});
 
 	utils.setCouldPool(this);
 	utils.getKnexInstance(this);
