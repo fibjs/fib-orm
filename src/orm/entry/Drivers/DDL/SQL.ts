@@ -20,7 +20,7 @@ export const doSync: FxOrmDMLDriver.DMLDriver['doSync'] = function (
 	});
 
 	if (opts.repair_column)
-		syncInstance.strategy = 'hard'
+		syncInstance.strategy = 'mixed'
 
 	if (this.customTypes) {
 		for (let k in this.customTypes) {
