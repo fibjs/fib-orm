@@ -36,3 +36,36 @@ export function getCollectionMapsTo_PropertyNameDict (collection: FxOrmSqlDDLSyn
 
     return hash;
 }
+
+export function filterPropertyDefaultValue (
+    property: FxOrmSqlDDLSync__Column.Property,
+    ctx: {
+        collection: string,
+        property: FxOrmSqlDDLSync__Column.Property,
+        driver: FxDbDriverNS.Driver
+    }
+) {
+    let _dftValue
+    if (property.hasOwnProperty('defaultValue'))
+        if (typeof property.defaultValue === 'function') {
+            _dftValue = property.defaultValue(ctx)
+        } else
+            _dftValue = property.defaultValue
+
+    return _dftValue
+}
+
+export function filterSyncStrategy (
+    strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy']
+) {
+    switch (strategy) {
+        case 'hard':
+        case 'soft':
+        case 'mixed':
+            break
+        default:
+            strategy = 'soft'
+            break
+    }
+    return strategy
+}

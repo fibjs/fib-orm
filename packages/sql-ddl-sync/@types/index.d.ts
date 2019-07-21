@@ -16,13 +16,14 @@ declare namespace FxOrmSqlDDLSync {
         dbdriver: FxDbDriverNS.Driver<ConnType>
         debug?: Function | false
         suppressColumnDrop?: boolean
+        syncStrategy?: FxOrmSqlDDLSync.SyncCollectionOptions['strategy']
     }
     interface SyncResult {
         changes: number
     }
     interface SyncCollectionOptions {
         columns?: FxOrmSqlDDLSync__Column.PropertyHash,
-        strategy?: 'soft' | 'hard' 
+        strategy?: 'soft' | 'hard' | 'mixed'
     }
 
     class Sync<ConnType = any> {
@@ -61,8 +62,9 @@ declare namespace FxOrmSqlDDLSync {
          *      - opts.strategy: (default soft) strategy when conflict between local and remote db, see details below
          * 
          * @strategy
-         *      - 'soft': never modify existed columns in db, but add missing columns
-         *      - 'hard': modify existed columns in db, add missing columns
+         *      - 'soft': no change
+         *      - 'mixed': add missing columns, but never change existed column in db
+         *      - 'hard': modify existed columns in db
          */
         syncCollection (
             collection: string | FxOrmSqlDDLSync__Collection.Collection,
@@ -73,6 +75,14 @@ declare namespace FxOrmSqlDDLSync {
             collection_name: string,
             indexes: FxOrmSqlDDLSync__DbIndex.DbIndexInfo[]
         ): void
+
+        needDefinitionToColumn (
+            property: FxOrmSqlDDLSync__Column.Property,
+            column: FxOrmSqlDDLSync__Column.Property,
+            options?: {
+                collection?: string
+            }
+        ): boolean
 
         /**
          * @description

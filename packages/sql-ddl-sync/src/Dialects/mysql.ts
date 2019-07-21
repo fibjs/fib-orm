@@ -2,7 +2,7 @@
 
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
-import { getSqlQueryDialect, arraify } from '../Utils';
+import { getSqlQueryDialect, arraify, filterPropertyDefaultValue } from '../Utils';
 
 const columnSizes = {
 	integer: {
@@ -541,11 +541,11 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 		type += " AUTO_INCREMENT";
 	}
 	if (property.hasOwnProperty("defaultValue")) {
-		const defaultValue = typeof property.defaultValue === 'function' ? property.defaultValue({
+		const defaultValue = filterPropertyDefaultValue(property, {
 			collection,
 			property,
 			driver
-		}) : property.defaultValue
+		})
 
 		type += (
 			[

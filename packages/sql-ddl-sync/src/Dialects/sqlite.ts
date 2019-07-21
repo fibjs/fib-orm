@@ -1,7 +1,7 @@
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
 
-import { getSqlQueryDialect, arraify } from '../Utils';
+import { getSqlQueryDialect, arraify, filterPropertyDefaultValue } from '../Utils';
 
 // @see https://www.sqlite.org/lang_altertable.html
 export const hasCollectionSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionSync'] = function (
@@ -527,11 +527,11 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 		type += " AUTOINCREMENT";
 	}
 	if (property.hasOwnProperty("defaultValue")) {
-		const defaultValue = typeof property.defaultValue === 'function' ? property.defaultValue({
+		const defaultValue = filterPropertyDefaultValue(property, {
 			collection,
 			property,
 			driver
-		}) : property.defaultValue
+		})
 
 		let defaultV = ''
 

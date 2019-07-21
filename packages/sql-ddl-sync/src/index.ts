@@ -3,7 +3,7 @@
 
 import FxORMCore = require("@fxjs/orm-core");
 import util  = require('util')
-import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict } from './Utils';
+import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy } from './Utils';
 
 const noOp = () => {};
 
@@ -109,52 +109,6 @@ function getColumnTypeRaw (
 	};
 }
 
-/**
- * @description if sync one column
- * 
- * @param property existed property in collection
- * @param column column expected to be synced
- */
-function needToSync (
-	syncInstance: Sync,
-	property: FxOrmSqlDDLSync__Column.Property,
-	column: FxOrmSqlDDLSync__Column.Property
-): boolean {
-	if (property.serial && property.type == "number") {
-		property.type = "serial";
-	}
-	if (property.type != column.type) {
-		if (typeof syncInstance.Dialect.supportsType != "function") {
-			return true;
-		}
-		if (syncInstance.Dialect.supportsType(property.type) != column.type) {
-			return true;
-		}
-	}
-	if (property.type == "serial") {
-		return false; // serial columns have a fixed form, nothing more to check
-	}
-	if (property.required != column.required && !property.key) {
-		return true;
-	}
-	if (property.hasOwnProperty("defaultValue") && property.defaultValue != column.defaultValue) {
-		return true;
-	}
-	if (property.type == "number" || property.type == "integer") {
-		if (column.hasOwnProperty("size") && (property.size || 4) != column.size) {
-			return true;
-		}
-	}
-	if (property.type == "enum" && column.type == "enum") {
-		if (util.difference(property.values, column.values).length > 0
-		|| util.difference(column.values, property.values).length > 0) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 	strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy'] = 'soft'
 	/**
@@ -179,6 +133,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		const dbdriver = options.dbdriver
 
 		this.suppressColumnDrop = (options.suppressColumnDrop !== false)
+		this.strategy = filterSyncStrategy(options.syncStrategy)
 		if (dbdriver.type === 'sqlite')
 			this.suppressColumnDrop = true
 			
@@ -268,76 +223,82 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 			strategy = this.strategy,
 		} = opts || {};
 
-		if (!['soft', 'hard'].includes(strategy)) strategy = 'soft';
+		strategy = filterSyncStrategy(strategy)
 		
 		let last_k: string  = null;
 
 		this.debug("Synchronizing " + collection.name);
 		
-		for (let k in collection.properties) {
-			const prop = collection.properties[k];
-			if (!columns.hasOwnProperty(k)) {
-				prop.mapsTo = prop.mapsTo || k;
+		if (strategy !== 'soft') {
+			for (let k in collection.properties) {
+				const prop = collection.properties[k];
+				if (!columns.hasOwnProperty(k)) {
+					prop.mapsTo = prop.mapsTo || k;
 
-				const col = getColumnTypeRaw(this, collection.name, prop, { for: 'add_column' });
+					const col = getColumnTypeRaw(this, collection.name, prop, { for: 'add_column' });
 
-				if (col === false) {
-					logJson('syncCollection', prop);
-					throw new Error(`Invalid type definition for property '${k}'.`);
+					if (col === false) {
+						logJson('syncCollection', prop);
+						throw new Error(`Invalid type definition for property '${k}'.`);
+					}
+
+					this.debug("Adding column " + collection.name + "." + k + ": " + col.value);
+
+					// check existence again
+					if (!this.Dialect.hasCollectionColumnsSync(this.dbdriver, collection.name, prop.mapsTo)) {
+						this.Dialect.addCollectionColumnSync(
+							this.dbdriver,
+							collection.name,
+							col.value,
+							last_k
+						)
+
+						this.total_changes += 1;
+					}
+				} else if (
+					strategy === 'hard' &&
+					this.dbdriver.type !== 'sqlite'
+					&& this.needDefinitionToColumn(prop, columns[k], { collection: collection.name })
+				) {
+					const col = getColumnTypeRaw(this, collection.name, prop, { for: 'alter_column' });
+
+					if (col === false) {
+						logJson('syncCollection', prop);
+						throw new Error(`Invalid type definition for property '${k}'.`);
+					}
+
+					this.debug("Modifying column " + collection.name + "." + k + ": " + col.value);
+					
+					// check existence again
+					if (this.Dialect.hasCollectionColumnsSync(this.dbdriver, collection.name, prop.mapsTo)) {
+						this.Dialect.modifyCollectionColumnSync(
+							this.dbdriver,
+							collection.name,
+							col.value
+						);
+
+						this.total_changes += 1;
+					}
 				}
 
-				this.debug("Adding column " + collection.name + "." + k + ": " + col.value);
-
-				// check existence again
-				if (!this.Dialect.hasCollectionColumnsSync(this.dbdriver, collection.name, prop.mapsTo)) {
-					this.Dialect.addCollectionColumnSync(
-						this.dbdriver,
-						collection.name,
-						col.value,
-						last_k
-					)
-
-					this.total_changes += 1;
-				}
-			} else if (strategy === 'hard' && this.dbdriver.type !== 'sqlite' && needToSync(this, prop, columns[k])) {
-				const col = getColumnTypeRaw(this, collection.name, prop, { for: 'alter_column' });
-
-				if (col === false) {
-					logJson('syncCollection', prop);
-					throw new Error(`Invalid type definition for property '${k}'.`);
-				}
-
-				this.debug("Modifying column " + collection.name + "." + k + ": " + col.value);
-				
-				// check existence again
-				if (this.Dialect.hasCollectionColumnsSync(this.dbdriver, collection.name, prop.mapsTo)) {
-					this.Dialect.modifyCollectionColumnSync(
-						this.dbdriver,
-						collection.name,
-						col.value
-					);
-
-					this.total_changes += 1;
-				}
+				last_k = k;
 			}
 
-			last_k = k;
+			if ( strategy === 'hard' && !this.suppressColumnDrop ) {
+				const hash = getCollectionMapsTo_PropertyNameDict(collection)
+				for (let colname in columns) {
+					if (collection.properties.hasOwnProperty(colname)) continue ;
+					/* colname maybe mapsTo */
+					if (hash.hasOwnProperty(colname)) continue ;
+					
+					this.debug(`Dropping column ${collection.name}.${colname}`);
+
+					this.total_changes += 1;
+
+					this.Dialect.dropCollectionColumnSync(this.dbdriver, collection.name, colname);
+				}
+			}
 		}
-
-        if ( !this.suppressColumnDrop ) {
-			const hash = getCollectionMapsTo_PropertyNameDict(collection)
-            for (let colname in columns) {
-				if (collection.properties.hasOwnProperty(colname)) continue ;
-				/* colname maybe mapsTo */
-				if (hash.hasOwnProperty(colname)) continue ;
-				
-				this.debug(`Dropping column ${collection.name}.${colname}`);
-
-				this.total_changes += 1;
-
-				this.Dialect.dropCollectionColumnSync(this.dbdriver, collection.name, colname);
-            }
-        }
 
 		const indexes = this.getCollectionIndexes(collection);
 
@@ -502,4 +463,66 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 
 		return exposedErrResults.result;
 	};
+
+	/**
+	 * @description if sync one column
+	 * 
+	 * @param property existed property in collection
+	 * @param column column expected to be synced
+	 */
+	needDefinitionToColumn (
+		property: FxOrmSqlDDLSync__Column.Property,
+		column: FxOrmSqlDDLSync__Column.Property,
+		options?: {
+			collection?: string
+		}
+	): boolean {
+		if (property.serial && property.type === "number") {
+			property.type = "serial";
+		}
+
+		/* if type not equal, sync is required */
+		if (property.type != column.type) {
+			if (typeof this.Dialect.supportsType !== "function") {
+				return true;
+			}
+			if (this.Dialect.supportsType(property.type) !== column.type) {
+				return true;
+			}
+		}
+
+		/* deal with type which maybe require sync as type equals between two sides :start */
+		if (property.type === 'serial') {
+			return false; // serial columns have a fixed form, nothing more to check
+		}
+		if (property.required !== column.required && !property.key) {
+			return true;
+		}
+
+		const { collection: collection_name = undefined } = options || {}
+		if (
+			property.hasOwnProperty('defaultValue')
+			&& filterPropertyDefaultValue(property, {
+				collection: collection_name,
+				property,
+				driver: this.dbdriver
+			}) != column.defaultValue
+		) {
+			return true;
+		}
+		if (property.type === 'number' || property.type === 'integer') {
+			if (column.hasOwnProperty('size') && (property.size || 4) != column.size) {
+				return true;
+			}
+		}
+		if (property.type === 'enum' && column.type === 'enum') {
+			if (util.difference(property.values, column.values).length > 0
+			|| util.difference(column.values, property.values).length > 0) {
+				return true;
+			}
+		}
+		/* deal with type which maybe require sync as type equals between two sides :end */
+
+		return false;
+	}
 }
