@@ -1,7 +1,15 @@
 
-v1.11.1 / 2019-07-20
+v1.11.2 / 2019-07-21
 ==================
 
+  * upgrade sql-ddl-sync
+  * packages, sql-ddl-sync: Release v0.6.0
+  * packages, sql-ddl-sync: robust change; add Sync[`needDefinitionToColumn`]
+
+v1.11.1 / 2019-07-20
+====================
+
+  * Release v1.11.1
   * expose `ddlDialect` for DMLDriver; fix strategy passing when `doSync`.
 
 v1.11.0 / 2019-07-19
