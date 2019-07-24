@@ -236,7 +236,6 @@ export const getCollectionPropertiesSync: FxOrmSqlDDLSync__Dialect.Dialect['getC
 					column.values = _enum_value_str.split(/'\s*,\s*'/);
 					break;
 				}
-				console.log('Type', Type, colInfo);
 				throw new Error(`Unknown column type '${Type}'`);
 		}
 

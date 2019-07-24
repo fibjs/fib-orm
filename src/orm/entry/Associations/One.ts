@@ -219,7 +219,6 @@ function extendInstance(
 
 			return !!instance;
 		} catch (error) {
-			console.log('error', error)
 			return false
 		}
 	});
