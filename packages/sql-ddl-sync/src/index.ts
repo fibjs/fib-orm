@@ -40,11 +40,16 @@ function processCollection (
 		is_processed = true;
 	}
 
-	const { strategy = 'soft' } = opts || {};
+	const { strategy = syncInstnace.strategy } = opts || {};
 
-	if (strategy !== 'hard')
-		return is_processed
-
+	switch (strategy) {
+		case 'soft':
+			return is_processed
+		case 'mixed':
+		case 'hard':
+			break
+	}
+	
 	syncInstnace.syncCollection(collection, { strategy })
 
 	return true;
