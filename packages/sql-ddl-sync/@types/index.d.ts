@@ -15,6 +15,9 @@ declare namespace FxOrmSqlDDLSync {
     interface SyncOptions<ConnType = any> {
         dbdriver: FxDbDriverNS.Driver<ConnType>
         debug?: Function | false
+        /**
+         * @default true
+         */
         suppressColumnDrop?: boolean
         syncStrategy?: FxOrmSqlDDLSync.SyncCollectionOptions['strategy']
     }
@@ -24,6 +27,10 @@ declare namespace FxOrmSqlDDLSync {
     interface SyncCollectionOptions {
         columns?: FxOrmSqlDDLSync__Column.PropertyHash,
         strategy?: 'soft' | 'hard' | 'mixed'
+        /**
+         * @default true
+         */
+        suppressColumnDrop?: boolean
     }
 
     class Sync<ConnType = any> {

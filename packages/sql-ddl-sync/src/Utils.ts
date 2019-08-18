@@ -1,6 +1,5 @@
 /// <reference types="@fibjs/types" />
 
-
 export function logJson (group: string, detail: any) {
     let json = null;
     try {
@@ -68,4 +67,13 @@ export function filterSyncStrategy (
             break
     }
     return strategy
+}
+
+export function filterSuppressColumnDrop (
+    suppressColumnDrop: boolean, db_type: FxOrmSqlDDLSync.Sync['dbdriver']['type']
+) {
+    if (db_type === 'sqlite')
+        return true
+
+    return !!suppressColumnDrop
 }

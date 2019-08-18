@@ -17,6 +17,13 @@ declare namespace FxOrmSqlDDLSync__SQL {
         name: string
     }
 
+    interface CheckTableHasColumnOptions {
+        // table/collection name
+        name: string
+        // column name
+        column: string
+    }
+
     interface AddColumnOptions extends TableColumnOptionsBase {
         // column name
         column: string

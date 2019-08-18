@@ -299,11 +299,23 @@ export const dropCollection: FxOrmSqlDDLSync__Dialect.Dialect['dropCollection'] 
 export const hasCollectionColumnsSync: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionColumnsSync'] = function (
 	dbdriver, name, column
 ) {
-	const cols = getCollectionColumnsSync<FxOrmSqlDDLSync__Column.ColumnInfo__MySQL>(dbdriver, name)
+	const columns = arraify(column)
+	let res = null, has = false
+	try {
+		has = columns.every(
+			column =>
+				(res = dbdriver.execute(
+					SQL.CHECK_TABLE_HAS_COLUMN({
+						name: name,
+						column: column,
+					}, 'mysql')
+				)) && !!(res && res.length)
+		)
+	} catch (error) {
+		has = false
+	}
 
-	return arraify(column).every(
-		column_name => cols.find(col => col.Field === column_name)
-	)
+	return has
 };
 
 export const hasCollectionColumns: FxOrmSqlDDLSync__Dialect.Dialect['hasCollectionColumns'] = function (

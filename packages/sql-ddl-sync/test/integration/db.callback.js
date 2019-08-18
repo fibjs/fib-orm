@@ -8,6 +8,7 @@ var Sync = require('../../').Sync;
 
 var sync    = new Sync({
 	dbdriver: common.dbdriver,
+	suppressColumnDrop: false,
 	debug   : function (text) {
 		process.env.DEBUG_SYNC && console.log("> %s", text);
 	}
@@ -35,6 +36,31 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 		before(common.dropTable())
 
 		describe("Syncing", function () {
+			it("shouldn has no `id` before sync", function (done) {
+				Dialect.hasCollection(
+					common.dbdriver,
+					common.table,
+					function (err, has) {
+						should.not.exist(err);
+						should.exist(has);
+						has.should.equal(false);
+					}
+				);
+
+				Dialect.hasCollectionColumns(
+					common.dbdriver,
+					common.table,
+					'id',
+					function (err, has) {
+						should.not.exist(err);
+						should.exist(has);
+						has.should.equal(false);
+
+						return done();
+					}
+				);
+			});
+
 			it("should create the table", function (done) {
 				sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
 					should.not.exist(err);
@@ -54,6 +80,21 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 					return done();
 				});
 			});
+
+			it("should has `id` after sync", function (done) {				
+				Dialect.hasCollectionColumns(
+					common.dbdriver,
+					common.table,
+					'id',
+					function (err, has) {
+						should.not.exist(err);
+						should.exist(has);
+						has.should.equal(true);
+
+						return done();
+					}
+				)
+			});
 		});
 
 		if (common.dialect != "sqlite") {
@@ -64,6 +105,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
 						should.not.exist(err);
 						should.exist(info);
+
 						if (use_force_sync)
 							info.should.have.property("changes", 1);
 						else
@@ -115,10 +157,11 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 			describe("Adding a column", function () {
 				before(common.addColumn('unknown_col'));
 
-				it("should drop column on first call", function (done) {
+				it(`${use_force_sync ? 'should' : 'shouldn\'t'} drop column on first call`, function (done) {
 					sync[use_force_sync ? 'forceSync' : 'sync'](function (err, info) {
 						should.not.exist(err);
 						should.exist(info);
+
 						if (use_force_sync)
 							info.should.have.property("changes", 1);
 						else
@@ -219,21 +262,6 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 
 					return done();
 				});
-			});
-
-			it("should has it after sync", function (done) {				
-				Dialect.hasCollectionColumns(
-					common.dbdriver,
-					common.table,
-					'id',
-					function (err, has) {
-						should.not.exist(err);
-						should.exist(has);
-						has.should.equal(true);
-
-						return done();
-					}
-				)
 			});
 		});
 

@@ -3,7 +3,7 @@
 
 import FxORMCore = require("@fxjs/orm-core");
 import util  = require('util')
-import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy } from './Utils';
+import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop } from './Utils';
 
 const noOp = () => {};
 
@@ -137,10 +137,8 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 	constructor (options: FxOrmSqlDDLSync.SyncOptions) {
 		const dbdriver = options.dbdriver
 
-		this.suppressColumnDrop = (options.suppressColumnDrop !== false)
+		this.suppressColumnDrop = filterSuppressColumnDrop(options.suppressColumnDrop !== false, dbdriver.type)
 		this.strategy = filterSyncStrategy(options.syncStrategy)
-		if (dbdriver.type === 'sqlite')
-			this.suppressColumnDrop = true
 			
 		this.debug = typeof options.debug === 'function' ? options.debug : noOp
 
@@ -226,7 +224,9 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		let {
 			columns = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name),
 			strategy = this.strategy,
+			suppressColumnDrop = this.suppressColumnDrop
 		} = opts || {};
+		suppressColumnDrop = filterSuppressColumnDrop(suppressColumnDrop, this.dbdriver.type)
 
 		strategy = filterSyncStrategy(strategy)
 		
@@ -289,7 +289,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 				last_k = k;
 			}
 
-			if ( strategy === 'hard' && !this.suppressColumnDrop ) {
+			if ( strategy === 'hard' && !suppressColumnDrop ) {
 				const hash = getCollectionMapsTo_PropertyNameDict(collection)
 				for (let colname in columns) {
 					if (collection.properties.hasOwnProperty(colname)) continue ;

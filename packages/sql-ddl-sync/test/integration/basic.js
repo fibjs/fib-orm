@@ -4,7 +4,7 @@ test.setup()
 var index   = require("../../lib");
 var DBDriver  = require("@fxjs/db-driver");
 
-odescribe("sql-ddl-sync", function () {
+describe("sql-ddl-sync", function () {
   describe("exports", function () {
     it("should expose Sync function", function () {
       assert.exist(index.Sync)

@@ -28,11 +28,24 @@ export function DROP_TABLE (
 	return sql;
 };
 
+export function CHECK_TABLE_HAS_COLUMN (
+	options: FxOrmSqlDDLSync__SQL.CheckTableHasColumnOptions,
+	db_type: FxDbDriverNS.DriverType,
+) {
+	const eid = getSqlQueryDialect(db_type).escapeId;
+	const evalue = getSqlQueryDialect(db_type).escapeVal;
+	const sql = [
+		`SHOW COLUMNS FROM ${eid(options.name)} LIKE ${evalue(options.column)}`
+	].filter(x => x).join('')
+
+	return sql;
+};
+
 export function ALTER_TABLE_ADD_COLUMN (
 	options: FxOrmSqlDDLSync__SQL.AddColumnOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	let sql = [
+	const sql = [
 		"ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name),
 		" ADD " + options.column,
 		options.after && " AFTER " + getSqlQueryDialect(db_type).escapeId(options.after),

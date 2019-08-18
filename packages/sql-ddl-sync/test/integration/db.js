@@ -8,6 +8,7 @@ var Sync = require('../../').Sync;
 
 var sync    = new Sync({
 	dbdriver: common.dbdriver,
+	suppressColumnDrop: false,
 	debug   : function (text) {
 		process.env.DEBUG_SYNC && console.log("> %s", text);
 	}
@@ -35,6 +36,29 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 		before(common.dropTable())
 
 		describe("Syncing", function () {
+			it("shouldn has `id` before sync", function (done) {
+				var hasTable
+				hasTable = Dialect.hasCollectionSync(
+					common.dbdriver,
+					common.table,
+				);
+
+				should.exist(hasTable);
+				hasTable.should.equal(false);
+
+				
+				hasTable = Dialect.hasCollectionColumnsSync(
+					common.dbdriver,
+					common.table,
+					'id'
+				);
+
+				should.exist(hasTable);
+				hasTable.should.equal(false);
+
+				return done();
+			});
+
 			it("should create the table", function (done) {
 				const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
@@ -53,7 +77,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 				return done();
 			});
 
-			it("should has it after sync", function (done) {
+			it("should has `id` after sync", function (done) {
 				const has = Dialect.hasCollectionColumnsSync(
 					common.dbdriver,
 					common.table,
@@ -122,7 +146,7 @@ function testOnUseSync (use_force_sync = Math.random(0, 1) > 0.5) {
 			describe("Adding a column", function () {
 				before(common.addColumn('unknown_col'));
 
-				it("should drop column on first call", function (done) {
+				it(`${use_force_sync ? 'should' : 'shouldn\'t'} drop column on first call`, function (done) {
 					const info = sync[use_force_sync ? 'forceSync' : 'sync']();
 
 					should.exist(info);
