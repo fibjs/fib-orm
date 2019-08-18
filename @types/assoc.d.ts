@@ -4,7 +4,12 @@
 declare namespace FxOrmAssociation {
     type AssociationType = 'extendsTo' | 'hasOne' | 'hasMany'
 
-    type AssociationKeyComputation = Function | string
+    /**
+     * @type.function: (model_name: string, idkey: string) => string
+     * 
+     * @string.default: `{model_name}_${idkey}`
+     */
+    type AssociationKeyComputation = (model_name: string, idkey: string) => string | string
     interface AssociationDefinitionOptions {
         /**
          * it's also accessor base for `extendsTo`, `hasOne`, `hasMany`,
