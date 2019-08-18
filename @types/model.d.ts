@@ -41,7 +41,7 @@ declare namespace FxOrmModel {
                 propIn: FxOrmProperty.NormalizedProperty, /* ModelPropertyDefinition */
                 options?: {
                     name?: string
-                    klass?: 'primary' | 'hasOne'
+                    klass?: FxOrmProperty.KlassType
                 } | false
             ): FxOrmProperty.NormalizedProperty
         }
@@ -296,7 +296,7 @@ declare namespace FxOrmModel {
 
     interface ModelPropertyDefinition extends FxOrmSqlDDLSync__Column.Property {
         key?: boolean
-        klass?: 'primary' | 'hasOne'
+        klass?: FxOrmProperty.KlassType
         alwaysValidate?: boolean
         enumerable?: boolean
         // whether lazyload property, if it is, it can be loaded only by its accessor

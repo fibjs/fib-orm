@@ -40,6 +40,13 @@ export const Model = function (
 	const association_properties: string[] = [];
 	const model_fields: FxSqlQueryColumns.SelectInputArgType[] = [];
 	const fieldToPropertyMap: FxOrmProperty.FieldToPropertyMapType = {};
+	/**
+	 * @description compared to m_opts.properties, allProperties means all properties including:
+	 * 	1. association key properties, such as `{assoc_name}_{id}` property in default `hasOne` case,
+	 * 	which was not included by m_opts.properties;
+	 *  2. dynamic added properties by `model.addProperty(...)`, in fact, all association-about properties
+	 *  were added by `addProperty` method
+	 */
 	const allProperties: FxOrmProperty.NormalizedPropertyHash = {};
 	const keyProperties: FxOrmProperty.NormalizedProperty[] = [];
 	
@@ -227,7 +234,6 @@ export const Model = function (
 			extension           : m_opts.__for_extension,
 			id                  : m_opts.keys,
 			table               : m_opts.table,
-			properties          : m_opts.properties,
 			allProperties       : allProperties,
 			indexes             : m_opts.indexes || [],
 			customTypes         : m_opts.db.customTypes,

@@ -191,7 +191,6 @@ declare namespace FxOrmDMLShared {
         id: string[]
         extension: boolean
         table: string
-        properties: FxOrmProperty.NormalizedPropertyHash
         allProperties: FxOrmProperty.NormalizedPropertyHash
         indexes: string[]
         customTypes: {

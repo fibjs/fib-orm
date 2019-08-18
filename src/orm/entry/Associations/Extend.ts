@@ -62,7 +62,7 @@ export function prepare (
 				field: assoc_options.field,
 				model: Model,
 				altName: Model.table
-			}) || Utilities.formatField(
+			}) || Utilities.formatAssociatedField(
 				Model,
 				Model.table,
 				false,

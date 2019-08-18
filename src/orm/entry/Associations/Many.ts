@@ -87,7 +87,7 @@ export function prepare(
 			Utilities.wrapFieldObject({
 				field: assoc_options.mergeId, model: Model, altName: Model.table
 			}) ||
-			Utilities.formatField(Model, Model.table, true, assoc_options.reversed),
+			Utilities.formatAssociatedField(Model, Model.table, true, assoc_options.reversed),
 			{ makeKey: makeKey, required: true }
 		);
 
@@ -95,13 +95,13 @@ export function prepare(
 			Utilities.wrapFieldObject({
 				field: assoc_options.mergeAssocId, model: OtherModel, altName: name
 			}) ||
-			Utilities.formatField(OtherModel, name, true, assoc_options.reversed),
+			Utilities.formatAssociatedField(OtherModel, name, true, assoc_options.reversed),
 			{ makeKey: makeKey, required: true }
 		)
 
 		const associationSemanticNameCore = assoc_options.name || Utilities.formatNameFor("assoc:hasMany", name);
 		
-		const fieldhash = Utilities.wrapFieldObject({ field: assoc_options.field, model: OtherModel, altName: Model.table }) || Utilities.formatField(Model, name, true, assoc_options.reversed)
+		const fieldhash = Utilities.wrapFieldObject({ field: assoc_options.field, model: OtherModel, altName: Model.table }) || Utilities.formatAssociatedField(Model, name, true, assoc_options.reversed)
 		const association = <FxOrmAssociation.InstanceAssociationItem_HasMany>{
 			name: name,
 			model: OtherModel,

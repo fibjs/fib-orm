@@ -74,7 +74,7 @@ export function prepare (
 		Utilities.addHookPatchHelperForAssociation(association);
 
 		if (!association.field) {
-			association.field = Utilities.formatField(association.model, association.name, association.required, association.reversed);
+			association.field = Utilities.formatAssociatedField(association.model, association.name, association.required, association.reversed);
 		} else if (!association.__for_extension) {
 			association.field = Utilities.wrapFieldObject({
 				field: association.field, model: Model, altName: Model.table,

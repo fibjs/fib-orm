@@ -299,7 +299,7 @@ export function wrapFieldObject (
  * @param required is field required for relationship
  * @param reversed is model is reversed in relationship
  */
-export function formatField (
+export function formatAssociatedField (
 	model: FxOrmModel.Model,
 	name: string,
 	required: boolean,
