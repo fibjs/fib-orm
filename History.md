@@ -1,7 +1,19 @@
 
-v1.11.2 / 2019-07-21
+v1.11.3 / 2019-08-19
 ==================
 
+  * package, sql-ddl-sync: Release v0.6.2
+  * feat, main: add comment for type `FxOrmAssociation.AssociationKeyComputation`.
+  * package, sql-ddl-sync: use better strategy to check if one collection has column for `mysql`, add test cases about it.
+  * package, sql-ddl-sync: allow processCollection when strategy is 'mixed'.
+  * feat, main: better semantic declaration, add some comments.
+  * packages, sql-ddl-sync: Release v0.6.1
+  * code clean.
+
+v1.11.2 / 2019-07-21
+====================
+
+  * Release v1.11.2
   * upgrade sql-ddl-sync
   * packages, sql-ddl-sync: Release v0.6.0
   * packages, sql-ddl-sync: robust change; add Sync[`needDefinitionToColumn`]

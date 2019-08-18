@@ -1,6 +1,6 @@
 {
     "name": "@fxjs/orm",
-    "version": "1.11.2",
+    "version": "1.11.3",
     "description": "Object Relational Mapping for fibjs",
     "main": "lib",
     "types": "@types/index.d.ts",
@@ -43,7 +43,7 @@
         "@fxjs/db-driver": "^0.0.3",
         "@fxjs/knex": "^0.1.1",
         "@fxjs/orm-core": "^0.0.1",
-        "@fxjs/sql-ddl-sync": "^0.6.0",
+        "@fxjs/sql-ddl-sync": "^0.6.2",
         "@fxjs/sql-query": "^0.5.1",
         "fib-pool": "^1.5.3",
         "knex": "^0.16.3",
