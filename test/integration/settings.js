@@ -113,4 +113,53 @@ describe("Settings", function () {
             });
         });
     });
+
+    describe("used in model", () => {
+        var db = null;
+        var User = null;
+
+        before(function () {
+            db = helper.connect();
+        });
+
+        after(function () {
+            return db.closeSync();
+        });
+
+        var setup = function ({ useSelfSettings = false } = {}) {
+            return function () {
+                User = db.define("user", {
+                    username: {
+                        type: 'text',
+                        size: 64
+                    },
+                    password: {
+                        type: 'text',
+                        size: 128
+                    }
+                }, {
+                    id: 'username',
+                    useSelfSettings
+                });
+
+                ORM.singleton.clear();
+
+                return helper.dropSync([User]);
+            };
+        };
+
+        describe(`Model instance has same "settings" with db default`, () => {
+            before(setup())
+            it('default', () => {
+                assert.equal(User.settings, db.settings);
+            });
+        });
+
+        describe(`Model instance has different "settings" with db`, () => {
+            before(setup({ useSelfSettings: true }))
+            it('useSelfSettings: true', () => {
+                assert.notEqual(User.settings, db.settings);
+            });
+        });
+    });
 });

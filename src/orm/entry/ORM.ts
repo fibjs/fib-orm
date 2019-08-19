@@ -224,29 +224,31 @@ ORM.prototype.define = function (
 		}
 	}
 
+	const m_settings = opts.useSelfSettings ? Settings.Container(this.settings.get('*')) : this.settings;
+
 	this.models[name] = new Model({
 		name		   : name,
 		db             : this,
-		settings       : this.settings,
+		settings       : m_settings,
 		driver_name    : this.driver_name,
 		driver         : this.driver,
-		table          : opts.table || opts.collection || ((this.settings.get("model.namePrefix") || "") + name),
+		table          : opts.table || opts.collection || ((m_settings.get("model.namePrefix") || "") + name),
 		// not standard FxOrmProperty.NormalizedPropertyHash here, but we should pass it firstly
 		properties     : properties as FxOrmProperty.NormalizedPropertyHash,
 		__for_extension: opts.__for_extension || false,
 		indexes        : opts.indexes || [],
-		identityCache  : opts.hasOwnProperty("identityCache") ? opts.identityCache : this.settings.get("instance.identityCache"),
+		identityCache  : opts.hasOwnProperty("identityCache") ? opts.identityCache : m_settings.get("instance.identityCache"),
 		keys           : opts.id,
-		autoSave       : opts.hasOwnProperty("autoSave") ? opts.autoSave : this.settings.get("instance.autoSave"),
-		autoFetch      : opts.hasOwnProperty("autoFetch") ? opts.autoFetch : this.settings.get("instance.autoFetch"),
-		autoFetchLimit : opts.autoFetchLimit || this.settings.get("instance.autoFetchLimit"),
-		cascadeRemove  : opts.hasOwnProperty("cascadeRemove") ? opts.cascadeRemove : this.settings.get("instance.cascadeRemove"),
+		autoSave       : opts.hasOwnProperty("autoSave") ? opts.autoSave : m_settings.get("instance.autoSave"),
+		autoFetch      : opts.hasOwnProperty("autoFetch") ? opts.autoFetch : m_settings.get("instance.autoFetch"),
+		autoFetchLimit : opts.autoFetchLimit || m_settings.get("instance.autoFetchLimit"),
+		cascadeRemove  : opts.hasOwnProperty("cascadeRemove") ? opts.cascadeRemove : m_settings.get("instance.cascadeRemove"),
 		hooks          : opts.hooks || {},
 		methods        : opts.methods || {},
 		validations    : opts.validations || {},
 		ievents		   : opts.ievents || {},
 
-		instanceCacheSize : opts.hasOwnProperty("instanceCacheSize") ? opts.instanceCacheSize : this.settings.get("instance.cacheSize"),
+		instanceCacheSize : opts.hasOwnProperty("instanceCacheSize") ? opts.instanceCacheSize : m_settings.get("instance.cacheSize"),
 	});
 
 	for (let i = 0; i < this.plugins.length; i++) {

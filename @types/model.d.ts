@@ -230,6 +230,9 @@ declare namespace FxOrmModel {
         table?: ModelConstructorOptions['table']
         collection?: ModelConstructorOptions['table']
 
+        /**
+         * @dirty would be deprecated
+         */
         __for_extension?: ModelConstructorOptions['__for_extension']
         indexes?: ModelConstructorOptions['indexes']
         // keys composition, it's array-like
@@ -243,6 +246,7 @@ declare namespace FxOrmModel {
         identityCache?: ModelConstructorOptions['identityCache']
         cascadeRemove?: ModelConstructorOptions['cascadeRemove']
         ievents?: ModelConstructorOptions['ievents']
+        useSelfSettings?: boolean
 
         [extensibleProperty: string]: any;
     }

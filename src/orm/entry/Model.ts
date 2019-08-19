@@ -1,6 +1,5 @@
 /// <reference lib="es2017" />
 
-import coroutine = require('coroutine')
 import util = require('util')
 
 import ChainFind         = require("./ChainFind");
@@ -229,8 +228,8 @@ export const Model = function (
 
 	model.syncSync = function () {
 		m_opts.driver.doSync({
-			repair_column		: !!model.settings.get('model.repair_column'),
-			allow_drop_column   : !!model.settings.get('model.allow_drop_column'),
+			repair_column		: !!model.settings.get(`model.dbsync.repair_column.${model.name}`),
+			allow_drop_column   : !!model.settings.get(`model.dbsync.allow_drop_column.${model.name}`),
 			extension           : m_opts.__for_extension,
 			id                  : m_opts.keys,
 			table               : m_opts.table,
