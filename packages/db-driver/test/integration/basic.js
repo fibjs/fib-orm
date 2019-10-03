@@ -131,7 +131,7 @@ describe("DBDriver", function () {
         }
       ],
       [
-        '[sqlite] query:pool',
+        '[sqlite] query:debug',
         'sqlite:test-driver.db?debug=y',
         {
           "protocol": "sqlite:",
@@ -152,6 +152,60 @@ describe("DBDriver", function () {
           assert.deepEqual(driver.extend_config.debug, true)
 
           assert.deepEqual(driver.extend_config.pool, false)
+          assert.deepEqual(driver.uri, "sqlite:test-driver.db")
+        }
+      ],
+      [
+        '[sqlite] query:pool=y',
+        'sqlite:test-driver.db?pool=y',
+        {
+          "protocol": "sqlite:",
+          "slashes": false,
+          "query": {
+            "pool": "y"
+          },
+          "database": "test-driver.db",
+          "username": null,
+          "password": null,
+          "host": null,
+          "hostname": null,
+          "port": null,
+          "href": "sqlite:test-driver.db?pool=y",
+          "pathname": "test-driver.db"
+        },
+        (driver) => {
+          assert.deepEqual(driver.extend_config.debug, false)
+
+          assert.deepEqual(driver.extend_config.pool, {
+            maxsize: 100,
+            timeout: 1000
+          })
+          assert.deepEqual(driver.uri, "sqlite:test-driver.db")
+        }
+      ],
+      [
+        '[sqlite] query:pool=false',
+        'sqlite:test-driver.db?pool=false',
+        {
+          "protocol": "sqlite:",
+          "slashes": false,
+          "query": {
+            "pool": "false"
+          },
+          "database": "test-driver.db",
+          "username": null,
+          "password": null,
+          "host": null,
+          "hostname": null,
+          "port": null,
+          "href": "sqlite:test-driver.db?pool=false",
+          "pathname": "test-driver.db"
+        },
+        (driver) => {
+          assert.deepEqual(driver.extend_config.debug, false)
+
+          assert.deepEqual(driver.extend_config.pool, false)
+          assert.deepEqual(driver.uri, "sqlite:test-driver.db")
         }
       ],
       [

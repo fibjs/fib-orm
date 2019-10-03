@@ -9,6 +9,9 @@ function setReactivePool (driver: Driver) {
 	let pool: (typeof driver.extend_config)['pool'] = false
 	Object.defineProperty(driver.extend_config, 'pool', {
 		set (nextVal) {
+            if (typeof nextVal === 'string')
+                nextVal = Utils.castQueryStringToBoolean(nextVal)
+                
 			if (nextVal) {
 				pool = Utils.parsePoolConfig(nextVal)
 				pool.maxsize = Utils.forceInteger(pool.maxsize, 100);
@@ -56,9 +59,11 @@ export class Driver<ConnType = any> implements FxDbDriverNS.Driver<ConnType> {
 	}
 	
 	uid: FxDbDriverNS.Driver['uid'];
-    get uri () {
-
-        return url.format({ ...this.config });
+    get uri () {        
+        return url.format({
+            ...this.config,
+            slashes: this.config.protocol === 'sqlite:' ? false : this.config.slashes
+        });
     }
 	config: FxDbDriverNS.Driver['config'];
 	extend_config: FxDbDriverNS.Driver['extend_config'] = {

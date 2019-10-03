@@ -46,6 +46,7 @@ export function castQueryStringToBoolean (input: any) {
         case "y":
             return true
         case "0":
+        case "false":
         case "no":
         case "n":
         case "":
