@@ -77,11 +77,11 @@ declare namespace FxDbDriverNS {
         /* transaction about :end */
     }
 
-    class Driver<ConnType = any> {
+    class Driver<CONN_TYPE = any> {
         static getDriver(
             name: FxDbDriverNS.DriverType | string
         ): any
-        static create<CreateConnType = any> (options: ConnectionInputArgs | string): Driver<CreateConnType>
+        static create<CreateCONN_TYPE = any> (options: ConnectionInputArgs | string): Driver<CreateCONN_TYPE>
 
         constructor (options: ConnectionInputArgs | string)
 
@@ -104,8 +104,8 @@ declare namespace FxDbDriverNS {
         config: DBConnectionConfig
         extend_config: Fibjs.AnyObject & DriverBuiltInExtConfig
 
-        connection: ConnType
-        pool?: FibPoolNS.FibPoolFunction<ConnType>
+        connection: CONN_TYPE
+        pool?: FibPoolNS.FibPoolFunction<CONN_TYPE>
 
         // knex: FXJSKnex.FXJSKnexModule.KnexInstance
 
@@ -113,13 +113,13 @@ declare namespace FxDbDriverNS {
          * @description re open db connection
          */
         reopen: {
-            (): ConnType
+            (): CONN_TYPE
         }
         /**
          * @description open db connection
          */
         open: {
-            (): ConnType
+            (): CONN_TYPE
         }
         /**
          * @description close db connection
@@ -133,6 +133,10 @@ declare namespace FxDbDriverNS {
         ping: {
             (): void
         }
+        /**
+         * @description get connection instance but don't change internal status
+         */
+        getConnection (): CONN_TYPE
 
         [ext_key: string]: any
     }
