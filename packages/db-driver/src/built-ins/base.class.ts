@@ -17,7 +17,7 @@ function setReactivePool (driver: Driver) {
 				pool.maxsize = Utils.forceInteger(pool.maxsize, 100);
 				pool.timeout = Utils.forceInteger(pool.timeout, 1000);
 				
-				Utils.mountPoolToDb(driver)
+				Utils.mountPoolToDriver(driver, pool)
 			} else {
 				pool = false
 			}
@@ -155,6 +155,13 @@ export class Driver<CONN_TYPE = any> implements FxDbDriverNS.Driver<CONN_TYPE> {
      * @override
      */
     getConnection (): CONN_TYPE { return null as any }
+
+    connectionPool (callback: (connection: CONN_TYPE) => any) {
+        if (this.isPool)
+            return this.pool((conn) => callback(conn))
+        
+        return callback(this.open())
+    }
 
 	[sync_method: string]: any
 }

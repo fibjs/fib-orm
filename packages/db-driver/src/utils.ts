@@ -152,16 +152,19 @@ export function parsePoolConfig (
     }
 }
 
-export function mountPoolToDb (driver: FxDbDriverNS.Driver) {
-    if (!driver.pool && driver.config.pool)
-        driver.pool = FibPool<FxDbDriverNS.Driver>({
+export function mountPoolToDriver (
+    driver: FxDbDriverNS.Driver,
+    poolSetting = driver.config.pool
+) {
+    if (!driver.pool && poolSetting)
+        driver.pool = FibPool<FxDbDriverNS.Driver['connection']>({
             create: () => {
-                return driver.open()
+                return driver.getConnection()
             },
-            destroy: (driver: FxDbDriverNS.Driver) => {
-                return driver.close()
+            destroy: (conn) => {
+                return conn.close()
             },
-            ...parsePoolConfig(driver.config.pool)
+            ...parsePoolConfig(poolSetting)
         })
 }
 

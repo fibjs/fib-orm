@@ -138,6 +138,8 @@ declare namespace FxDbDriverNS {
          */
         getConnection (): CONN_TYPE
 
+        connectionPool (callback: (connection: CONN_TYPE) => any): any
+
         [ext_key: string]: any
     }
 
