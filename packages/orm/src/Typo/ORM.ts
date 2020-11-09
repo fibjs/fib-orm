@@ -22,8 +22,18 @@ import type {
     FxSqlQueryChainBuilder
 } from '@fxjs/sql-query';
 
-// fix fibjs types' missing
-// declare var console: any
+export type {
+    FxSqlAggregation,
+    FxSqlQueryComparator,
+    FxSqlQueryComparatorFunction,
+    FxSqlQueryDialect,
+    FxSqlQueryColumns,
+    FxSqlQueryHelpler,
+    FxSqlQueryChainBuilder,
+    FxSqlQuery,
+    FxSqlQuerySql,
+    FxSqlQuerySubQuery,
+} from '@fxjs/sql-query';
 
 export namespace FxOrmNS {
     /* compatible :start */
