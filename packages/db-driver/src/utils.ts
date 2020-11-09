@@ -6,6 +6,7 @@ import net = require('net')
 import uuid = require('uuid')
 import ParseQSDotKey = require('parse-querystring-dotkey')
 import FibPool = require('fib-pool');
+import { FxDbDriverNS } from './Typo'
 
 export function driverUUid () {
     return uuid.node().hex()
@@ -152,17 +153,17 @@ export function parsePoolConfig (
     }
 }
 
-export function mountPoolToDriver (
-    driver: FxDbDriverNS.Driver,
+export function mountPoolToDriver<CONN_TYPE = any> (
+    driver: any,
     poolSetting = driver.config.pool
 ) {
     if (!driver.pool && poolSetting)
-        driver.pool = FibPool<FxDbDriverNS.Driver['connection']>({
+        driver.pool = FibPool<CONN_TYPE>({
             create: () => {
                 return driver.getConnection()
             },
             destroy: (conn) => {
-                return conn.close()
+                return (conn as any).close()
             },
             ...parsePoolConfig(poolSetting)
         })

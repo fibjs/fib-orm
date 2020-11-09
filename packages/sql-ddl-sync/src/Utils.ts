@@ -1,5 +1,12 @@
 /// <reference types="@fibjs/types" />
 
+import { FxOrmSqlDDLSync__Column } from "./Typo/Column";
+import { FxOrmSqlDDLSync } from "./Typo/_common";
+
+import { FxDbDriverNS } from "@fxjs/db-driver/typings/Typo";
+import { FxOrmSqlDDLSync__Collection } from "./Typo/Collection";
+import { IDbDriver } from "@fxjs/db-driver";
+
 export function logJson (group: string, detail: any) {
     let json = null;
     try {
@@ -41,7 +48,7 @@ export function filterPropertyDefaultValue (
     ctx: {
         collection: string,
         property: FxOrmSqlDDLSync__Column.Property,
-        driver: FxDbDriverNS.Driver
+        driver: IDbDriver
     }
 ) {
     let _dftValue
@@ -70,7 +77,7 @@ export function filterSyncStrategy (
 }
 
 export function filterSuppressColumnDrop (
-    suppressColumnDrop: boolean, db_type: FxOrmSqlDDLSync.Sync['dbdriver']['type']
+    suppressColumnDrop: boolean, db_type: FxDbDriverNS.DriverType
 ) {
     if (db_type === 'sqlite')
         return true

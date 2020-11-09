@@ -1,0 +1,85 @@
+{
+	"name": "@fxjs/orm",
+	"version": "1.11.4",
+	"description": "",
+	"main": "lib",
+	"types": "typings/index.d.ts",
+	"repository": {
+		"type": "https",
+		"url": "https://github.com/fxjs-modules/orm/tree/master/packages/orm"
+	},
+	"author": "richardo2016 <richardo2016@gmail.com>",
+	"contributors": [
+		{
+			"email": "richardo2016@gmail.com",
+			"name": "Richard"
+		}
+	],
+	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/orm",
+	"license": "ISC",
+	"keywords": [
+		"orm",
+		"database",
+		"fibjs"
+	],
+	"scripts": {
+		"build": "ftsc ./src/* --outDir ./lib",
+        "test": "fibjs test",
+        "ci": "npm run ci-sqlite",
+        "cio": "npm run build && npm run test",
+        "ci-mysql": "npm run build && cross-env ORM_PROTOCOL=mysql npm run test",
+        "ci-sqlite": "npm run build && cross-env ORM_PROTOCOL=sqlite npm run test",
+		"prepublishOnly": "npm run ci"
+	},
+	"ci": {
+		"type": "travis, appveyor",
+		"version": [
+			"0.28.0",
+			"0.29.0",
+			"0.30.0",
+			"0.31.0"
+		]
+	},
+	"dependencies": {
+		"@fibjs/enforce": "^0.1.1",
+		"@fxjs/db-driver": "^0.1.0",
+		"@fxjs/knex": "^0.3.0",
+		"@fxjs/orm-core": "^0.1.0",
+		"@fxjs/sql-ddl-sync": "^0.6.5",
+		"@fxjs/sql-query": "^0.7.0",
+		"fib-pool": "^1.6.0",
+		"@types/knex": "^0.16.1",
+		"knex": "^0.19.5",
+		"lodash.clonedeep": "^4.5.0",
+		"lodash.flatten": "^4.4.0",
+		"lodash.merge": "^4.6.1"
+	},
+	"devDependencies": {
+		"@fibjs/ci": "^2.2.0",
+		"@fibjs/types": "^0.31.0",
+		"@types/lodash.clonedeep": "^4.5.6",
+		"@types/lodash.flatten": "^4.4.6",
+		"@types/lodash.merge": "^4.6.6",
+		"async": "^2.6.2",
+		"cross-env": "^5.2.0",
+		"fib-typify": "^0.8.3",
+		"lodash": "^4.17.11",
+		"semver": "^5.6.0",
+		"fib-pool": "^1.6.0"
+	},
+	"peerDependencies": {
+		"@fxjs/sql-ddl-sync": ">= 0.6 < 7",
+		"@fxjs/sql-query": ">= 0.5 <= 0.7",
+		"@fibjs/enforce": ">= 0.1.1 < 0.2",
+		"@fxjs/knex": ">= 0.3 <= 0.3",
+		"knex": ">= 0.19.0 < 0.20"
+	},
+	"private": true,
+	"files": [
+		"lib",
+		"typings"
+	],
+	"publishConfig": {
+		"access": "public"
+	}
+}

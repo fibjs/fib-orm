@@ -1,7 +1,9 @@
-/// <reference path="../../@types/index.d.ts" />
-
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
+import { FxOrmSqlDDLSync__Column } from "../Typo/Column";
+import { FxOrmSqlDDLSync__DbIndex } from "../Typo/DbIndex";
+import { FxOrmSqlDDLSync__Dialect } from "../Typo/Dialect";
+import { FxOrmSqlDDLSync__Driver } from "../Typo/Driver";
 import { getSqlQueryDialect, arraify, filterPropertyDefaultValue } from '../Utils';
 
 const columnSizes = {
@@ -551,7 +553,7 @@ export const getType: FxOrmSqlDDLSync__Dialect.Dialect['getType'] = function (
 		}
 		type += " AUTO_INCREMENT";
 	}
-	if (property.hasOwnProperty("defaultValue")) {
+	if (property.hasOwnProperty("defaultValue") && property.defaultValue !== undefined) {
 		const defaultValue = filterPropertyDefaultValue(property, {
 			collection,
 			property,

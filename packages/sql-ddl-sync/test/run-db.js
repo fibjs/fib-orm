@@ -1,7 +1,7 @@
 const test = require('test')
 test.setup()
 
-var DBDriver     = require("@fxjs/db-driver");
+var DBDriver  = require("@fxjs/db-driver").Driver;
 var common  = require("./common");
 var url     = require("url");
 

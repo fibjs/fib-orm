@@ -1,7 +1,7 @@
 {
 	"name": "@fxjs/sql-ddl-sync",
-	"version": "0.6.2",
-	"description": "Fibjs SQL DDL Synchronization",
+	"version": "0.6.5",
+	"description": "",
 	"keywords": [
 		"sql",
 		"ddl",
@@ -10,38 +10,40 @@
 		"postgres",
 		"sqlite"
 	],
-	"author": "Richard <richardo2016@gmail.com>",
-	"license": "MIT",
-	"repository": "http://github.com/fxjs-modules/sql-ddl-sync.git",
-	"types": "@types/index.d.ts",
-	"main": "./lib",
+	"author": "richardo2016 <richardo2016@gmail.com>",
+	"license": "ISC",
+	"repository": {
+		"type": "https",
+		"url": "https://github.com/fxjs-modules/orm/tree/master/packages/sql-ddl-sync"
+	},
+	"types": "typings/index.d.ts",
+	"main": "lib",
 	"unpkg": "./dist/index.js",
 	"jsdelivr": "./dist/index.js",
 	"scripts": {
-		"build": "fibjs build.js",
-		"test-db": "fibjs test/run-db",
-		"test-db-mysql": "cross-env URI=mysql://root:@localhost:3306/sql-ddl-sync npm run test-db",
+		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
 		"ci": "npm run build && npm run test",
-		"ci-mysql": "npm run build && npm run test-db-mysql",
-		"prepublishOnly": "npm run build"
+		"prepublishOnly": "npm run ci"
 	},
 	"engines": {
 		"fibjs": "*"
 	},
 	"analyse": false,
 	"peerDependencies": {
-		"@fxjs/sql-query": ">= 0.4 < 0.6",
-		"@fxjs/db-driver": "*"
+		"@fxjs/db-driver": "*",
+		"@fxjs/orm-core": "*",
+		"@fxjs/sql-query": ">= 0.6 <= 0.7"
 	},
 	"devDependencies": {
 		"@fibjs/ci": "^2.2.0",
-		"@fibjs/types": "^0.27.1",
-		"@fxjs/db-driver": "^0.0.2",
-		"@fxjs/sql-query": "^0.4.0",
+		"@fibjs/types": "^0.31.0",
+		"@fxjs/db-driver": "^0.1.0",
+		"@fxjs/sql-query": "^0.7.0",
 		"cross-env": "^5.2.0",
+		"fib-pool": "^1.6.0",
 		"fib-rollup": "^0.4.0",
-		"fib-typify": "^0.6.0",
+		"fib-typify": "^0.8.3",
 		"rollup-plugin-commonjs": "^9.2.1",
 		"should": "^13.2.3"
 	},
@@ -51,14 +53,22 @@
 	"ci": {
 		"type": "travis, appveyor",
 		"version": [
-			"0.21.0",
-			"0.22.0",
-			"0.23.0",
-			"0.24.0",
-			"0.25.0",
-			"0.26.0",
-			"0.26.1",
-			"0.27.0"
+			"0.28.0",
+			"0.29.0",
+			"0.30.0",
+			"0.31.0"
 		]
+	},
+	"private": false,
+	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/sql-ddl-sync",
+	"files": [
+		"lib",
+		"typings"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@fxjs/orm-core": "^0.1.0"
 	}
 }

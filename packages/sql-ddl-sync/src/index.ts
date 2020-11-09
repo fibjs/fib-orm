@@ -1,13 +1,20 @@
-/// <reference types="@fxjs/orm-core" />
-/// <reference path="../@types/index.d.ts" />
-
 import FxORMCore = require("@fxjs/orm-core");
 import util  = require('util')
+import { FxOrmSqlDDLSync__Collection } from "./Typo/Collection";
+import { FxOrmSqlDDLSync__Column } from "./Typo/Column";
+import { FxOrmSqlDDLSync__DbIndex } from "./Typo/DbIndex";
+import { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
+import { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
+import { FxOrmSqlDDLSync } from "./Typo/_common";
 import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop } from './Utils';
+import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
+
+import "./Dialects";
+import { IDbDriver } from "@fxjs/db-driver";
 
 const noOp = () => {};
 
-export const dialect: FxOrmSqlDDLSync.ExportModule['dialect'] = function (name) {
+export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDDLSync__Dialect.Dialect {
 	const Dialects = require('./Dialects')
 
 	if (!Dialects[name])
@@ -114,27 +121,27 @@ function getColumnTypeRaw (
 	};
 }
 
-export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
+export class Sync<ConnType = any> {
 	strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy'] = 'soft'
 	/**
 	 * @description total changes count in this time `Sync`
 	 * @deprecated
 	 */
-	total_changes: FxOrmSqlDDLSync.Sync['total_changes']
+	total_changes: number
 	
 	readonly collections: FxOrmSqlDDLSync__Collection.Collection[]
 
-	readonly dbdriver: FxOrmSqlDDLSync.Sync['dbdriver']
-	readonly Dialect: FxOrmSqlDDLSync.Sync['Dialect']
+	readonly dbdriver: IDbDriver<ConnType>
+	readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect
 	/**
 	 * @description customTypes
 	 */
-	readonly types: FxOrmSqlDDLSync.Sync['types']
+	readonly types: FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash
 
 	private suppressColumnDrop: boolean
 	private debug: Exclude<FxOrmSqlDDLSync.SyncOptions['debug'], false>
 
-	constructor (options: FxOrmSqlDDLSync.SyncOptions) {
+	constructor (options: FxOrmSqlDDLSync.SyncOptions<ConnType>) {
 		const dbdriver = options.dbdriver
 
 		this.suppressColumnDrop = filterSuppressColumnDrop(options.suppressColumnDrop !== false, dbdriver.type)
@@ -150,7 +157,7 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 
 	[sync_method: string]: any
 	
-	defineCollection (collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties']) {
+	defineCollection (collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties']): this {
 		let idx = this.collections.findIndex(collection => collection.name === collection_name)
 		if (idx >= 0)
 			this.collections.splice(idx, 1)
@@ -163,16 +170,22 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		return this;
 	}
 
-	findCollection (collection_name: string): null | FxOrmSqlDDLSync__Collection.Collection {
+	findCollection (collection_name: string): FxOrmSqlDDLSync__Collection.Collection {
 		return this.collections.find(collection => collection.name === collection_name) || null
 	}
 
-	defineType (type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType) {
+	defineType (type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType): this {
 		this.types[type] = proto;
 		return this;
 	}
 
-	createCollection (collection: FxOrmSqlDDLSync__Collection.Collection) {
+	/**
+	 * @description
+	 *  create collection in db if it doesn't exist, then sync all columns for it.
+	 * 
+	 * @param collection collection relation to create 
+	 */
+	createCollection <T = any> (collection: FxOrmSqlDDLSync__Collection.Collection): T {
 		const columns: string[] = [];
 
 		let keys: string[] = [];
@@ -212,10 +225,25 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		return result_1;
 	}
 
+	/**
+	 * @description
+	 *  compare/diff properties between definition ones and the real ones,
+	 *  then sync column in definition but missing in the real
+	 * 
+	 * @param collection collection properties user provided 
+	 * @param opts
+	 *      - opts.columns: properties from user(default from db)
+	 *      - opts.strategy: (default soft) strategy when conflict between local and remote db, see details below
+	 * 
+	 * @strategy
+	 *      - 'soft': no change
+	 *      - 'mixed': add missing columns, but never change existed column in db
+	 *      - 'hard': modify existed columns in db
+	 */
 	syncCollection (
 		_collection: string | FxOrmSqlDDLSync__Collection.Collection,
 		opts?: FxOrmSqlDDLSync.SyncCollectionOptions
-	) {
+	): void {
 		const collection = typeof _collection === 'string' ? this.findCollection(_collection) : _collection;
 
 		if (!collection)
@@ -437,6 +465,14 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		}
 	}
 
+	/**
+	 * @description
+	 *  sync all collections to db (if not existing), with initializing ones' properties.
+	 * 
+	 * @callbackable
+	 */
+	sync (cb: FxOrmCoreCallbackNS.ExecutionCallback<FxOrmSqlDDLSync.SyncResult>): void
+	sync (): FxOrmSqlDDLSync.SyncResult
 	sync (cb?: FxOrmCoreCallbackNS.ExecutionCallback<FxOrmSqlDDLSync.SyncResult>) {
 		const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod<FxOrmSqlDDLSync.SyncResult>(
 			() => {
@@ -453,6 +489,15 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		return exposedErrResults.result;
 	};
 	
+	/**
+	 * @description
+	 *  sync all collections to db whatever it existed,
+	 *  with sync ones' properties whatever the property existed.
+	 * 
+	 * @callbackable
+	 */
+	forceSync (cb: FxOrmCoreCallbackNS.ExecutionCallback<FxOrmSqlDDLSync.SyncResult>): void
+	forceSync (): FxOrmSqlDDLSync.SyncResult
 	forceSync (cb?: FxOrmCoreCallbackNS.ExecutionCallback<FxOrmSqlDDLSync.SyncResult>) {
 		const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod<FxOrmSqlDDLSync.SyncResult>(
 			() => {
@@ -531,3 +576,8 @@ export class Sync<ConnType = any> implements FxOrmSqlDDLSync.Sync<ConnType> {
 		return false;
 	}
 }
+
+export type { FxOrmSqlDDLSync } from "./Typo/_common";
+export type { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
+export type { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
+export type { FxOrmSqlDDLSync__Column } from "./Typo/Column";

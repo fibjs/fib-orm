@@ -1,0 +1,36 @@
+import { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
+import { FxOrmNS } from './Typo/ORM';
+import { FxOrmInstance } from './Typo/instance';
+import { FxOrmAssociation } from './Typo/assoc';
+import { FxOrmModel } from './Typo/model';
+import { FxOrmHook } from './Typo/hook';
+export declare function buildDbDriver(opts: string | FxDbDriverNS.DBConnectionConfig): FxOrmNS.ORMLike | IDbDriver;
+export declare function get_many_associations_from_instance_by_extname(instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasMany[];
+export declare function get_one_associations_from_instance_by_extname(instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasOne[];
+export declare function get_extendsto_associations_from_instance_by_extname(instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_ExtendTos[];
+export declare function getManyAssociationItemFromInstanceByExtname(instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_HasMany;
+export declare function getOneAssociationItemFromInstanceByExtname(instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_HasOne;
+export declare function getExtendsToAssociationItemFromInstanceByExtname(instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_ExtendTos;
+export declare function getAssociationItemFromInstanceByExtname(reltype: string, inst: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem;
+export declare function getManyAssociationItemFromInstanceByAssocModel(instance: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasMany;
+export declare function getOneAssociationItemFromInstanceByAssocModel(instance: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasOne;
+export declare function getExtendsToAssociationItemFromInstanceByAssocModel(instance: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_ExtendTos;
+export declare function getAssociationItemFromInstanceByAssocModel(reltype: string, inst: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem;
+export declare function getManyAssociationItemFromModel(ext_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasMany;
+export declare function getOneAssociationItemFromModel(ext_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasOne;
+export declare function getExtendsToAssociationItemFromModel(ext_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_ExtendTos;
+export declare function getAssociationItemFromModel(reltype: string, extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem;
+export declare function tryGetAssociationItemFromModel(extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem;
+export declare function prependHook(hooks: FxOrmModel.Hooks, hookName: FxOrmModel.keyofHooks, preLogic: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback): void;
+export declare function preReplaceHook(m: FxOrmModel.Model, opts: FxOrmModel.ModelOptions, hookName: FxOrmModel.keyofHooks, cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void): void;
+export declare const hookTrigger: FxOrmHook.HookTrigger<any, any>;
+export declare const hookWait: FxOrmHook.HookWait<FxOrmInstance.Instance, any>;
+export declare function selectArgs(args: ArrayLike<any>, callback: {
+    (arg_type: "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function", arg: any, idx: number): void;
+}): void;
+export declare function parseDriverUidAndTableNameFromUID(uid: string): {
+    driver_uid: string;
+    table: string;
+    driver_table_uid: string;
+};
+export declare function valueOrComputeFunction<T = Exclude<any, Function>>(input: T | ((...args: any[]) => T), args?: any[], thisArg?: any): T;

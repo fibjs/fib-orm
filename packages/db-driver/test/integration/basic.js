@@ -1,7 +1,7 @@
 const test = require('test')
 test.setup()
 
-var DBDriver   = require("../..");
+var DBDriver   = require("../..").Driver;
 
 describe("DBDriver", function () {
   describe("exports", function () {

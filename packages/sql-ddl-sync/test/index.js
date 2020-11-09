@@ -3,8 +3,8 @@ test.setup();
 
 ;[
     [0, { ENTRY: '../lib/index.js',        URI: 'sqlite:test.db' }],
-    [0, { ENTRY: '../dist/index.js',       URI: 'sqlite:test.db' }],
-    [0, { ENTRY: '../dist/index.min.js',   URI: 'sqlite:test.db' }],
+    // [0, { ENTRY: '../dist/index.js',       URI: 'sqlite:test.db' }],
+    // [0, { ENTRY: '../dist/index.min.js',   URI: 'sqlite:test.db' }],
 ].forEach(([ep, envs]) => {
     const result_p = process.run(
         process.execPath,

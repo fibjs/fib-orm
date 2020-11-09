@@ -1,27 +1,51 @@
 {
-  "name": "@fxjs/orm-plugin-uacl",
-  "version": "1.0.0",
-  "description": "",
-  "main": "lib",
-  "types": "typings.d.ts",
-  "scripts": {
-    "build": "fib-typify ./src -o ./lib",
-    "test": "fibjs test",
-    "ci": "npm run build && npm run test",
-    "prepublishOnly": "npm run ci"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@fxjs/orm": "^1.10.2",
-    "fib-kv": "^1.3.1",
-    "fib-pool": "^1.5.3",
-    "rxjs": "^6.5.2"
-  },
-  "devDependencies": {
-    "fib-typify": "^0.6.0"
-  },
-  "peerDependencies": {
-    "@fxjs/orm": ">= 1.10.1 < 2"
-  }
+	"name": "@fxjs/orm-plugin-uacl",
+	"version": "1.0.0",
+	"description": "",
+	"main": "lib",
+	"types": "typings/index.d.ts",
+	"scripts": {
+		"build": "ftsc ./src/* --outDir ./lib",
+		"test": "fibjs test",
+		"ci": "npm run build && npm run test",
+		"prepublishOnly": "npm run ci"
+	},
+	"author": "richardo2016 <richardo2016@gmail.com>",
+	"license": "ISC",
+	"dependencies": {
+		"@fxjs/orm": "^1.10.2",
+		"fib-kv": "^1.3.1",
+		"fib-pool": "^1.5.3",
+		"rxjs": "^6.5.2"
+	},
+	"devDependencies": {
+		"fib-typify": "^0.8.3",
+		"@fibjs/types": "^0.31.0",
+		"fib-pool": "^1.6.0"
+	},
+	"peerDependencies": {
+		"@fxjs/orm": ">= 1.10.1 < 2"
+	},
+	"private": true,
+	"repository": {
+		"type": "https",
+		"url": "https://github.com/fxjs-modules/orm/tree/master/packages/orm-plugin-uacl"
+	},
+	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/orm-plugin-uacl",
+	"files": [
+		"lib",
+		"typings"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"ci": {
+		"type": "travis, appveyor",
+		"version": [
+			"0.28.0",
+			"0.29.0",
+			"0.30.0",
+			"0.31.0"
+		]
+	}
 }

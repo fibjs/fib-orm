@@ -1,9 +1,13 @@
+/// <reference types="fib-pool" />
+
 import db = require('db')
 import url = require('url');
 import assert = require('assert');
 import coroutine = require('coroutine')
 
 import Utils = require('../utils')
+import { FxDbDriverNS } from '../Typo';
+import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 
 function setReactivePool (driver: Driver) {
 	let pool: (typeof driver.extend_config)['pool'] = false
@@ -26,55 +30,59 @@ function setReactivePool (driver: Driver) {
 	})
 }
 
-export class Driver<CONN_TYPE = any> implements FxDbDriverNS.Driver<CONN_TYPE> {
-    static getDriver = function getDriver (
-            name: FxDbDriverNS.DriverType | string
-        ): any {
-        switch (name) {
-            case 'mysql':
-                return MySQLDriver
-            case 'sqlite':
-                return SQLiteDriver
-            case 'redis':
-                return RedisDriver
-            case 'mongodb':
-                return MongoDriver
-            default:
-                if (name) {
-                    const type = Utils.filterDriverType(url.parse(name).protocol)
-                    if (type !== 'unknown')
-                        return getDriver(type)
-                }
-                
-                return Driver
+function getDriver(name: 'sqlite'): typeof SQLiteDriver
+function getDriver(name: 'redis'): typeof RedisDriver
+function getDriver(name: 'mysql'): typeof MySQLDriver
+function getDriver (name: FxDbDriverNS.DriverType | string) {
+switch (name) {
+    case 'mysql':
+        return MySQLDriver as any
+    case 'sqlite':
+        return SQLiteDriver as any
+    case 'redis':
+        return RedisDriver as any
+    case 'mongodb':
+        return MongoDriver as any
+    default:
+        if (name) {
+            const type = Utils.filterDriverType(url.parse(name).protocol)
+            if (type !== 'unknown')
+                return getDriver(type as any)
         }
-    }
+        
+        return Driver
+}
+}
+
+export class Driver<CONN_TYPE = any> {
+    static getDriver = getDriver;
 
 	static create (input: FxDbDriverNS.ConnectionInputArgs | string) {
 		const driver = Driver.getDriver(
-			typeof input === 'object' ? input.protocol : input
+			typeof input === 'object' ? input.protocol : input as any
 		)
 
 		return new driver(input);
 	}
 	
-	uid: FxDbDriverNS.Driver['uid'];
+	uid: string;
     get uri () {        
         return url.format({
             ...this.config,
-            slashes: this.config.protocol === 'sqlite:' ? false : this.config.slashes
+            slashes: this.config.protocol === 'sqlite:' ? false : this.config.slashes,
+            query: this.config.protocol === 'sqlite:' ? {} : this.config.query
         });
     }
-	config: FxDbDriverNS.Driver['config'];
-	extend_config: FxDbDriverNS.Driver['extend_config'] = {
+	config: FxDbDriverNS.DBConnectionConfig;
+	extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig = {
 		pool: false,
 		debug: false
 	};
 
-	type: FxDbDriverNS.Driver['type'];
+	type: FxDbDriverNS.DriverType;
 
-    connection: FxDbDriverNS.Driver<CONN_TYPE>['connection'];
-    pool: FxDbDriverNS.Driver<CONN_TYPE>['pool'];
+    connection: CONN_TYPE;
+    pool: FibPoolNS.FibPool<CONN_TYPE, any>;
 
 	get isPool () {
 		return !!this.extend_config.pool
@@ -115,7 +123,7 @@ export class Driver<CONN_TYPE = any> implements FxDbDriverNS.Driver<CONN_TYPE> {
 
 		this.type = Utils.filterDriverType(this.config.protocol);
 
-		const extend_config = <FxDbDriverNS.Driver['extend_config']>{}
+		const extend_config = <Driver['extend_config']>{}
 		Object.defineProperty(this, 'extend_config', { get () { return extend_config } })
 
 		setReactivePool(this)
@@ -126,33 +134,37 @@ export class Driver<CONN_TYPE = any> implements FxDbDriverNS.Driver<CONN_TYPE> {
 		Object.defineProperty(this, 'uid', { value: Utils.driverUUid(), writable: false, configurable: false })
 	}
 
-	/**
-	 * @override
-	 */
+
+    /**
+     * @description re open db connection
+     */
 	reopen () {
         try { this.close() } catch (error) {}
         return this.open()
     }
 
-	/**
-	 * @override
-	 */
+
+    /**
+     * @description open db connection
+     */
 	open (): CONN_TYPE {
         return this.connection = this.getConnection()
     }
 
-	/**
-	 * @override
-	 */
+
+    /**
+     * @description close db connection
+     */
 	close (): void {}
 
-	/**
-	 * @override
-	 */
+
+    /**
+     * @description some db connection has `ping` method
+     */
 	ping (): void {}
 
     /**
-     * @override
+     * @description get connection instance but don't change internal status
      */
     getConnection (): CONN_TYPE { return null as any }
 
@@ -160,7 +172,27 @@ export class Driver<CONN_TYPE = any> implements FxDbDriverNS.Driver<CONN_TYPE> {
         if (this.isPool)
             return this.pool((conn) => callback(conn))
         
-        return callback(this.open())
+        return callback(this.getConnection())
+    }
+
+    useTrans (callback: (conn_for_trans: CONN_TYPE) => any) {
+        return this.connectionPool((conn: any) => {
+            if (typeof conn.trans === 'function') {
+                const waitor = {
+                    ev: new (coroutine.Event)(),
+                    result: <any>undefined
+                }
+                conn.trans(() => {
+                    waitor.result = callback(conn)
+                    waitor.ev.set()
+                })
+                waitor.ev.wait()
+
+                return waitor.result
+            } else {
+                return callback(conn)
+            }
+        })
     }
 
 	[sync_method: string]: any
@@ -193,8 +225,8 @@ export class SQLDriver<CONN_TYPE> extends Driver<CONN_TYPE> implements FxDbDrive
 	execute<T> (sql: string): T { return }
 }
 
-class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriverNS.SQLDriver {
-    constructor (conn: FxDbDriverNS.ConnectionInputArgs) {
+export class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriverNS.SQLDriver {
+    constructor (conn: FxDbDriverNS.ConnectionInputArgs | string) {
         super(conn);
 
         this.connection = null
@@ -220,15 +252,15 @@ class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriverNS.SQLDriv
 
     execute<T = any> (sql: string): T {
         if (this.isPool)
-            return this.pool(conn => conn.execute(sql));
+            return this.pool(conn => conn.execute(sql)) as any;
 
         if (!this.connection) this.open()
         return this.connection.execute(sql) as any;
     }
 }
 
-class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriverNS.SQLDriver {
-    constructor (conn: FxDbDriverNS.ConnectionInputArgs) {
+export class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriverNS.SQLDriver {
+    constructor (conn: FxDbDriverNS.ConnectionInputArgs | string) {
         super(conn);
 
         this.connection = null
@@ -249,15 +281,15 @@ class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriverNS.SQLDr
 
     execute<T = any> (sql: string): T {
         if (this.isPool)
-            return this.pool(conn => conn.execute(sql));
+            return this.pool(conn => conn.execute(sql)) as any;
 
         if (!this.connection) this.open()
         return this.connection.execute(sql) as any;
     }
 }
 
-class RedisDriver extends Driver<Class_Redis> implements FxDbDriverNS.CommandDriver {
-    constructor (conn: FxDbDriverNS.ConnectionInputArgs) {
+export class RedisDriver extends Driver<Class_Redis> implements FxDbDriverNS.CommandDriver {
+    constructor (conn: FxDbDriverNS.ConnectionInputArgs | string) {
         super(conn);
 
         this.connection = null
@@ -299,7 +331,7 @@ class RedisDriver extends Driver<Class_Redis> implements FxDbDriverNS.CommandDri
     getConnection (): Class_Redis { return db.openRedis(this.uri) }
 }
 
-class MongoDriver extends Driver<Class_MongoDB> implements FxDbDriverNS.CommandDriver {
+export class MongoDriver extends Driver<Class_MongoDB> implements FxDbDriverNS.CommandDriver {
     constructor (conn: FxDbDriverNS.ConnectionInputArgs) {
         super(conn);
 
@@ -327,7 +359,7 @@ class MongoDriver extends Driver<Class_MongoDB> implements FxDbDriverNS.CommandD
         opts?: FxDbDriverNS.CommandDriverCommandOptions
     ): T {
         if (this.isPool)
-            return this.pool(conn => conn.runCommand(cmds));
+            return this.pool(conn => conn.runCommand(cmds)) as any;
 
         if (!this.connection) this.open()
         return this.connection.runCommand(cmds) as any;
@@ -336,3 +368,7 @@ class MongoDriver extends Driver<Class_MongoDB> implements FxDbDriverNS.CommandD
     getConnection (): Class_MongoDB { return db.openMongoDB(this.uri) }
 }
 
+export type IClsSQLDriver = typeof SQLDriver;
+export type IClsMySQLDriver = typeof MySQLDriver;
+export type IClsSQLiteDriver = typeof SQLiteDriver;
+export type IClsRedisDriver = typeof RedisDriver;

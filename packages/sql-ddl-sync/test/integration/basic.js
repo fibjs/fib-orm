@@ -2,7 +2,7 @@ const test = require('test')
 test.setup()
 
 var index   = require("../../lib");
-var DBDriver  = require("@fxjs/db-driver");
+var DBDriver  = require("@fxjs/db-driver").Driver;
 
 describe("sql-ddl-sync", function () {
   describe("exports", function () {
@@ -18,7 +18,7 @@ describe("sql-ddl-sync", function () {
   });
 
   describe("#dialect", function () {
-    ['mysql', 'postgresql', 'sqlite'].forEach(function (dialectName) {
+    ['mysql', /* 'postgresql',  */'sqlite'].forEach(function (dialectName) {
       describe("should expose " + dialectName + " dialect", function () {
         var dialect = index.dialect(dialectName);
 

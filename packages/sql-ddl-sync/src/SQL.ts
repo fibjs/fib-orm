@@ -1,6 +1,6 @@
-/// <reference path="../@types/index.d.ts" />
-
+import { FxOrmSqlDDLSync__SQL } from './Typo/SQL';
 import { getSqlQueryDialect } from './Utils';
+import { FxDbDriverNS } from "@fxjs/db-driver/typings/Typo";
 
 export function CREATE_TABLE (
 	options: FxOrmSqlDDLSync__SQL.TableOptions,
