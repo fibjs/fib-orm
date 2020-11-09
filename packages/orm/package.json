@@ -26,10 +26,10 @@
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
 		"ci": "npm run ci-sqlite",
+		"prepublishOnly": "npm run ci",
 		"cio": "npm run build && npm run test",
 		"ci-mysql": "npm run build && cross-env ORM_PROTOCOL=mysql npm run test",
-		"ci-sqlite": "npm run build && cross-env ORM_PROTOCOL=sqlite npm run test",
-		"prepublishOnly": "npm run ci"
+		"ci-sqlite": "npm run build && cross-env ORM_PROTOCOL=sqlite npm run test"
 	},
 	"ci": {
 		"type": "travis, appveyor",
@@ -74,7 +74,7 @@
 		"@fxjs/sql-query": ">= 0.5 <= 0.7",
 		"knex": ">= 0.19.0 < 0.20"
 	},
-	"private": true,
+	"private": false,
 	"files": [
 		"lib",
 		"typings"

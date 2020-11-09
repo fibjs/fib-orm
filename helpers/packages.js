@@ -22,7 +22,6 @@ module.exports = [
     {
         name: 'orm',
         _dirname: 'orm',
-        no_publish: true,
     },
     {
         name: 'orm-plugin-pool',
