@@ -14,7 +14,7 @@
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test/run",
 		"ci": "npm run build && npm run test",
-		"prepublishOnly": "npm run build && npm run ci:rollup",
+		"prepublishOnly": "npm run build",
 		"build:rollup": "fibjs ./rollup.build.js",
 		"test:rollup": "cross-env ENTRY_SUFFIX=.cjs.js fibjs test/vbox",
 		"ci:rollup": "npm run build && npm run build:rollup && npm run test:rollup"
