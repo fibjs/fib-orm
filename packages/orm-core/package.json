@@ -17,13 +17,11 @@
 	},
 	"author": "richardo2016 <richardo2016@gmail.com>",
 	"license": "ISC",
-	"dependencies": {},
 	"devDependencies": {
 		"@fibjs/types": "^0.31.0",
-		"fib-typify": "^0.8.3",
-		"fib-pool": "^1.6.0"
+		"fib-pool": "^1.6.0",
+		"fib-typify": "^0.8.3"
 	},
-	"peerDependencies": {},
 	"private": false,
 	"files": [
 		"lib",
