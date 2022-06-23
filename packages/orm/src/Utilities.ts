@@ -567,8 +567,7 @@ export function queryParamCast (val: any): any {
 }
 
 export function isDriverNotSupportedError (err: FxOrmError.ExtendedError) {
-	if (err.code === "MODULE_NOT_FOUND")
-		return true;
+	if (err.code === 'MODULE_NOT_FOUND') return true;
 
 	if(
 		[
@@ -577,7 +576,7 @@ export function isDriverNotSupportedError (err: FxOrmError.ExtendedError) {
 			// unix like not found
 			'No such file or directory',
 		].some((msg: string) => {
-			return err.message.indexOf(msg) > -1
+			return err.message.indexOf(msg) > -1 || (err.message.toLocaleLowerCase()).indexOf(msg.toLowerCase()) > -1
 		})
 	)
 		return true
