@@ -12,10 +12,18 @@
     "postinstall": "rm -rf node_modules/@type/node"
   },
   "devDependencies": {
+    "@fibjs/ci": "^2.5.2",
     "@fibjs/fs-readdir-recursive": "^1.0.2",
     "@fibjs/mkdirp": "^1.0.1",
     "@fibjs/types": "^0.34.1",
     "ejs": "^3.0.2",
     "lerna": "^5.1.0"
+  },
+  "ci": {
+    "type": "actions",
+    "version": [
+      "0.33.0",
+      "0.34.0"
+    ]
   }
 }

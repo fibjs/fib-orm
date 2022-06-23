@@ -36,7 +36,7 @@
 		"@fxjs/sql-query": ">= 0.6 <= 0.7"
 	},
 	"devDependencies": {
-		"@fibjs/ci": "^2.2.0",
+		"@fibjs/ci": "^2.5.2",
 		"@fibjs/types": "^0.34.1",
 		"@fxjs/db-driver": "^0.1.0",
 		"@fxjs/sql-query": "^0.7.1",
