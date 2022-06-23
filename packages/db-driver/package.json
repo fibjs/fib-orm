@@ -35,7 +35,7 @@
 		"parse-querystring-dotkey": "^1.0.3"
 	},
 	"devDependencies": {
-		"@fibjs/types": "^0.31.0",
+		"@fibjs/types": "^0.34.1",
 		"@fxjs/knex": "^0.3.0",
 		"cross-env": "^5.2.0",
 		"fib-pool": "^1.6.0",

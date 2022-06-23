@@ -233,9 +233,7 @@ export class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriverNS.
     }
 
     switchDb (targetDb: string) {
-        this.execute(
-            db.formatMySQL("use `" + db.escape(targetDb) + "`")
-        );
+        this.execute(`use \`${targetDb}\``);
     }
     
     open (): Class_MySQL { return super.open() }

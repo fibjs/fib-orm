@@ -11,14 +11,12 @@ typify.compileDirectoryTo(
     }
 )
 
-if (util.buildInfo().fibjs >= '0.26.0') {
-    process.run(process.execPath, ['rollup.build.js'])
+require('child_process').run(process.execPath, ['rollup.build.js'])
 
-    process.run(process.execPath, ['rollup.build.js'], {
-        env: {
-            COMPRESS: true
-        }
-    })
-}
+require('child_process').run(process.execPath, ['rollup.build.js'], {
+    env: {
+        COMPRESS: true
+    }
+})
 
     

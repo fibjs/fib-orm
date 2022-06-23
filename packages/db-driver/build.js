@@ -11,13 +11,6 @@ typify.compileDirectoryTo(
     }
 )
 
-if (util.buildInfo().fibjs >= '0.26.0') {
-    process.run(process.execPath, ['rollup.build.js'])
-} else {
-    fs.copy(
-        require.resolve('./lib/index.js'),
-        path.resolve('./lib/index.cjs.js')
-    )
-}
+require('child_process').run(process.execPath, ['rollup.build.js'])
 
     

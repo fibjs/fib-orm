@@ -13,6 +13,7 @@ import type { FxOrmProperty } from "./property";
 import type { FxOrmCommon } from "./_common";
 import { FxDbDriverNS } from "@fxjs/db-driver";
 import type { FxSqlQueryComparator, FxSqlQueryChainBuilder } from '@fxjs/sql-query';
+export type { FxSqlAggregation, FxSqlQueryComparator, FxSqlQueryComparatorFunction, FxSqlQueryDialect, FxSqlQueryColumns, FxSqlQueryHelpler, FxSqlQueryChainBuilder, FxSqlQuery, FxSqlQuerySql, FxSqlQuerySubQuery, } from '@fxjs/sql-query';
 export declare namespace FxOrmNS {
     type Model = FxOrmModel.Model;
     type IChainFind = FxOrmQuery.IChainFind;

@@ -16,7 +16,7 @@
 		"fib-pool": "^1.5.3"
 	},
 	"devDependencies": {
-		"@fibjs/types": "^0.31.0",
+		"@fibjs/types": "^0.34.1",
 		"@fxjs/orm": "^1.12.0",
 		"fib-pool": "^1.6.0",
 		"fib-typify": "^0.8.3"

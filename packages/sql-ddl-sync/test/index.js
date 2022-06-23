@@ -6,7 +6,7 @@ test.setup();
     // [0, { ENTRY: '../dist/index.js',       URI: 'sqlite:test.db' }],
     // [0, { ENTRY: '../dist/index.min.js',   URI: 'sqlite:test.db' }],
 ].forEach(([ep, envs]) => {
-    const result_p = process.run(
+    const result_p = require('child_process').run(
         process.execPath,
         [
             require.resolve('./vbox')
