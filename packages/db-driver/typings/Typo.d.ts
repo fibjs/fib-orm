@@ -2,7 +2,7 @@
 /// <reference types="fib-pool" />
 import { FxOrmCoreCallbackNS } from "@fxjs/orm-core";
 export declare namespace FxDbDriverNS {
-    type DriverType = 'mysql' | 'sqlite' | 'redis' | 'mongodb' | 'unknown';
+    type DriverType = 'mysql' | 'sqlite' | 'redis' | 'psql' | 'mongodb' | 'unknown';
     interface ConnectionInputArgs {
         protocol?: string;
         /**

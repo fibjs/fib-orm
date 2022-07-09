@@ -62,8 +62,6 @@ function escapeVal (val: any, timeZone?: FxSqlQuery.FxSqlQueryTimezone) {
 			val = JSON.stringify(val);
 	}
 
-	// No need to escape backslashes with default PostgreSQL 9.1+ config.
-	// Google 'postgresql standard_conforming_strings' for details.
 	return "'" + val.replace(/\'/g, "''") + "'";
 };
 

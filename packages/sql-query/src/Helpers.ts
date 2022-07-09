@@ -132,7 +132,7 @@ export function defaultTableAliasNameRule (idx: number) {
 	return `t${idx}`
 }
 
-export const DialectTypes: FxSqlQueryDialect.DialectType[] = ['mysql', 'sqlite', 'mssql']
+export const DialectTypes: FxSqlQueryDialect.DialectType[] = ['mysql', 'sqlite', 'mssql', 'postgresql']
 
 export function ucfirst (str: string = '') {
 	if (str.length <= 1)
@@ -160,8 +160,8 @@ export function bufferToString (buffer: Class_Buffer | string, dialect: FxSqlQue
 			return "X'" + buffer.toString('hex')+ "'";
 		case 'sqlite':
 			return "X'" + buffer.toString('hex') + "'";
-		// case 'postgresql':
-		// 	return "'\\x" + buffer.toString('hex') + "'";
+		case 'postgresql':
+			return "'\\x" + buffer.toString('hex') + "'";
 	}
 }
 

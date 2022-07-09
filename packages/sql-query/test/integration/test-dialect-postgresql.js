@@ -3,11 +3,11 @@ test.setup()
 
 var common = require('../common')
 var assert = require('assert')
-// var dialect = common.getDialect('postgresql')
+var dialect = common.getDialect('postgresql')
 var d = new Date(1378322111133)
 var tzOffsetMillis = (d.getTimezoneOffset() * 60 * 1000)
 
-xdescribe('dialect-postgresql', () => {
+describe('dialect-postgresql', () => {
   it('dialect-postgresql', () => {
     assert.equal(
       dialect.escapeId('col'),

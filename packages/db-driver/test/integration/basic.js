@@ -12,6 +12,7 @@ describe("DBDriver", function () {
 
       assert.isFunction(DBDriver.getDriver('mysql'));
       assert.isFunction(DBDriver.getDriver('sqlite'));
+      assert.isFunction(DBDriver.getDriver('postgresql'));
       assert.isFunction(DBDriver.getDriver('redis'));
       assert.isFunction(DBDriver.getDriver('mongodb'));
 
@@ -21,10 +22,11 @@ describe("DBDriver", function () {
 
   describe("#driver", function () {
     [
-      [ 'mysql' , 'mysql://user:@localhost:3306/db'     ],
+      [ 'mysql', 'mysql://user:@localhost:3306/db'     ],
+      [ 'postgresql', 'psql://user:@localhost:5432/db'     ],
       [ 'sqlite', 'sqlite:test.db'                      ],
-      [ 'redis' , 'redis://localhost:6379/db'           ],
-      [ 'mongodb' , 'mongodb://localhost:27017/db'       ],
+      [ 'redis', 'redis://localhost:6379/db'           ],
+      [ 'mongodb', 'mongodb://localhost:27017/db'       ],
     ].forEach(function ([driverType, driverConnString]) {
       describe(`should expose ${driverType} driver`, function () {
         var driver = new (DBDriver.getDriver(driverType))(driverConnString);
@@ -247,6 +249,60 @@ describe("DBDriver", function () {
           "hostname": "localhost",
           "port": 3306,
           "href": "mysql://localhost:3306/test_tb",
+          "pathname": "/test_tb"
+        },
+        (driver) => {
+          assert.deepEqual(driver.extend_config.debug, false)
+          assert.deepEqual(driver.extend_config.pool, false)
+
+          driver.extend_config.pool = true
+
+          assert.deepEqual(driver.extend_config.pool.maxsize, 100)
+          assert.deepEqual(driver.extend_config.pool.timeout, 1000)
+
+          driver.extend_config.pool = null
+          assert.deepEqual(driver.extend_config.pool, false)
+        }
+      ],
+      [
+        '[psql] full connection string',
+        'psql://postgres:123456@localhost:5432/test_tb',
+        {
+          "protocol": "psql:",
+          "slashes": true,
+          "query": {
+          },
+          "database": "test_tb",
+          "username": "postgres",
+          "password": "123456",
+          "host": "localhost:5432",
+          "hostname": "localhost",
+          "port": 5432,
+          "href": "psql://postgres:123456@localhost:5432/test_tb",
+          "pathname": "/test_tb"
+        },
+        (driver) => {
+          assert.deepEqual(driver.extend_config.debug, false)
+          assert.deepEqual(driver.extend_config.pool, false)
+
+          assert.deepEqual(driver.uri, "psql://postgres:123456@localhost:5432/test_tb")
+        }
+      ],
+      [
+        '[psql] change query:pool',
+        'psql://localhost:5432/test_tb',
+        {
+          "protocol": "psql:",
+          "slashes": true,
+          "query": {
+          },
+          "database": "test_tb",
+          "username": null,
+          "password": null,
+          "host": "localhost:5432",
+          "hostname": "localhost",
+          "port": 5432,
+          "href": "psql://localhost:5432/test_tb",
           "pathname": "/test_tb"
         },
         (driver) => {

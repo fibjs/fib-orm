@@ -5,7 +5,7 @@ var common     = require('../common');
 var assert     = require('assert');
 var Helpers = require('../../lib/Helpers');
 
-describe('where-advanced', () => {
+describe('where-advanced - mysql', () => {
 	var rawTimes = [
 		"2019-03-06T00:00:16.000Z",
 		"2019-03-06T00:09:16.000Z",

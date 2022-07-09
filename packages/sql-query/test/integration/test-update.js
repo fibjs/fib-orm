@@ -6,7 +6,7 @@ var assert = require('assert')
 
 describe('update', () => {
   it('update - mysql', () => {
-	const queryOptions = { dialect: 'mysql' };
+	  const queryOptions = { dialect: 'mysql' };
 
     assert.equal(
       common.Update(queryOptions).into('table1').set({ col: 1 }).build(),
@@ -24,8 +24,27 @@ describe('update', () => {
     )
   })
 
+  it('update - postgresql', () => {
+	  const queryOptions = { dialect: 'postgresql' };
+
+    assert.equal(
+      common.Update(queryOptions).into('table1').set({ col: 1 }).build(),
+      'update "table1" set "col" = 1'
+    )
+
+    assert.equal(
+      common.Update(queryOptions).into('table1').set({ col1: 1, col2: 2 }).build(),
+      'update "table1" set "col1" = 1, "col2" = 2'
+    )
+
+    assert.equal(
+      common.Update(queryOptions).into('table1').set({ col1: 1, col2: 2 }).where({ id: 3 }).build(),
+      'update "table1" set "col1" = 1, "col2" = 2 where "id" = 3'
+    )
+  })
+
   it('update - sqlite', () => {
-	const queryOptions = { dialect: 'sqlite' };
+	  const queryOptions = { dialect: 'sqlite' };
 
     assert.equal(
       common.Update(queryOptions).into('table1').set({ col: 1 }).build(),
@@ -44,7 +63,7 @@ describe('update', () => {
   })
 
   xit('update - mssql', () => {
-	const queryOptions = { dialect: 'mssql' };
+	  const queryOptions = { dialect: 'mssql' };
 
     assert.equal(
       common.Update(queryOptions).into('table1').set({ col: 1 }).build(),
