@@ -21,10 +21,32 @@ export function logJson (group: string, detail: any) {
     return json
 }
 
-export function getSqlQueryDialect (type: FxDbDriverNS.DriverType) {
-    const Dialects = require('@fxjs/sql-query/lib/Dialects')
+const sqlQueryDialects = require('@fxjs/sql-query/lib/Dialects') as typeof import('@fxjs/sql-query/typings/Dialects');
+type ISqlQueryDialects = typeof sqlQueryDialects;
 
-	return Dialects[type];
+export function addSqlQueryDialect (type: string, Dialect: any) {
+    (sqlQueryDialects as any)[type] = Dialect;
+}
+
+export function getAllSqlQueryDialects (type: string) {
+    return sqlQueryDialects
+}
+
+export function getSqlQueryDialect (type: FxDbDriverNS.DriverType): ISqlQueryDialects[keyof ISqlQueryDialects] {
+    switch (type) {
+        default:
+            // some times others libs could mount faked dialect to sqlQueryDialects, allow return it
+            return (sqlQueryDialects as any)[type] || null;
+        case 'mongodb':
+        case 'redis':
+            throw new Error('[getSqlQueryDialect] unsupported driver type: ' + type)
+        case 'psql':
+            return sqlQueryDialects['postgresql'];
+        case 'sqlite':
+        case 'mysql':
+        case 'mssql':
+	        return sqlQueryDialects[type];
+    }
 }
 
 export function arraify<T = any> (item: T | T[]): T[] {

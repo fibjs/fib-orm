@@ -27,7 +27,7 @@ export declare namespace FxOrmDMLDriver {
         new (config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase, opts: FxOrmDMLDriver.DMLDriverOptions): DMLDriver;
         prototype: DMLDriver;
     }
-    interface DMLDriver<ConnType = any> {
+    interface DMLDriver<ConnType extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
         readonly db: FxOrmDb.DatabaseBase<ConnType>;
         readonly config: FxOrmDb.DatabaseBase<ConnType>['config'];
         customTypes: {
@@ -41,7 +41,7 @@ export declare namespace FxOrmDMLDriver {
         getQuery: {
             (): FxSqlQuery.Class_Query;
         };
-        readonly ddlDialect: FxOrmSqlDDLSync__Dialect.Dialect;
+        readonly ddlDialect: FxOrmSqlDDLSync__Dialect.Dialect<IDbDriver.ISQLConn>;
         doSync<T = any>(opts?: FxOrmDMLShared.SyncOptions): this;
         doDrop<T = any>(opts?: FxOrmDMLShared.DropOptions): this;
         connect: {
@@ -152,7 +152,7 @@ export declare namespace FxOrmDMLDriver {
         db: FxOrmDb.DatabaseBase_SQLite;
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_SQLITE)[];
     }
-    type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect;
+    type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<IDbDriver.ISQLConn>;
 }
 export declare namespace FxOrmDMLShared {
     interface SyncOptions {

@@ -14,7 +14,6 @@ const DataTypes = {
 	text:  'TEXT'
 };
 
-
 const escape = function (
 	query: FxSqlQuerySql.SqlFragmentStr,
 	args: FxSqlQuerySql.SqlAssignmentValues
@@ -80,7 +79,7 @@ const escapeVal = function (val: any, timeZone?: FxSqlQuery.FxSqlQueryTimezone) 
 };
 
 const Dialect: FxSqlQueryDialect.Dialect = {
-	type: 'mssql',
+	type: 'mssql' as const,
 	DataTypes,
 	escape,
 	escapeId,

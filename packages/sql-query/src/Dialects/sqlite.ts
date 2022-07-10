@@ -4,7 +4,6 @@ import { FxSqlQueryDialect } from "../Typo/Dialect";
 import { FxSqlQuery } from "../Typo/Query";
 import { FxSqlQuerySql } from "../Typo/Sql";
 
-
 const DataTypes = {
 	isSQLITE: true,
 	id:      'INTEGER PRIMARY KEY AUTOINCREMENT',
@@ -66,7 +65,7 @@ function escapeVal (val: any, timeZone?: FxSqlQuery.FxSqlQueryTimezone) {
 };
 
 const Dialect: FxSqlQueryDialect.Dialect = {
-	type: 'sqlite',
+	type: 'sqlite' as const,
 	DataTypes,
 	escape,
 	escapeId,

@@ -61,6 +61,15 @@ function getDriver (name: FxDbDriverNS.DriverType | string) {
 
 export namespace Driver {
     export type IConnTypeEnum = Class_DbConnection | Class_MongoDB | Class_Redis;
+    type IClass_PostgreSQL = Class_DbConnection;
+    type IClass_MSSQL = Class_DbConnection;
+    export type ISQLConn = IClass_PostgreSQL | IClass_MSSQL | Class_SQLite | Class_MySQL;
+
+    export type ITypedDriver<T extends IConnTypeEnum = IConnTypeEnum> =
+        T extends ISQLConn ? SQLDriver<T>
+        : T extends Class_MongoDB ? MongoDriver
+        : T extends Class_Redis ? RedisDriver
+        : Driver<T>
 }
 
 export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnum> {

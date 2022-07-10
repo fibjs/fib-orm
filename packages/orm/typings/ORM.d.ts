@@ -31,7 +31,7 @@ export declare const settings: FxOrmSettings.SettingInstance;
 export import Property = require("./Property");
 export declare function use(connection: FxOrmDb.DatabaseBase, proto: string, opts: FxOrmNS.IUseOptions, cb: (err: Error, db?: FxOrmNS.ORM) => void): any;
 export declare function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): FxOrmNS.ORMLike;
-export declare function connect<T = any>(uri?: string | FxDbDriverNS.DBConnectionConfig, cb?: FxOrmCoreCallbackNS.ExecutionCallback<IDbDriver<T>>): FxOrmNS.ORMLike;
+export declare function connect<T extends IDbDriver.ISQLConn = any>(uri?: string | FxDbDriverNS.DBConnectionConfig, cb?: FxOrmCoreCallbackNS.ExecutionCallback<IDbDriver<T>>): FxOrmNS.ORMLike;
 export declare const ORM: FxOrmNS.ORMConstructor;
 export declare const ErrorCodes: FxOrmError.PredefineErrorCodes;
 export declare const addAdapter: (name: string, constructor: FxOrmDMLDriver.DMLDriverConstructor) => void;

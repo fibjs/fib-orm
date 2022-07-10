@@ -5,7 +5,7 @@ export namespace FxOrmSqlDDLSync {
     export type TableName = string
     export type ColumnName = string
 
-    export interface SyncOptions<ConnType = any> {
+    export interface SyncOptions<ConnType extends IDbDriver.IConnTypeEnum = IDbDriver.IConnTypeEnum> {
         dbdriver: IDbDriver<ConnType>
         debug?: Function | false
         /**

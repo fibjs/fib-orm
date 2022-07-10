@@ -6,6 +6,7 @@ require('./integration/sql')
 
 require('./integration/dialect-mysql')
 require('./integration/dialect-sqlite')
+require('./integration/dialect-postgresql')
 
 if (process.env.URI)
     require('./run-db')

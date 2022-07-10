@@ -5,12 +5,12 @@ import { FxOrmSqlDDLSync__DbIndex } from "./DbIndex";
 import { IDbDriver } from "@fxjs/db-driver";
 
 export namespace FxOrmSqlDDLSync__Driver {
-    export interface CustomPropertyType<ConnType = any> {
+    export interface CustomPropertyType<T extends IDbDriver.IConnTypeEnum = IDbDriver.IConnTypeEnum> {
         datastoreType(
             prop?: FxOrmSqlDDLSync__Column.Property,
             opts?: {
                 collection: string
-                driver: IDbDriver<ConnType>
+                driver: IDbDriver<T>
             }
         ): string
         valueToProperty?(value?: any, prop?: any): any
@@ -19,13 +19,13 @@ export namespace FxOrmSqlDDLSync__Driver {
         [ext_cfg_name: string]: any
     }
 
-    export interface CustomPropertyTypeHash {
-        [key: string]: CustomPropertyType
+    export interface CustomPropertyTypeHash<T extends IDbDriver.IConnTypeEnum> {
+        [key: string]: CustomPropertyType<T>
     }
     /**
      * @description one protocol driver should implement
      */    
-    export interface Driver<ConnType = any> extends IDbDriver<ConnType> {
+    export interface Driver<T extends IDbDriver.IConnTypeEnum> extends IDbDriver<T> {
         dialect: FxOrmSqlDDLSync__Dialect.DialectType
 
         /**
@@ -45,7 +45,7 @@ export namespace FxOrmSqlDDLSync__Driver {
         }
 
         customTypes?: {
-            [type_name: string]: CustomPropertyType
+            [type_name: string]: CustomPropertyType<T>
         }
     }
 
@@ -54,6 +54,13 @@ export namespace FxOrmSqlDDLSync__Driver {
         column_name: string
 
         non_unique: number|boolean
+    }
+
+    export interface DbIndexInfo_PostgreSQL extends FxOrmSqlDDLSync__DbIndex.DbIndexInfo {
+        indisprimary: boolean
+        indisunique: boolean
+        relname: string
+        attname: string
     }
 
     export interface DbIndexInfo_SQLite extends FxOrmSqlDDLSync__DbIndex.DbIndexInfo {

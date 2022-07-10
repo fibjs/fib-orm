@@ -108,7 +108,7 @@ function arrayToList(array: any[], timeZone?: FxSqlQuery.FxSqlQueryTimezone): st
 }
 
 const Dialect: FxSqlQueryDialect.Dialect = {
-	type: 'mysql',
+	type: 'mysql' as const,
 	DataTypes,
 	escape,
 	escapeId,

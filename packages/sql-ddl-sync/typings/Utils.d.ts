@@ -4,7 +4,11 @@ import { FxDbDriverNS } from "@fxjs/db-driver/typings/Typo";
 import { FxOrmSqlDDLSync__Collection } from "./Typo/Collection";
 import { IDbDriver } from "@fxjs/db-driver";
 export declare function logJson(group: string, detail: any): string;
-export declare function getSqlQueryDialect(type: FxDbDriverNS.DriverType): any;
+declare const sqlQueryDialects: typeof import("@fxjs/sql-query/typings/Dialects");
+declare type ISqlQueryDialects = typeof sqlQueryDialects;
+export declare function addSqlQueryDialect(type: string, Dialect: any): void;
+export declare function getAllSqlQueryDialects(type: string): typeof import("@fxjs/sql-query/typings/Dialects");
+export declare function getSqlQueryDialect(type: FxDbDriverNS.DriverType): ISqlQueryDialects[keyof ISqlQueryDialects];
 export declare function arraify<T = any>(item: T | T[]): T[];
 export declare function getCollectionMapsTo_PropertyNameDict(collection: FxOrmSqlDDLSync__Collection.Collection): {
     [k: string]: string;
@@ -16,3 +20,4 @@ export declare function filterPropertyDefaultValue(property: FxOrmSqlDDLSync__Co
 }): any;
 export declare function filterSyncStrategy(strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy']): "soft" | "hard" | "mixed";
 export declare function filterSuppressColumnDrop(suppressColumnDrop: boolean, db_type: FxDbDriverNS.DriverType): boolean;
+export {};

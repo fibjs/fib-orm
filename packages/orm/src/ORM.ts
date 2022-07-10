@@ -149,7 +149,7 @@ export function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): Fx
 	return orm;
 }
 
-export function connect <T = any> (
+export function connect <T extends IDbDriver.ISQLConn = any> (
 	uri?: string | FxDbDriverNS.DBConnectionConfig,
 	cb?: FxOrmCoreCallbackNS.ExecutionCallback<IDbDriver<T>>
 ): FxOrmNS.ORMLike {

@@ -7,8 +7,8 @@ import { FxOrmSqlDDLSync } from "./Typo/_common";
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 import "./Dialects";
 import { IDbDriver } from "@fxjs/db-driver";
-export declare function dialect(name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDDLSync__Dialect.Dialect;
-export declare class Sync<ConnType = any> {
+export declare function dialect(name: FxOrmSqlDDLSync__Dialect.DialectType | 'psql'): typeof import("./Dialects/mysql") | typeof import("./Dialects/sqlite");
+export declare class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
     strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy'];
     /**
      * @description total changes count in this time `Sync`
@@ -16,19 +16,19 @@ export declare class Sync<ConnType = any> {
      */
     total_changes: number;
     readonly collections: FxOrmSqlDDLSync__Collection.Collection[];
-    readonly dbdriver: IDbDriver<ConnType>;
-    readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect;
+    readonly dbdriver: IDbDriver.ITypedDriver<T>;
+    readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect<T>;
     /**
      * @description customTypes
      */
-    readonly types: FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash;
+    readonly types: FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash<T>;
     private suppressColumnDrop;
     private debug;
-    constructor(options: FxOrmSqlDDLSync.SyncOptions<ConnType>);
+    constructor(options: FxOrmSqlDDLSync.SyncOptions<T>);
     [sync_method: string]: any;
     defineCollection(collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties']): this;
     findCollection(collection_name: string): FxOrmSqlDDLSync__Collection.Collection;
-    defineType(type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType): this;
+    defineType(type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType<T>): this;
     /**
      * @description
      *  create collection in db if it doesn't exist, then sync all columns for it.

@@ -14,13 +14,20 @@ import { IDbDriver } from "@fxjs/db-driver";
 
 const noOp = () => {};
 
-export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDDLSync__Dialect.Dialect {
-	const Dialects = require('./Dialects')
+export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType | 'psql') {
+	const Dialects = require('./Dialects') as typeof import('./Dialects');
 
-	if (!Dialects[name])
-		throw new Error(`no dialect with name '${name}'`)
-		
-	return Dialects[name];
+	switch (name) {
+		case 'psql':
+		case 'postgresql':
+			return Dialects['postgresql'];
+		case 'sqlite':
+		case 'mssql':
+		case 'mysql':
+			return Dialects[name];
+		default:
+			throw new Error(`no dialect with name '${name}'`)
+		}
 }
 
 /**
@@ -29,7 +36,7 @@ export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDD
  * @param collection 
  * @param force_sync (dangerous) if force re-syncing property to column
  */
-function processCollection (
+function processCollection(
 	syncInstnace: Sync,
 	collection: FxOrmSqlDDLSync__Collection.Collection,
 	opts?: {
@@ -83,7 +90,7 @@ function getIndexName (
 }
 
 /**
- * @param collection table where column created
+ * @param collection_name table where column created
  * @param prop column's property
  */
 function getColumnTypeRaw (
@@ -121,7 +128,7 @@ function getColumnTypeRaw (
 	};
 }
 
-export class Sync<ConnType = any> {
+export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 	strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy'] = 'soft'
 	/**
 	 * @description total changes count in this time `Sync`
@@ -131,17 +138,17 @@ export class Sync<ConnType = any> {
 	
 	readonly collections: FxOrmSqlDDLSync__Collection.Collection[]
 
-	readonly dbdriver: IDbDriver<ConnType>
-	readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect
+	readonly dbdriver: IDbDriver.ITypedDriver<T>
+	readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect<T>
 	/**
 	 * @description customTypes
 	 */
-	readonly types: FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash
+	readonly types: FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash<T>
 
 	private suppressColumnDrop: boolean
 	private debug: Exclude<FxOrmSqlDDLSync.SyncOptions['debug'], false>
 
-	constructor (options: FxOrmSqlDDLSync.SyncOptions<ConnType>) {
+	constructor (options: FxOrmSqlDDLSync.SyncOptions<T>) {
 		const dbdriver = options.dbdriver
 
 		this.suppressColumnDrop = filterSuppressColumnDrop(options.suppressColumnDrop !== false, dbdriver.type)
@@ -174,7 +181,7 @@ export class Sync<ConnType = any> {
 		return this.collections.find(collection => collection.name === collection_name) || null
 	}
 
-	defineType (type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType): this {
+	defineType (type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType<T>): this {
 		this.types[type] = proto;
 		return this;
 	}

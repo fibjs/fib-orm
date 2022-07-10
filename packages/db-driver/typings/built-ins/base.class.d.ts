@@ -7,7 +7,12 @@ declare function getDriver(name: 'psql' | 'postgresql' | 'pg'): typeof MySQLDriv
 declare function getDriver(name: 'sqlite'): typeof SQLiteDriver;
 declare function getDriver(name: 'redis'): typeof RedisDriver;
 export declare namespace Driver {
-    type IConnTypeEnum = Class_DbConnection | Class_MongoDB | Class_Redis;
+    export type IConnTypeEnum = Class_DbConnection | Class_MongoDB | Class_Redis;
+    type IClass_PostgreSQL = Class_DbConnection;
+    type IClass_MSSQL = Class_DbConnection;
+    export type ISQLConn = IClass_PostgreSQL | IClass_MSSQL | Class_SQLite | Class_MySQL;
+    export type ITypedDriver<T extends IConnTypeEnum = IConnTypeEnum> = T extends ISQLConn ? SQLDriver<T> : T extends Class_MongoDB ? MongoDriver : T extends Class_Redis ? RedisDriver : Driver<T>;
+    export {};
 }
 export declare class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnum> {
     static getDriver: typeof getDriver;

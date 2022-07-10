@@ -8,7 +8,7 @@ export namespace FxOrmDb {
         pool: FxDbDriverNS.ConnectionPoolOptions
     }
 
-    export interface DatabaseBase<ConnType = any> extends IDbDriver<ConnType> {
+    export interface DatabaseBase<T extends IDbDriver.IConnTypeEnum = IDbDriver.IConnTypeEnum> extends IDbDriver<T> {
         eventor: Class_EventEmitter
 
         query: {
@@ -16,8 +16,8 @@ export namespace FxOrmDb {
         }
         
         connect: {
-            (cb?: FxOrmCommon.GenericCallback<ConnType>): void
-            (): ConnType
+            (cb?: FxOrmCommon.GenericCallback<T>): void
+            (): T
         }
     }
 
@@ -31,7 +31,7 @@ export namespace FxOrmDb {
     // interface DatabaseBase_MySQL extends DatabaseBase<Class_MySQL> {}
 
     // not supported now.
-    export interface DatabaseBase_PostgreSQL extends DatabaseBase {
+    export interface DatabaseBase_PostgreSQL extends DatabaseBase<IDbDriver.ISQLConn> {
     }
 
     // common

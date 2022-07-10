@@ -3,7 +3,7 @@ import { FxOrmSqlDDLSync__Column } from "./Column";
 export declare namespace FxOrmSqlDDLSync {
     type TableName = string;
     type ColumnName = string;
-    interface SyncOptions<ConnType = any> {
+    interface SyncOptions<ConnType extends IDbDriver.IConnTypeEnum = IDbDriver.IConnTypeEnum> {
         dbdriver: IDbDriver<ConnType>;
         debug?: Function | false;
         /**

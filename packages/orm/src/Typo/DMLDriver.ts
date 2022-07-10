@@ -43,7 +43,7 @@ export namespace FxOrmDMLDriver {
         prototype: DMLDriver
     }
 
-    export interface DMLDriver<ConnType = any> {
+    export interface DMLDriver<ConnType extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
         readonly db: FxOrmDb.DatabaseBase<ConnType>
         readonly config: FxOrmDb.DatabaseBase<ConnType>['config']
 
@@ -59,7 +59,7 @@ export namespace FxOrmDMLDriver {
             (): FxSqlQuery.Class_Query
         }
         
-        readonly ddlDialect: FxOrmSqlDDLSync__Dialect.Dialect
+        readonly ddlDialect: FxOrmSqlDDLSync__Dialect.Dialect<IDbDriver.ISQLConn>
 
         /* shared :start */
         doSync <T = any>(opts?: FxOrmDMLShared.SyncOptions): this
@@ -195,7 +195,7 @@ export namespace FxOrmDMLDriver {
 
     /* ============================= typed db :end   ============================= */
     // type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<FxSqlQuery.Class_Query>
-    export type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect
+    export type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<IDbDriver.ISQLConn>
 }
 
 export namespace FxOrmDMLShared {

@@ -4,22 +4,22 @@ import { FxOrmSqlDDLSync__Dialect } from "./Dialect";
 import { FxOrmSqlDDLSync__DbIndex } from "./DbIndex";
 import { IDbDriver } from "@fxjs/db-driver";
 export declare namespace FxOrmSqlDDLSync__Driver {
-    interface CustomPropertyType<ConnType = any> {
+    interface CustomPropertyType<T extends IDbDriver.IConnTypeEnum = IDbDriver.IConnTypeEnum> {
         datastoreType(prop?: FxOrmSqlDDLSync__Column.Property, opts?: {
             collection: string;
-            driver: IDbDriver<ConnType>;
+            driver: IDbDriver<T>;
         }): string;
         valueToProperty?(value?: any, prop?: any): any;
         propertyToValue?(value?: any, prop?: any): any;
         [ext_cfg_name: string]: any;
     }
-    interface CustomPropertyTypeHash {
-        [key: string]: CustomPropertyType;
+    interface CustomPropertyTypeHash<T extends IDbDriver.IConnTypeEnum> {
+        [key: string]: CustomPropertyType<T>;
     }
     /**
      * @description one protocol driver should implement
      */
-    interface Driver<ConnType = any> extends IDbDriver<ConnType> {
+    interface Driver<T extends IDbDriver.IConnTypeEnum> extends IDbDriver<T> {
         dialect: FxOrmSqlDDLSync__Dialect.DialectType;
         /**
          * @description sync table/collection
@@ -36,13 +36,19 @@ export declare namespace FxOrmSqlDDLSync__Driver {
             <T = any>(cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void;
         };
         customTypes?: {
-            [type_name: string]: CustomPropertyType;
+            [type_name: string]: CustomPropertyType<T>;
         };
     }
     interface DbIndexInfo_MySQL extends FxOrmSqlDDLSync__DbIndex.DbIndexInfo {
         index_name: string;
         column_name: string;
         non_unique: number | boolean;
+    }
+    interface DbIndexInfo_PostgreSQL extends FxOrmSqlDDLSync__DbIndex.DbIndexInfo {
+        indisprimary: boolean;
+        indisunique: boolean;
+        relname: string;
+        attname: string;
     }
     interface DbIndexInfo_SQLite extends FxOrmSqlDDLSync__DbIndex.DbIndexInfo {
         unique: boolean;

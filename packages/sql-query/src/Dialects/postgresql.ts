@@ -13,8 +13,6 @@ const DataTypes = {
 	text:  'TEXT'
 };
 
-const type = 'postgresql'
-
 const escape = function (
 	query: FxSqlQuerySql.SqlFragmentStr,
 	args: FxSqlQuerySql.SqlAssignmentValues
@@ -57,7 +55,7 @@ const escapeVal = function (val: any, timeZone?: FxSqlQuery.FxSqlQueryTimezone):
 	}
 
 	if (Buffer.isBuffer(val)) {
-		return helpers.bufferToString( val, 'postgresql');
+		return helpers.bufferToString(val, 'postgresql');
 	}
 
 	switch (typeof val) {
@@ -86,7 +84,7 @@ const escapeVal = function (val: any, timeZone?: FxSqlQuery.FxSqlQueryTimezone):
 const defaultValuesStmt = "DEFAULT VALUES";
 
 const Dialect: FxSqlQueryDialect.Dialect = {
-	type: 'postgresql',
+	type: 'postgresql' as const,
 	DataTypes,
 	escape,
 	escapeId,

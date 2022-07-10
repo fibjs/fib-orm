@@ -27,6 +27,9 @@ export declare namespace FxOrmSqlDDLSync__Column {
         values?: any[];
         [ext_k: string]: any;
     }
+    /**
+     * @deprecated use Record<string, FxOrmSqlDDLSync__Column.Property> instead
+     */
     interface PropertyHash {
         [col: string]: FxOrmSqlDDLSync__Column.Property;
     }
