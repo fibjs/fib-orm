@@ -4,6 +4,7 @@ var test = require("test");
 test.setup();
 
 function t() {
+    run('./integration/orm-test-prepare.js')
     run('./integration/orm-exports.js');
 
     run('./integration/association-extend.js');

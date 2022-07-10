@@ -8,7 +8,8 @@
 // make test
 
 exports.mysql = {
-  protocol : "mysql://",
+  protocol : "mysql:",
+  host      : "localhost",
   user     : "root",
   port     : 3306,
   password : "",
@@ -20,19 +21,21 @@ exports.mysql = {
 if (Boolean(process.env.FX_ORM_TEST_DEBUG))
   exports.mysql.query.debug = true;
 exports.postgres = {
-  protocol : "postgres://",
+  protocol : "postgres:",
+  host      : "localhost",
   user     : "root",
   password : "",
   database : "fxjs-orm-test"
 };
 exports.redshift = {
-  protocol  : "redshift://",
+  protocol  : "redshift:",
+  host      : "localhost",
   user      : "root",
   password  : "",
   database  : "fxjs-orm-test"
 };
 exports.mongodb = {
-  protocol  : "mongodb://",
+  protocol  : "mongodb:",
   host      : "localhost",
   database  : "fxjs-orm-test"
 };

@@ -7,6 +7,10 @@ var ORM         = require('../');
 
 common.ORM = ORM;
 
+/**
+ * 
+ * @returns {'mysql' | 'sqlite' | 'postgresql'}
+ */
 common.protocol = function () {
   return (process.env.ORM_PROTOCOL || '').toLocaleLowerCase();
 };
@@ -33,6 +37,10 @@ common.hasConfig = function (proto) {
   return (config.hasOwnProperty(proto) ? 'found' : 'not-defined');
 };
 
+/**
+ * @typedef {import('./config.ci')} ITestConfig
+ * @returns {ITestConfig[keyof ITestConfig]}
+ */
 common.getConfig = function () {
   if (common.isTravis()) {
     var config = require("./config.ci")[this.protocol()];
@@ -84,13 +92,14 @@ common.getConnectionString = function (opts) {
     case 'mongodb':
       if (common.isTravis()) {
         if (protocol == 'redshift') protocol = 'postgres';
-        return util.format("%s://%s@%s/%s?%s",
-          protocol, config.user, config.host, config.database, query
+        return util.format("%s://%s@%s%s/%s?%s",
+          protocol, config.user, config.host,
+          config.port ? `:${config.port}` : '', config.database, query
         );
       } else {
-        return util.format("%s://%s:%s@%s/%s?%s",
+        return util.format("%s://%s:%s@%s%s/%s?%s",
           protocol, config.user, config.password,
-          config.host, config.database, query
+          config.host, config.port ? `:${config.port}` : '', config.database, query
         ).replace(':@','@');
       }
     case 'sqlite':

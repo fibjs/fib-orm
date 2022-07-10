@@ -2,6 +2,7 @@ var _ = require('lodash')
 var helper = require('../support/spec_helper')
 var common = require('../common')
 var ORM = require('../../')
+const { lowerCaseColumn } = require('../support/_helpers')
 var protocol = common.protocol()
 
 describe('Model.get() - callback', function () {
@@ -67,6 +68,9 @@ describe('Model.get() - callback', function () {
       db.driver.execQuery(sql, [Person.table], function (err, data) {
         assert.notExist(err)
 
+        if (protocol === 'mysql') { // support mysql 8.0+
+          data = data.map(col => lowerCaseColumn(col));
+        }
         var names = _.map(data, protocol == 'sqlite' ? 'name' : 'column_name')
 
         assert.equal(typeof Person.properties.name, 'object')

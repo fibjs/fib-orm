@@ -6,6 +6,7 @@ var helper = require('../support/spec_helper');
 var common = require('../common');
 var ORM = require('../../');
 var coroutine = require('coroutine');
+const { lowerCaseColumn } = require("../support/_helpers");
 
 describe("Model.get()", function () {
     var db = null;
@@ -63,6 +64,9 @@ describe("Model.get()", function () {
             }
 
             var data = db.driver.execQuerySync(sql, [Person.table, db.driver.config.database]);
+            if (protocol === 'mysql') { // support mysql 8.0+
+                data = data.map(col => lowerCaseColumn(col));
+            }
             var names = _.map(data, protocol == 'sqlite' ? 'name' : 'column_name')
 
             assert.equal(typeof Person.properties.name, 'object');
