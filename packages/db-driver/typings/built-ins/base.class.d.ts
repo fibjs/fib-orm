@@ -17,6 +17,11 @@ export declare namespace Driver {
 export declare class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnum> {
     static getDriver: typeof getDriver;
     static create(input: FxDbDriverNS.ConnectionInputArgs | string): MySQLDriver;
+    /**
+     * @descritpin there's a bug in fibjs <= 0.35.x, only string type `field` would be
+     * used by `url.format`
+     */
+    static formatUrl(input: FxDbDriverNS.ConnectionInputArgs): string;
     uid: string;
     get uri(): string;
     config: FxDbDriverNS.DBConnectionConfig;

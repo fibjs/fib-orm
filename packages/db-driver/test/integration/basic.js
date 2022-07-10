@@ -4,6 +4,38 @@ test.setup()
 var DBDriver   = require("../..").Driver;
 
 describe("DBDriver", function () {
+  describe("helpers", function () {
+    it('#formatUrl', () => {
+      var configs = [
+        {
+          protocol : "mysql:",
+          hostname : "localhost",
+          username : "root",
+          port     : 3306,
+          password : "",
+          pathname : "/mydb",
+          slashes: true
+        },
+        {
+          protocol : "mysql://",
+          hostname : "localhost",
+          username : "root",
+          port     : 3306,
+          password : "",
+          pathname : "/mydb",
+          slashes: true
+        }
+      ];
+
+      configs.forEach((config) => {
+        assert.equal(
+          DBDriver.formatUrl(config),
+          "mysql://root@localhost:3306/mydb"
+        )
+      });
+    })
+  });
+
   describe("exports", function () {
     it("should expose Driver Class", function () {
       assert.exist(DBDriver)

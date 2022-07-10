@@ -82,10 +82,28 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
 
 		return new driver(input);
 	}
+
+    /**
+     * @descritpin there's a bug in fibjs <= 0.35.x, only string type `field` would be
+     * used by `url.format`
+     */
+    static formatUrl (input: FxDbDriverNS.ConnectionInputArgs) {
+        let protocol = input.protocol;
+        // some user would like add // after valid protocol like `http:`, `mysql:`
+        if (protocol?.endsWith('//')) protocol = protocol.slice(0, -2)
+
+        return url.format({
+            ...input,
+            protocol,
+            // there's a bug in fibjs <= 0.35.x, only string type `field` would be
+            // used by `url.format`
+            ...!!input.port && { port: input.port + '' }
+        })
+    }
 	
 	uid: string;
     get uri () {        
-        return url.format({
+        return Driver.formatUrl({
             ...this.config,
             slashes: this.config.protocol === 'sqlite:' ? false : this.config.slashes,
             query: this.config.protocol === 'sqlite:' ? {} : this.config.query
@@ -139,7 +157,14 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
 		assert.ok(!!this.config.protocol, '[driver.config] invalid protocol')
 		
 		// some db has no host
-		// assert.ok(!!this.config.host, '[driver.config] invalid host')
+        switch (options.protocol) {
+            default: break;
+            case 'mysql:':
+            case 'mssql:':
+            case 'postgresql:':
+		        assert.ok(!!this.config.host || !!this.config.hostname, '[driver.config] host or hostname required')
+                break;
+        } 
 
 		this.type = Utils.filterDriverType(this.config.protocol);
 
