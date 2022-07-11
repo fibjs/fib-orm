@@ -15,11 +15,11 @@ export declare namespace FxOrmSqlDDLSync__Column {
         unsigned?: boolean;
         primary?: boolean;
         required?: boolean;
-        defaultValue?: (opts?: {
+        defaultValue?: ((opts?: {
             collection: string;
             property: Property;
             driver: IDbDriver;
-        }) => any | any;
+        }) => any) | any;
         size?: number | string;
         rational?: boolean;
         time?: boolean;
@@ -65,9 +65,11 @@ export declare namespace FxOrmSqlDDLSync__Column {
     type PropertyType_SQLite = PropertyType;
     type ColumnType_SQLite = __StringType<'TEXT' | 'INTEGER' | 'REAL' | 'SERIAL' | 'INTEGER UNSIGNED' | 'DATE' | 'DATETIME' | 'BLOB' | 'ENUM' | 'POINT'>;
     interface PropertySQLite extends Property {
-        key: boolean;
+        key?: boolean;
         type: PropertyType_SQLite;
         before?: string;
         after?: string;
     }
+    type PropertyType_PostgreSQL = PropertyType;
+    type ColumnType_PostgreSQL = __StringType<PropertyType_PostgreSQL>;
 }

@@ -18,6 +18,7 @@ export declare class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
     readonly collections: FxOrmSqlDDLSync__Collection.Collection[];
     readonly dbdriver: IDbDriver.ITypedDriver<T>;
     readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect<T>;
+    readonly transformers: FxOrmSqlDDLSync.Transformers<T>;
     /**
      * @description customTypes
      */

@@ -1,5 +1,6 @@
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
+import { columnInfo2Property, property2ColumnType } from "../Transformers/sqlite";
 import { FxOrmSqlDDLSync__Column } from "../Typo/Column";
 import { FxOrmSqlDDLSync__Dialect } from "../Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "../Typo/Driver";
@@ -137,81 +138,12 @@ export const getCollectionPropertiesSync: IDialect['getCollectionPropertiesSync'
 ) {
 	const cols = getCollectionColumnsSync(dbdriver, name)
 
-	let columns = <{ [col: string]: FxOrmSqlDDLSync__Column.PropertySQLite }>{}, m;
+	let columns = <{ [col: string]: FxOrmSqlDDLSync__Column.PropertySQLite }>{};
 
 	for (let i = 0; i < cols.length; i++) {
-		const column = <FxOrmSqlDDLSync__Column.PropertySQLite>{};
 		const dCol = cols[i];
 
-		if (dCol.pk) {
-			column.key = true;
-		}
-
-		if (dCol.notnull) {
-			column.required = true;
-		}
-		if (dCol.dflt_value) {
-			m = dCol.dflt_value.match(/^'(.*)'$/);
-			if (m) {
-				column.defaultValue = m[1];
-			} else {
-				column.defaultValue = null;
-			}
-		}
-		
-		const TYPE_UPPER = dCol.type.toUpperCase()
-
-		switch (TYPE_UPPER) {
-			case "INTEGER":
-				// In sqlite land, integer primary keys are autoincrement by default
-				// weather you asked for this behaviour or not.
-				// http://www.sqlite.org/faq.html#q1
-				if (dCol.pk == 1) {
-					column.type = "serial";
-				} else {
-					column.type = "integer";
-				}
-				break;
-			case "INTEGER UNSIGNED":
-				column.type = "boolean";
-				break;
-			case "REAL":
-				column.type = "number";
-				column.rational = true;
-				break;
-			case "DATETIME":
-				column.type = "date";
-				column.time = true;
-				break;
-			case "BLOB":
-				column.type = "binary";
-				column.big = true;
-				break;
-			case "TEXT":
-				column.type = "text";
-				break;
-			case "POINT":
-				column.type = "point";
-				break;
-			default:
-				let [_, type, _before, field] = dCol.type.toUpperCase().match(/(.*)\s(AFTER|BEFORE)\s`(.*)`$/) || [] as any[]
-
-				if (_) {
-					switch (_before && field) {
-						case 'BEFORE':
-							column.before = field
-						case 'AFTER':
-							column.after = field
-							break
-					}
-					column.type = type;
-					break;
-				}
-
-				throw new Error(`Unknown column type '${dCol.type}'`);
-		}
-
-		columns[dCol.name] = column;
+		columns[dCol.name] = columnInfo2Property(dCol);
 	}
 
 	return columns;
@@ -456,81 +388,28 @@ export const supportsType: IDialect['supportsType'] = function (type) {
 };
 
 export const getType: IDialect['getType'] = function (
-	collection, property: FxOrmSqlDDLSync__Column.PropertySQLite, driver, opts
+	collection, property, driver, opts
 ) {
 	const { for: _for = 'create_table' } = opts || {}
 
 	let type: false | FxOrmSqlDDLSync__Column.ColumnType_SQLite = false;
 	let customType = null;
 
-	if (property.type == 'number' && property.rational === false) {
-		property.type = 'integer';
-		delete property.rational;
-	}
+	const result = property2ColumnType(property);
+	type = result.value;
+	property = result.property;
 
-	switch (property.type) {
-		case "text":
-			type = "TEXT";
-			break;
-		case "integer":
-			type = "INTEGER";
-			break;
-		case "number":
-			type = "REAL";
-			break;
-		case "serial":
-			property.serial = true;
-			property.key = true;
-			type = "INTEGER";
-			break;
-		case "boolean":
-			type = "INTEGER UNSIGNED";
-			break;
-		case "datetime":
-			property.type = "date";
-			property.time = true;
-		case "date":
-			type = "DATETIME";
-			break;
-		case "binary":
-		case "object":
-			type = "BLOB";
-			break;
-		case "enum":
-			type = "INTEGER";
-			break;
-		case "point":
-			type = "POINT";
-			break;
-		default:
-			if (
-				driver.customTypes && 
-				(customType = driver.customTypes[property.type])
-			) {
-				type = customType.datastoreType(property, { collection, driver })
-			}
+	if (result.isCustomType) {
+		if (
+			driver.customTypes && 
+			(customType = driver.customTypes[property.type])
+		) {
+			type = customType.datastoreType(property, { collection, driver })
+		}
 	}
 
 	if (!type) return false;
 
-	if (property.required) {
-		type += " NOT NULL";
-	}
-	if (property.key) {
-		if (!property.required) {
-			// append if not set
-			type += " NOT NULL";
-		}
-		if (property.serial) {
-			type += " PRIMARY KEY";
-		}
-	}
-	if (property.serial) {
-		if (!property.key) {
-			type += " PRIMARY KEY";
-		}
-		type += " AUTOINCREMENT";
-	}
 	if (property.hasOwnProperty("defaultValue") && property.defaultValue !== undefined) {
 		const defaultValue = filterPropertyDefaultValue(property, {
 			collection,
@@ -540,7 +419,6 @@ export const getType: IDialect['getType'] = function (
 
 		let defaultV = ''
 
-		// if (!['alter_table', 'add_column', 'alter_column'].includes(_for)) {
 		if (['create_table'].includes(_for)) {
 			defaultV = getSqlQueryDialect(driver.type).escapeVal(defaultValue)
 		}

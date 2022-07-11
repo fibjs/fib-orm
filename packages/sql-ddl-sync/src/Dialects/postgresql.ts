@@ -7,20 +7,13 @@
 import { IDbDriver } from "@fxjs/db-driver";
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
+import { columnInfo2Property, property2ColumnType } from "../Transformers/postgresql";
 import { FxOrmSqlDDLSync__Column } from "../Typo/Column";
-import { FxOrmSqlDDLSync__DbIndex } from "../Typo/DbIndex";
 import { FxOrmSqlDDLSync__Dialect } from "../Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "../Typo/Driver";
 import { getSqlQueryDialect, arraify, filterPropertyDefaultValue } from '../Utils';
 
 type IDialect = FxOrmSqlDDLSync__Dialect.Dialect<Class_DbConnection>;
-
-// one fifo process queue, pointless now, just write synchronously
-let Queue: any       = null;
-const columnSizes = {
-	integer:  { 2: 'SMALLINT', 4: 'INTEGER', 8: 'BIGINT' }  as {[k: string]: string},
-	floating: {                4: 'REAL',    8: 'DOUBLE PRECISION' }  as {[k: string]: string}
-};
 
 export const hasCollectionSync: IDialect['hasCollectionSync'] = function (dbdriver, name) {
 	const rows = dbdriver.execute<any[]>(
@@ -43,88 +36,14 @@ export const hasCollection: IDialect['hasCollection'] = function (
 };
 
 export const getCollectionPropertiesSync: IDialect['getCollectionPropertiesSync'] = function (dbdriver, name) {
-	const cols = dbdriver.execute<any[]>(
-		getSqlQueryDialect('psql').escape(
-			"SELECT * FROM information_schema.columns WHERE table_name = ?", [ name ]
-		)
-	);
+	const cols = getCollectionColumnsSync(dbdriver, name);
 
 	let columns = <Record<string, FxOrmSqlDDLSync__Column.Property>>{}, m;
 
 	for (let i = 0; i < cols.length; i++) {
-		let column = <FxOrmSqlDDLSync__Column.Property>{};
-		let dCol = cols[i];
+		const dCol = cols[i];
 
-		if (dCol.is_nullable.toUpperCase() == "NO") {
-			column.required = true;
-		}
-		if (dCol.column_default !== null) {
-			m = dCol.column_default.match(/^'(.+)'::/);
-			if (m) {
-				column.defaultValue = m[1];
-			} else {
-				column.defaultValue = dCol.column_default;
-			}
-		}
-
-		switch (dCol.data_type.toUpperCase()) {
-			case "SMALLINT":
-			case "INTEGER":
-			case "BIGINT":
-				if (typeof dCol.column_default == 'string' && dCol.column_default.indexOf('nextval(') == 0) {
-					column.type = "serial";
-				} else {
-					column.type = "integer";
-				}
-				for (let k in columnSizes.integer) {
-					if (columnSizes.integer[k] == dCol.data_type.toUpperCase()) {
-						column.size = k;
-						break;
-					}
-				}
-				break;
-			case "REAL":
-			case "DOUBLE PRECISION":
-				column.type = "number";
-				column.rational = true;
-				for (var k in columnSizes.floating) {
-					if (columnSizes.floating[k] == dCol.data_type.toUpperCase()) {
-						column.size = k;
-						break;
-					}
-				}
-				break;
-			case "BOOLEAN":
-				column.type = "boolean";
-				break;
-			case "TIMESTAMP WITHOUT TIME ZONE":
-				column.time = true;
-			case "DATE":
-				column.type = "date";
-				break;
-			case "BYTEA":
-				column.type = "binary";
-				break;
-			case "TEXT":
-				column.type = "text";
-				break;
-			case "CHARACTER VARYING":
-				column.type = "text";
-				if (dCol.character_maximum_length) {
-					column.size = dCol.character_maximum_length;
-				}
-				break;
-			case "USER-DEFINED":
-				if (dCol.udt_name.match(/_enum_/)) {
-					column.type = "enum";
-					column.values = [];
-					break;
-				}
-			default:
-				throw new Error("Unknown column type '" + dCol.data_type + "'");
-		}
-
-		columns[dCol.column_name] = column;
+		columns[dCol.column_name] = columnInfo2Property(dCol);
 	}
 
 	return checkColumnTypes(dbdriver, name, columns);
@@ -255,7 +174,7 @@ export const getCollectionColumnsSync: IDialect['getCollectionColumnsSync'] = fu
 ) {
 	return dbdriver.execute(
 		getSqlQueryDialect('psql').escape(
-			"select * from information_schema.columns where table_name = '??' and column_name = 'id';",
+			"SELECT * FROM information_schema.columns WHERE table_name = ?;",
 			[name]
 		)
 	)
@@ -466,82 +385,23 @@ export const getType: IDialect['getType'] = function (collection, property, driv
 	let before: false = false;
 	let customType = null;
 
-	if (property.type == 'number' && property.rational === false) {
-		property.type = 'integer';
-		delete property.rational;
-	}
-
 	if (property.serial) {
 		type = "SERIAL";
 	} else {
-		switch (property.type) {
-			case "text":
-				type = "TEXT";
-				break;
-			case "integer":
-				type = columnSizes.integer[property.size || 4];
-				break;
-			case "number":
-				type = columnSizes.floating[property.size || 4];
-				break;
-			case "serial":
-				property.serial = true;
-				property.key = true;
-				type = "SERIAL";
-				break;
-			case "boolean":
-				type = "BOOLEAN";
-				break;
-			case "datetime":
-				property.type = "date";
-				property.time = true;
-			case "date":
-				if (!property.time) {
-					type = "DATE";
-				} else {
-					type = "TIMESTAMP WITHOUT TIME ZONE";
-				}
-				break;
-			case "binary":
-			case "object":
-				type = "BYTEA";
-				break;
-			case "enum":
-				type   = collection + "_enum_" + (property.mapsTo?.toLowerCase() || '');
-				// before = function (driver, cb) {
-				// 	var type = collection + "_enum_" + property.mapsTo.toLowerCase();
-
-				// 	driver.execute("SELECT * FROM pg_catalog.pg_type WHERE typname = ?", [ type ], function (err, rows) {
-				// 		if (!err && rows.length) {
-				// 			return cb();
-				// 		}
-
-				// 		var values = property.values.map(function (val) {
-				// 			return getSqlQueryDialect('psql').escapeVal(val);
-				// 		});
-
-				// 		return driver.execute("CREATE TYPE " + type + " " +
-				// 		                "AS ENUM (" + values + ")", cb);
-				// 	});
-				// };
-				break;
-			case "point":
-				type = "POINT";
-				break;
-			default:
-				if (
-					driver.customTypes && 
-					(customType = driver.customTypes[property.type])
-				) {
-					type = customType.datastoreType(property)
-				}
+		const result = property2ColumnType(property, { collection });
+		property = result.property;
+		type = result.value;
+		if (result.isCustomType) {
+			if (
+				driver.customTypes && 
+				(customType = driver.customTypes[property.type])
+			) {
+				type = customType.datastoreType(property)
+			}
 		}
 
 		if (!type) return false;
 
-		if (property.required) {
-			type += " NOT NULL";
-		}
 		if (property.hasOwnProperty("defaultValue") && property.defaultValue !== undefined) {
 			if (property.type == 'date' && property.defaultValue === Date.now){
 				type += " DEFAULT now()";

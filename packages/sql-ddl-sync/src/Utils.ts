@@ -32,7 +32,7 @@ export function getAllSqlQueryDialects (type: string) {
     return sqlQueryDialects
 }
 
-export function getSqlQueryDialect (type: FxDbDriverNS.DriverType): ISqlQueryDialects[keyof ISqlQueryDialects] {
+export function getSqlQueryDialect (type: FxDbDriverNS.DriverType | 'postgresql'): ISqlQueryDialects[keyof ISqlQueryDialects] {
     switch (type) {
         default:
             // some times others libs could mount faked dialect to sqlQueryDialects, allow return it
@@ -40,6 +40,7 @@ export function getSqlQueryDialect (type: FxDbDriverNS.DriverType): ISqlQueryDia
         case 'mongodb':
         case 'redis':
             throw new Error('[getSqlQueryDialect] unsupported driver type: ' + type)
+        case 'postgresql':
         case 'psql':
             return sqlQueryDialects['postgresql'];
         case 'sqlite':

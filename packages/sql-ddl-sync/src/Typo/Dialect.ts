@@ -50,10 +50,10 @@ export namespace FxOrmSqlDDLSync__Dialect{
             (driver: ITypedDriver<ConnType>, tableName: string, columnName: string): any
         }
         getCollectionColumns: {
-            <T = any>(driver: ITypedDriver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<T[]>): void
+            <T extends any = any>(driver: ITypedDriver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<T[]>): void
         }
         getCollectionColumnsSync: {
-            <T = any>(driver: ITypedDriver<ConnType>, name: string): T[]
+            <T extends any = any>(driver: ITypedDriver<ConnType>, name: string): T[]
         }
         getCollectionProperties: {
             (driver: ITypedDriver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<Record<string, FxOrmSqlDDLSync__Column.Property>>): void
@@ -123,6 +123,8 @@ export namespace FxOrmSqlDDLSync__Dialect{
         }
         /**
          * transform semantic property to raw string in db
+         * 
+         * @deprecated
          */
         getType: (
             collection: FxOrmSqlDDLSync.TableName,

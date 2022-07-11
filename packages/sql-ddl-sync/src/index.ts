@@ -10,6 +10,7 @@ import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filt
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 
 import "./Dialects";
+import * as Transformers from './Transformers';
 import { IDbDriver } from "@fxjs/db-driver";
 
 const noOp = () => {};
@@ -140,6 +141,7 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 
 	readonly dbdriver: IDbDriver.ITypedDriver<T>
 	readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect<T>
+	readonly transformers: FxOrmSqlDDLSync.Transformers<T>
 	/**
 	 * @description customTypes
 	 */
@@ -160,6 +162,7 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		Object.defineProperty(this, 'collections', { value: [], writable: false })
 		Object.defineProperty(this, 'dbdriver', { value: dbdriver, writable: false })
 		Object.defineProperty(this, 'Dialect', { value: dialect(dbdriver.type as any), writable: false })
+		Object.defineProperty(this, 'transformers', { value: (Transformers as any)[dbdriver.type], writable: false })
 	}
 
 	[sync_method: string]: any

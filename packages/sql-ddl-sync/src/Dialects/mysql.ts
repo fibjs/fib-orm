@@ -1,20 +1,11 @@
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
+import { columnInfo2Property, property2ColumnType, buffer2ColumnsMeta } from "../Transformers/mysql";
 import { FxOrmSqlDDLSync__Column } from "../Typo/Column";
 import { FxOrmSqlDDLSync__DbIndex } from "../Typo/DbIndex";
 import { FxOrmSqlDDLSync__Dialect } from "../Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "../Typo/Driver";
 import { getSqlQueryDialect, arraify, filterPropertyDefaultValue } from '../Utils';
-
-const columnSizes = {
-	integer: {
-		2: 'SMALLINT', 4: 'INTEGER', 8: 'BIGINT'
-	} as {[k: string]: string},
-	floating: {
-		4: 'FLOAT',
-		8: 'DOUBLE'
-	} as {[k: string]: string}
-};
 
 type IDialect = FxOrmSqlDDLSync__Dialect.Dialect<Class_MySQL>;
 
@@ -121,11 +112,11 @@ export const dropForeignKey: IDialect['dropForeignKey'] = function (
 export const getCollectionColumnsSync: IDialect['getCollectionColumnsSync'] = function (
 	dbdriver, name
 ) {
-	return dbdriver.execute(
+	return dbdriver.execute<Record<string, Class_Buffer>[]>(
 		getSqlQueryDialect('mysql').escape(
 			"SHOW COLUMNS FROM ??", [name]
 		)
-	)
+	).map(row => buffer2ColumnsMeta(row as any)) as any
 }
 
 export const getCollectionColumns: IDialect['getCollectionColumns'] = function (
@@ -140,117 +131,16 @@ export const getCollectionColumns: IDialect['getCollectionColumns'] = function (
 export const getCollectionPropertiesSync: IDialect['getCollectionPropertiesSync'] = function (
 	dbdriver, name
 ) {
-
 	const cols: FxOrmSqlDDLSync__Column.ColumnInfo__MySQL[] = getCollectionColumnsSync(dbdriver, name)
 
-	const columns = <{ [col: string]: FxOrmSqlDDLSync__Column.Property }>{};
+	const props = <{ [col: string]: FxOrmSqlDDLSync__Column.Property }>{};
 
 	for (let i = 0; i < cols.length; i++) {
-		let column = <FxOrmSqlDDLSync__Column.Property>{};
 		const colInfo = cols[i];
-		colInfoBuffer2Str(colInfo);
-
-		let Type = colInfo.Type + ''
-		if (Type.indexOf(" ") > 0) {
-			colInfo.SubType = Type.substr(Type.indexOf(" ") + 1).split(/\s+/);
-			Type = Type.substr(0, Type.indexOf(" "));
-		}
-
-		// match_result
-		let [_, _type, _size] = Type.match(/^(.+)\((\d+)\)$/) || [] as any[];
-		if (_) {
-			colInfo.Size = parseInt(_size, 10);
-			Type = _type;
-		}
-
-		if (colInfo.Extra.toUpperCase() == "AUTO_INCREMENT") {
-			column.serial = true;
-			column.unsigned = true;
-		}
-
-		if (colInfo.Key == "PRI") {
-			column.primary = true;
-		}
-
-		if (colInfo.Null.toUpperCase() == "NO") {
-			column.required = true;
-		}
-		if (colInfo.Default !== "null") {
-			column.defaultValue = colInfo.Default;
-		}
-
-		switch (Type.toUpperCase()) {
-			case "SMALLINT":
-			case "INTEGER":
-			case "BIGINT":
-			case "INT":
-				column.type = "integer";
-				column.size = 4; // INT
-				for (let k in columnSizes.integer) {
-					if (columnSizes.integer[k] == Type.toUpperCase()) {
-						column.size = k;
-						break;
-					}
-				}
-				break;
-			case "FLOAT":
-			case "DOUBLE":
-				column.type = "number";
-				column.rational = true;
-				for (let k in columnSizes.floating) {
-					if (columnSizes.floating[k] == Type.toUpperCase()) {
-						column.size = k;
-						break;
-					}
-				}
-				break;
-			case "TINYINT":
-				if (colInfo.Size == 1) {
-					column.type = "boolean";
-				} else {
-					column.type = "integer";
-				}
-				break;
-			case "DATETIME":
-				column.time = true;
-			case "DATE":
-				column.type = "date";
-				break;
-			case "LONGBLOB":
-				column.big = true;
-			case "BLOB":
-				column.type = "binary";
-				break;
-			case "VARCHAR":
-				column.type = "text";
-				if (colInfo.Size) {
-					column.size = colInfo.Size;
-				}
-				break;
-			case "TEXT":
-				column.type = "text";
-				break;
-			case "POINT":
-				column.type = "point";
-				break;
-			default:
-				let [_2, _enum_value_str] = Type.match(/^enum\('(.+)'\)$/) || [] as any;
-				if (_2) {
-					column.type = "enum";
-					column.values = _enum_value_str.split(/'\s*,\s*'/);
-					break;
-				}
-				throw new Error(`Unknown column type '${Type}'`);
-		}
-
-		if (column.serial) {
-			column.type = "serial";
-		}
-
-		columns[colInfo.Field] = column;
+		props[colInfo.Field] = columnInfo2Property(colInfo);
 	}
 
-	return columns;
+	return props;
 };
 
 export const getCollectionProperties: IDialect['getCollectionProperties'] = function (
@@ -479,89 +369,29 @@ export const removeIndex: IDialect['removeIndex'] = function (
 export const getType: IDialect['getType'] = function (
 	collection, property, driver
 ) {
-	var type: false | FxOrmSqlDDLSync__Column.ColumnType_MySQL = false;
-	var customType: FxOrmSqlDDLSync__Driver.CustomPropertyType<Class_MySQL> = null;
+	let customType: FxOrmSqlDDLSync__Driver.CustomPropertyType<Class_MySQL> = null;
 
-	if (property.type == 'number' && property.rational === false) {
-		property.type = 'integer';
-		delete property.rational;
-	}
+	const result = property2ColumnType(property);
+	property = result.property;
 
-	switch (property.type) {
-		case "text":
-			if (property.big) {
-				type = "LONGTEXT";
-			} else {
-				type = "VARCHAR(" + Math.min(Math.max(parseInt(property.size as any, 10) || 255, 1), 65535) + ")";
-			}
-			break;
-		case "integer":
-			type = columnSizes.integer[property.size] || columnSizes.integer[4];
-			break;
-		case "number":
-			type = columnSizes.floating[property.size] || columnSizes.floating[4];
-			break;
-		case "serial":
-			property.type = "number";
-			property.serial = true;
-			property.key = true;
-			type = `INT(${property.size || 11})`;
-			break;
-		case "boolean":
-			type = "TINYINT(1)";
-			break;
-		case "datetime":
-			property.type = "date";
-			property.time = true;
-		case "date":
-			if (!property.time) {
-				type = "DATE";
-			} else {
-				type = "DATETIME";
-			}
-			break;
-		case "binary":
-		case "object":
-			if (property.big === true) {
-				type = "LONGBLOB";
-			} else {
-				type = "BLOB";
-			}
-			break;
-		case "enum":
-			type = "ENUM (" + property.values.map((val: any) => getSqlQueryDialect(driver.type).escapeVal(val)) + ")";
-			break;
-		case "point":
-			type = "POINT";
-			break;
-		default:
-			if (
-				driver.customTypes && 
-				(customType = driver.customTypes[property.type])
-			) {
-				type = customType.datastoreType(property, { collection, driver })
-			}
-	}
-
-	if (!type) return false;
-
-	if (property.required) {
-		type += " NOT NULL";
-	}
-	if (property.serial) {
-		if (!property.required) {
-			// append if not set
-			type += " NOT NULL";
+	if (result.isCustomType) { // is custom type
+		if (
+			driver.customTypes && 
+			(customType = driver.customTypes[property.type])
+		) {
+			result.value = customType.datastoreType(property, { collection, driver })
 		}
-		type += " AUTO_INCREMENT";
 	}
+
+	if (!result.value) return false;
+
 	if (property.hasOwnProperty("defaultValue") && property.defaultValue !== undefined) {
 		const defaultValue = filterPropertyDefaultValue(property, {
 			collection,
 			property,
 			driver
 		})
-		type += (
+		result.value += (
 			[
 				" DEFAULT ",
 				property.type === 'date'
@@ -572,7 +402,7 @@ export const getType: IDialect['getType'] = function (
 	}
 
 	return {
-		value: type,
+		value: result.value,
 		before: false
 	};
 };
@@ -605,13 +435,4 @@ function convertIndexRows(
 
 function getObjectPropertyCaseInsensitive(obj: any, key: string) {
 	return obj[Object.keys(obj).find((k) => k.toLowerCase() === key.toLowerCase())];
-}
-
-function colInfoBuffer2Str (col: FxOrmSqlDDLSync__Column.ColumnInfo__MySQL) {
-	col.Type += '';
-	col.Size += '';
-	col.Extra += '';
-	col.Key += '';
-	col.Null += '';
-	col.Default += '';
 }
