@@ -27,7 +27,7 @@ export default defineConfig({
 
     themeConfig: {
         repo: 'fxjs-modules/orm',
-        docsDir: 'orm-docs',
+        docsDir: 'docs',
         docsBranch: 'master',
         editLinks: true,
         editLinkText: '在 Github 上编辑此页',
@@ -63,10 +63,10 @@ export default defineConfig({
 
 function getOrmSidebar() {
     return [
-        {
-            text: 'Home',
-            link: '/orm/'
-        },
+        { text: '开始连接', link: '/orm/getting-started' },
+        { text: 'Packages', link: '/orm-packages/', children: [
+            { text: 'orm-core', link: '/orm-packages/orm-core' },
+        ] },
     ]
 }
 

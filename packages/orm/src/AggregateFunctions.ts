@@ -175,8 +175,12 @@ const AggregateFunctions = function (
 				throw new ORMError("You must pass a callback to Model.aggregate().get()", 'MISSING_CALLBACK');
 			}
 
-			const syncReponse = Utilities.exposeErrAndResultFromSyncMethod(proto.getSync, [], { thisArg: proto })
-			Utilities.throwErrOrCallabckErrResult(
+			const syncReponse = Utilities.catchBlocking(proto.getSync, [], { thisArg: proto })
+			if (syncReponse.error instanceof ORMError && syncReponse.error.code === ORMError.codes['PARAM_MISMATCH']) {
+				throw syncReponse.error;
+			}
+
+			Utilities.takeAwayResult(
 				syncReponse,
 				{
 					callback: cb && function (err, results) {

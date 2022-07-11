@@ -237,8 +237,8 @@ function extendInstance(
 		}
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance>(Instance[association.hasSyncAccessor], [ _has_opts ]);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance>(Instance[association.hasSyncAccessor], [ _has_opts ]);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 
 		return this;
@@ -317,8 +317,8 @@ function extendInstance(
 
 		if (withCallback) {
 			process.nextTick(() => {
-				const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance>(getAccessorChainOrRunSync, [opts, !withCallback]);
-				Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb });
+				const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance>(getAccessorChainOrRunSync, [opts, !withCallback]);
+				Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb });
 			});
 
 			return this;
@@ -401,8 +401,8 @@ function extendInstance(
 		cb?: FxOrmCommon.GenericCallback<FxOrmInstance.Instance>
 	) {
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[association.setSyncAccessor], [ OtherInstance ]);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[association.setSyncAccessor], [ OtherInstance ]);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 
 		return this;
@@ -442,8 +442,8 @@ function extendInstance(
 			cb?: FxOrmCommon.GenericCallback<void>
 		) {
 			process.nextTick(() => {
-				const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[association.delSyncAccessor]);
-				Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+				const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[association.delSyncAccessor]);
+				Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 			});
 			
 			return this;

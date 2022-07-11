@@ -225,9 +225,9 @@ function extendInstance(
 
 	Utilities.addHiddenPropertyToInstance(Instance, association.hasAccessor, function (cb: FxOrmCommon.GenericCallback<boolean>) {
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<boolean>(Instance[association.hasSyncAccessor]);
+			const syncResponse = Utilities.catchBlocking<boolean>(Instance[association.hasSyncAccessor]);
 			syncResponse.result = !!syncResponse.result;
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 
 		return this;
@@ -262,8 +262,8 @@ function extendInstance(
 		});
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance>(Instance[association.getSyncAccessor], [ opts ]);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance>(Instance[association.getSyncAccessor], [ opts ]);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 
 		return this;
@@ -319,8 +319,8 @@ function extendInstance(
 		cb: FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance>
 	) {
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(Instance[association.setSyncAccessor], [ Extension ]);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking(Instance[association.setSyncAccessor], [ Extension ]);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 		
 		return this;
@@ -365,8 +365,8 @@ function extendInstance(
 
 	Utilities.addHiddenPropertyToInstance(Instance, association.delAccessor, function (cb: FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance, FxOrmInstance.Instance>) {
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<void>(Instance[association.delSyncAccessor]);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<void>(Instance[association.delSyncAccessor]);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 
 		return this;

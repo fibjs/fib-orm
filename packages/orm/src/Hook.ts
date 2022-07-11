@@ -88,7 +88,7 @@ export const wait: FxOrmHook.HookWait = function () {
 	 */
 	restArgs[restArgs.length - 1] = function () {
 		const args = Array.prototype.slice.apply(arguments)
-		errWaitor.err = Utilities.exposeErrAndResultFromSyncMethod(() => next.apply(null, args)).error
+		errWaitor.err = Utilities.catchBlocking(() => next.apply(null, args)).error
 		errWaitor.evt.set();
 	}
 	

@@ -236,8 +236,8 @@ export const Model = function (
 		this:FxOrmModel.Model,
 		cb?: FxOrmCommon.GenericCallback<void>
 	) {
-		const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(model.dropSync, [], { thisArg: model });
-		Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+		const syncResponse = Utilities.catchBlocking(model.dropSync, [], { thisArg: model });
+		Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 		return this;
 	};
@@ -262,14 +262,14 @@ export const Model = function (
 		this:FxOrmModel.Model,
 		cb?: FxOrmCommon.GenericCallback<FxOrmSqlDDLSync.SyncResult>
 	) {
-		const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+		const syncResponse = Utilities.catchBlocking(() => {
 			if (typeof m_opts.driver.sync !== "function") {
 				throw new ORMError("Driver does not support Model.sync()", 'NO_SUPPORT', { model: m_opts.table })
 			}
 
 			model.syncSync();
 		});
-		Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+		Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 		return this;
 	};
@@ -387,8 +387,8 @@ export const Model = function (
 		collectParamsForGet(args);
 
 		process.nextTick(() => {
-			const syncReponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance>(model.getSync, args, { thisArg: model });
-			Utilities.throwErrOrCallabckErrResult(syncReponse, { no_throw: true, callback: cb });
+			const syncReponse = Utilities.catchBlocking<FxOrmInstance.Instance>(model.getSync, args, { thisArg: model });
+			Utilities.takeAwayResult(syncReponse, { no_throw: true, callback: cb });
 		});
 
 		return this;
@@ -643,8 +643,8 @@ export const Model = function (
 		}
 		
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(model.countSync, [conditions, cb], {thisArg: model});
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+			const syncResponse = Utilities.catchBlocking(model.countSync, [conditions, cb], {thisArg: model});
+			Utilities.takeAwayResult(syncResponse, { callback: cb });
 		});
 
 		return this;
@@ -745,8 +745,8 @@ export const Model = function (
 		    throw new ORMError("Missing Model.exists() callback", 'MISSING_CALLBACK', { model: m_opts.table });
 		}
 
-		const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(model.existsSync, ids, { thisArg: model });
-		Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+		const syncResponse = Utilities.catchBlocking(model.existsSync, ids, { thisArg: model });
+		Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 		return this;
 	}
@@ -762,13 +762,13 @@ export const Model = function (
 			}
 		});
 	
-		const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(
+		const syncResponse = Utilities.catchBlocking(
 			model.createSync,
 			args,
 			{ thisArg: model }
 		)
 
-		Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: done });
+		Utilities.takeAwayResult(syncResponse, { callback: done });
 
 		return syncResponse.result;
 	}

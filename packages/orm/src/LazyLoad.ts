@@ -54,8 +54,8 @@ function addLazyLoadProperty(
 
 	Utilities.addHiddenPropertyToInstance(Instance, propertyAccessors.getAccessor, function <T>(cb?: FxOrmCommon.ExecutionCallback<FxOrmCommon.Nilable<T>>) {
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[propertyAccessors.getSyncAccessor]);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[propertyAccessors.getSyncAccessor]);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 		
 		return this;
@@ -80,8 +80,8 @@ function addLazyLoadProperty(
 
 	Utilities.addHiddenPropertyToInstance(Instance, propertyAccessors.removeAccessor, function <T>(cb?: FxOrmCommon.ExecutionCallback<FxOrmCommon.Nilable<T>>) {
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[propertyAccessors.removeSyncAccessor]);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[propertyAccessors.removeSyncAccessor]);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 		
 		return this;
@@ -105,9 +105,9 @@ function addLazyLoadProperty(
 
 	Utilities.addHiddenPropertyToInstance(Instance, propertyAccessors.setAccessor, function <T>(content: FxOrmInstance.InstanceDataPayload[any], cb?: FxOrmCommon.ExecutionCallback<FxOrmCommon.Nilable<T>>) {
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[propertyAccessors.setSyncAccessor], [content]);
+			const syncResponse = Utilities.catchBlocking<FxOrmInstance.Instance | FxOrmInstance.Instance[]>(Instance[propertyAccessors.setSyncAccessor], [content]);
 
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 		
 		return this;

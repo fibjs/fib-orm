@@ -13,7 +13,7 @@
 | 特征 | blocking style | non-blocking style |
 |--|--|--|
 | 阻塞进程 | YES | NO |
-| 错误处理 | 直接 throw 到上下文 | callback 回调的 `err` 参数 |
+| 错误处理 | 直接 throw 到上下文 | 不会 throw 错误, 由 callback 处理回调的 `err` 参数 |
 
 在 `@fxjs/orm` 中, 绝大部分和数据库发生交互的 API 同时包含了同步(阻塞)和异步(非阻塞)的版本.
 
@@ -64,3 +64,11 @@ Person.find({ where: { name: 'xicilion' } }, (err, person) => {
     })
 })
 ```
+
+## TypeScript
+
+TypeScript 已经成为 JavaScript 生态中的一个重要的支撑, 它的类型系统是非常强大的.
+
+[fib-typify]:https://github.com/richardo2016/fib-typify
+
+orm 基于 [fib-typify] 开发, 核心源代码均由 typescript 编写, 包括 orm 所有的关键包均提供了**类型支持**, 以帮助开发者在支持 TypeScript LSP 的 IDE (比如 Visual Studio Code, WebStorm) 中获得友好的类型提示.

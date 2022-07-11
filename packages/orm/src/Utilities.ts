@@ -593,8 +593,8 @@ export function isDriverNotSupportedError (err: FxOrmError.ExtendedError) {
 	return false;
 }
 
-export const exposeErrAndResultFromSyncMethod = FxORMCore.Utils.exposeErrAndResultFromSyncMethod
-export const throwErrOrCallabckErrResult = FxORMCore.Utils.throwErrOrCallabckErrResult
+export const catchBlocking = FxORMCore.catchBlocking;
+export const takeAwayResult = FxORMCore.takeAwayResult
 
 export function doWhenErrIs (
 	compare: {

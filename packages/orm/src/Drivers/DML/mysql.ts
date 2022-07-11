@@ -85,11 +85,11 @@ Driver.prototype.on = function (
 Driver.prototype.connect = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, cb?: FxOrmCommon.GenericCallback<IDbDriver>
 ) {
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		return this.db.connect()
 	})
 
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 	return syncResponse.result;
 };
@@ -102,7 +102,7 @@ Driver.prototype.reconnect = function (
 
 	this.db = new mysql.Database(connOpts);
 
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		return this.connect()
 	})
 
@@ -115,11 +115,11 @@ Driver.prototype.reconnect = function (
 Driver.prototype.close = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, cb: FxOrmCommon.VoidCallback
 ) {
-	const errResults = Utilities.exposeErrAndResultFromSyncMethod(
+	const errResults = Utilities.catchBlocking(
 		() => this.db.close()
 	)
 
-	Utilities.throwErrOrCallabckErrResult(errResults, { no_throw: !!cb, callback: cb });
+	Utilities.takeAwayResult(errResults, { no_throw: !!cb, callback: cb });
 	return errResults.result;
 };
 
@@ -185,7 +185,7 @@ Driver.prototype.insert = function (
 	                  .set(data)
 	                  .build();
 
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		const info = this.execSimpleQuery(q);
 
 		const ids: FxOrmQuery.InsertResult = {};
@@ -204,7 +204,7 @@ Driver.prototype.insert = function (
 		return ids
 	})
 
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 	return syncResponse.result;
 };

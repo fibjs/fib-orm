@@ -117,8 +117,8 @@ const ChainFind = function (
 	}
 
 	const chainRun = function<T> (done?: FxOrmCommon.GenericCallback<T|T[]|FxOrmInstance.InstanceDataPayload[]>) {
-		const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(chainRunSync);
-		Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: done, use_tick: true });
+		const syncResponse = Utilities.catchBlocking(chainRunSync);
+		Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: done, use_tick: true });
 	}
 
 	const chain: FxOrmQuery.IChainFind = {
@@ -245,8 +245,8 @@ const ChainFind = function (
 
 		count: function (cb?) {
 			process.nextTick(() => {
-				const syncResult = Utilities.exposeErrAndResultFromSyncMethod<number>(chain.countSync)
-				Utilities.throwErrOrCallabckErrResult<number>(syncResult, { callback: cb });
+				const syncResult = Utilities.catchBlocking<number>(chain.countSync)
+				Utilities.takeAwayResult<number>(syncResult, { callback: cb });
 			});
 			return this;
 		},
@@ -264,8 +264,8 @@ const ChainFind = function (
 
 		remove: function (cb?) {
 			process.nextTick(() => {
-				const syncResult = Utilities.exposeErrAndResultFromSyncMethod<FxOrmQuery.RemoveResult>(chain.removeSync)
-				Utilities.throwErrOrCallabckErrResult(syncResult, { callback: cb });
+				const syncResult = Utilities.catchBlocking<FxOrmQuery.RemoveResult>(chain.removeSync)
+				Utilities.takeAwayResult(syncResult, { callback: cb });
 			})
 			return this;
 		},

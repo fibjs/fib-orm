@@ -62,8 +62,8 @@ export declare function tableAliasCalculatorInOneQuery(): (tableName: string, ge
 export declare function ORM_Error(err: Error, cb?: FxOrmCommon.VoidCallback): FxOrmNS.ORMLike;
 export declare function queryParamCast(val: any): any;
 export declare function isDriverNotSupportedError(err: FxOrmError.ExtendedError): boolean;
-export declare const exposeErrAndResultFromSyncMethod: typeof FxORMCore.Utils.exposeErrAndResultFromSyncMethod;
-export declare const throwErrOrCallabckErrResult: typeof FxORMCore.Utils.throwErrOrCallabckErrResult;
+export declare const catchBlocking: typeof FxORMCore.Utils.exposeErrAndResultFromSyncMethod;
+export declare const takeAwayResult: typeof FxORMCore.Utils.throwErrOrCallabckErrResult;
 export declare function doWhenErrIs(compare: {
     message?: string;
     literalCode?: string;

@@ -343,8 +343,8 @@ function extendInstance(
 			cb = Instances.pop() as any;
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<boolean>(Instance[association.hasSyncAccessor], Instances);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb })
+			const syncResponse = Utilities.catchBlocking<boolean>(Instance[association.hasSyncAccessor], Instances);
+			Utilities.takeAwayResult(syncResponse, { callback: cb })
 		});
 
 		return this;
@@ -488,8 +488,8 @@ function extendInstance(
 		const cb = typeof util.last(items) === 'function' ? items.pop() : noOperation;
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<boolean>(Instance[association.setSyncAccessor], items);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<boolean>(Instance[association.setSyncAccessor], items);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 
 		return this;
@@ -508,8 +508,8 @@ function extendInstance(
 		args = args.filter(x => x !== cb);
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<void>(Instance[association.delSyncAccessor], args);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: true, callback: cb })
+			const syncResponse = Utilities.catchBlocking<void>(Instance[association.delSyncAccessor], args);
+			Utilities.takeAwayResult(syncResponse, { no_throw: true, callback: cb })
 		});
 
 		return this;
@@ -695,8 +695,8 @@ function extendInstance(
 		const errWaitor = Utilities.getErrWaitor(!cb);
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<void>(Instance[association.addSyncAccessor], args);
-			Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: !withExtraProps, callback: cb });
+			const syncResponse = Utilities.catchBlocking<void>(Instance[association.addSyncAccessor], args);
+			Utilities.takeAwayResult(syncResponse, { no_throw: !withExtraProps, callback: cb });
 
 			errWaitor.err = syncResponse.error;
 			if (errWaitor.evt) errWaitor.evt.set();
