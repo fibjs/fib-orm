@@ -6,6 +6,8 @@
 
 [`@fxjs/orm-core`]:https://npmjs.com/package/@fxjs/orm-core
 [`@fxjs/db-driver`]:https://npmjs.com/package/@fxjs/db-driver
+[`@fxjs/knex`]:https://npmjs.com/package/@fxjs/knex
 
 - [`@fxjs/orm-core`] 核心函数库, 提供了一些用于处理 fibjs 中 blocking/non-blocking 风格转化的 utils 方法, 参考 [这里](./orm-core)
 - [`@fxjs/db-driver`] 适配了不同类型 database 的 driver, 支持 SQL/NoSQL/Redis 参考 [这里](./db-driver)
+- [`@fxjs/knex`] 为 fibjs 集成好用的 sql generator 库. 参考 [这里](./knex)

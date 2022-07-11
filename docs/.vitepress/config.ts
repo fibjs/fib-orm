@@ -67,6 +67,7 @@ function getOrmSidebar() {
         { text: 'Packages', link: '/orm-packages/', children: [
             { text: 'orm-core', link: '/orm-packages/orm-core' },
             { text: 'db-driver', link: '/orm-packages/db-driver' },
+            { text: 'knex', link: '/orm-packages/knex' },
         ] },
     ]
 }
