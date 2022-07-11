@@ -101,7 +101,7 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
         })
     }
 	
-	uid: string;
+	readonly uid: string;
     get uri () {        
         return Driver.formatUrl({
             ...this.config,
@@ -109,8 +109,8 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
             query: this.config.protocol === 'sqlite:' ? {} : this.config.query
         });
     }
-	config: FxDbDriverNS.DBConnectionConfig;
-	extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig = {
+	readonly config: FxDbDriverNS.DBConnectionConfig;
+	readonly extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig = {
 		pool: false,
 		debug: false
 	};
@@ -152,6 +152,7 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
 	constructor (
 		options: FxDbDriverNS.ConnectionInputArgs | string
 	) {
+        // options would be replaced, `Utils.parseConnectionString` return a fresh object
 		options = Utils.parseConnectionString( options )
 		Object.defineProperty(this, 'config', { get () { return options } })
 		assert.ok(!!this.config.protocol, '[driver.config] invalid protocol')
@@ -391,10 +392,9 @@ export class RedisDriver extends Driver<Class_Redis> implements FxDbDriverNS.Com
         opts?: FxDbDriverNS.CommandDriverCommandOptions
     ): T {
         const { parallel = false } = opts || {};
-        const keys = Object.keys(cmds)
 
         if (parallel)
-            return coroutine.parallel(keys, (cmd: string) => {
+            return coroutine.parallel(Object.keys(cmds), (cmd: string) => {
                 return { cmd, result: this.command(cmd, ...Utils.arraify(cmds[cmd])) }
             }) as any
         else

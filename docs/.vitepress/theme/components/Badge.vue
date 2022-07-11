@@ -5,7 +5,7 @@ import type { DefaultTheme } from '../config'
 const props = withDefaults(
     defineProps<{
         text?: string,
-        type?: 'warning' | 'tip' | 'error'
+        type?: 'warning' | 'tip' | 'error' | 'info'
         vertical?: 'top' | 'middle'
     }>(), {
         text: '',
@@ -46,5 +46,9 @@ const props = withDefaults(
 
 .badge.badge-type-error {
     background-color: #da5961;
+}
+
+.badge.badge-type-info {
+    background-color: #0170fe;
 }
 </style>

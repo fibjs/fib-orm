@@ -66,6 +66,7 @@ function getOrmSidebar() {
         { text: '开始连接', link: '/orm/getting-started' },
         { text: 'Packages', link: '/orm-packages/', children: [
             { text: 'orm-core', link: '/orm-packages/orm-core' },
+            { text: 'db-driver', link: '/orm-packages/db-driver' },
         ] },
     ]
 }

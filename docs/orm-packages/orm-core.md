@@ -1,4 +1,9 @@
-# ORM Core
+# `@fxjs/orm-core`
+
+[![NPM version](https://img.shields.io/npm/v/@fxjs/orm-core.svg)](https://www.npmjs.org/package/@fxjs/orm-core)&nbsp;
+[![NPM download](https://img.shields.io/npm/dt/@fxjs/orm-core.svg)](https://www.npmjs.org/package/@fxjs/orm-core)&nbsp;
+[![NPM download monthly](https://img.shields.io/npm/dm/@fxjs/orm-core.svg)](https://www.npmjs.org/package/@fxjs/orm-core)
+
 
 ## 错误处理
 

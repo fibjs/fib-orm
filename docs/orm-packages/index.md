@@ -8,3 +8,4 @@
 [`@fxjs/db-driver`]:https://npmjs.com/package/@fxjs/db-driver
 
 - [`@fxjs/orm-core`] 核心函数库, 提供了一些用于处理 fibjs 中 blocking/non-blocking 风格转化的 utils 方法, 参考 [这里](./orm-core)
+- [`@fxjs/db-driver`] 适配了不同类型 database 的 driver, 支持 SQL/NoSQL/Redis 参考 [这里](./db-driver)

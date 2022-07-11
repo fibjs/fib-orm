@@ -22,10 +22,10 @@ export declare class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.ICon
      * used by `url.format`
      */
     static formatUrl(input: FxDbDriverNS.ConnectionInputArgs): string;
-    uid: string;
+    readonly uid: string;
     get uri(): string;
-    config: FxDbDriverNS.DBConnectionConfig;
-    extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig;
+    readonly config: FxDbDriverNS.DBConnectionConfig;
+    readonly extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig;
     type: FxDbDriverNS.DriverType;
     connection: CONN_TYPE;
     pool: FibPoolNS.FibPool<CONN_TYPE, any>;
