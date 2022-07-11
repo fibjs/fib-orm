@@ -1,0 +1,18 @@
+{
+  "name": "orm-docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vitepress dev . --host",
+    "build": "vitepress build .",
+    "serve": "vitepress serve .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "richardo2016 <richardo2016@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "markdown-it-task-checkbox": "^1.0.6",
+    "vitepress": "^0.21.4"
+  }
+}
