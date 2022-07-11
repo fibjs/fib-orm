@@ -1,14 +1,19 @@
 {
-	"name": "@fxjs/orm-core",
+	"name": "@fxjs/orm-cli",
 	"version": "0.1.0",
-	"description": "",
+	"private": false,
+	"description": "cli for @fxjs/orm developer",
 	"main": "lib",
 	"types": "typings/index.d.ts",
+	"bin": {
+		"orm": "./lib/index.js",
+		"orm-cli": "./lib/index.js"
+	},
 	"repository": {
 		"type": "https",
-		"url": "https://github.com/fxjs-modules/orm/tree/master/packages/orm-core"
+		"url": "https://github.com/fxjs-modules/orm/tree/master/packages/cli"
 	},
-	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/orm-core",
+	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/cli",
 	"scripts": {
 		"build": "ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
@@ -20,14 +25,17 @@
 	"devDependencies": {
 		"@fibjs/types": "^0.34.1",
 		"fib-pool": "^1.6.0",
-		"fib-typify": "^0.8.3"
+		"fib-typify": "^0.10.0"
 	},
-	"private": false,
+	"publishConfig": {
+		"access": "public"
+	},
 	"files": [
 		"lib",
 		"typings"
 	],
-	"publishConfig": {
-		"access": "public"
+	"dependencies": {
+		"@fibcli/make-cli": "^0.1.1",
+		"@fxjs/cli": "^0.0.6"
 	}
 }

@@ -36,7 +36,6 @@
 		"@fxjs/sql-query": ">= 0.6 <= 0.7"
 	},
 	"devDependencies": {
-		"@fibjs/ci": "^2.5.2",
 		"@fibjs/types": "^0.34.1",
 		"@fxjs/db-driver": "^0.1.0",
 		"@fxjs/sql-query": "^0.7.1",
@@ -50,15 +49,6 @@
 	"rollup.internal": [
 		"@fxjs/sql-query/lib/Dialects"
 	],
-	"ci": {
-		"type": "travis, appveyor",
-		"version": [
-			"0.28.0",
-			"0.29.0",
-			"0.30.0",
-			"0.31.0"
-		]
-	},
 	"private": false,
 	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/sql-ddl-sync",
 	"files": [
