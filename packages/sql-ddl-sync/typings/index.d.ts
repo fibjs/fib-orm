@@ -21,7 +21,7 @@ export declare class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
     /**
      * @description customTypes
      */
-    readonly types: FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash<T>;
+    readonly types: Record<string, FxOrmSqlDDLSync__Driver.CustomPropertyType<T>>;
     private suppressColumnDrop;
     private debug;
     constructor(options: FxOrmSqlDDLSync.SyncOptions<T>);

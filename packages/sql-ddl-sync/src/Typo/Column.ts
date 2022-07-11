@@ -35,13 +35,6 @@ export namespace FxOrmSqlDDLSync__Column {
 
         [ext_k: string]: any
     }
-    
-    /**
-     * @deprecated use Record<string, FxOrmSqlDDLSync__Column.Property> instead
-     */
-    export interface PropertyHash {
-        [col: string]: FxOrmSqlDDLSync__Column.Property
-    }
 
     export type PropertyType = __StringType<'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point'>
 

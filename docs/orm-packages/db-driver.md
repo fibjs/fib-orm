@@ -249,7 +249,7 @@ SQL 数据库一般都支持事务(Transaction),
 - `SQLDriver::commit()`
 - `SQLDriver::rollback()`
 
-详情参见[事务](../sql-db-transactions)
+<!-- 详情参见[事务](../sql-db-transactions) -->
 
 ### `SQLDriver::execute(sql: string)` <Badge type="warning">blocking</Badge>
 

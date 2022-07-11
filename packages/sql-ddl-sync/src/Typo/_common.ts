@@ -18,7 +18,7 @@ export namespace FxOrmSqlDDLSync {
         changes: number
     }
     export interface SyncCollectionOptions {
-        columns?: FxOrmSqlDDLSync__Column.PropertyHash,
+        columns?: Record<string, FxOrmSqlDDLSync__Column.Property>,
         strategy?: 'soft' | 'hard' | 'mixed'
         /**
          * @default true

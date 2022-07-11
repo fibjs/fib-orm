@@ -49,7 +49,7 @@ export const getCollectionPropertiesSync: IDialect['getCollectionPropertiesSync'
 		)
 	);
 
-	let columns = <FxOrmSqlDDLSync__Column.PropertyHash>{}, m;
+	let columns = <Record<string, FxOrmSqlDDLSync__Column.Property>>{}, m;
 
 	for (let i = 0; i < cols.length; i++) {
 		let column = <FxOrmSqlDDLSync__Column.Property>{};
@@ -586,7 +586,7 @@ function convertIndexRows(rows: FxOrmSqlDDLSync__Driver.DbIndexInfo_PostgreSQL[]
 function checkColumnTypes(
 	dbdriver: IDbDriver.ITypedDriver<Class_DbConnection>,
 	collection: string,
-	columns: FxOrmSqlDDLSync__Column.PropertyHash
+	columns: Record<string, FxOrmSqlDDLSync__Column.Property>
 ) {
 	// TODO: use coroutine.parallel to improve it
 	for (var name in columns) {

@@ -27,12 +27,6 @@ export declare namespace FxOrmSqlDDLSync__Column {
         values?: any[];
         [ext_k: string]: any;
     }
-    /**
-     * @deprecated use Record<string, FxOrmSqlDDLSync__Column.Property> instead
-     */
-    interface PropertyHash {
-        [col: string]: FxOrmSqlDDLSync__Column.Property;
-    }
     type PropertyType = __StringType<'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point'>;
     type PropertyType_MySQL = PropertyType;
     type ColumnType_MySQL = __StringType<PropertyType_MySQL>;

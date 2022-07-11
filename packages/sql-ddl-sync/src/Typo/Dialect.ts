@@ -56,10 +56,10 @@ export namespace FxOrmSqlDDLSync__Dialect{
             <T = any>(driver: ITypedDriver<ConnType>, name: string): T[]
         }
         getCollectionProperties: {
-            (driver: ITypedDriver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<FxOrmSqlDDLSync__Column.PropertyHash>): void
+            (driver: ITypedDriver<ConnType>, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<Record<string, FxOrmSqlDDLSync__Column.Property>>): void
         }
         getCollectionPropertiesSync: {
-            (driver: ITypedDriver<ConnType>, name: string): FxOrmSqlDDLSync__Column.PropertyHash
+            (driver: ITypedDriver<ConnType>, name: string): Record<string, FxOrmSqlDDLSync__Column.Property>
         }
         createCollection: {
             (driver: ITypedDriver<ConnType>, name: string, columns: string[], keys: string[], cb: FxOrmCoreCallbackNS.ExecutionCallback<any>): void

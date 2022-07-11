@@ -19,9 +19,6 @@ export namespace FxOrmSqlDDLSync__Driver {
         [ext_cfg_name: string]: any
     }
 
-    export interface CustomPropertyTypeHash<T extends IDbDriver.IConnTypeEnum> {
-        [key: string]: CustomPropertyType<T>
-    }
     /**
      * @description one protocol driver should implement
      */    
