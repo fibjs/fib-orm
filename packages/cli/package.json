@@ -24,9 +24,13 @@
 	"license": "ISC",
 	"dependencies": {
 		"@fibcli/make-cli": "^0.1.1",
+		"@fibcli/ora": "^0.1.0",
+		"@fibjs/chalk": "^1.0.0",
 		"@fxjs/cli": "^0.0.6",
 		"@fxjs/db-driver": "^0.1.0",
-		"@fxjs/sql-ddl-sync": "^0.7.1"
+		"@fxjs/sql-ddl-sync": "^0.7.1",
+		"@types/semver": "^7.3.10",
+		"semver": "^7.3.7"
 	},
 	"devDependencies": {
 		"@fibjs/types": "^0.34.1",

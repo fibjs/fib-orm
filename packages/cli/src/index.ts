@@ -3,11 +3,13 @@
 const pkg = require('../package.json')
 import getCli = require('@fxjs/cli')
 
+import cmdUpgrade from './commands/upgrade';
 import cmdSpinner from './commands/spinner';
 import cmdDDLFrom from './commands/ddlFrom';
 
 const cli = getCli('orm-cli');
 
+cmdUpgrade(cli);
 cmdSpinner(cli);
 cmdDDLFrom(cli);
 
