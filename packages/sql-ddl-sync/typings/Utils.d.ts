@@ -1,3 +1,4 @@
+/// <reference types="@fibjs/types" />
 import { FxOrmSqlDDLSync__Column } from "./Typo/Column";
 import { FxOrmSqlDDLSync } from "./Typo/_common";
 import { FxDbDriverNS } from "@fxjs/db-driver/typings/Typo";
@@ -20,4 +21,6 @@ export declare function filterPropertyDefaultValue(property: FxOrmSqlDDLSync__Co
 }): any;
 export declare function filterSyncStrategy(strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy']): "soft" | "hard" | "mixed";
 export declare function filterSuppressColumnDrop(suppressColumnDrop: boolean, db_type: FxDbDriverNS.DriverType): boolean;
+export declare function psqlGetEnumTypeName(collection_name: string, column_name: string): string;
+export declare function psqlRepairEnumTypes(columns: Record<string, FxOrmSqlDDLSync__Column.Property> | FxOrmSqlDDLSync__Column.Property[], collection_name: string, dbdriver: IDbDriver.ITypedDriver<Class_DbConnection>): void;
 export {};

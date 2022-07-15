@@ -9,10 +9,19 @@ common.ORM = ORM;
 
 /**
  * 
- * @returns {'mysql' | 'sqlite' | 'postgresql'}
+ * @returns {'mysql' | 'sqlite' | 'postgres'}
  */
 common.protocol = function () {
-  return (process.env.ORM_PROTOCOL || '').toLocaleLowerCase();
+  const orig = (process.env.ORM_PROTOCOL || '').toLocaleLowerCase();
+  switch (orig) {
+    case 'postgresql':
+    case 'postgres':
+    case 'psql':
+    case 'pg':
+      return 'postgres';
+    default:
+      return orig;
+  }
 };
 
 common.isTravis = function() {
@@ -42,14 +51,15 @@ common.hasConfig = function (proto) {
  * @returns {ITestConfig[keyof ITestConfig]}
  */
 common.getConfig = function () {
+  var protocol = common.protocol();
   if (common.isTravis()) {
-    var config = require("./config.ci")[this.protocol()];
+    var config = require("./config.ci")[protocol];
   } else {
-    var config = require("./config")[this.protocol()];
+    var config = require("./config")[protocol];
   }
   
   if (typeof config == "string") {
-    config = require("url").parse(config, this.protocol());
+    config = require("url").parse(config, protocol);
   }
 
   if (config.hasOwnProperty("auth")) {
@@ -69,8 +79,8 @@ common.getConfig = function () {
 };
 
 common.getConnectionString = function (opts) {
-  var config   = this.getConfig();
-  var protocol = this.protocol();
+  var config   = common.getConfig();
+  var protocol = common.protocol();
   var query;
 
   _.defaults(config, {

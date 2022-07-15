@@ -49,6 +49,19 @@ export declare function convertPropToJoinKeyProp(props: FxOrmProperty.Normalized
     makeKey: boolean;
 }): FxOrmProperty.NormalizedPropertyHash;
 export declare function getRealPath(path_str: string, stack_index?: number): string;
+/**
+ * @description rename a field name in <dataIn> according to the name map in <properties>
+ * @example
+ * ```
+ * dataIn: { a: 1, b: 2 };
+ * properties: { a: { mapsTo: 'a1' }, b: { mapsTo: 'b' } };
+ * -->
+ * result: { a1: 1, b: 2 };
+ * ```
+ *
+ * @param dataIn
+ * @param properties
+ */
 export declare function transformPropertyNames(dataIn: FxOrmInstance.InstanceDataPayload, properties: FxOrmProperty.NormalizedPropertyHash | FxOrmModel.ModelPropertyDefinition): FxOrmInstance.InstanceDataPayload;
 export declare function transformOrderPropertyNames(order: FxOrmQuery.ChainFindOptions['order'], properties: FxOrmProperty.NormalizedPropertyHash): FxSqlQuery.OrderNormalizedResult[];
 export declare function renameDatastoreFieldsToPropertyNames(data: FxOrmInstance.InstanceDataPayload, fieldToPropertyMap: FxOrmProperty.FieldToPropertyMapType): FxOrmInstance.InstanceDataPayload;
@@ -72,7 +85,15 @@ export declare function getErrWaitor(shouldWait?: boolean): FxOrmError.ErrorWait
 export declare function getValueWaitor<T = any>(shouldWait?: boolean): FxOrmCommon.ValueWaitor<T>;
 export declare function parallelQueryIfPossible<T = any, RESP = any>(can_parallel: boolean, iteratee: T[], iterator: (value: T, index?: number, array?: T[]) => RESP): RESP[];
 export declare function is_model_conjunctions_key(k: string): boolean;
-export declare function filterWhereConditionsInput(conditions: FxSqlQuerySubQuery.SubQueryConditions, m: FxOrmModel.Model): FxSqlQuerySubQuery.SubQueryConditions;
+/**
+ * @description do some mutation for field-value in conditions
+ *
+ * @param conditions
+ * @param host
+ */
+export declare function filterWhereConditionsInput(conditions: FxSqlQuerySubQuery.SubQueryConditions, host: {
+    allProperties: FxOrmProperty.NormalizedPropertyHash;
+}): FxSqlQuerySubQuery.SubQueryConditions;
 export declare function addUnwritableProperty(obj: any, property: string, value: any, propertyConfiguration?: PropertyDescriptor): void;
 export declare function addHiddenUnwritableMethodToInstance(instance: FxOrmInstance.Instance, method_name: 'save' | 'saveSync' | string, fn: Function, propertyConfiguration?: PropertyDescriptor): void;
 export declare function addHiddenPropertyToInstance(instance: FxOrmInstance.Instance, property_name: string, value: any, propertyConfiguration?: PropertyDescriptor): void;

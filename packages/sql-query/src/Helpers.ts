@@ -186,9 +186,9 @@ export function escapeValForKnex (val: any, Dialect: FxSqlQueryDialect.Dialect, 
 	else if (val instanceof Date)
 		// TODO: how to suppor timezone?
 		return val;
-	else if (Buffer.isBuffer(val))
-		return val;
-	else if (val instanceof Array)
+	else if (Buffer.isBuffer(val)) {
+		return Dialect.type === 'postgresql' ? Dialect.knex.raw( bufferToString(val, Dialect.type) ) : val;
+	} else if (val instanceof Array)
 		return val;
 	else if (val === null)
 		return val;

@@ -11,11 +11,12 @@ exports.mysql = {
   protocol : "mysql:",
   host      : "localhost",
   user     : "root",
+  // if you use docker in <root>/Dockerfile/docker-compose.yml, 3356, 3357, 3358 are available
   port     : 3306,
   password : "",
   database : "fxjs-orm-test",
   query    : {
-    pool     : Boolean(process.env.FX_ORM_TEST_POOL),
+    pool   : Boolean(process.env.FX_ORM_TEST_POOL),
   }
 };
 if (Boolean(process.env.FX_ORM_TEST_DEBUG))
@@ -23,14 +24,16 @@ if (Boolean(process.env.FX_ORM_TEST_DEBUG))
 exports.postgres = {
   protocol : "postgres:",
   host      : "localhost",
-  user     : "root",
+  user     : "postgres",
+  // if you use docker in <root>/Dockerfile/docker-compose.yml, 5514 are available
+  port     : 5432,
   password : "",
   database : "fxjs-orm-test"
 };
 exports.redshift = {
   protocol  : "redshift:",
   host      : "localhost",
-  user      : "root",
+  user      : "postgres",
   password  : "",
   database  : "fxjs-orm-test"
 };

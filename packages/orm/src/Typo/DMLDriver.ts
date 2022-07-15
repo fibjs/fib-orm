@@ -170,6 +170,9 @@ export namespace FxOrmDMLDriver {
     }
     export interface DMLDriver_MySQL extends DMLDriver {
         db: FxOrmDb.DatabaseBase<Class_MySQL>
+        config: DMLDriver['config'] & {
+            timezone: string
+        }
 
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_MYSQL | FxOrmDb.AGGREGATION_METHOD_TUPLE__MYSQL)[]
     }
@@ -179,6 +182,9 @@ export namespace FxOrmDMLDriver {
     }
     export interface DMLDriver_PostgreSQL extends DMLDriver {
         db: FxOrmDb.DatabaseBase_PostgreSQL
+        config: DMLDriver['config'] & {
+            timezone: string
+        }
 
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_POSTGRESQL)[]
     }
@@ -189,6 +195,9 @@ export namespace FxOrmDMLDriver {
     }
     export interface DMLDriver_SQLite extends DMLDriver {
         db: FxOrmDb.DatabaseBase_SQLite
+        config: DMLDriver['config'] & {
+            timezone: string
+        }
 
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_SQLITE)[]
     }

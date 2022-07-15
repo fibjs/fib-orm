@@ -6,7 +6,7 @@ import { FxOrmSqlDDLSync__DbIndex } from "./Typo/DbIndex";
 import { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
 import { FxOrmSqlDDLSync } from "./Typo/_common";
-import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop } from './Utils';
+import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop, psqlGetEnumTypeName, psqlRepairEnumTypes } from './Utils';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 
 import "./Dialects";
@@ -201,29 +201,33 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		let keys: string[] = [];
 
 		for (let k in collection.properties) {
-			let prop: FxOrmSqlDDLSync__Column.Property,
+			let property: FxOrmSqlDDLSync__Column.Property = collection.properties[k],
 				col: false | FxOrmSqlDDLSync__Dialect.DialectResult;
 
-			prop = collection.properties[k];
-			prop.mapsTo = prop.mapsTo || k;
+			property.mapsTo = property.mapsTo || k;
 
-			col = getColumnTypeRaw(this, collection.name, prop, { for: 'create_table' });
+			col = getColumnTypeRaw(this, collection.name, property, { for: 'create_table' });
 
 			if (col === false) {
-				logJson('createCollection', prop);
+				logJson('createCollection', property);
 				throw new Error(`Invalid type definition for property '${k}'.`);
 			}
 
-			if (prop.key) keys.push(prop.mapsTo);
+			if (property.key) keys.push(property.mapsTo);
 			columns.push(col.value);
 		}
 
 		this.debug("Creating " + collection.name);
 
+		// ? TODO: what it means?
 		if (typeof this.Dialect.processKeys === "function")
 			keys = this.Dialect.processKeys(keys);
 
 		this.total_changes += 1;
+
+		if (this.dbdriver.type === 'psql') {
+			psqlRepairEnumTypes(collection.properties, collection.name, this.dbdriver);
+		}
 		
 		const result_1 = this.Dialect.createCollectionSync(
 			this.dbdriver,

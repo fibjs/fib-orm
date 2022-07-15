@@ -23,6 +23,22 @@ describe("PostgreSQL", function () {
 		driver.execute(`SELECT 'DROP DATABASE ${DBNAME}' WHERE EXISTS (SELECT FROM pg_database WHERE datname = '${DBNAME}');`)
 	})
 
+	describe("protocol format", () => {
+		// protocol aliases
+		;[
+			'postgresql:',
+			'postgres:',
+			'psql:',
+			'pg:',
+		].forEach((protocol) => {
+			it(`alia: ${protocol}`, () => {
+				var postgresqlDriver = Driver.create(`${protocol}//postgres:@localhost:5432`);
+				assert.equal(postgresqlDriver.type, 'psql');
+				assert.equal(postgresqlDriver.uri, 'psql://postgres@localhost:5432');
+			})
+		})
+	});
+
 	describe("basic operation", () => {
 		before(setup());
 		it("#open, #ping, #close, re-open", () => {

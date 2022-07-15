@@ -4,6 +4,7 @@
  * 	dbdriver.execute(getSqlQueryDialect(dbdriver.type)).escape
  * )
  */ 
+import coroutine = require('coroutine');
 import { IDbDriver } from "@fxjs/db-driver";
 import FxORMCore = require("@fxjs/orm-core");
 import SQL = require("../SQL");
@@ -448,17 +449,16 @@ function checkColumnTypes(
 	collection: string,
 	columns: Record<string, FxOrmSqlDDLSync__Column.Property>
 ) {
-	// TODO: use coroutine.parallel to improve it
-	for (var name in columns) {
+	coroutine.parallel(columns, (column: FxOrmSqlDDLSync__Column.Property) => {
+		const name = column.name;
 		if (columns[name].type == "enum") {
 			const col = columns[name];
-			var col_name = collection + "_enum_" + name;
+			const col_name = collection + "_enum_" + name;
 
 			const rows = dbdriver.execute<any[]>(
 				getSqlQueryDialect('psql').escape(
-					"SELECT t.typname, string_agg(e.enumlabel, '|' ORDER BY e.enumsortorder) AS enum_values " +
-						"FROM pg_catalog.pg_type t JOIN pg_catalog.pg_enum e ON t.oid = e.enumtypid  " +
-						"WHERE t.typname = ? GROUP BY 1", [ col_name ]
+`SELECT t.typname, string_agg(e.enumlabel, '|' ORDER BY e.enumsortorder) AS enum_values 
+FROM pg_catalog.pg_type t JOIN pg_catalog.pg_enum e ON t.oid = e.enumtypid WHERE t.typname = ? GROUP BY 1`, [ col_name ]
 				)
 			);
 
@@ -466,6 +466,7 @@ function checkColumnTypes(
 				col.values = rows[0].enum_values.split("|");
 			}
 		}
-	}
+	})
+
 	return columns;
 }

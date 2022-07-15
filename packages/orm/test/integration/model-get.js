@@ -57,10 +57,17 @@ describe("Model.get()", function () {
             var sql;
             var protocol = common.protocol();
 
-            if (protocol == 'sqlite') {
-                sql = "PRAGMA table_info(?)";
-            } else {
-                sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_schema = ?";
+            switch (protocol) {
+                case 'sqlite':
+                    sql = "PRAGMA table_info(?)"; break;
+                case 'mysql':
+                    sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_schema = ?";
+                    break;
+                case 'postgres':
+                    sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_catalog = ?";
+                    break;
+                default:
+                    throw new Error('unsupported protocol: ' + protocol);
             }
 
             var data = db.driver.execQuerySync(sql, [Person.table, db.driver.config.database]);

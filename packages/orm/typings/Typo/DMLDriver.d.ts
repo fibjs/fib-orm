@@ -134,6 +134,9 @@ export declare namespace FxOrmDMLDriver {
     }
     interface DMLDriver_MySQL extends DMLDriver {
         db: FxOrmDb.DatabaseBase<Class_MySQL>;
+        config: DMLDriver['config'] & {
+            timezone: string;
+        };
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_MYSQL | FxOrmDb.AGGREGATION_METHOD_TUPLE__MYSQL)[];
     }
     interface DMLDriverConstructor_PostgreSQL extends DMLDriverConstructor {
@@ -142,6 +145,9 @@ export declare namespace FxOrmDMLDriver {
     }
     interface DMLDriver_PostgreSQL extends DMLDriver {
         db: FxOrmDb.DatabaseBase_PostgreSQL;
+        config: DMLDriver['config'] & {
+            timezone: string;
+        };
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_POSTGRESQL)[];
     }
     interface DMLDriverConstructor_SQLite extends DMLDriverConstructor {
@@ -150,6 +156,9 @@ export declare namespace FxOrmDMLDriver {
     }
     interface DMLDriver_SQLite extends DMLDriver {
         db: FxOrmDb.DatabaseBase_SQLite;
+        config: DMLDriver['config'] & {
+            timezone: string;
+        };
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_SQLITE)[];
     }
     type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<IDbDriver.ISQLConn>;

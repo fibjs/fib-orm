@@ -29,7 +29,8 @@
 		"prepublishOnly": "npm run ci",
 		"cio": "npm run build && npm run test",
 		"ci-mysql": "npm run build && cross-env ORM_PROTOCOL=mysql npm run test",
-		"ci-sqlite": "npm run build && cross-env ORM_PROTOCOL=sqlite npm run test"
+		"ci-sqlite": "npm run build && cross-env ORM_PROTOCOL=sqlite npm run test",
+		"ci-postgres": "npm run build && cross-env ORM_PROTOCOL=postgres npm run test"
 	},
 	"dependencies": {
 		"@fibjs/enforce": "^0.1.1",

@@ -16,13 +16,13 @@ import type {
 	FxSqlQuerySubQuery
 } from '@fxjs/sql-query';
 
-var prepareConditions = function (opts: FxOrmQuery.ChainFindOptions) {
+const prepareConditions = function (opts: FxOrmQuery.ChainFindOptions) {
 	return Utilities.transformPropertyNames(
 		opts.conditions, opts.properties
 	);
 };
 
-var prepareOrder = function (opts: FxOrmQuery.ChainFindOptions) {
+const prepareOrder = function (opts: FxOrmQuery.ChainFindOptions) {
 	return Utilities.transformOrderPropertyNames(
 		opts.order, opts.properties
 	);
@@ -42,7 +42,7 @@ const ChainFind = function (
 
 	const chainRunSync = function (): FxOrmInstance.Instance[] {
 		const conditions: FxSqlQuerySubQuery.SubQueryConditions = Utilities.transformPropertyNames(opts.conditions, opts.properties);
-		Utilities.filterWhereConditionsInput(conditions, Model);
+		Utilities.filterWhereConditionsInput(conditions, { allProperties: Model.allProperties });
 
 		const order = Utilities.transformOrderPropertyNames(opts.order, opts.properties);
 
@@ -53,7 +53,17 @@ const ChainFind = function (
 			order  : order,
 			merge  : merges,
 			offset : opts.offset,
-			exists : opts.exists
+			exists : opts.exists.map(existCond => {
+				const maybeAssoc = Object.values(Model.associations).find(({ association }) => association.mergeTable === existCond.table)?.association;
+				const mergeProps = maybeAssoc?.props || null;
+
+				if (mergeProps) {
+					existCond.conditions = Utilities.transformPropertyNames(existCond.conditions, mergeProps);
+					Utilities.filterWhereConditionsInput(existCond.conditions, { allProperties: mergeProps });
+				}
+
+				return existCond;
+			})
 		});
 		
 		if (foundItems.length === 0) {
@@ -142,7 +152,7 @@ const ChainFind = function (
 			return this;
 		},
 		omit: function () {
-			var omit = null;
+			let omit = null;
 
 			if (arguments.length && Array.isArray(arguments[0])) {
 				omit = arguments[0];

@@ -1,117 +1,54 @@
 /// <reference lib="es2015" />
 
-import util       = require("util");
+import type { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
+import type { FxOrmDMLDriver } from "../../Typo/DMLDriver";
+import type { FxOrmDb } from "../../Typo/Db";
+import type { FxOrmCommon } from "../../Typo/_common";
 
-const pg 			= require("pg");
-import shared  		= require("./_shared");
-import DDL     		= require("../DDL/SQL");
-import { Query }	from "@fxjs/sql-query";
-import utils		= require("./_utils");
+import util = require("util");
 
-var switchableFunctions = {
-	pool: {
-		connect: function<T = any> (cb: FxOrmNS.GenericCallback<T>) {
-			this.db.connect(this.config, function (err: FxOrmError.ExtendedError, client: any, done: Function) {
-				if (!err) {
-					done();
-				}
-				cb(err);
-			});
-		},
-		execSimpleQuery: function<T extends {rows: any} = any> (query: string, cb: FxOrmNS.GenericCallback<T>) {
-			if (this.opts.debug) {
-				require("../../Debug").sql('postgres', query);
-			}
-			this.db.connect(this.config, function (err: FxOrmError.ExtendedError, client: any, done: Function) {
-				if (err) {
-					return cb(err);
-				}
-
-				client.query(query, function (err: FxOrmError.ExtendedError, result: T) {
-					done();
-
-					if (err) {
-						cb(err);
-					} else {
-						cb(null, result.rows);
-					}
-				});
-			});
-			return this;
-		},
-		on: function<T = any> (ev: string, cb: FxOrmNS.GenericCallback<T>) {
-			// Because `pg` is the same for all instances of this driver
-			// we can't keep adding listeners since they are never removed.
-			return this;
-		}
-	},
-	client: {
-		connect: function<T = any> (cb: FxOrmNS.GenericCallback<T>) {
-			this.db.connect(cb);
-		},
-		execSimpleQuery: function<T extends {rows: any} = any> (query: string, cb: FxOrmNS.GenericCallback<T>) {
-			if (this.opts.debug) {
-				require("../../Debug").sql('postgres', query);
-			}
-			this.db.query(query, function (err: FxOrmError.ExtendedError, result: T) {
-				if (err) {
-					cb(err);
-				} else {
-					cb(null, result.rows);
-				}
-			});
-			return this;
-		},
-		on: function<T = any> (ev: string, cb: FxOrmNS.GenericCallback<T>) {
-			if (ev == "error") {
-				this.db.on("error", cb);
-			}
-			return this;
-		}
-	}
-};
+import shared = require("./_shared");
+import DDL = require("../DDL/SQL");
+import Sync = require("@fxjs/sql-ddl-sync");
+import { FxSqlQuery, Query }	from "@fxjs/sql-query";
+import utils = require("./_utils");
+import * as Utilities from "../../Utilities";
+import PostgresqlDatabase from "../DB/postgres";
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor = function (
-	this: FxOrmDMLDriver.DMLDriver_PostgreSQL, config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase_PostgreSQL, opts: FxOrmDMLDriver.DMLDriverOptions
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	config: FxDbDriverNS.DBConnectionConfig,
+	connection: FxOrmDb.DatabaseBase_PostgreSQL,
+	opts: FxOrmDMLDriver.DMLDriverOptions
 ) {
-	var functions = switchableFunctions.client;
-
 	this.dialect = 'postgresql';
-	this.config = config || <FxDbDriverNS.DBConnectionConfig>{};
-	this.opts   = opts || <FxOrmDMLDriver.DMLDriverOptions>{};
-
-	if (!this.config.timezone) {
-		this.config.timezone = "local";
-	}
-
-	this.query  = new Query({ dialect: this.dialect, timezone: this.config.timezone });
-	utils.setCouldPool(this);
-	utils.getKnexInstance(this);
-
+	this.opts = opts || <FxOrmDMLDriver.DMLDriverOptions>{};
+	
 	this.customTypes = {};
 
 	if (connection) {
 		this.db = connection;
 	} else {
-		if (this.config.query && this.config.query.ssl) {
-			config.ssl = true;
-			this.config = util.extend(this.config, config);
-		// } else {
-		// 	this.config = util.extend(this.config, config);
-		// 	this.config = config.href || config;
-		}
-
-		pg.types.setTypeParser(20, Number);
-
-		if (opts.pool) {
-			functions = switchableFunctions.pool;
-			this.db = pg;
-		} else {
-			this.db = new pg.Client(this.config);
-		}
+		this.db = new PostgresqlDatabase(config)
 	}
 
-	util.extend(this.constructor.prototype, functions);
+	Object.defineProperty(this, 'config', {
+		value: this.db.config,
+		writable: false
+	});
+	if (!this.config.timezone) this.config.timezone = "local";
+
+	Object.defineProperty(this, 'ddlDialect', {
+		value: Sync.dialect(this.dialect),
+		writable: false
+	});
+	Object.defineProperty(this, 'query', {
+		value: new Query({ dialect: this.dialect, timezone: this.config.timezone }),
+		writable: false
+	});
+
+	utils.setCouldPool(this);
+	utils.getKnexInstance(this);
 
 	this.aggregate_functions = [
 		"ABS", "CEIL", "FLOOR", "ROUND",
@@ -126,22 +63,64 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor = function (
 
 util.extend(Driver.prototype, shared, DDL);
 
-Driver.prototype.ping = function<T = any> (cb: FxOrmNS.SuccessCallback<T>) {
+Driver.prototype.ping = function<T = any> (this: FxOrmDMLDriver.DMLDriver_PostgreSQL, cb: FxOrmCommon.SuccessCallback<T>) {
 	this.execSimpleQuery("SELECT * FROM pg_stat_activity LIMIT 1", function () {
-		return cb();
+		return cb?.();
 	});
+
 	return this;
 };
 
-Driver.prototype.close = function<T = any> (cb: FxOrmNS.SuccessCallback<T>) {
-	this.db.end();
-
-	if (typeof cb == "function") cb();
-
-	return;
+Driver.prototype.on = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL, ev: string, cb?: FxOrmCommon.VoidCallback
+) {
+	if (ev == "error") {
+		this.db.eventor.on("error", cb);
+		this.db.eventor.on("unhandledError", cb);
+	}
+	return this;
 };
 
-Driver.prototype.getQuery = function () {
+Driver.prototype.connect = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL, cb?: FxOrmCommon.GenericCallback<IDbDriver>
+) {
+	const syncResponse = Utilities.catchBlocking(() => {
+		return this.db.connect()
+	})
+
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
+
+	return syncResponse.result;
+};
+
+Driver.prototype.reconnect = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	cb?: any
+) {
+	const connOpts = this.config.href || this.config;
+
+	this.db = new PostgresqlDatabase(connOpts);
+
+	const syncResponse = Utilities.catchBlocking(() => {
+		return this.connect()
+	})
+
+	if (typeof cb === 'function')
+		cb(null, syncResponse.result);
+
+	return syncResponse.result;
+};
+
+Driver.prototype.close = function<T = any> (cb: FxOrmCommon.VoidCallback<T>) {
+	const errResults = Utilities.catchBlocking(
+		() => this.db.close()
+	)
+
+	Utilities.takeAwayResult(errResults, { no_throw: !!cb, callback: cb });
+	return errResults.result;
+};
+
+Driver.prototype.getQuery = function (this: FxOrmDMLDriver.DMLDriver_PostgreSQL) {
 	return this.query;
 };
 
@@ -149,13 +128,16 @@ Driver.prototype.execSimpleQuery = function (
 	this: FxOrmDMLDriver.DMLDriver_PostgreSQL, query, cb
 ) {
 	if (this.opts.debug) {
-		require("../../Debug").sql('sqlite', query);
+		require("../../Debug").sql('postgresql', query);
 	}
 	return this.db.query(query, cb);
 };
 
-Driver.prototype.find = function (fields, table, conditions, opts, cb: FxOrmNS.GenericCallback<any>) {
-	var q = this.query.select().from(table).select(fields);
+Driver.prototype.find = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	fields, table, conditions, opts, cb: FxOrmCommon.GenericCallback<any>
+) {
+	let q = this.query.select().from(table).select(fields);
 
 	if (opts.offset) {
 		q.offset(opts.offset);
@@ -168,70 +150,84 @@ Driver.prototype.find = function (fields, table, conditions, opts, cb: FxOrmNS.G
 			q.order(opts.order[i][0], opts.order[i][1]);
 		}
 	}
-
 	
 	utils.buildOrderToQuery.apply(this, [q, opts.order]);
 	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
 	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
-	q = q.build();
-
-	this.execSimpleQuery(q, cb);
+	return this.execSimpleQuery(q.build(), cb);
 };
 
-Driver.prototype.count = function (table, conditions, opts, cb) {
-	var q = this.query.select().from(table).count(null, 'c');
+Driver.prototype.count = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	table,
+	conditions,
+	opts,
+	cb
+) {
+	let q = this.query.select().from(table).count(null, 'c');
 
 	q = utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
 	utils.buildExistsToQuery.apply(this, [q, table, opts.exists]);
 
-	q = q.build();
-
-	this.execSimpleQuery(q, cb);
+	return this.execSimpleQuery(q.build(), cb);
 };
 
-Driver.prototype.insert = function (table, data, keyProperties, cb) {
-	var q = this.query.insert().into(table).set(data).build();
+Driver.prototype.insert = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	table, data, keyProperties, cb
+) {
+	const q = this.query.insert().into(table).set(data).build();
+	const syncResponse = Utilities.catchBlocking(() => {
+		const results = this.execSimpleQuery(q + " RETURNING *");
 
-	this.execSimpleQuery(q + " RETURNING *", function (err: FxOrmError.ExtendedError, results: any) {
-		if (err) {
-			return cb(err);
-		}
-
-		var ids: {[k: string]: any} = {},
-			prop;
+		const ids: {[k: string]: any} = {};
 
 		if (keyProperties) {
 			for (let i = 0; i < keyProperties.length; i++) {
-				prop = keyProperties[i];
-                                // Zero is a valid value for an ID column
+				const prop = keyProperties[i];
+								// Zero is a valid value for an ID column
 				ids[prop.name] = results[0][prop.mapsTo] !== undefined ? results[0][prop.mapsTo] : null;
 			}
 		}
-		return cb(null, ids);
+		
+		return ids;
 	});
+
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
+
+	return syncResponse.result;
 };
 
-Driver.prototype.update = function (table, changes, conditions, cb) {
-	var q = this.query.update().into(table).set(changes).where(conditions).build();
+Driver.prototype.update = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	table, changes, conditions, cb
+) {
+	const q = this.query.update().into(table).set(changes).where(conditions).build();
 
-	this.execSimpleQuery(q, cb);
+	return this.execSimpleQuery(q, cb);
 };
 
-Driver.prototype.remove = function (table, conditions, cb) {
-	var q = this.query.remove().from(table).where(conditions).build();
+Driver.prototype.remove = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	table, conditions, cb
+) {
+	const q = this.query.remove().from(table).where(conditions).build();
 
-	this.execSimpleQuery(q, cb);
+	return this.execSimpleQuery(q, cb);
 };
 
-Driver.prototype.clear = function (table, cb) {
-	var q = "TRUNCATE TABLE " + this.query.escapeId(table);
+Driver.prototype.clear = function (this: FxOrmDMLDriver.DMLDriver_PostgreSQL, table, cb) {
+	const q = "TRUNCATE TABLE " + this.query.escapeId(table);
 
-	this.execSimpleQuery(q, cb);
+	return this.execSimpleQuery(q, cb);
 };
 
-Driver.prototype.valueToProperty = function (value, property) {
-	var customType, v;
+Driver.prototype.valueToProperty = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	value, property
+) {
+	let customType, v;
 
 	switch (property.type) {
 		case "object":
@@ -246,7 +242,7 @@ Driver.prototype.valueToProperty = function (value, property) {
 			break;
 		case "point":
 			if (typeof value == "string") {
-				var m = value.match(/\((\-?[\d\.]+)[\s,]+(\-?[\d\.]+)\)/);
+				const m = value.match(/\((\-?[\d\.]+)[\s,]+(\-?[\d\.]+)\)/);
 
 				if (m) {
 					value = { x : parseFloat(m[1]) , y : parseFloat(m[2]) };
@@ -258,7 +254,7 @@ Driver.prototype.valueToProperty = function (value, property) {
             	value = new Date(value);
 			
 			if (util.isDate(value) && this.config.timezone && this.config.timezone != 'local') {
-				var tz = convertTimezone(this.config.timezone);
+				const tz = convertTimezone(this.config.timezone);
 
 				// shift local to UTC
 				value.setTime(value.getTime() - (value.getTimezoneOffset() * 60000));
@@ -304,19 +300,23 @@ Driver.prototype.valueToProperty = function (value, property) {
 	return value;
 };
 
-Driver.prototype.propertyToValue = function (value, property) {
-	var customType;
+Driver.prototype.propertyToValue = function (
+	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
+	value, property
+) {
+	let customType;
 
 	switch (property.type) {
 		case "object":
-			if (value !== null && !Buffer.isBuffer(value)) {
-				value = new Buffer(JSON.stringify(value));
+			if (value !== null) {
+				if (!Buffer.isBuffer(value)) 
+					value = JSON.stringify(value);
 			}
 			break;
 		case "date":
 			if ((util.isNumber(value) || util.isString(value)))
             	value = new Date(value);
-				
+
 			if (util.isDate(value) && this.config.timezone && this.config.timezone != 'local') {
 				var tz = convertTimezone(this.config.timezone);
 

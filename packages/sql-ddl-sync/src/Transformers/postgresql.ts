@@ -1,5 +1,6 @@
 import { FxOrmSqlDDLSync__Column } from "../Typo/Column";
 import { FxOrmSqlDDLSync } from "../Typo/_common";
+import { psqlGetEnumTypeName } from "../Utils";
 
 type ITransformers = FxOrmSqlDDLSync.Transformers<Class_DbConnection>;
 
@@ -144,23 +145,8 @@ export const property2ColumnType: ITransformers['property2ColumnType'] = functio
 				result.value = "BYTEA";
 				break;
 			case "enum":
-				result.value = (ctx?.collection || '') + "_enum_" + (property.mapsTo?.toLowerCase() || '');
-				// before = function (driver, cb) {
-				// 	var type = collection + "_enum_" + property.mapsTo.toLowerCase();
-
-				// 	driver.execute("SELECT * FROM pg_catalog.pg_type WHERE typname = ?", [ type ], function (err, rows) {
-				// 		if (!err && rows.length) {
-				// 			return cb();
-				// 		}
-
-				// 		var values = property.values.map(function (val) {
-				// 			return getSqlQueryDialect('psql').escapeVal(val);
-				// 		});
-
-				// 		return driver.execute("CREATE TYPE " + type + " " +
-				// 		                "AS ENUM (" + values + ")", cb);
-				// 	});
-				// };
+                const collection = (ctx?.collection || '');
+                result.value = psqlGetEnumTypeName(collection, property.mapsTo?.toLowerCase() || '');
 				break;
 			case "point":
 				result.value = "POINT";

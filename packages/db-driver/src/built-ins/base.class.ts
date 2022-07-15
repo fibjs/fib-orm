@@ -39,6 +39,7 @@ function getDriver (name: FxDbDriverNS.DriverType | string) {
         case 'mysql':
             return MySQLDriver
         case 'postgresql':
+        case 'postgres':
         case 'pg':
         case 'psql':
             return PostgreSQLDriver
@@ -102,11 +103,13 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
     }
 	
 	readonly uid: string;
-    get uri () {        
+    get uri () {       
+        const isSQLite = this.config.protocol === 'sqlite:';
         return Driver.formatUrl({
             ...this.config,
-            slashes: this.config.protocol === 'sqlite:' ? false : this.config.slashes,
-            query: this.config.protocol === 'sqlite:' ? {} : this.config.query
+            ...this.type === 'psql' && { protocol: 'psql:' },
+            slashes: isSQLite ? false : this.config.slashes,
+            query: isSQLite ? {} : this.config.query
         });
     }
 	readonly config: FxDbDriverNS.DBConnectionConfig;

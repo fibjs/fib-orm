@@ -1,5 +1,6 @@
 /// <reference types="@fibjs/types" />
 import { IDbDriver } from "@fxjs/db-driver";
+import { FxOrmCoreCallbackNS } from "@fxjs/orm-core";
 import { FxOrmSqlDDLSync__Column } from "./Column";
 import { FxOrmSqlDDLSync__Dialect } from "./Dialect";
 export declare namespace FxOrmSqlDDLSync {
@@ -52,7 +53,7 @@ export declare namespace FxOrmSqlDDLSync {
             isCustomType: boolean;
             property: FxOrmSqlDDLSync__Column.Property;
             value: string;
-            before?: false | (() => any);
+            before?: false | ((driver: IDbDriver.ITypedDriver<Class_DbConnection>, cb?: FxOrmCoreCallbackNS.VoidCallback<void>) => void);
         };
     }
     export {};

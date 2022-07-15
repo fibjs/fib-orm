@@ -1,3 +1,10 @@
+import type { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
+import type { FxOrmDMLDriver } from "../../Typo/DMLDriver";
+import type { FxOrmDb } from "../../Typo/Db";
+import type { FxOrmQuery } from "../../Typo/query";
+import type { FxOrmProperty } from "../../Typo/property";
+import type { FxOrmCommon } from "../../Typo/_common";
+
 import util    = require("util");
 
 import mysql 		= require("../DB/mysql");
@@ -7,13 +14,6 @@ import { FxSqlQuery, Query }	from "@fxjs/sql-query";
 import Sync			= require("@fxjs/sql-ddl-sync");
 import utils		= require("./_utils");
 import * as Utilities from "../../Utilities";
-
-import type { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
-import type { FxOrmDMLDriver } from "../../Typo/DMLDriver";
-import type { FxOrmDb } from "../../Typo/Db";
-import type { FxOrmQuery } from "../../Typo/query";
-import type { FxOrmProperty } from "../../Typo/property";
-import { FxOrmCommon } from "../../Typo/_common";
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_MySQL = function(
 	this: FxOrmDMLDriver.DMLDriver_MySQL,
@@ -123,10 +123,7 @@ Driver.prototype.close = function (
 	return errResults.result;
 };
 
-Driver.prototype.getQuery = function 
-(
-	this: FxOrmDMLDriver.DMLDriver_MySQL
-): FxSqlQuery.Class_Query {
+Driver.prototype.getQuery = function (this: FxOrmDMLDriver.DMLDriver_MySQL): FxSqlQuery.Class_Query {
 	return this.query;
 };
 

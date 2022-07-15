@@ -1,5 +1,6 @@
 /// <reference types="@fibjs/types" />
 
+import coroutine = require('coroutine');
 import { FxOrmSqlDDLSync__Column } from "./Typo/Column";
 import { FxOrmSqlDDLSync } from "./Typo/_common";
 
@@ -106,4 +107,44 @@ export function filterSuppressColumnDrop (
         return true
 
     return !!suppressColumnDrop
+}
+
+export function psqlGetEnumTypeName (
+    collection_name: string,
+    column_name: string
+) {
+    return `${collection_name}_enum_${column_name.toLowerCase()}`
+}
+
+export function psqlRepairEnumTypes (
+    columns: Record<string, FxOrmSqlDDLSync__Column.Property> | FxOrmSqlDDLSync__Column.Property[],
+    collection_name: string,
+    dbdriver: IDbDriver.ITypedDriver<Class_DbConnection>
+) {
+    const enumProperties = Object.values(columns).filter(col => col.type === 'enum');
+    if (!enumProperties.length) return ;
+
+    const sqlQueryDialect = getSqlQueryDialect('psql');
+
+    const rows = dbdriver.execute<{ typname: string }[]>(
+            `SELECT * FROM pg_catalog.pg_type WHERE typname IN ${[ `(${enumProperties.map(p =>
+                sqlQueryDialect.escapeVal(
+                    psqlGetEnumTypeName(collection_name, p.name)
+                )
+            ).join(', ')})`]}`
+    );
+    const allExistedTypes = new Set(rows.map(row => row.typname));
+    const missingEnumTypeProperties = enumProperties.filter(p => !allExistedTypes.has(
+        psqlGetEnumTypeName(collection_name, p.name)
+    ))
+    
+    coroutine.parallel(missingEnumTypeProperties, (property: FxOrmSqlDDLSync__Column.Property) => {
+        const type = psqlGetEnumTypeName(collection_name, property.mapsTo.toLowerCase());
+        
+        const values = property.values.map(function (val) {
+            return sqlQueryDialect.escapeVal(val);
+        });
+
+        dbdriver.execute(`CREATE TYPE ${type} AS ENUM (${values})`);
+    });
 }
