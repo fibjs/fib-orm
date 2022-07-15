@@ -231,7 +231,7 @@ export const Instance = function (
 		let err: FxOrmError.ExtendedError;
 		
 		if (shouldSaveAssocs(saveOptions)) {
-			const syncReponse = Utilities.exposeErrAndResultFromSyncMethod<boolean>(saveAssociationsSync)
+			const syncReponse = Utilities.catchBlocking<boolean>(saveAssociationsSync)
 			err = syncReponse.error;
 		}
 		
@@ -259,7 +259,7 @@ export const Instance = function (
 				return saveInstanceExtraSync();
 			}
 			
-			const { error: err, result: assocSaved } = Utilities.exposeErrAndResultFromSyncMethod<boolean>(saveAssociationsSync)
+			const { error: err, result: assocSaved } = Utilities.catchBlocking<boolean>(saveAssociationsSync)
 
 			if (saved || assocSaved) {
 				runSyncAfterSaveActions(false, err);
@@ -285,7 +285,7 @@ export const Instance = function (
 
 		Utilities.filterWhereConditionsInput(conditions, instance.model());
 
-		const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => opts.driver.update(opts.table, changes, conditions));
+		const syncResponse = Utilities.catchBlocking(() => opts.driver.update(opts.table, changes, conditions));
 			
 		if (syncResponse.error) {
 			saveError(syncResponse.error)
@@ -308,7 +308,7 @@ export const Instance = function (
 
 			let error: FxOrmError.ExtendedError = null;
 
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+			const syncResponse = Utilities.catchBlocking(() => {
 				instance[syncVersionAccessor](instances);
 			});
 			
@@ -325,7 +325,7 @@ export const Instance = function (
 				assocSaved = true;
 			}
 
-			Utilities.throwErrOrCallabckErrResult({ error: error, result: assocSaved }, { callback: cb });
+			Utilities.takeAwayResult({ error: error, result: assocSaved }, { callback: cb });
 		};
 
 		const _saveOneAssociation = function (assoc: FxOrmAssociation.InstanceAssociationItem) {
@@ -445,7 +445,7 @@ export const Instance = function (
 			}
 
 			Utilities.filterWhereConditionsInput(conditions, instance.model());
-			const syncReponse = Utilities.exposeErrAndResultFromSyncMethod(() => opts.driver.update(opts.table, changes, conditions))
+			const syncReponse = Utilities.catchBlocking(() => opts.driver.update(opts.table, changes, conditions))
 			if (!syncReponse.error)
 				opts.data[key] = value;
 
@@ -677,8 +677,8 @@ export const Instance = function (
 		collectParamsForSave(args);
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(instance.saveSync, args);
-			Utilities.throwErrOrCallabckErrResult({ error: syncResponse.error, result: instance }, { no_throw: !!cb, callback: cb });
+			const syncResponse = Utilities.catchBlocking(instance.saveSync, args);
+			Utilities.takeAwayResult({ error: syncResponse.error, result: instance }, { no_throw: !!cb, callback: cb });
 		});
 
 		return this;
@@ -711,7 +711,7 @@ export const Instance = function (
 			emitCallbackStyleEvent("beforeRemove", instance);
 			
 			Utilities.filterWhereConditionsInput(conditions, instance.model());
-			const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => opts.driver.remove(opts.table, conditions));
+			const syncResponse = Utilities.catchBlocking(() => opts.driver.remove(opts.table, conditions));
 
 			Hook.trigger(instance, opts.hooks.afterRemove, !syncResponse.error);
 
@@ -727,8 +727,8 @@ export const Instance = function (
 	})
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "remove", function (cb: FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance>) {
-		const syncReponse = Utilities.exposeErrAndResultFromSyncMethod(() => instance.removeSync());
-		Utilities.throwErrOrCallabckErrResult(syncReponse, { callback: cb });
+		const syncReponse = Utilities.catchBlocking(() => instance.removeSync());
+		Utilities.takeAwayResult(syncReponse, { callback: cb });
 
 		return this;
 	});

@@ -7,8 +7,21 @@ var ORM         = require('../');
 
 common.ORM = ORM;
 
+/**
+ * 
+ * @returns {'mysql' | 'sqlite' | 'postgres'}
+ */
 common.protocol = function () {
-  return (process.env.ORM_PROTOCOL || '').toLocaleLowerCase();
+  const orig = (process.env.ORM_PROTOCOL || '').toLocaleLowerCase();
+  switch (orig) {
+    case 'postgresql':
+    case 'postgres':
+    case 'psql':
+    case 'pg':
+      return 'postgres';
+    default:
+      return orig;
+  }
 };
 
 common.isTravis = function() {
@@ -33,15 +46,20 @@ common.hasConfig = function (proto) {
   return (config.hasOwnProperty(proto) ? 'found' : 'not-defined');
 };
 
+/**
+ * @typedef {import('./config.ci')} ITestConfig
+ * @returns {ITestConfig[keyof ITestConfig]}
+ */
 common.getConfig = function () {
+  var protocol = common.protocol();
   if (common.isTravis()) {
-    var config = require("./config.ci")[this.protocol()];
+    var config = require("./config.ci")[protocol];
   } else {
-    var config = require("./config")[this.protocol()];
+    var config = require("./config")[protocol];
   }
   
   if (typeof config == "string") {
-    config = require("url").parse(config, this.protocol());
+    config = require("url").parse(config, protocol);
   }
 
   if (config.hasOwnProperty("auth")) {
@@ -61,8 +79,8 @@ common.getConfig = function () {
 };
 
 common.getConnectionString = function (opts) {
-  var config   = this.getConfig();
-  var protocol = this.protocol();
+  var config   = common.getConfig();
+  var protocol = common.protocol();
   var query;
 
   _.defaults(config, {
@@ -84,13 +102,14 @@ common.getConnectionString = function (opts) {
     case 'mongodb':
       if (common.isTravis()) {
         if (protocol == 'redshift') protocol = 'postgres';
-        return util.format("%s://%s@%s/%s?%s",
-          protocol, config.user, config.host, config.database, query
+        return util.format("%s://%s@%s%s/%s?%s",
+          protocol, config.user, config.host,
+          config.port ? `:${config.port}` : '', config.database, query
         );
       } else {
-        return util.format("%s://%s:%s@%s/%s?%s",
+        return util.format("%s://%s:%s@%s%s/%s?%s",
           protocol, config.user, config.password,
-          config.host, config.database, query
+          config.host, config.port ? `:${config.port}` : '', config.database, query
         ).replace(':@','@');
       }
     case 'sqlite':

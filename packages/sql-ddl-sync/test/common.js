@@ -1,17 +1,19 @@
 const FxOrmCore = require('@fxjs/orm-core')
+const { addSqlQueryDialect, getAllSqlQueryDialects } = require('../lib/Utils');
 
 exports.dialect = null;
 exports.table   = "sql_ddl_sync_test_table";
+const Dialects = getAllSqlQueryDialects();
 
-const Dialects = require('@fxjs/sql-query/lib/Dialects')
-Dialects['fake'] = {
+
+addSqlQueryDialect('fake', {
 	escapeId  : function (id) {
 		return "$$" + id + "$$";
 	},
 	escapeVal : function (val) {
 		return "^^" + val + "^^";
 	}
-}
+});
 
 exports.fakeDriver = {
 	type: 'fake',

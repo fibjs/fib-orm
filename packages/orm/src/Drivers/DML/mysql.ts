@@ -1,3 +1,10 @@
+import type { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
+import type { FxOrmDMLDriver } from "../../Typo/DMLDriver";
+import type { FxOrmDb } from "../../Typo/Db";
+import type { FxOrmQuery } from "../../Typo/query";
+import type { FxOrmProperty } from "../../Typo/property";
+import type { FxOrmCommon } from "../../Typo/_common";
+
 import util    = require("util");
 
 import mysql 		= require("../DB/mysql");
@@ -7,13 +14,6 @@ import { FxSqlQuery, Query }	from "@fxjs/sql-query";
 import Sync			= require("@fxjs/sql-ddl-sync");
 import utils		= require("./_utils");
 import * as Utilities from "../../Utilities";
-
-import type { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
-import type { FxOrmDMLDriver } from "../../Typo/DMLDriver";
-import type { FxOrmDb } from "../../Typo/Db";
-import type { FxOrmQuery } from "../../Typo/query";
-import type { FxOrmProperty } from "../../Typo/property";
-import { FxOrmCommon } from "../../Typo/_common";
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_MySQL = function(
 	this: FxOrmDMLDriver.DMLDriver_MySQL,
@@ -85,11 +85,11 @@ Driver.prototype.on = function (
 Driver.prototype.connect = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, cb?: FxOrmCommon.GenericCallback<IDbDriver>
 ) {
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		return this.db.connect()
 	})
 
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 	return syncResponse.result;
 };
@@ -102,7 +102,7 @@ Driver.prototype.reconnect = function (
 
 	this.db = new mysql.Database(connOpts);
 
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		return this.connect()
 	})
 
@@ -115,18 +115,15 @@ Driver.prototype.reconnect = function (
 Driver.prototype.close = function (
 	this: FxOrmDMLDriver.DMLDriver_MySQL, cb: FxOrmCommon.VoidCallback
 ) {
-	const errResults = Utilities.exposeErrAndResultFromSyncMethod(
+	const errResults = Utilities.catchBlocking(
 		() => this.db.close()
 	)
 
-	Utilities.throwErrOrCallabckErrResult(errResults, { no_throw: !!cb, callback: cb });
+	Utilities.takeAwayResult(errResults, { no_throw: !!cb, callback: cb });
 	return errResults.result;
 };
 
-Driver.prototype.getQuery = function 
-(
-	this: FxOrmDMLDriver.DMLDriver_MySQL
-): FxSqlQuery.Class_Query {
+Driver.prototype.getQuery = function (this: FxOrmDMLDriver.DMLDriver_MySQL): FxSqlQuery.Class_Query {
 	return this.query;
 };
 
@@ -185,7 +182,7 @@ Driver.prototype.insert = function (
 	                  .set(data)
 	                  .build();
 
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		const info = this.execSimpleQuery(q);
 
 		const ids: FxOrmQuery.InsertResult = {};
@@ -204,7 +201,7 @@ Driver.prototype.insert = function (
 		return ids
 	})
 
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 	return syncResponse.result;
 };

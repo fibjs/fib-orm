@@ -6,6 +6,7 @@ var helper = require('../support/spec_helper');
 var common = require('../common');
 var ORM = require('../../');
 var coroutine = require('coroutine');
+const { lowerCaseColumn } = require("../support/_helpers");
 
 describe("Model.get()", function () {
     var db = null;
@@ -56,13 +57,23 @@ describe("Model.get()", function () {
             var sql;
             var protocol = common.protocol();
 
-            if (protocol == 'sqlite') {
-                sql = "PRAGMA table_info(?)";
-            } else {
-                sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_schema = ?";
+            switch (protocol) {
+                case 'sqlite':
+                    sql = "PRAGMA table_info(?)"; break;
+                case 'mysql':
+                    sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_schema = ?";
+                    break;
+                case 'postgres':
+                    sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_catalog = ?";
+                    break;
+                default:
+                    throw new Error('unsupported protocol: ' + protocol);
             }
 
             var data = db.driver.execQuerySync(sql, [Person.table, db.driver.config.database]);
+            if (protocol === 'mysql') { // support mysql 8.0+
+                data = data.map(col => lowerCaseColumn(col));
+            }
             var names = _.map(data, protocol == 'sqlite' ? 'name' : 'column_name')
 
             assert.equal(typeof Person.properties.name, 'object');

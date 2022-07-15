@@ -27,7 +27,7 @@ export declare namespace FxOrmDMLDriver {
         new (config: FxDbDriverNS.DBConnectionConfig, connection: FxOrmDb.DatabaseBase, opts: FxOrmDMLDriver.DMLDriverOptions): DMLDriver;
         prototype: DMLDriver;
     }
-    interface DMLDriver<ConnType = any> {
+    interface DMLDriver<ConnType extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
         readonly db: FxOrmDb.DatabaseBase<ConnType>;
         readonly config: FxOrmDb.DatabaseBase<ConnType>['config'];
         customTypes: {
@@ -41,7 +41,7 @@ export declare namespace FxOrmDMLDriver {
         getQuery: {
             (): FxSqlQuery.Class_Query;
         };
-        readonly ddlDialect: FxOrmSqlDDLSync__Dialect.Dialect;
+        readonly ddlDialect: FxOrmSqlDDLSync__Dialect.Dialect<IDbDriver.ISQLConn>;
         doSync<T = any>(opts?: FxOrmDMLShared.SyncOptions): this;
         doDrop<T = any>(opts?: FxOrmDMLShared.DropOptions): this;
         connect: {
@@ -134,6 +134,9 @@ export declare namespace FxOrmDMLDriver {
     }
     interface DMLDriver_MySQL extends DMLDriver {
         db: FxOrmDb.DatabaseBase<Class_MySQL>;
+        config: DMLDriver['config'] & {
+            timezone: string;
+        };
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_MYSQL | FxOrmDb.AGGREGATION_METHOD_TUPLE__MYSQL)[];
     }
     interface DMLDriverConstructor_PostgreSQL extends DMLDriverConstructor {
@@ -142,6 +145,9 @@ export declare namespace FxOrmDMLDriver {
     }
     interface DMLDriver_PostgreSQL extends DMLDriver {
         db: FxOrmDb.DatabaseBase_PostgreSQL;
+        config: DMLDriver['config'] & {
+            timezone: string;
+        };
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_POSTGRESQL)[];
     }
     interface DMLDriverConstructor_SQLite extends DMLDriverConstructor {
@@ -150,9 +156,12 @@ export declare namespace FxOrmDMLDriver {
     }
     interface DMLDriver_SQLite extends DMLDriver {
         db: FxOrmDb.DatabaseBase_SQLite;
+        config: DMLDriver['config'] & {
+            timezone: string;
+        };
         aggregate_functions: (FxOrmDb.AGGREGATION_METHOD_SQLITE)[];
     }
-    type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect;
+    type DefaultSqlDialect = FxOrmSqlDDLSync__Dialect.Dialect<IDbDriver.ISQLConn>;
 }
 export declare namespace FxOrmDMLShared {
     interface SyncOptions {

@@ -8,7 +8,7 @@ describe("Date Type", function () {
     var db = null;
     var Person = null;
     var tz_offset = 0;
-    var is_mysql = common.protocol() === 'mysql';
+    var is_db_with_tz = common.protocol() === 'mysql' || common.protocol() === 'postgres';
 
     var setup = function (hooks) {
         return function () {
@@ -27,7 +27,7 @@ describe("Date Type", function () {
     before(function () {
         db = helper.connect();
 
-        if (is_mysql)
+        if (is_db_with_tz)
             tz_offset = (new Date(0)).getTimezoneOffset() * 6e4
     });
 
@@ -38,9 +38,9 @@ describe("Date Type", function () {
     describe("opt", function () {
         before(setup());
 
-        var birthday_input_for_find = is_mysql ? '1971-08-29 00:00:00' : '1971-08-29T00:00:00Z'
-        var birthday_input_between_from = is_mysql ? '1970-08-29 00:00:00' : '1970-08-29T00:00:00Z'
-        var birthday_input_between_to = is_mysql ? '2000-08-29 00:00:00' : '2000-08-29T00:00:00Z'
+        var birthday_input_for_find = is_db_with_tz ? '1971-08-29 00:00:00' : '1971-08-29T00:00:00Z'
+        var birthday_input_between_from = is_db_with_tz ? '1970-08-29 00:00:00' : '1970-08-29T00:00:00Z'
+        var birthday_input_between_to = is_db_with_tz ? '2000-08-29 00:00:00' : '2000-08-29T00:00:00Z'
 
         it("insert", function () {
             var John = Person.createSync({

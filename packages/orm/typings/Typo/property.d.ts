@@ -31,6 +31,9 @@ export declare namespace FxOrmProperty {
         alwaysValidate?: boolean;
         lazyname?: string;
     }
+    /**
+     * @deprecated use Record<string, NormalizedProperty> instead
+     */
     interface NormalizedPropertyHash {
         [key: string]: NormalizedProperty;
     }

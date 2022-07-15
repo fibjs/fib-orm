@@ -392,7 +392,8 @@ describe("hasMany extra properties", function () {
                                     'pets_id', 'id'
                                 ],
                                 conditions: {
-                                    since: "non_existed_extra_field"
+                                    // 1day after test since
+                                    since: Date.now() + 86400 * 1e3
                                 }
                             }
                         ],
@@ -550,7 +551,8 @@ describe("hasMany extra properties", function () {
                                     'pets_id', 'id'
                                 ],
                                 conditions: {
-                                    since: "non_existed_extra_field"
+                                    // 1day after test since
+                                    since: Date.now() + 86400 * 1e3
                                 }
                             }
                         ],

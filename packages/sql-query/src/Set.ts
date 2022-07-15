@@ -18,7 +18,7 @@ export function build (
 	const safeSet: typeof set = {};
 
 	for (let k in set) {
-		safeSet[k] = escapeValForKnex(set[k], this.Dialect, opts)
+		safeSet[k] = escapeValForKnex(set[k], Dialect, opts)
 	}
 
 	knexQueryBuilder.update(safeSet);

@@ -419,8 +419,22 @@ export function getRealPath (path_str: string, stack_index?: number) {
 	return path_str;
 };
 
+/**
+ * @description rename a field name in <dataIn> according to the name map in <properties>
+ * @example
+ * ```
+ * dataIn: { a: 1, b: 2 };
+ * properties: { a: { mapsTo: 'a1' }, b: { mapsTo: 'b' } };
+ * -->
+ * result: { a1: 1, b: 2 };
+ * ```
+ * 
+ * @param dataIn 
+ * @param properties 
+ */
 export function transformPropertyNames (
-	dataIn: FxOrmInstance.InstanceDataPayload, properties: FxOrmProperty.NormalizedPropertyHash | FxOrmModel.ModelPropertyDefinition
+	dataIn: FxOrmInstance.InstanceDataPayload,
+	properties: FxOrmProperty.NormalizedPropertyHash | FxOrmModel.ModelPropertyDefinition
 ) {
 	var prop: FxOrmModel.ModelPropertyDefinition;
 	var dataOut: FxOrmInstance.InstanceDataPayload = {};
@@ -593,8 +607,8 @@ export function isDriverNotSupportedError (err: FxOrmError.ExtendedError) {
 	return false;
 }
 
-export const exposeErrAndResultFromSyncMethod = FxORMCore.Utils.exposeErrAndResultFromSyncMethod
-export const throwErrOrCallabckErrResult = FxORMCore.Utils.throwErrOrCallabckErrResult
+export const catchBlocking = FxORMCore.catchBlocking;
+export const takeAwayResult = FxORMCore.takeAwayResult
 
 export function doWhenErrIs (
 	compare: {
@@ -651,21 +665,24 @@ export function is_model_conjunctions_key (k: string) {
  */
 // value keyof FxSqlQuerySql.DetailedQueryWhereCondition
 const comps = ['val', 'from', 'to'];
-function filter_date_for_where_conditions(opt: FxOrmInstance.InstanceDataPayload, m: FxOrmModel.Model) {
+function filter_date_for_where_conditions(
+	opt: FxOrmInstance.InstanceDataPayload,
+	m: Pick<FxOrmModel.Model, 'allProperties'>
+) {
 	for (let k in opt) {
 		if (is_model_conjunctions_key(k))
 			Array.isArray(opt[k]) && opt[k].forEach((item: any) => filter_date_for_where_conditions(item, m));
 		else {
-			var p = m.allProperties[k];
+			let p = m.allProperties[k];
 			if (p && p.type === 'date') {
-				var v: any = opt[k];
+				let v: any = opt[k];
 
 				if (!util.isDate(v)) {
 					if (util.isNumber(v) || util.isString(v))
 						opt[k] = new Date(v);
 					else if (util.isObject(v)) {
 						comps.forEach(c => {
-							var v1 = v[c];
+							let v1 = v[c];
 
 							if (Array.isArray(v1)) {
 								v1.forEach((v2: any, i) => {
@@ -683,12 +700,18 @@ function filter_date_for_where_conditions(opt: FxOrmInstance.InstanceDataPayload
 	}
 }
 
+/**
+ * @description do some mutation for field-value in conditions
+ * 
+ * @param conditions 
+ * @param host 
+ */
 export function filterWhereConditionsInput (
 	conditions: FxSqlQuerySubQuery.SubQueryConditions,
-	m: FxOrmModel.Model
+	host: { allProperties: FxOrmProperty.NormalizedPropertyHash }
 ): FxSqlQuerySubQuery.SubQueryConditions {
 	if (typeof conditions === 'object') {
-		filter_date_for_where_conditions(conditions, m);
+		filter_date_for_where_conditions(conditions, host);
 	}
 
 	return conditions;

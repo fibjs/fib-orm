@@ -63,7 +63,7 @@ util.extend(Driver.prototype, shared, DDL);
 Driver.prototype.ping = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite, cb?
 ) {
-	Utilities.throwErrOrCallabckErrResult({ error: null }, { callback: cb, use_tick: true });
+	Utilities.takeAwayResult({ error: null }, { callback: cb, use_tick: true });
 	return this;
 };
 
@@ -79,22 +79,22 @@ Driver.prototype.on = function (this: FxOrmDMLDriver.DMLDriver_SQLite,
 Driver.prototype.connect = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite, cb?: FxOrmCommon.GenericCallback<IDbDriver>
 ) {
-	const errResults = Utilities.exposeErrAndResultFromSyncMethod(
+	const errResults = Utilities.catchBlocking(
 		() => this.db.connect()
 	)
 
-	Utilities.throwErrOrCallabckErrResult(errResults, { no_throw: !!cb, callback: cb });
+	Utilities.takeAwayResult(errResults, { no_throw: !!cb, callback: cb });
 	return errResults.result;
 };
 
 Driver.prototype.close = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite, cb?
 ) {
-	const errResults = Utilities.exposeErrAndResultFromSyncMethod(
+	const errResults = Utilities.catchBlocking(
 		() => this.db.close()
 	)
 
-	Utilities.throwErrOrCallabckErrResult(errResults, { no_throw: !!cb, callback: cb });
+	Utilities.takeAwayResult(errResults, { no_throw: !!cb, callback: cb });
 	return errResults.result;
 };
 
@@ -162,7 +162,7 @@ Driver.prototype.insert = function (
 		require("../../Debug").sql('sqlite', q);
 	}
 
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		const info = this.execSimpleQuery<FxOrmQuery.InsertResult>(q);
 
         if (!keyProperties) return null;
@@ -182,7 +182,7 @@ Driver.prototype.insert = function (
 
 		return ids;
 	});
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 	return syncResponse.result
 };
@@ -219,7 +219,7 @@ Driver.prototype.remove = function (
 Driver.prototype.clear = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite, table, cb?
 ) {
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResponse = Utilities.catchBlocking(() => {
 		this.execQuery(
 			this.query.remove()
 	                  .from(table)
@@ -233,7 +233,7 @@ Driver.prototype.clear = function (
 					  .build()
 		);
 	})
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 	return syncResponse.result;
 };

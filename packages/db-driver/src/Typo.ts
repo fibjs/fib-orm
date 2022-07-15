@@ -1,7 +1,7 @@
 import { FxOrmCoreCallbackNS } from "@fxjs/orm-core"
 
 export namespace FxDbDriverNS {
-    export type DriverType = 'mysql' | 'sqlite' | 'redis' | 'mongodb' | 'unknown'
+    export type DriverType = 'mysql' | 'sqlite' | 'psql' | 'mssql' | 'redis' | 'mongodb' | 'unknown'
 
     export interface ConnectionInputArgs {
         protocol?: string;

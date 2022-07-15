@@ -4,7 +4,6 @@ import { FxSqlQueryDialect } from "../Typo/Dialect";
 import { FxSqlQuery } from "../Typo/Query";
 import { FxSqlQuerySql } from "../Typo/Sql";
 
-
 const DataTypes = {
 	isSQLITE: true,
 	id:      'INTEGER PRIMARY KEY AUTOINCREMENT',
@@ -62,13 +61,11 @@ function escapeVal (val: any, timeZone?: FxSqlQuery.FxSqlQueryTimezone) {
 			val = JSON.stringify(val);
 	}
 
-	// No need to escape backslashes with default PostgreSQL 9.1+ config.
-	// Google 'postgresql standard_conforming_strings' for details.
 	return "'" + val.replace(/\'/g, "''") + "'";
 };
 
 const Dialect: FxSqlQueryDialect.Dialect = {
-	type: 'sqlite',
+	type: 'sqlite' as const,
 	DataTypes,
 	escape,
 	escapeId,

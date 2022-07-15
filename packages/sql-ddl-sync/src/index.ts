@@ -6,21 +6,29 @@ import { FxOrmSqlDDLSync__DbIndex } from "./Typo/DbIndex";
 import { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
 import { FxOrmSqlDDLSync } from "./Typo/_common";
-import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop } from './Utils';
+import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop, psqlGetEnumTypeName, psqlRepairEnumTypes } from './Utils';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 
 import "./Dialects";
+import * as Transformers from './Transformers';
 import { IDbDriver } from "@fxjs/db-driver";
 
 const noOp = () => {};
 
-export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDDLSync__Dialect.Dialect {
-	const Dialects = require('./Dialects')
+export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType | 'psql') {
+	const Dialects = require('./Dialects') as typeof import('./Dialects');
 
-	if (!Dialects[name])
-		throw new Error(`no dialect with name '${name}'`)
-		
-	return Dialects[name];
+	switch (name) {
+		case 'psql':
+		case 'postgresql':
+			return Dialects['postgresql'];
+		case 'sqlite':
+		case 'mssql':
+		case 'mysql':
+			return Dialects[name];
+		default:
+			throw new Error(`no dialect with name '${name}'`)
+		}
 }
 
 /**
@@ -29,7 +37,7 @@ export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType): FxOrmSqlDD
  * @param collection 
  * @param force_sync (dangerous) if force re-syncing property to column
  */
-function processCollection (
+function processCollection(
 	syncInstnace: Sync,
 	collection: FxOrmSqlDDLSync__Collection.Collection,
 	opts?: {
@@ -83,7 +91,7 @@ function getIndexName (
 }
 
 /**
- * @param collection table where column created
+ * @param collection_name table where column created
  * @param prop column's property
  */
 function getColumnTypeRaw (
@@ -121,7 +129,7 @@ function getColumnTypeRaw (
 	};
 }
 
-export class Sync<ConnType = any> {
+export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 	strategy: FxOrmSqlDDLSync.SyncCollectionOptions['strategy'] = 'soft'
 	/**
 	 * @description total changes count in this time `Sync`
@@ -131,17 +139,18 @@ export class Sync<ConnType = any> {
 	
 	readonly collections: FxOrmSqlDDLSync__Collection.Collection[]
 
-	readonly dbdriver: IDbDriver<ConnType>
-	readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect
+	readonly dbdriver: IDbDriver.ITypedDriver<T>
+	readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect<T>
+	readonly transformers: FxOrmSqlDDLSync.Transformers<T>
 	/**
 	 * @description customTypes
 	 */
-	readonly types: FxOrmSqlDDLSync__Driver.CustomPropertyTypeHash
+	readonly types: Record<string, FxOrmSqlDDLSync__Driver.CustomPropertyType<T>>
 
 	private suppressColumnDrop: boolean
 	private debug: Exclude<FxOrmSqlDDLSync.SyncOptions['debug'], false>
 
-	constructor (options: FxOrmSqlDDLSync.SyncOptions<ConnType>) {
+	constructor (options: FxOrmSqlDDLSync.SyncOptions<T>) {
 		const dbdriver = options.dbdriver
 
 		this.suppressColumnDrop = filterSuppressColumnDrop(options.suppressColumnDrop !== false, dbdriver.type)
@@ -153,6 +162,7 @@ export class Sync<ConnType = any> {
 		Object.defineProperty(this, 'collections', { value: [], writable: false })
 		Object.defineProperty(this, 'dbdriver', { value: dbdriver, writable: false })
 		Object.defineProperty(this, 'Dialect', { value: dialect(dbdriver.type as any), writable: false })
+		Object.defineProperty(this, 'transformers', { value: (Transformers as any)[dbdriver.type], writable: false })
 	}
 
 	[sync_method: string]: any
@@ -174,7 +184,7 @@ export class Sync<ConnType = any> {
 		return this.collections.find(collection => collection.name === collection_name) || null
 	}
 
-	defineType (type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType): this {
+	defineType (type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType<T>): this {
 		this.types[type] = proto;
 		return this;
 	}
@@ -191,29 +201,33 @@ export class Sync<ConnType = any> {
 		let keys: string[] = [];
 
 		for (let k in collection.properties) {
-			let prop: FxOrmSqlDDLSync__Column.Property,
+			let property: FxOrmSqlDDLSync__Column.Property = collection.properties[k],
 				col: false | FxOrmSqlDDLSync__Dialect.DialectResult;
 
-			prop = collection.properties[k];
-			prop.mapsTo = prop.mapsTo || k;
+			property.mapsTo = property.mapsTo || k;
 
-			col = getColumnTypeRaw(this, collection.name, prop, { for: 'create_table' });
+			col = getColumnTypeRaw(this, collection.name, property, { for: 'create_table' });
 
 			if (col === false) {
-				logJson('createCollection', prop);
+				logJson('createCollection', property);
 				throw new Error(`Invalid type definition for property '${k}'.`);
 			}
 
-			if (prop.key) keys.push(prop.mapsTo);
+			if (property.key) keys.push(property.mapsTo);
 			columns.push(col.value);
 		}
 
 		this.debug("Creating " + collection.name);
 
+		// ? TODO: what it means?
 		if (typeof this.Dialect.processKeys === "function")
 			keys = this.Dialect.processKeys(keys);
 
 		this.total_changes += 1;
+
+		if (this.dbdriver.type === 'psql') {
+			psqlRepairEnumTypes(collection.properties, collection.name, this.dbdriver);
+		}
 		
 		const result_1 = this.Dialect.createCollectionSync(
 			this.dbdriver,

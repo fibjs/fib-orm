@@ -51,11 +51,3 @@ And then run:
 ```sh
 URI=mysql://username:password@localhost/database fibjs test/run-db
 ```
-
-## Credits
-
-This repo is checked out from [Diogo Resende]'s [node-sql-ddl-sync], which is one part of `orm`, and orm is the original source of `@fxjs/orm`. Thx a lot to him and his partner.
-
-
-[Diogo Resende]:dresende@thinkdigital.pt
-[node-sql-ddl-sync]:./README_orig.md

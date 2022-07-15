@@ -71,7 +71,7 @@ export const doDrop: FxOrmDMLDriver.DMLDriver['doDrop'] = function (
 	pending = drop_queries.length;
 
 	for (let i = 0; i < drop_queries.length; i++) {
-		err = Utilities.exposeErrAndResultFromSyncMethod(this.execQuery, [drop_queries[i]], { thisArg: this }).error
+		err = Utilities.catchBlocking(this.execQuery, [drop_queries[i]], { thisArg: this }).error
 		if (err || --pending === 0)
 			break
 	}

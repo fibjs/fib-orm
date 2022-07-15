@@ -32,11 +32,15 @@ exports.getKnexInstance = (driver, opts) => {
 			break
 		case 'mysql':
 			type = 'mysql2'
+			break
+		case 'psql':
+			type = 'pg'
+			break
 	}
 
 	return FibKnex({
 		...opts,
-		client: driver.type,
+		client: type,
 		// useNullAsDefault: true
 	})
 }

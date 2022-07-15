@@ -1,5 +1,6 @@
 var helper   = require('../support/spec_helper');
 var common   = require('../common');
+const { lowerCaseColumn } = require('../support/_helpers');
 var protocol = common.protocol();
 
 describe("hasMany - callback", function () {
@@ -785,6 +786,7 @@ describe("hasMany - callback", function () {
             assert.equal(cols[1].name, 'emails_text');
             assert.equal(cols[1].type, 'TEXT');
           } else if (protocol == 'mysql') {
+            cols = cols.map(col => lowerCaseColumn(col));
             assert.equal(cols[0].column_name, 'account_id');
             assert.equal(cols[0].data_type,   'int');
             assert.equal(cols[1].column_name, 'emails_text');

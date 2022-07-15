@@ -2,7 +2,7 @@ import { FxSqlQuery } from "./Query"
 import { FxSqlQuerySql } from "./Sql"
 
 export namespace FxSqlQueryDialect {
-	export type DialectType = 'mysql' | 'mssql' | 'sqlite'/*  | 'postgresql' */
+	export type DialectType = 'mysql' | 'mssql' | 'sqlite' | 'postgresql'
 
 	export interface DataTypesDescriptorBase {
 		id: string
@@ -18,9 +18,9 @@ export namespace FxSqlQueryDialect {
 		isSQLITE?: boolean
 	}
 
-	export interface Dialect {
+	export interface Dialect<T extends DialectType = DialectType> {
 		DataTypes: DataTypesDescriptor
-		type: DialectType
+		type: T
 
 		escape: {
 			(
@@ -39,6 +39,9 @@ export namespace FxSqlQueryDialect {
 		limitAsTop: boolean
 
 		readonly knex: import('@fxjs/knex')
+
+		// only postgresql has it
+		defaultValuesStmt?: T extends 'postgresql' ? string : never
 	}
 
 	export type fn_escape = Dialect['escape']

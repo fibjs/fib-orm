@@ -2,16 +2,30 @@
 /// <reference types="fib-pool" />
 import { FxDbDriverNS } from '../Typo';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
+declare function getDriver(name: 'mysql'): typeof MySQLDriver;
+declare function getDriver(name: 'psql' | 'postgresql' | 'pg'): typeof MySQLDriver;
 declare function getDriver(name: 'sqlite'): typeof SQLiteDriver;
 declare function getDriver(name: 'redis'): typeof RedisDriver;
-declare function getDriver(name: 'mysql'): typeof MySQLDriver;
-export declare class Driver<CONN_TYPE = any> {
+export declare namespace Driver {
+    export type IConnTypeEnum = Class_DbConnection | Class_MongoDB | Class_Redis;
+    type IClass_PostgreSQL = Class_DbConnection;
+    type IClass_MSSQL = Class_DbConnection;
+    export type ISQLConn = IClass_PostgreSQL | IClass_MSSQL | Class_SQLite | Class_MySQL;
+    export type ITypedDriver<T extends IConnTypeEnum = IConnTypeEnum> = T extends ISQLConn ? SQLDriver<T> : T extends Class_MongoDB ? MongoDriver : T extends Class_Redis ? RedisDriver : Driver<T>;
+    export {};
+}
+export declare class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnum> {
     static getDriver: typeof getDriver;
-    static create(input: FxDbDriverNS.ConnectionInputArgs | string): SQLiteDriver;
-    uid: string;
+    static create(input: FxDbDriverNS.ConnectionInputArgs | string): MySQLDriver;
+    /**
+     * @descritpin there's a bug in fibjs <= 0.35.x, only string type `field` would be
+     * used by `url.format`
+     */
+    static formatUrl(input: FxDbDriverNS.ConnectionInputArgs): string;
+    readonly uid: string;
     get uri(): string;
-    config: FxDbDriverNS.DBConnectionConfig;
-    extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig;
+    readonly config: FxDbDriverNS.DBConnectionConfig;
+    readonly extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig;
     type: FxDbDriverNS.DriverType;
     connection: CONN_TYPE;
     pool: FibPoolNS.FibPool<CONN_TYPE, any>;
@@ -44,7 +58,7 @@ export declare class Driver<CONN_TYPE = any> {
     useTrans(callback: (conn_for_trans: CONN_TYPE) => any): any;
     [sync_method: string]: any;
 }
-export declare class SQLDriver<CONN_TYPE> extends Driver<CONN_TYPE> implements FxDbDriverNS.SQLDriver {
+export declare class SQLDriver<CONN_TYPE extends Driver.IConnTypeEnum> extends Driver<CONN_TYPE> implements FxDbDriverNS.SQLDriver {
     currentDb: FxDbDriverNS.SQLDriver['currentDb'];
     switchDb(targetDb: string): void;
     /**
@@ -76,6 +90,19 @@ export declare class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbD
     trans<T = any>(cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): boolean;
     rollback(): void;
     getConnection(): Class_MySQL;
+    execute<T = any>(sql: string): T;
+}
+export declare class PostgreSQLDriver extends SQLDriver<Class_DbConnection> implements FxDbDriverNS.SQLDriver {
+    constructor(conn: FxDbDriverNS.ConnectionInputArgs | string);
+    switchDb(targetDb: string): void;
+    open(): Class_DbConnection;
+    close(): void;
+    ping(): void;
+    begin(): void;
+    commit(): void;
+    trans<T = any>(cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): boolean;
+    rollback(): void;
+    getConnection(): Class_DbConnection;
     execute<T = any>(sql: string): T;
 }
 export declare class SQLiteDriver extends SQLDriver<Class_SQLite> implements FxDbDriverNS.SQLDriver {
@@ -111,6 +138,7 @@ export declare class MongoDriver extends Driver<Class_MongoDB> implements FxDbDr
 }
 export declare type IClsSQLDriver = typeof SQLDriver;
 export declare type IClsMySQLDriver = typeof MySQLDriver;
+export declare type IClsPostgreSQLDriver = typeof PostgreSQLDriver;
 export declare type IClsSQLiteDriver = typeof SQLiteDriver;
 export declare type IClsRedisDriver = typeof RedisDriver;
 export {};

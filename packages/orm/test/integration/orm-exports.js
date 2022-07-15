@@ -142,10 +142,6 @@ describe('ORM', function () {
     })
 
     it('should pass successful when opts is OK!', function () {
-      console.notice(
-        'common.getConnectionString()',
-        common.getConnectionString()
-      )
       const db = ORM.connectSync(common.getConnectionString())
 
       assert.exist(db)

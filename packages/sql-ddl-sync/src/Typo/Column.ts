@@ -21,11 +21,11 @@ export namespace FxOrmSqlDDLSync__Column {
         unsigned?: boolean
         primary?: boolean
         required?: boolean
-        defaultValue?: (opts?: {
+        defaultValue?: ((opts?: {
             collection: string,
             property: Property,
             driver: IDbDriver,
-        }) => any | any
+        }) => any) | any
         size?: number | string
         rational?: boolean // whether float typ
         time?: boolean
@@ -34,10 +34,6 @@ export namespace FxOrmSqlDDLSync__Column {
         /* extra option :end */
 
         [ext_k: string]: any
-    }
-    
-    export interface PropertyHash {
-        [col: string]: FxOrmSqlDDLSync__Column.Property
     }
 
     export type PropertyType = __StringType<'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point'>
@@ -99,11 +95,18 @@ export namespace FxOrmSqlDDLSync__Column {
         __StringType<'TEXT' | 'INTEGER' | 'REAL' | 'SERIAL' | 'INTEGER UNSIGNED' | 'DATE' | 'DATETIME' | 'BLOB' | 'ENUM' | 'POINT'>
 
     export interface PropertySQLite extends Property {
-        key: boolean
+        key?: boolean
         type: PropertyType_SQLite
 
         before?: string
         after?: string
     }
     /* sqlite about :end */
+
+
+    /* postgresql about :start */
+    export type PropertyType_PostgreSQL = PropertyType
+    export type ColumnType_PostgreSQL =
+        __StringType<PropertyType_PostgreSQL>
+    /* postgresql about :end */
 }

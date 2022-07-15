@@ -26,19 +26,19 @@ export class Database extends Driver implements FxOrmDb.DatabaseBase_SQLite {
     }
 
     connect(cb?: FxOrmCommon.GenericCallback<Class_SQLite>) {
-        const exposedErrResults = Utilities.exposeErrAndResultFromSyncMethod(
+        const exposedErrResults = Utilities.catchBlocking(
             () => super.open()
         )
-        Utilities.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: !!cb, callback: cb});
+        Utilities.takeAwayResult(exposedErrResults, { no_throw: !!cb, callback: cb});
         
         return this.connection
     }
 
     query<T = any>(sql: string, cb?: FxOrmCommon.GenericCallback<T>) {
-        const exposedErrResults = Utilities.exposeErrAndResultFromSyncMethod(
+        const exposedErrResults = Utilities.catchBlocking(
             () => this.execute(sql)
         );
-        Utilities.throwErrOrCallabckErrResult(exposedErrResults, { no_throw: !!cb, callback: cb});
+        Utilities.takeAwayResult(exposedErrResults, { no_throw: !!cb, callback: cb});
             
         return exposedErrResults.result
     }

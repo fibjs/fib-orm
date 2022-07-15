@@ -1,7 +1,7 @@
 import { FxSqlQuery } from "./Query";
 import { FxSqlQuerySql } from "./Sql";
 export declare namespace FxSqlQueryDialect {
-    type DialectType = 'mysql' | 'mssql' | 'sqlite';
+    type DialectType = 'mysql' | 'mssql' | 'sqlite' | 'postgresql';
     interface DataTypesDescriptorBase {
         id: string;
         int: string;
@@ -13,9 +13,9 @@ export declare namespace FxSqlQueryDialect {
     interface DataTypesDescriptor extends DataTypesDescriptorBase {
         isSQLITE?: boolean;
     }
-    interface Dialect {
+    interface Dialect<T extends DialectType = DialectType> {
         DataTypes: DataTypesDescriptor;
-        type: DialectType;
+        type: T;
         escape: {
             (query: FxSqlQuerySql.SqlFragmentStr, args: FxSqlQuerySql.SqlAssignmentValues): string;
         };
@@ -31,6 +31,7 @@ export declare namespace FxSqlQueryDialect {
         };
         limitAsTop: boolean;
         readonly knex: import('@fxjs/knex');
+        defaultValuesStmt?: T extends 'postgresql' ? string : never;
     }
     type fn_escape = Dialect['escape'];
     type fn_escapeId = Dialect['escapeId'];

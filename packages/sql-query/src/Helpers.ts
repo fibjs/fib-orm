@@ -132,7 +132,7 @@ export function defaultTableAliasNameRule (idx: number) {
 	return `t${idx}`
 }
 
-export const DialectTypes: FxSqlQueryDialect.DialectType[] = ['mysql', 'sqlite', 'mssql']
+export const DialectTypes: FxSqlQueryDialect.DialectType[] = ['mysql', 'sqlite', 'mssql', 'postgresql']
 
 export function ucfirst (str: string = '') {
 	if (str.length <= 1)
@@ -160,8 +160,8 @@ export function bufferToString (buffer: Class_Buffer | string, dialect: FxSqlQue
 			return "X'" + buffer.toString('hex')+ "'";
 		case 'sqlite':
 			return "X'" + buffer.toString('hex') + "'";
-		// case 'postgresql':
-		// 	return "'\\x" + buffer.toString('hex') + "'";
+		case 'postgresql':
+			return "'\\x" + buffer.toString('hex') + "'";
 	}
 }
 
@@ -186,9 +186,9 @@ export function escapeValForKnex (val: any, Dialect: FxSqlQueryDialect.Dialect, 
 	else if (val instanceof Date)
 		// TODO: how to suppor timezone?
 		return val;
-	else if (Buffer.isBuffer(val))
-		return val;
-	else if (val instanceof Array)
+	else if (Buffer.isBuffer(val)) {
+		return Dialect.type === 'postgresql' ? Dialect.knex.raw( bufferToString(val, Dialect.type) ) : val;
+	} else if (val instanceof Array)
 		return val;
 	else if (val === null)
 		return val;

@@ -124,7 +124,7 @@ export function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): Fx
 		proto = DriverAliases[proto];
 	}
 
-	const syncResult = Utilities.exposeErrAndResultFromSyncMethod(() => {
+	const syncResult = Utilities.catchBlocking(() => {
 		const DMLDriver = adapters.get(proto);
 		const settings = Settings.Container(SettingsInstance.get('*'));
 		const driver   = new DMLDriver(dbdriver.uri as any, null, {
@@ -144,12 +144,12 @@ export function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): Fx
 		syncResult.error = new ORMError("Connection protocol not supported - have you installed the database driver for " + proto + "?", 'NO_SUPPORT');
 	}
 
-	Utilities.throwErrOrCallabckErrResult(syncResult, { no_throw: false });
+	Utilities.takeAwayResult(syncResult, { no_throw: false });
 
 	return orm;
 }
 
-export function connect <T = any> (
+export function connect <T extends IDbDriver.ISQLConn = any> (
 	uri?: string | FxDbDriverNS.DBConnectionConfig,
 	cb?: FxOrmCoreCallbackNS.ExecutionCallback<IDbDriver<T>>
 ): FxOrmNS.ORMLike {
@@ -164,7 +164,7 @@ export function connect <T = any> (
 	});
 	args = args.filter((x: any) => x !== cb);
 
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod<FxOrmNS.ORMLike>(connectSync, args);
+	const syncResponse = Utilities.catchBlocking<FxOrmNS.ORMLike>(connectSync, args);
 
 	let orm: FxOrmNS.ORMLike = null;
 	if (syncResponse.error)
@@ -172,7 +172,7 @@ export function connect <T = any> (
 	else
 		orm = syncResponse.result;
 
-	Utilities.throwErrOrCallabckErrResult(syncResponse, {
+	Utilities.takeAwayResult(syncResponse, {
 		// no throw it, it could be processed with event handler
 		no_throw: true,
 		callback: cb
@@ -334,8 +334,8 @@ ORM.prototype.close = function (
 	this: FxOrmNS.ORM,
 	cb?
 ) {
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(this.closeSync, [], { thisArg: this});
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { callback: cb });
+	const syncResponse = Utilities.catchBlocking(this.closeSync, [], { thisArg: this});
+	Utilities.takeAwayResult(syncResponse, { callback: cb });
 	return this;
 };
 
@@ -385,8 +385,8 @@ ORM.prototype.sync = function (
 	this: FxOrmNS.ORM,
 	cb?
 ) {
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(this.syncSync, [], { thisArg: this })
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: !!cb, callback: cb })
+	const syncResponse = Utilities.catchBlocking(this.syncSync, [], { thisArg: this })
+	Utilities.takeAwayResult(syncResponse, { no_throw: !!cb, callback: cb })
 
 	return this;
 };
@@ -407,8 +407,8 @@ ORM.prototype.drop = function (
 	this: FxOrmNS.ORM,
 	cb?
 ) {
-	const syncResponse = Utilities.exposeErrAndResultFromSyncMethod(this.dropSync, [], { thisArg: this })
-	Utilities.throwErrOrCallabckErrResult(syncResponse, { no_throw: !!cb, callback: cb })
+	const syncResponse = Utilities.catchBlocking(this.dropSync, [], { thisArg: this })
+	Utilities.takeAwayResult(syncResponse, { no_throw: !!cb, callback: cb })
 
 	return this;
 };

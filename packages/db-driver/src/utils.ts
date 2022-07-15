@@ -18,6 +18,11 @@ export function filterDriverType (protocol: any): FxDbDriverNS.DriverType {
             return 'sqlite';
         case 'mysql:':
             return 'mysql';
+        case 'postgresql:':
+        case 'postgres:':
+        case 'pg:':
+        case 'psql:':
+            return 'psql';
         case 'redis:':
             return 'redis';
         case 'mongodb:':

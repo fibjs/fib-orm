@@ -2,6 +2,7 @@ var test = require("test");
 test.setup();
 
 var helper = require('../support/spec_helper');
+var { lowerCaseColumn } = require('../support/_helpers');
 var common = require('../common');
 
 function assertModelInstanceWithHasMany(instance) {
@@ -31,7 +32,6 @@ describe("hasMany", function () {
     });
 
     describe("normal", function () {
-
         var setup = function (opts) {
             opts = opts || {};
 
@@ -840,6 +840,7 @@ describe("hasMany", function () {
                     assert.equal(cols[1].type, 'TEXT');
                     break
                 case 'mysql':
+                    cols = cols.map((col) => lowerCaseColumn(col)); // support mysql 8.0+
                     assert.equal(cols[0].column_name, 'account_id');
                     assert.equal(cols[0].data_type, 'int');
                     assert.equal(cols[1].column_name, 'emails_text');
