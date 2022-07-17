@@ -8,7 +8,7 @@ describe("Date Type", function () {
     var db = null;
     var Person = null;
     var tz_offset = 0;
-    var is_db_with_tz = common.protocol() === 'mysql' || common.protocol() === 'postgres';
+    var is_db_with_tz = common.dbType() === 'mysql' || common.dbType() === 'postgres';
 
     var setup = function (hooks) {
         return function () {

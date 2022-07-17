@@ -207,7 +207,7 @@ describe("Model.save() - callback", function() {
   describe("with saveAssociations", function () {
     var afterSaveCalled = false;
 
-    if (common.protocol() == 'mongodb') return;
+    if (common.dbType() == 'mongodb') return;
 
     describe("default on in settings", function () {
       beforeEach(function (done) {
@@ -423,7 +423,7 @@ describe("Model.save() - callback", function() {
   });
 
   describe("with a point property", function () {
-    if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
+    if (common.dbType() == 'sqlite' || common.dbType() == 'mongodb') return;
 
     it("should save the instance as a geospatial point", function (done) {
       setup({ type: "point" }, null)(function () {

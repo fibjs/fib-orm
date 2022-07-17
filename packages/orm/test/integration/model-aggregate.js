@@ -40,10 +40,10 @@ describe("Model.aggregate()", function () {
     describe("method checks", function () {
         before(setup());
 
-        var protocol = common.protocol();
+        var dbType = common.dbType();
         var methods = [];
 
-        if (protocol === 'sqlite') {
+        if (dbType === 'sqlite') {
             methods = [
                 "ABS", "ROUND",
                 "AVG", "MIN", "MAX",
@@ -51,7 +51,7 @@ describe("Model.aggregate()", function () {
                 "SUM", "COUNT",
                 "DISTINCT"
             ]
-        } else if (protocol === 'mysql') {
+        } else if (dbType === 'mysql') {
             methods = [
                 "ABS", "CEIL", "FLOOR", "ROUND",
                 "AVG", "MIN", "MAX",
@@ -71,7 +71,7 @@ describe("Model.aggregate()", function () {
             }
 
             alias = alias.toLocaleLowerCase()
-            it(`driver [${protocol}] support method ${fun} by \`.${alias}()\``, function () {
+            it(`driver [${dbType}] support method ${fun} by \`.${alias}()\``, function () {
                 var aggregaton = Person.aggregate();
                 
                 assert.isFunction(aggregaton[alias]);

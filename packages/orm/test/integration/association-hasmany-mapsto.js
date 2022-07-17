@@ -1,7 +1,7 @@
 var helper = require('../support/spec_helper');
 var common = require('../common');
 
-if (common.protocol() == "mongodb") return ;   // Can't do mapsTo testing on mongoDB ()
+if (common.dbType() == "mongodb") return ;   // Can't do mapsTo testing on mongoDB ()
 
 describe("hasMany with mapsTo", function () {
     var db = null;
@@ -133,7 +133,7 @@ describe("hasMany with mapsTo", function () {
                 assert.equal(pets[0].petName, "Mutt");
             });
 
-            if (common.protocol() == "mongodb") return;
+            if (common.dbType() == "mongodb") return;
 
             it("should return a chain if no callback defined", function () {
                 var people = Person.findSync({ firstName: "John" });
@@ -249,7 +249,7 @@ describe("hasMany with mapsTo", function () {
         describe("addAccessor", function () {
             before(setup());
 
-            if (common.protocol() != "mongodb") {
+            if (common.dbType() != "mongodb") {
                 it("might add duplicates", function () {
                     var pets = Pet.findSync({ petName: "Mutt" });
 

@@ -5,7 +5,7 @@ var _ = require('lodash')
 var helper = require('../support/spec_helper')
 var ORM = require('../../')
 var common = require('../common')
-var protocol = common.protocol()
+var dbType = common.dbType()
 
 describe('ORM', function () {
   describe('when loaded', function () {
@@ -123,7 +123,7 @@ describe('ORM', function () {
 
     it('should do not mutate opts', function () {
       var opts = {
-        protocol: 'mysql',
+        protocol: 'mysql:',
         query: { pool: true, debug: true },
         username: 'notauser',
         password: 'wrong password',
@@ -168,7 +168,7 @@ describe('ORM', function () {
         connStr = null
       })
 
-      if (protocol !== 'mongodb') {
+      if (dbType !== 'mongodb') {
         it("should understand pool `'false'` from query string", function () {
           var connString = connStr + 'debug=false&pool=false'
           return ORM.connectSync(connString)
@@ -208,7 +208,7 @@ describe('ORM', function () {
         it("should understand pool `'true'` from query string", function () {
           var connCopy = _.cloneDeep(common.getConfig())
           var connOpts = _.extend(connCopy, {
-            protocol: common.protocol(),
+            protocol: common.dbType(),
             query: {
               pool: true, debug: true
             }
@@ -224,7 +224,7 @@ describe('ORM', function () {
         it('should understand pool `false` from query options', function () {
           var connCopy = _.cloneDeep(common.getConfig())
           var connOpts = _.extend(connCopy, {
-            protocol: common.protocol(),
+            protocol: common.dbType(),
             query: {
               pool: false, debug: false
             }
@@ -353,7 +353,7 @@ describe('ORM', function () {
 
     it('should not modify connection opts', function (done) {
       var opts = {
-        protocol: 'mysql',
+        protocol: 'mysql:',
         username: 'notauser',
         password: 'wrong password',
         query: { pool: true, debug: true }

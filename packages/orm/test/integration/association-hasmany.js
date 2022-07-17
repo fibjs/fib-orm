@@ -820,11 +820,11 @@ describe("hasMany", function () {
         it("should generate correct tables", function () {
             setup({});
 
-            var protocol = common.protocol();
+            var dbType = common.dbType();
 
             var sql;
 
-            if (protocol == 'sqlite') {
+            if (dbType == 'sqlite') {
                 sql = "PRAGMA table_info(?)";
             } else {
                 sql = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ? AND table_schema = ? ORDER BY data_type";
@@ -832,7 +832,7 @@ describe("hasMany", function () {
 
             var cols = db.driver.execQuerySync(sql, ['account_emails', db.driver.config.database]);
 
-            switch (protocol) {
+            switch (dbType) {
                 case 'sqlite':
                     assert.equal(cols[0].name, 'account_id');
                     assert.equal(cols[0].type, 'INTEGER');
@@ -854,10 +854,10 @@ describe("hasMany", function () {
                 key: true
             });
 
-            var protocol = common.protocol();
+            var dbType = common.dbType();
             var sql;
 
-            if (protocol == 'mysql') {
+            if (dbType == 'mysql') {
                 var data = db.driver.execQuerySync("SHOW KEYS FROM ?? WHERE Key_name = ?", ['account_emails', 'PRIMARY']);
 
                 assert.equal(data.length, 2);
@@ -865,7 +865,7 @@ describe("hasMany", function () {
                 assert.equal(data[0].Key_name, 'PRIMARY');
                 assert.equal(data[1].Column_name, 'emails_text');
                 assert.equal(data[1].Key_name, 'PRIMARY');
-            } else if (protocol == 'sqlite') {
+            } else if (dbType == 'sqlite') {
                 var data = db.driver.execQuerySync("pragma table_info(??)", ['account_emails']);
                 assert.equal(data.length, 2);
                 assert.equal(data[0].name, 'account_id');

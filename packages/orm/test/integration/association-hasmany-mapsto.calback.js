@@ -1,7 +1,7 @@
 var helper = require('../support/spec_helper');
 var common = require('../common');
 
-if (common.protocol() == "mongodb") return ;   // Can't do mapsTo testing on mongoDB ()
+if (common.dbType() == "mongodb") return ;   // Can't do mapsTo testing on mongoDB ()
 
 describe("hasMany with mapsTo - callback", function () {
     var db = null;
@@ -166,7 +166,7 @@ describe("hasMany with mapsTo - callback", function () {
                 });
             });
 
-            if (common.protocol() == "mongodb") return;
+            if (common.dbType() == "mongodb") return;
 
             it("should return a chain if no callback defined", function (done) {
                 Person.find({ firstName: "John" }, function (err, people) {
@@ -349,7 +349,7 @@ describe("hasMany with mapsTo - callback", function () {
         describe("addAccessor", function () {
             before(setup());
 
-            if (common.protocol() != "mongodb") {
+            if (common.dbType() != "mongodb") {
                 it("might add duplicates", function (done) {
                     Pet.find({ petName: "Mutt" }, function (err, pets) {
                         Person.find({ firstName: "Jane" }, function (err, people) {

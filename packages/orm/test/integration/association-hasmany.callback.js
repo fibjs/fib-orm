@@ -1,7 +1,7 @@
 var helper   = require('../support/spec_helper');
 var common   = require('../common');
 const { lowerCaseColumn } = require('../support/_helpers');
-var protocol = common.protocol();
+var dbType = common.dbType();
 
 describe("hasMany - callback", function () {
   var db     = null;
@@ -165,7 +165,7 @@ describe("hasMany - callback", function () {
         });
       });
 
-      if (common.protocol() == "mongodb") return;
+      if (common.dbType() == "mongodb") return;
 
       it("should return a chain if no callback defined", function (done) {
         Person.find({ name: "John" }, function (err, people) {
@@ -273,7 +273,7 @@ describe("hasMany - callback", function () {
         });
       });
 
-      if (common.protocol() != "mongodb") {
+      if (common.dbType() != "mongodb") {
         it("should return true if join table has duplicate entries", function (done) {
           Pet.find({ name: ["Mutt", "Deco"] }, function (err, pets) {
             assert.notExist(err);
@@ -400,7 +400,7 @@ describe("hasMany - callback", function () {
     describe("addAccessor", function () {
       before(setup());
 
-      if (common.protocol() != "mongodb") {
+      if (common.dbType() != "mongodb") {
         it("might add duplicates", function (done) {
           Pet.find({ name: "Mutt" }, function (err, pets) {
             Person.find({ name: "Jane" }, function (err, people) {
@@ -714,7 +714,7 @@ describe("hasMany - callback", function () {
     });
   });
 
-  if (protocol == "mongodb") return;
+  if (dbType == "mongodb") return;
 
   describe("with non-standard keys", function () {
     var Email;
@@ -771,7 +771,7 @@ describe("hasMany - callback", function () {
 
         var sql;
 
-        if (protocol == 'sqlite') {
+        if (dbType == 'sqlite') {
           sql = "PRAGMA table_info(?)";
         } else {
           sql = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ? ORDER BY data_type";
@@ -780,18 +780,18 @@ describe("hasMany - callback", function () {
         db.driver.execQuery(sql, ['account_emails'], function (err, cols) {
           assert.notExist(err);
 
-          if (protocol == 'sqlite') {
+          if (dbType == 'sqlite') {
             assert.equal(cols[0].name, 'account_id');
             assert.equal(cols[0].type, 'INTEGER');
             assert.equal(cols[1].name, 'emails_text');
             assert.equal(cols[1].type, 'TEXT');
-          } else if (protocol == 'mysql') {
+          } else if (dbType == 'mysql') {
             cols = cols.map(col => lowerCaseColumn(col));
             assert.equal(cols[0].column_name, 'account_id');
             assert.equal(cols[0].data_type,   'int');
             assert.equal(cols[1].column_name, 'emails_text');
             assert.equal(cols[1].data_type,    'varchar');
-          } else if (protocol == 'postgres') {
+          } else if (dbType == 'postgres') {
             assert.equal(cols[0].column_name, 'account_id');
             assert.equal(cols[0].data_type,   'integer');
             assert.equal(cols[1].column_name, 'emails_text');
@@ -808,7 +808,7 @@ describe("hasMany - callback", function () {
         assert.notExist(err);
         var sql;
 
-        if (protocol == 'postgres' || protocol === 'redshift') {
+        if (dbType == 'postgres' || dbType === 'redshift') {
           sql = "" +
             "SELECT c.column_name, c.data_type " +
             "FROM  information_schema.table_constraints tc " +
@@ -826,7 +826,7 @@ describe("hasMany - callback", function () {
 
             done()
           });
-        } else if (protocol == 'mysql') {
+        } else if (dbType == 'mysql') {
           db.driver.execQuery("SHOW KEYS FROM ?? WHERE Key_name = ?", ['account_emails', 'PRIMARY'], function (err, data) {
             assert.notExist(err);
 
@@ -838,7 +838,7 @@ describe("hasMany - callback", function () {
 
             done();
           });
-        } else if (protocol == 'sqlite') {
+        } else if (dbType == 'sqlite') {
           db.driver.execQuery("pragma table_info(??)", ['account_emails'], function (err, data) {
             assert.notExist(err);
 

@@ -169,7 +169,7 @@ describe("hasOne - callback", function () {
                 assert.equal(owners.length, 2);
 
                 // Don't know which order they'll be in.
-                var idProp = common.protocol() == 'mongodb' ? '_id' : 'id'
+                var idProp = common.dbType() == 'mongodb' ? '_id' : 'id'
 
                 if (owners[0][idProp] == ownersCopy[0][idProp]) {
                   assert.deepEqual(owners[0], ownersCopy[0]);
@@ -188,7 +188,7 @@ describe("hasOne - callback", function () {
     });
     
     // broken in mongo
-    if (common.protocol() != "mongodb") {
+    if (common.dbType() != "mongodb") {
       describe("findBy()", function () {
         before(setup());
 
@@ -218,7 +218,7 @@ describe("hasOne - callback", function () {
             assert.equal(Array.isArray(pets), true);
 
             // This often fails for sqlite on travis
-            if (common.isTravis() && common.protocol() != 'sqlite') {
+            if (common.isTravis() && common.dbType() != 'sqlite') {
               assert.equal(pets.length, 1);
               assert.equal(pets[0].name, 'Deco');
             }

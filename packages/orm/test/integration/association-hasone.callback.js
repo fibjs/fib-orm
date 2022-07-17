@@ -1,7 +1,7 @@
 var ORM      = require('../../');
 var helper   = require('../support/spec_helper');
 var common   = require('../common');
-var protocol = common.protocol();
+var dbType = common.dbType();
 
 describe("hasOne - callback", function() {
   var db    = null;
@@ -378,7 +378,7 @@ describe("hasOne - callback", function() {
     });
   });
 
-  if (protocol != "mongodb") {
+  if (dbType != "mongodb") {
     describe("mapsTo", function () {
       describe("with `mapsTo` set via `hasOne`", function () {
         var leaf = null;

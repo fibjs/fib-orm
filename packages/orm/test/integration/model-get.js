@@ -55,9 +55,9 @@ describe("Model.get()", function () {
 
         it("should create the table with a different column name than property name", function () {
             var sql;
-            var protocol = common.protocol();
+            var dbType = common.dbType();
 
-            switch (protocol) {
+            switch (dbType) {
                 case 'sqlite':
                     sql = "PRAGMA table_info(?)"; break;
                 case 'mysql':
@@ -67,14 +67,14 @@ describe("Model.get()", function () {
                     sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_catalog = ?";
                     break;
                 default:
-                    throw new Error('unsupported protocol: ' + protocol);
+                    throw new Error('unsupported dbType: ' + dbType);
             }
 
             var data = db.driver.execQuerySync(sql, [Person.table, db.driver.config.database]);
-            if (protocol === 'mysql') { // support mysql 8.0+
+            if (dbType === 'mysql') { // support mysql 8.0+
                 data = data.map(col => lowerCaseColumn(col));
             }
-            var names = _.map(data, protocol == 'sqlite' ? 'name' : 'column_name')
+            var names = _.map(data, dbType == 'sqlite' ? 'name' : 'column_name')
 
             assert.equal(typeof Person.properties.name, 'object');
             assert.notEqual(names.indexOf('fullname'), -1);
@@ -238,7 +238,7 @@ describe("Model.get()", function () {
     });
 
     describe("with a point property type", function () {
-        if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
+        if (common.dbType() == 'sqlite' || common.dbType() == 'mongodb') return;
 
         it("should deserialize the point to an array", function (done) {
             db.settings.set('properties.primary_key', 'id');

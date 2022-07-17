@@ -36,9 +36,9 @@ var driver = Driver.create('mysql://root:password@localhost:3306/mydb');
 // or use connection object
 var driver = Driver.create({
     protocol: 'mysql:',
-    host: 'localhost',
+    hostname: 'localhost',
+    username: 'root',
     port: 3306,
-    user: 'root',
     password: 'password',
     database: 'mydb'
 });

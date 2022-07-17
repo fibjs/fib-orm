@@ -403,7 +403,7 @@ describe("Model.save()", function () {
     });
 
     describe("with a point property", function () {
-        if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return;
+        if (common.dbType() == 'sqlite' || common.dbType() == 'mongodb') return;
 
         it("should save the instance as a geospatial point", function (done) {
             setup({ type: "point" }, null)(function () {

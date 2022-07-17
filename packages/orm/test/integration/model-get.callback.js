@@ -3,7 +3,7 @@ var helper = require('../support/spec_helper')
 var common = require('../common')
 var ORM = require('../../')
 const { lowerCaseColumn } = require('../support/_helpers')
-var protocol = common.protocol()
+var dbType = common.dbType()
 
 describe('Model.get() - callback', function () {
   var db = null
@@ -52,14 +52,14 @@ describe('Model.get() - callback', function () {
   })
 
   describe('mapsTo', function () {
-    if (protocol == 'mongodb') return
+    if (dbType == 'mongodb') return
 
     before(setup(true))
 
     it('should create the table with a different column name than property name', function (done) {
       var sql
 
-      if (protocol == 'sqlite') {
+      if (dbType == 'sqlite') {
         sql = 'PRAGMA table_info(?)'
       } else {
         sql = 'SELECT column_name FROM information_schema.columns WHERE table_name = ?'
@@ -68,10 +68,10 @@ describe('Model.get() - callback', function () {
       db.driver.execQuery(sql, [Person.table], function (err, data) {
         assert.notExist(err)
 
-        if (protocol === 'mysql') { // support mysql 8.0+
+        if (dbType === 'mysql') { // support mysql 8.0+
           data = data.map(col => lowerCaseColumn(col));
         }
-        var names = _.map(data, protocol == 'sqlite' ? 'name' : 'column_name')
+        var names = _.map(data, dbType == 'sqlite' ? 'name' : 'column_name')
 
         assert.equal(typeof Person.properties.name, 'object')
         assert.notEqual(names.indexOf('fullname'), -1)
@@ -315,7 +315,7 @@ describe('Model.get() - callback', function () {
   })
 
   describe('with a point property type', function () {
-    if (common.protocol() == 'sqlite' || common.protocol() == 'mongodb') return
+    if (common.dbType() == 'sqlite' || common.dbType() == 'mongodb') return
 
     it('should deserialize the point to an array', function (done) {
       db.settings.set('properties.primary_key', 'id')

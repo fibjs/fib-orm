@@ -8,37 +8,46 @@
 // make test
 
 exports.mysql = {
-  protocol : "mysql://",
-  user     : "root",
+  protocol : "mysql:",
+  hostname : "localhost",
+  username : "root",
+  // if you use docker in <root>/Dockerfile/docker-compose.yml, 3356, 3357, 3380 are available
   port     : 3306,
   password : "",
   database : "fxjs-orm-test",
   query    : {
-    pool     : false
+    pool   : Boolean(process.env.FX_ORM_TEST_POOL),
   }
 };
+if (Boolean(process.env.FX_ORM_TEST_DEBUG))
+  exports.mysql.query.debug = true;
 exports.postgres = {
-  protocol : "postgres://",
-  user     : "root",
+  protocol : "postgres:",
+  hostname : "localhost",
+  username : "postgres",
+  // if you use docker in <root>/Dockerfile/docker-compose.yml, 5514 are available
+  port     : 5432,
   password : "",
   database : "fxjs-orm-test"
 };
 exports.redshift = {
-  protocol  : "redshift://",
-  user      : "root",
-  password  : "",
-  database  : "fxjs-orm-test"
+  protocol : "redshift:",
+  hostname : "localhost",
+  username : "postgres",
+  password : "",
+  database : "fxjs-orm-test"
 };
 exports.mongodb = {
-  protocol  : "mongodb://",
-  host      : "localhost",
-  database  : "fxjs-orm-test"
+  protocol : "mongodb:",
+  hostname : "localhost",
+  database : "fxjs-orm-test"
 };
 exports.sqlite = {
-  protocol  : "sqlite:",
-  // comment line below to enable memory mode
-  database  : 'test',
+  protocol : "sqlite:",
+  database : 'test',
   query    : {
-    pool     : false
+    pool   : Boolean(process.env.FX_ORM_TEST_POOL),
   }
 }; // uses in-memory database
+if (Boolean(process.env.FX_ORM_TEST_DEBUG))
+  exports.mysql.query.debug = true;

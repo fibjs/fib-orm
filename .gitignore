@@ -4,3 +4,6 @@ package-lock.json
 lib
 
 config.js*
+
+Dockerfile/mydata*
+Dockerfile/pgdata*

@@ -1,6 +1,7 @@
 var common      = exports;
 var _           = require('lodash');
 var util        = require('util');
+var url         = require('url');
 var querystring = require('querystring');
 var Semver      = require('semver');
 var ORM         = require('../');
@@ -11,7 +12,7 @@ common.ORM = ORM;
  * 
  * @returns {'mysql' | 'sqlite' | 'postgres'}
  */
-common.protocol = function () {
+common.dbType = function () {
   const orig = (process.env.ORM_PROTOCOL || '').toLocaleLowerCase();
   switch (orig) {
     case 'postgresql':
@@ -51,28 +52,15 @@ common.hasConfig = function (proto) {
  * @returns {ITestConfig[keyof ITestConfig]}
  */
 common.getConfig = function () {
-  var protocol = common.protocol();
+  var dbType = common.dbType();
   if (common.isTravis()) {
-    var config = require("./config.ci")[protocol];
+    var config = require("./config.ci")[dbType];
   } else {
-    var config = require("./config")[protocol];
+    var config = require("./config")[dbType];
   }
   
   if (typeof config == "string") {
-    config = require("url").parse(config, protocol);
-  }
-
-  if (config.hasOwnProperty("auth")) {
-    if (config.auth.indexOf(":") >= 0) {
-      config.user = config.auth.substr(0, config.auth.indexOf(":"));
-      config.password = config.auth.substr(config.auth.indexOf(":") + 1);
-    } else {
-      config.user = config.auth;
-      config.password = "";
-    }
-  }
-  if (config.hostname) {
-    config.host = config.hostname;
+    config = url.parse(config, !!dbType);
   }
 
   return config;
@@ -80,41 +68,45 @@ common.getConfig = function () {
 
 common.getConnectionString = function (opts) {
   var config   = common.getConfig();
-  var protocol = common.protocol();
-  var query;
+  var dbType = common.dbType();
 
   _.defaults(config, {
-    user     : { postgres: 'postgres', redshift: 'postgres', mongodb: '' }[protocol] || 'root',
-    database : { mongodb:  'test'     }[protocol] || 'orm_test',
+    username : { postgres: 'postgres', redshift: 'postgres', mongodb: '' }[dbType] || 'root',
+    database : { mongodb:  'test'     }[dbType] || 'orm_test',
     password : '',
-    host     : 'localhost',
+    hostname : 'localhost',
     pathname : '',
     query    : {}
   });
   _.merge(config, opts || {});
 
-  query = querystring.stringify(config.query);
-
-  switch (protocol) {
+  switch (dbType) {
     case 'mysql':
     case 'postgres':
     case 'redshift':
     case 'mongodb':
       if (common.isTravis()) {
-        if (protocol == 'redshift') protocol = 'postgres';
-        return util.format("%s://%s@%s%s/%s?%s",
-          protocol, config.user, config.host,
-          config.port ? `:${config.port}` : '', config.database, query
-        );
-      } else {
-        return util.format("%s://%s:%s@%s%s/%s?%s",
-          protocol, config.user, config.password,
-          config.host, config.port ? `:${config.port}` : '', config.database, query
-        ).replace(':@','@');
+        if (dbType == 'redshift') dbType = 'postgres';
       }
+
+      return url.format({
+        protocol: `${dbType}:`,
+        username: config.username,
+        password: config.password,
+        hostname: config.hostname,
+        port: config.port,
+        pathname: !config.database ? '' : `/${config.database}`,
+        query: config.query,
+        slashes: true,
+      });
     case 'sqlite':
-      var dbname = config.pathname || config.database;
-      return util.format("%s://%s?%s", protocol, `${dbname ? `${dbname}.db`: ''}`, query);
+      var dbname = config.database;
+      return url.format({
+        protocol: 'sqlite:',
+        slashes: false,
+        pathname: `${dbname ? `${dbname}.db`: ''}`,
+        query: config.query
+      });
     default:
       throw new Error("Unknown protocol " + protocol);
   }
