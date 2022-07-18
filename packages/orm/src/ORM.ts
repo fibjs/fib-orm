@@ -8,7 +8,6 @@ import SqlQuery       = require("@fxjs/sql-query");
 import ormPluginSyncPatch from './Patch/plugin'
 
 import { Model }      from "./Model";
-import DriverAliases  = require("./Drivers/aliases");
 import adapters       = require("./Adapters");
 import ORMError       = require("./Error");
 import Utilities      = require("./Utilities");
@@ -64,9 +63,6 @@ export function use(
 	opts: FxOrmNS.IUseOptions,
 	cb: (err: Error, db?: FxOrmNS.ORM) => void
 ): any {
-	if (DriverAliases[proto]) {
-		proto = DriverAliases[proto];
-	}
 	if (typeof opts === "function") {
 		cb = opts;
 		opts = <FxOrmNS.IUseOptions>{};
@@ -118,14 +114,11 @@ export function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): Fx
         return dbdriver;
 	}
 	
-	let proto  = dbdriver.config.protocol.replace(/:$/, '');
+	let adapterName = dbdriver.config.protocol.replace(/:$/, '');
 	let orm: FxOrmNS.ORM;
-	if (DriverAliases[proto]) {
-		proto = DriverAliases[proto];
-	}
 
 	const syncResult = Utilities.catchBlocking(() => {
-		const DMLDriver = adapters.get(proto);
+		const DMLDriver = adapters.get(adapterName);
 		const settings = Settings.Container(SettingsInstance.get('*'));
 		const driver   = new DMLDriver(dbdriver.uri as any, null, {
 			debug    : dbdriver.extend_config.debug ? dbdriver.extend_config.debug : settings.get("connection.debug"),
@@ -135,13 +128,13 @@ export function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): Fx
 
 		driver.connect();
 
-		orm = new ORM(proto, driver, settings);
+		orm = new ORM(adapterName, driver, settings);
 
 		return orm;
 	});
 
 	if (syncResult.error && Utilities.isDriverNotSupportedError(syncResult.error)) {
-		syncResult.error = new ORMError("Connection protocol not supported - have you installed the database driver for " + proto + "?", 'NO_SUPPORT');
+		syncResult.error = new ORMError("Connection protocol not supported - have you installed the database driver for " + adapterName + "?", 'NO_SUPPORT');
 	}
 
 	Utilities.takeAwayResult(syncResult, { no_throw: false });

@@ -1,24 +1,37 @@
 import type { FxOrmDMLDriver } from './Typo/DMLDriver';
 
-import aliases = require('./Drivers/aliases');
-
 import "./Drivers/DML";
 
 export const add = addAdapter;
 export const get = getAdapter;
 
-const adapters = <{[key: string]: FxOrmDMLDriver.DMLDriverConstructor}>{};
+// type ISupportedDBDriver = 'mysql' | 'sqlite' | 'postgresql'
+
+const adapters = <{
+	[key: string]: FxOrmDMLDriver.DMLDriverConstructor
+}>{};
 
 function addAdapter(name: string, constructor: FxOrmDMLDriver.DMLDriverConstructor) {
-  adapters[name] = constructor;
+	adapters[name] = constructor;
 }
 
 function getAdapter(name: string): FxOrmDMLDriver.DMLDriverConstructor {
-  if (name in aliases) {
-    return getAdapter(aliases[name]);
-  } else if (!(name in adapters)) {
-    adapters[name] = require("./Drivers/DML/" + name).Driver;
-  }
+	switch (name) {
+		case 'mysql':
+		case 'sqlite':
+			return require(`./Drivers/DML/${name}`).Driver;
+		case 'pg':
+		case 'psql':
+		case 'postgres':
+		case 'postgresql':
+			return require(`./Drivers/DML/postgres`).Driver;
+	}
+	
+	// TODO: support install dml driver from node_modules
+	if (!(name in adapters)) {
+		// trigger error which could be detected by `isDriverNotSupportedError`
+		adapters[name] = require("./Drivers/DML/" + name).Driver;
+	}
 
-  return adapters[name];
+	return adapters[name];
 }
