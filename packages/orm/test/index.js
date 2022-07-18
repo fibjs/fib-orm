@@ -34,6 +34,7 @@ function t() {
     run('./integration/association-hook.js');
 
     run('./integration/instance.js');
+    run('./integration/instance-issues.js');
     run('./integration/model-aggregate.js');
     run('./integration/model-clear.js');
     run('./integration/model-count.js');

@@ -526,7 +526,9 @@ export const Instance = function (
 			set: function (val) {
 				if (prop.key === true) {
 					if (prop.type == 'serial' && opts.data[key] != null) {
-						return;
+						if (!(val === null || val === undefined)) {
+							return ;
+						}
 					} else {
 						opts.originalKeyValues[prop.name] = opts.data[prop.name];
 					}
