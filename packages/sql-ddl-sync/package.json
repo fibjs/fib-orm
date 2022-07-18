@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/sql-ddl-sync",
-	"version": "0.7.1",
+	"version": "0.8.0",
 	"description": "",
 	"keywords": [
 		"sql",
@@ -37,8 +37,8 @@
 	},
 	"devDependencies": {
 		"@fibjs/types": "^0.34.1",
-		"@fxjs/db-driver": "^0.1.0",
-		"@fxjs/sql-query": "^0.7.1",
+		"@fxjs/db-driver": "^0.2.0",
+		"@fxjs/sql-query": "^0.8.0",
 		"cross-env": "^5.2.0",
 		"fib-pool": "^1.6.0",
 		"fib-rollup": "^0.4.0",
@@ -59,6 +59,6 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@fxjs/orm-core": "^0.1.0"
+		"@fxjs/orm-core": "^0.2.0"
 	}
 }
