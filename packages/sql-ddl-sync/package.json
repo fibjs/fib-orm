@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/sql-ddl-sync",
-	"version": "0.8.0",
+	"version": "0.8.1",
 	"description": "",
 	"keywords": [
 		"sql",
@@ -37,7 +37,7 @@
 	},
 	"devDependencies": {
 		"@fibjs/types": "^0.34.1",
-		"@fxjs/db-driver": "^0.2.0",
+		"@fxjs/db-driver": "^0.2.1",
 		"@fxjs/sql-query": "^0.8.0",
 		"cross-env": "^5.2.0",
 		"fib-pool": "^1.6.0",

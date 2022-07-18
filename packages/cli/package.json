@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/orm-cli",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"private": false,
 	"description": "cli for @fxjs/orm developer",
 	"main": "lib",
@@ -27,8 +27,8 @@
 		"@fibcli/ora": "^0.1.0",
 		"@fibjs/chalk": "^1.0.0",
 		"@fxjs/cli": "^0.0.6",
-		"@fxjs/db-driver": "^0.2.0",
-		"@fxjs/sql-ddl-sync": "^0.8.0",
+		"@fxjs/db-driver": "^0.2.1",
+		"@fxjs/sql-ddl-sync": "^0.8.1",
 		"@types/semver": "^7.3.10",
 		"semver": "^7.3.7"
 	},
