@@ -47,7 +47,7 @@ export const Model = function (
 	m_opts: FxOrmModel.ModelConstructorOptions
 ) {
 	m_opts = util.extend(m_opts || {}, { keys: m_opts.keys || [] });
-	m_opts.keys = Array.isArray(m_opts.keys) ? m_opts.keys : [m_opts.keys];
+	m_opts.keys = (Array.isArray(m_opts.keys) ? m_opts.keys : [m_opts.keys]).filter(Boolean);
 
 	const one_associations: FxOrmAssociation.InstanceAssociationItem_HasOne[] = [];
 	const many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[] = [];

@@ -120,4 +120,12 @@ describe("SQLite", function () {
 			assert.deepEqual(result, {foo: 'bar'})
 		});
 	});
+
+	describe("issues", () => {
+		it('connection string with query', () => {
+			driver = Driver.create('sqlite:test-driver.db?debug=true');
+			assert.equal(driver.uri, 'sqlite:test-driver.db')
+			assert.equal(driver.config.href, 'sqlite:test-driver.db?debug=true')
+		})
+	});
 })
