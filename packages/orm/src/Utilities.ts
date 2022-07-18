@@ -9,6 +9,7 @@ import FxORMCore = require('@fxjs/orm-core');
 import {
 	Helpers as QueryHelpers,
 	FxSqlQuery,
+	FxSqlQuerySql,
 	FxSqlQuerySubQuery,
 	FxSqlQueryComparator,
 } from '@fxjs/sql-query';
@@ -659,29 +660,46 @@ export function is_model_conjunctions_key (k: string) {
     return model_conjunctions_keys.includes(k as any)
 }
 
+function isNumbericDate(v: any) {
+	if (isNaN(v)) return false;
+	if (typeof v === 'number') return true;
+	if (typeof v === 'string') {
+		return !isNaN(parseInt(v))
+	}
+
+	return false;
+}
+
+const whereCondKeys = ['val', 'from', 'to'] as (keyof FxSqlQuerySql.DetailedQueryWhereCondition)[];
+const queryComparators = ['eq', 'ne', 'gt', 'gte', 'lt', 'lte'] as (FxSqlQueryComparator.ComparatorNameType)[];
+const ALL_FILTER_KEYS: (
+	keyof FxSqlQuerySql.DetailedQueryWhereCondition
+	| FxSqlQueryComparator.ComparatorNameType
+)[] = [].concat(whereCondKeys).concat(queryComparators);
 /**
  * filter the Date-Type SelectQuery Property corresponding item when call find-like executor ('find', 'get', 'where')
- * @param opt 
+ * @TODO add test about i
+ *  
+ * @param conds 
  */
-// value keyof FxSqlQuerySql.DetailedQueryWhereCondition
-const comps = ['val', 'from', 'to'];
+// value  | FxSqlQueryComparator.ComparatorNameType
 function filter_date_for_where_conditions(
-	opt: FxOrmInstance.InstanceDataPayload,
+	conds: FxOrmInstance.InstanceDataPayload,
 	m: Pick<FxOrmModel.Model, 'allProperties'>
 ) {
-	for (let k in opt) {
+	for (let k in conds) {
 		if (is_model_conjunctions_key(k))
-			Array.isArray(opt[k]) && opt[k].forEach((item: any) => filter_date_for_where_conditions(item, m));
+			Array.isArray(conds[k]) && conds[k].forEach((item: any) => filter_date_for_where_conditions(item, m));
 		else {
 			let p = m.allProperties[k];
 			if (p && p.type === 'date') {
-				let v: any = opt[k];
+				let v: any = conds[k];
 
 				if (!util.isDate(v)) {
 					if (util.isNumber(v) || util.isString(v))
-						opt[k] = new Date(v);
+						conds[k] = new Date(isNumbericDate(v) ? parseInt(v) : v);
 					else if (util.isObject(v)) {
-						comps.forEach(c => {
+						ALL_FILTER_KEYS.forEach(c => {
 							let v1 = v[c];
 
 							if (Array.isArray(v1)) {
@@ -690,7 +708,7 @@ function filter_date_for_where_conditions(
 										v1[i] = new Date(v2);
 								});
 							} else if (v1 !== undefined && !util.isDate(v1)) {
-								v[c] = new Date(v1);
+								v[c] = new Date(isNumbericDate(v1) ? parseInt(v1) : v1);
 							}
 						});
 					}
