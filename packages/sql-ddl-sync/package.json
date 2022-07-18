@@ -32,8 +32,7 @@
 	"analyse": false,
 	"peerDependencies": {
 		"@fxjs/db-driver": "*",
-		"@fxjs/orm-core": "*",
-		"@fxjs/sql-query": ">= 0.6 <= 0.7"
+		"@fxjs/orm-core": "*"
 	},
 	"devDependencies": {
 		"@fibjs/types": "^0.34.1",
