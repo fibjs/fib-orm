@@ -1,6 +1,6 @@
 /// <reference types="@fibjs/types" />
 /// <reference types="@fibjs/enforce" />
-import type { FxOrmSqlDDLSync, FxOrmSqlDDLSync__Column } from "@fxjs/sql-ddl-sync";
+import type { FxOrmSqlDDLSync } from "@fxjs/sql-ddl-sync";
 import { FxOrmAssociation } from "./assoc";
 import { FxOrmInstance } from "./instance";
 import { FxOrmProperty } from "./property";
@@ -32,12 +32,10 @@ export declare namespace FxOrmModel {
         caches: Class_LruCache;
         keys: string[];
         allProperties: FxOrmProperty.NormalizedPropertyHash;
-        addProperty: {
-            (propIn: FxOrmProperty.NormalizedProperty, /* ModelPropertyDefinition */ options?: {
-                name?: string;
-                klass?: FxOrmProperty.KlassType;
-            } | false): FxOrmProperty.NormalizedProperty;
-        };
+        addProperty(propIn: FxOrmProperty.NormalizedProperty, options?: {
+            name?: string;
+            klass?: FxOrmProperty.KlassType;
+        } | false): FxOrmProperty.NormalizedProperty;
         sync(callback?: FxOrmCommon.GenericCallback<FxOrmSqlDDLSync.SyncResult>): Model;
         drop(callback?: FxOrmCommon.VoidCallback): Model;
         /**
@@ -240,7 +238,7 @@ export declare namespace FxOrmModel {
             (func: FxOrmHook.HookResultCallback, opts?: ModelHookPatchOptions): any;
         };
     }
-    interface ModelPropertyDefinition extends FxOrmSqlDDLSync__Column.Property {
+    interface ModelPropertyDefinition extends FxOrmProperty.DataStoreProperty {
         key?: boolean;
         klass?: FxOrmProperty.KlassType;
         alwaysValidate?: boolean;

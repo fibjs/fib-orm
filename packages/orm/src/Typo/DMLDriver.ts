@@ -212,7 +212,7 @@ export namespace FxOrmDMLShared {
         id: string[]
         extension: boolean
         table: string
-        allProperties: FxOrmProperty.NormalizedPropertyHash
+        allProperties: Record<string, FxOrmProperty.NormalizedProperty>
         indexes: string[]
         customTypes: {
             [key: string]: FxOrmProperty.CustomPropertyType;

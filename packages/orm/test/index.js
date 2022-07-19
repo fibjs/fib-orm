@@ -31,6 +31,7 @@ function t() {
 
     run('./integration/hook.js');
     run('./integration/hook-ref.js');
+    run('./integration/hook-helpers.js');
     run('./integration/association-hook.js');
 
     run('./integration/instance.js');
@@ -75,7 +76,7 @@ function t() {
 
     run('./integration/date-type.js');
 
-    run('./integration/helpers.js');
+    run('./integration/orm-helpers.js');
 
     test.run(console.DEBUG);
 }

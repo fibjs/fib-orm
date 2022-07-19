@@ -50,15 +50,13 @@ export namespace FxOrmModel {
         allProperties: FxOrmProperty.NormalizedPropertyHash
 
         /* property operation :start */
-        addProperty: {
-            (
-                propIn: FxOrmProperty.NormalizedProperty, /* ModelPropertyDefinition */
-                options?: {
-                    name?: string
-                    klass?: FxOrmProperty.KlassType
-                } | false
-            ): FxOrmProperty.NormalizedProperty
-        }
+        addProperty(
+            propIn: FxOrmProperty.NormalizedProperty,
+            options?: {
+                name?: string
+                klass?: FxOrmProperty.KlassType
+            } | false
+        ): FxOrmProperty.NormalizedProperty
         /* property operation :end */
 
         sync(callback?: FxOrmCommon.GenericCallback<FxOrmSqlDDLSync.SyncResult>): Model;
@@ -312,7 +310,7 @@ export namespace FxOrmModel {
         };
     }
 
-    export interface ModelPropertyDefinition extends FxOrmSqlDDLSync__Column.Property {
+    export interface ModelPropertyDefinition extends FxOrmProperty.DataStoreProperty {
         key?: boolean
         klass?: FxOrmProperty.KlassType
         alwaysValidate?: boolean

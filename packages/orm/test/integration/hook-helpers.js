@@ -1,7 +1,7 @@
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Hook", function () {
+describe("Hook Helpers", function () {
     var db = null;
     var Person = null;
 

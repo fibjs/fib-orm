@@ -21,10 +21,14 @@ export declare namespace FxOrmProperty {
             (prop?: FxOrmProperty.NormalizedProperty, helper?: FxSqlQuery.Class_Query): any;
         };
     }
+    type DataStoreProperty = FxOrmSqlDDLSync__Column.Property;
     /**
      * @description useful when pass property's option(such as type, big, ...etc) internally, useless for exposed api.
+     *
+     * @notice though there's definition, but those fields SHOULD NEVER be set in NormalizedProperty:
+     * - `serial`
      */
-    interface NormalizedProperty extends FxOrmSqlDDLSync__Column.Property {
+    interface NormalizedProperty extends DataStoreProperty {
         key?: boolean;
         klass?: KlassType;
         lazyload?: boolean;

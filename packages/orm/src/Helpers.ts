@@ -1,7 +1,3 @@
-import url 	  = require('url');
-
-import _cloneDeep 	  = require('lodash.clonedeep');
-
 import {
     Driver as DbDriver,
     FxDbDriverNS,
@@ -15,14 +11,9 @@ import { FxOrmInstance } from './Typo/instance';
 import { FxOrmAssociation } from './Typo/assoc';
 import { FxOrmModel } from './Typo/model';
 import { FxOrmHook } from './Typo/hook';
+import { FxOrmProperty } from "./Typo/property";
 
-const SUPPORTED_PROTOCOLS = [
-    'sqlite:',
-    'mysql:',
-    'mssql:',
-]
-
-export function buildDbDriver (opts: string | FxDbDriverNS.DBConnectionConfig/* , cb?: FxOrmCoreCallbackNS.ExecutionCallback<T> */): FxOrmNS.ORMLike | IDbDriver {
+export function buildDbDriver (opts: string | FxDbDriverNS.DBConnectionConfig): FxOrmNS.ORMLike | IDbDriver {
     if (!opts) {
         return Utilities.ORM_Error(new ORMError("CONNECTION_URL_EMPTY", 'PARAM_MISMATCH'));
     } else if (typeof opts === 'string') {
@@ -43,39 +34,49 @@ export function buildDbDriver (opts: string | FxDbDriverNS.DBConnectionConfig/* 
 
 	if (isSqlite && config.timezone === undefined)
         driver.extend_config.timezone = 'UTC';
-    
-	// if (!config.host && !isSqlite) {
-	// 	config.host = config.hostname = "localhost";
-	// }
 
     return driver;
 }
 
-export function get_many_associations_from_instance_by_extname (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasMany[] {
+/* model helpers :start */
+export function pickProperties<T extends FxOrmModel.Model = FxOrmModel.Model>(
+    m: T,
+    picker: ((p: FxOrmProperty.NormalizedProperty, m: T) => boolean)
+) {
+    return Object.entries(m.allProperties).reduce((accu, [k, prop]) => {
+        if (picker(prop, m)) {
+            accu[k] = prop
+        };
+        return accu;
+    }, {} as Record<string, FxOrmProperty.NormalizedProperty>);
+}
+/* model helpers :end */
+
+function manyAssocsFromInst (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasMany[] {
     return instance.__opts.many_associations
 }
-export function get_one_associations_from_instance_by_extname (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasOne[] {
+function oneAssocsFromInst (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasOne[] {
     return instance.__opts.one_associations
 }
-export function get_extendsto_associations_from_instance_by_extname (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_ExtendTos[] {
+function extendsToAssocsFromInst (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_ExtendTos[] {
     return instance.__opts.extend_associations
 }
 
 /* by instance extname :start */
 export function getManyAssociationItemFromInstanceByExtname (instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_HasMany {
-    const many_assocs = get_many_associations_from_instance_by_extname(instance)
+    const many_assocs = manyAssocsFromInst(instance)
     
     return many_assocs.find(a => a.name === extend_name)
 }
 
 export function getOneAssociationItemFromInstanceByExtname (instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_HasOne {
-    const one_assocs = get_one_associations_from_instance_by_extname(instance)
+    const one_assocs = oneAssocsFromInst(instance)
     
     return one_assocs.find(a => a.name === extend_name)
 }
 
 export function getExtendsToAssociationItemFromInstanceByExtname (instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_ExtendTos {
-    const extendsto_assocs = get_extendsto_associations_from_instance_by_extname(instance)
+    const extendsto_assocs = extendsToAssocsFromInst(instance)
     
     return extendsto_assocs.find(a => a.name === extend_name)
 }
@@ -98,17 +99,17 @@ export function getAssociationItemFromInstanceByExtname (reltype: string, inst: 
 
 /* by instance x assoc_model :start */
 export function getManyAssociationItemFromInstanceByAssocModel (instance: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasMany {
-    const many_assocs = get_many_associations_from_instance_by_extname(instance)
+    const many_assocs = manyAssocsFromInst(instance)
     
     return many_assocs.find(a => a.model === assoc_model)
 }
 export function getOneAssociationItemFromInstanceByAssocModel (instance: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_HasOne {
-    const one_assocs = get_one_associations_from_instance_by_extname(instance)
+    const one_assocs = oneAssocsFromInst(instance)
     
     return one_assocs.find(a => a.model === assoc_model)
 }
 export function getExtendsToAssociationItemFromInstanceByAssocModel (instance: FxOrmInstance.Instance, assoc_model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_ExtendTos {
-    const extendsto_assocs = get_extendsto_associations_from_instance_by_extname(instance)
+    const extendsto_assocs = extendsToAssocsFromInst(instance)
     
     return extendsto_assocs.find(a => a.model === assoc_model)
 }

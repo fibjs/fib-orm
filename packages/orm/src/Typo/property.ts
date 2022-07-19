@@ -30,11 +30,14 @@ export namespace FxOrmProperty {
         }
     }
     
+    export type DataStoreProperty = FxOrmSqlDDLSync__Column.Property;
     /**
      * @description useful when pass property's option(such as type, big, ...etc) internally, useless for exposed api.
+     * 
+     * @notice though there's definition, but those fields SHOULD NEVER be set in NormalizedProperty:
+     * - `serial`
      */
-    // interface NormalizedProperty extends FxOrmModel.ModelPropertyDefinition {
-    export interface NormalizedProperty extends FxOrmSqlDDLSync__Column.Property {
+    export interface NormalizedProperty extends DataStoreProperty {
         // all fields inherited from `FxOrmModel.ModelPropertyDefinition` are still optional
 
         key?: boolean

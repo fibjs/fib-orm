@@ -4,10 +4,10 @@ import { FxOrmModel } from './Typo/model';
 import { FxOrmNS } from './Typo/ORM';
 import { FxOrmProperty } from './Typo/property';
 
-var KNOWN_TYPES = [
+const KNOWN_TYPES = [
 	"text", "number", "integer", "boolean", "date", "enum", "object",
 	"binary", "point",  "serial"
-];
+] as const;
 
 export function normalize 
 (opts: {
@@ -51,7 +51,7 @@ export function normalize
 		result_prop = _cloneDeep<FxOrmProperty.NormalizedProperty>(orig_prop);
 	}
 
-	if (KNOWN_TYPES.indexOf(result_prop.type) === -1 && !(result_prop.type in opts.customTypes)) {
+	if (!KNOWN_TYPES.includes(result_prop.type as any) && !(result_prop.type in opts.customTypes)) {
 		throw new ORMError("Unknown property type: " + result_prop.type, 'NO_SUPPORT');
 	}
 
