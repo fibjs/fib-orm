@@ -2,6 +2,11 @@
 	"name": "@fxjs/sql-ddl-sync",
 	"version": "0.8.4",
 	"description": "",
+	"private": false,
+	"publishConfig": {
+		"access": "public"
+	},
+	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/sql-ddl-sync",
 	"keywords": [
 		"sql",
 		"ddl",
@@ -26,6 +31,10 @@
 		"ci": "npm run build && npm run test",
 		"prepublishOnly": "npm run ci"
 	},
+	"files": [
+		"lib",
+		"typings"
+	],
 	"engines": {
 		"fibjs": "*"
 	},
@@ -51,14 +60,5 @@
 	},
 	"rollup.internal": [
 		"@fxjs/sql-query/lib/Dialects"
-	],
-	"private": false,
-	"homepage": "https://github.com/fxjs-modules/orm/tree/master/packages/sql-ddl-sync",
-	"files": [
-		"lib",
-		"typings"
-	],
-	"publishConfig": {
-		"access": "public"
-	}
+	]
 }
