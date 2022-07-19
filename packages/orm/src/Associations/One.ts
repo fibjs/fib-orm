@@ -98,7 +98,7 @@ export function prepare (
 			if (!normalizedField.hasOwnProperty(k)) {
 				continue;
 			}
-			if (!association.reversed) {
+			if (!association.reversed && !association.__for_extension) {
 				Model.addProperty(
 					util.extend({}, normalizedField[k], { klass: 'hasOne' }),
 					false

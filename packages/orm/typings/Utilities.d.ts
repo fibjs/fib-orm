@@ -30,6 +30,13 @@ export declare function hasValues(obj: {
 }, keys: string[]): boolean;
 export declare function populateModelIdKeysConditions(model: FxOrmModel.Model, fields: string[], source: FxOrmInstance.InstanceDataPayload, target: FxSqlQuerySubQuery.SubQueryConditions, overwrite?: boolean): void;
 export declare function getConditions(model: FxOrmModel.Model, fields: string[], from: FxSqlQuerySubQuery.SubQueryConditions): FxSqlQuerySubQuery.SubQueryConditions;
+/**
+ * TODO: add comment for this method
+ *
+ * @description WIP
+ * @param params
+ * @returns
+ */
 export declare function wrapFieldObject(params: {
     field: FxOrmAssociation.InstanceAssociationItem['field'];
     model: FxOrmModel.Model;
@@ -37,13 +44,13 @@ export declare function wrapFieldObject(params: {
     mapsTo?: FxOrmModel.ModelPropertyDefinition['mapsTo'];
 }): FxOrmProperty.NormalizedPropertyHash;
 /**
- *
+ * TODO: add comment for this method
  * @param model related Model
  * @param name field name
  * @param required is field required for relationship
  * @param reversed is model is reversed in relationship
  */
-export declare function formatAssociatedField(model: FxOrmModel.Model, name: string, required: boolean, reversed: boolean): FxOrmProperty.NormalizedPropertyHash;
+export declare function formatAssociatedField(model: FxOrmModel.Model, name: string, required: boolean, reversed: boolean): Record<string, FxOrmProperty.NormalizedProperty>;
 export declare function convertPropToJoinKeyProp(props: FxOrmProperty.NormalizedPropertyHash, opts: {
     required: boolean;
     makeKey: boolean;
@@ -121,3 +128,5 @@ export declare function reusableChannelGenerator(): () => FxOrmHook.HookChannelR
 export declare const createHookHelper: (hooks: Fibjs.AnyObject, hook: keyof FxOrmModel.Hooks | keyof FxOrmAssociation.InstanceAssociationItem['hooks'], { initialHooks }?: Fibjs.AnyObject) => (cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback, opts?: FxOrmModel.ModelHookPatchOptions) => any;
 export declare function attachOnceTypedHookRefToInstance(instance: FxOrmInstance.Instance, type: 'save' | 'create' | 'remove', typedHookRef: Fibjs.AnyObject): void;
 export declare function arraify<T = any>(item: T | T[]): T[];
+export declare function isKeyProperty(prop: FxOrmProperty.NormalizedProperty): boolean;
+export declare function isKeyPrimaryProperty(prop: FxOrmProperty.NormalizedProperty): boolean;

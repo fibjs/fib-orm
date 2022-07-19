@@ -303,7 +303,7 @@ const ChainFind = function (
 
 			for (let i = 0; i < data.length; i++) {
 				or = {};
-				for (let j = 0; j < opts.keys.length; j++) {
+				for (let j = 0; j < keys.length; j++) {
 					or[keys[j]] = data[i][keys[j]];
 				}
 				conditions.or.push(or);

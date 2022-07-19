@@ -145,6 +145,8 @@ export namespace FxOrmAssociation {
         modelFindByAccessor?: string
         modelFindBySyncAccessor?: string
 
+        // if the association is reversed association from other,
+        // such as `hasOne` from host's `extendsTo`, or `hasMany` from host's `hasMany`
         reversed?: boolean
         autoFetch: boolean
         autoFetchLimit: number

@@ -70,7 +70,6 @@ describe("ORM.Helpers", function () {
                 "name": "name",
                 "mapsTo": "fullname",
                 "enumerable": true,
-                "klass": "primary"
             });
         });
     });

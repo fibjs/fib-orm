@@ -865,8 +865,13 @@ export const Model = function (
 			customTypes: m_opts.db.customTypes, settings: m_opts.settings
 		});
 
+		if (prop.type === 'serial') {
+			prop.key = true;
+			prop.klass = prop.klass || 'primary';
+		}
+
 		// Maintains backwards compatibility
-		if (m_opts.keys.indexOf(prop.name) != -1) {
+		if (m_opts.keys.indexOf(prop.name) !== -1) {
 			prop.key = true;
 		} else if (prop.key) {
 			m_opts.keys.push(prop.name);
@@ -877,8 +882,11 @@ export const Model = function (
 		}
 
 		switch (prop.klass) {
-			case 'primary':
-				m_opts.properties[prop.name]  = prop;
+			default:
+				m_opts.properties[prop.name] = prop;
+				break;
+			case 'extendsTo':
+				association_properties.push(prop.name)
 				break;
 			case 'hasOne':
 				association_properties.push(prop.name)
@@ -892,7 +900,7 @@ export const Model = function (
 			model.prependValidation(prop.name, Validators.required());
 		}
 
-		if (prop.key && prop.klass == 'primary') {
+		if (Utilities.isKeyProperty(prop) && !m_opts.__for_extension) {
 			keyProperties.push(prop);
 		}
 
@@ -938,13 +946,27 @@ export const Model = function (
 		} as FxOrmProperty.NormalizedProperty;
 	}
 
+	let p: FxOrmProperty.NormalizedProperty,
+		keyPrimaryP: FxOrmProperty.NormalizedProperty = null,
+		keyP: FxOrmProperty.NormalizedProperty = null;
 	// standardize properties
 	for (let k in m_opts.properties) {
-		model.addProperty(m_opts.properties[k], { name: k, klass: 'primary' });
+		p = model.addProperty(m_opts.properties[k], { name: k });
+		if (Utilities.isKeyPrimaryProperty(p)) keyPrimaryP = keyPrimaryP || p;
+		else if (Utilities.isKeyProperty(p)) keyP = keyP || p;
 	}
 
+	if (keyP && keyPrimaryP) {
+		keyProperties.splice(0, keyProperties.length);
+		keyProperties.push(keyPrimaryP);
+	}
+
+	// if no any serial-type, keyPrimiary property
 	if (keyProperties.length == 0) {
-		throw new ORMError("Model defined without any keys", 'BAD_MODEL', { model: m_opts.table });
+		if (keyP) // use keyPrimary as the only keyProperties
+			keyProperties.push(keyP);
+		else
+			throw new ORMError("Model defined without any keys", 'BAD_MODEL', { model: m_opts.table });
 	}
 
 	// setup hooks
@@ -953,6 +975,7 @@ export const Model = function (
 	}
 
 	Utilities.addUnwritableProperty(model, 'associations', {}, { configurable: false })
+	Utilities.addUnwritableProperty(model, '__keyProperties', keyProperties, { enumerable: false, configurable: false })
 	
 	OneAssociation.prepare(model, { one_associations, many_associations, extend_associations }, { db: m_opts.db });
 	ManyAssociation.prepare(model, { one_associations, many_associations, extend_associations }, { db: m_opts.db });

@@ -253,6 +253,13 @@ export function getConditions (
 	return conditions;
 };
 
+/**
+ * TODO: add comment for this method
+ * 
+ * @description WIP
+ * @param params 
+ * @returns 
+ */
 export function wrapFieldObject (
 	params: {
 		field: FxOrmAssociation.InstanceAssociationItem['field']
@@ -283,8 +290,7 @@ export function wrapFieldObject (
 
 	const field_str = params.field as string
 
-	var newObj = <FxOrmProperty.NormalizedPropertyHash>{},
-		newProp: FxOrmProperty.NormalizedProperty,
+	var newProp: FxOrmProperty.NormalizedProperty,
 		propPreDefined: FxOrmProperty.NormalizedProperty,
 		propFromKey: FxOrmProperty.NormalizedProperty;
 
@@ -301,13 +307,13 @@ export function wrapFieldObject (
 		});
 	}
 
-	newObj[field_str] = prop;
-
-	return newObj;
+	return {
+		[field_str]: prop
+	};
 };
 
 /**
- * 
+ * TODO: add comment for this method
  * @param model related Model
  * @param name field name
  * @param required is field required for relationship
@@ -318,8 +324,8 @@ export function formatAssociatedField (
 	name: string,
 	required: boolean,
 	reversed: boolean
-): FxOrmProperty.NormalizedPropertyHash {
-	let fields = <FxOrmProperty.NormalizedPropertyHash>{},
+): Record<string, FxOrmProperty.NormalizedProperty> {
+	let fields = <Record<string, FxOrmProperty.NormalizedProperty>>{},
 		field_opts: FxOrmProperty.NormalizedProperty,
 		field_name: string;
 
@@ -1047,4 +1053,12 @@ export function attachOnceTypedHookRefToInstance (
 
 export function arraify<T = any> (item: T | T[]): T[] {
 	return Array.isArray(item) ? item : [item]
+}
+
+export function isKeyProperty(prop: FxOrmProperty.NormalizedProperty) {
+	return prop.key;
+}
+
+export function isKeyPrimaryProperty(prop: FxOrmProperty.NormalizedProperty) {
+	return prop.key && prop.klass === 'primary';
 }

@@ -5,8 +5,9 @@ export declare namespace FxOrmProperty {
      * @description key linked association type
      *  - 'primary': means this property is for column defined as 'primary'
      *  - 'hasOne': means this property is for column used as asscociated key in 'hasOne' assciation
+     *  - 'extendsTo': means this property is for column used as asscociated key in 'extendsTo' assciation
      */
-    type KlassType = 'primary' | 'hasOne';
+    type KlassType = 'primary' | 'hasOne' | 'extendsTo';
     interface CustomPropertyType extends FxOrmSqlDDLSync__Driver.CustomPropertyType {
         datastoreType: {
             (prop?: FxOrmProperty.NormalizedProperty): string;

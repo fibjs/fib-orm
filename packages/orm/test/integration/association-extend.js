@@ -38,6 +38,44 @@ describe("Model.extendsTo()", function () {
         return db.closeSync();
     });
 
+    describe("check model features", function () {
+        before(setup());
+
+        it("keyProperties of host in extendsTo", function () {
+            assert.deepEqual(
+                Person.__keyProperties,
+                [
+                    {
+                      "type": "serial",
+                      "key": true,
+                      "required": false,
+                      "klass": "primary",
+                      "enumerable": true,
+                      "mapsTo": "id",
+                      "name": "id"
+                    }
+                ]
+            );
+        });
+
+        it("keyProperties of extend in extendsTo", function () {
+            assert.deepEqual(
+                PersonAddress.__keyProperties,
+                [
+                    {
+                      "type": "integer",
+                      "key": true,
+                      "required": false,
+                      "klass": "extendsTo",
+                      "enumerable": true,
+                      "mapsTo": "person_id",
+                      "name": "person_id"
+                    }
+                ]
+            );
+        });
+    });
+
     describe("when calling hasAccessor", function () {
         before(setup());
 

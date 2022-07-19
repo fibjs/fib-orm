@@ -92,6 +92,11 @@ export function prepare (
 		const assoc_field = association.field as FxOrmProperty.NormalizedPropertyHash
 
 		for (let k in assoc_field) {
+			assoc_field[k].klass = 'extendsTo';
+			if (assoc_field[k].type === 'serial') {
+				assoc_field[k].type = 'integer';
+				assoc_field[k].key = true;
+			}
 		    newProperties[k] = assoc_field[k];
 		}
 

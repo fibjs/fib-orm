@@ -49,6 +49,9 @@ export namespace FxOrmInstance {
         autoSave?: FxOrmModel.ModelConstructorOptions['autoSave']
         methods?: FxOrmModel.ModelConstructorOptions['methods']
 
+        /**
+         * @description all key properties of the instance, determined by the model
+         */
         keyProperties: FxOrmProperty.NormalizedProperty[]
         validations: FxOrmValidators.IValidatorHash
         hooks: FxOrmModel.ModelConstructorOptions['hooks']
