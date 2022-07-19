@@ -19,7 +19,7 @@
 	"unpkg": "./lib/index.cjs.js",
 	"jsdelivr": "./lib/index.cjs.js",
 	"scripts": {
-		"build": "ftsc ./src/* --outDir ./lib",
+		"build": "rimraf ./lib ./typings && ftsc ./src/* --outDir ./lib",
 		"test": "fibjs test",
 		"ci": "npm run build && npm run test",
 		"prepublishOnly": "npm run ci",
@@ -41,6 +41,7 @@
 		"fib-pool": "^1.6.0",
 		"fib-rollup": "^0.4.0",
 		"fib-typify": "^0.8.3",
+		"rimraf": "^3.0.2",
 		"rollup-plugin-commonjs": "^9.2.1",
 		"should": "^13.2.3"
 	},

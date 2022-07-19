@@ -27,7 +27,8 @@
 		"@types/knex": "^0.16.1",
 		"fib-pool": "^1.6.0",
 		"fib-typify": "^0.8.3",
-		"knex": "^0.19.5"
+		"knex": "^0.19.5",
+		"rimraf": "^3.0.2"
 	},
 	"publishConfig": {
 		"access": "public"
