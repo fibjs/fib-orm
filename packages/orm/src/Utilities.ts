@@ -9,7 +9,6 @@ import FxORMCore = require('@fxjs/orm-core');
 import {
 	Helpers as QueryHelpers,
 	FxSqlQuery,
-	FxSqlQuerySql,
 	FxSqlQuerySubQuery,
 	FxSqlQueryComparator,
 } from '@fxjs/sql-query';
@@ -24,8 +23,7 @@ import { FxOrmCommon } from './Typo/_common';
 import { FxOrmNS } from './Typo/ORM';
 import { FxOrmError } from './Typo/Error';
 import { FxOrmHook } from './Typo/hook';
-
-function noOperation () {};
+import { filterDate } from './Where/filterDate';
 
 /**
  * Order should be a String (with the property name assumed ascending)
@@ -655,69 +653,6 @@ export function parallelQueryIfPossible<T = any, RESP = any> (
 	return iteratee.map(iterator)
 }
 
-const model_conjunctions_keys: (keyof FxSqlQuerySubQuery.ConjunctionInput__Sample)[] = [ 'or', 'and', 'not_or', 'not_and', 'not' ];
-export function is_model_conjunctions_key (k: string) {
-    return model_conjunctions_keys.includes(k as any)
-}
-
-function isNumbericDate(v: any) {
-	if (isNaN(v)) return false;
-	if (typeof v === 'number') return true;
-	if (typeof v === 'string') {
-		return !isNaN(parseInt(v))
-	}
-
-	return false;
-}
-
-const whereCondKeys = ['val', 'from', 'to'] as (keyof FxSqlQuerySql.DetailedQueryWhereCondition)[];
-const queryComparators = ['eq', 'ne', 'gt', 'gte', 'lt', 'lte'] as (FxSqlQueryComparator.ComparatorNameType)[];
-const ALL_FILTER_KEYS: (
-	keyof FxSqlQuerySql.DetailedQueryWhereCondition
-	| FxSqlQueryComparator.ComparatorNameType
-)[] = [].concat(whereCondKeys).concat(queryComparators);
-/**
- * filter the Date-Type SelectQuery Property corresponding item when call find-like executor ('find', 'get', 'where')
- * @TODO add test about i
- *  
- * @param conds 
- */
-// value  | FxSqlQueryComparator.ComparatorNameType
-function filter_date_for_where_conditions(
-	conds: FxOrmInstance.InstanceDataPayload,
-	m: Pick<FxOrmModel.Model, 'allProperties'>
-) {
-	for (let k in conds) {
-		if (is_model_conjunctions_key(k))
-			Array.isArray(conds[k]) && conds[k].forEach((item: any) => filter_date_for_where_conditions(item, m));
-		else {
-			let p = m.allProperties[k];
-			if (p && p.type === 'date') {
-				let v: any = conds[k];
-
-				if (!util.isDate(v)) {
-					if (util.isNumber(v) || util.isString(v))
-						conds[k] = new Date(isNumbericDate(v) ? parseInt(v) : v);
-					else if (util.isObject(v)) {
-						ALL_FILTER_KEYS.forEach(c => {
-							let v1 = v[c];
-
-							if (Array.isArray(v1)) {
-								v1.forEach((v2: any, i) => {
-									if (!util.isDate(v2))
-										v1[i] = new Date(v2);
-								});
-							} else if (v1 !== undefined && !util.isDate(v1)) {
-								v[c] = new Date(isNumbericDate(v1) ? parseInt(v1) : v1);
-							}
-						});
-					}
-				}
-			}
-		}
-	}
-}
-
 /**
  * @description do some mutation for field-value in conditions
  * 
@@ -728,9 +663,7 @@ export function filterWhereConditionsInput (
 	conditions: FxSqlQuerySubQuery.SubQueryConditions,
 	host: { allProperties: FxOrmProperty.NormalizedPropertyHash }
 ): FxSqlQuerySubQuery.SubQueryConditions {
-	if (typeof conditions === 'object') {
-		filter_date_for_where_conditions(conditions, host);
-	}
+	filterDate(conditions, host);
 
 	return conditions;
 }

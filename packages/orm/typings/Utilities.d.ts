@@ -84,7 +84,6 @@ export declare function doWhenErrIs(compare: {
 export declare function getErrWaitor(shouldWait?: boolean): FxOrmError.ErrorWaitor;
 export declare function getValueWaitor<T = any>(shouldWait?: boolean): FxOrmCommon.ValueWaitor<T>;
 export declare function parallelQueryIfPossible<T = any, RESP = any>(can_parallel: boolean, iteratee: T[], iterator: (value: T, index?: number, array?: T[]) => RESP): RESP[];
-export declare function is_model_conjunctions_key(k: string): boolean;
 /**
  * @description do some mutation for field-value in conditions
  *
