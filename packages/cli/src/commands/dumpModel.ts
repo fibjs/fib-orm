@@ -79,47 +79,37 @@ export default wrapSubcommand({
 
         getTableDDLs(sync, {
             afterGetTableDDL: (ddl) => {
-                const userDefinedProperties = modelByTable[ddl.collection].properties;
+                const userDefinedProperties = modelByTable[ddl.collection]?.allProperties || null;
                 const dataStoreProperties = ddl.properties;
 
-                const patchBaseName = `properties-for-t-${ddl.collection}`;
-                const tablePatchFile = path.resolve(diffOutDir, `./${patchBaseName}.patch`);
+                const tPatchBaseName = `properties-for-t-[${ddl.collection}]`;
+                const tablePatchFile = path.resolve(diffOutDir, `./${tPatchBaseName}.patch`);
 
                 const propritiesDiff = Object.entries(dataStoreProperties).reduce((accu, [mapsTo, prop]) => {
-                    const udP = userDefinedProperties[mapsTo];
-                    // prop = alphaBetKeySort(prop);
-                    if (udP) {
-                        const changes = Diff.diffJson(udP, prop);
-                        const patchBaseName = `properties-patch-for-t-${ddl.collection}-p-${mapsTo}`;
-                        const patch = Diff.createTwoFilesPatch(
-                            `${patchBaseName}-from-database.json`,
-                            `${patchBaseName}-user-defined.json`,
-                            JSON.stringify(prop, null, 2),
-                            JSON.stringify(udP, null, 2),
-                        );
+                    const udP = userDefinedProperties?.[mapsTo] || null;
+                    
+                    const changes = Diff.diffJson(udP, prop);
+                    const patchBaseName = `${tPatchBaseName}-p-${mapsTo}`;
+                    const patch = Diff.createTwoFilesPatch(
+                        `${patchBaseName}-from-database.json`,
+                        `${patchBaseName}-user-defined.json`,
+                        JSON.stringify(prop, null, 2),
+                        JSON.stringify(udP, null, 2),
+                    );
 
-                        // fs.writeFile(patchFile, patch as any);
-                        accu.push({
-                            name: mapsTo,
-                            mapsTo,
-                            changes,
-                            patch
-                        });
-                    } else {
-                        accu.push({
-                            name: mapsTo,
-                            mapsTo,
-                            changes: null,
-                            patch
-                        });
-                    }
+                    accu.push({
+                        name: mapsTo,
+                        mapsTo,
+                        changes,
+                        patch
+                    });
 
                     return accu
                 }, [])
 
                 const patch = Diff.createTwoFilesPatch(
-                    `${patchBaseName}-from-database.json`,
-                    `${patchBaseName}-user-defined.json`,
+                    `${tPatchBaseName}-from-database.json`,
+                    `${tPatchBaseName}-user-defined.json`,
                     JSON.stringify(userDefinedProperties, null, 2),
                     JSON.stringify(dataStoreProperties, null, 2),
                 );
