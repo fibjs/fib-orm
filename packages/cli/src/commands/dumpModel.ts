@@ -110,8 +110,8 @@ export default wrapSubcommand({
                 const patch = Diff.createTwoFilesPatch(
                     `${tPatchBaseName}-from-database.json`,
                     `${tPatchBaseName}-user-defined.json`,
-                    JSON.stringify(userDefinedProperties, null, 2),
                     JSON.stringify(dataStoreProperties, null, 2),
+                    JSON.stringify(userDefinedProperties, null, 2),
                 );
                 fs.writeFile(tablePatchFile, patch as any);
 
