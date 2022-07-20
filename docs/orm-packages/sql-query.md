@@ -35,7 +35,7 @@ const { Query }   = require("@fxjs/query");
 
 const query = new Query({ dialect: 'mysql' });
 
-query.table('table1').fields({id: 'id', a_text: 'text'}).build()
+query.create().table('table1').fields({id: 'id', a_text: 'text'}).build()
 // => "create table `table1` (`id` int unsigned not null auto_increment primary key, `a_text` text)"
 ```
 
@@ -134,7 +134,7 @@ const tzOffsetMillis = (d.getTimezoneOffset() * 60 * 1000)
 - [sqlite](https://github.com/fxjs-modules/orm/blob/@fxjs/sql-query@0.8.1/packages/sql-query/test/integration/test-dialect-sqlite.js)
 - [postgresql](https://github.com/fxjs-modules/orm/blob/@fxjs/sql-query@0.8.1/packages/sql-query/test/integration/test-dialect-postgresql.js)
 
-**注意** `timezone` 的含义根据不同的数据库, 处理亦有不同, 请参考相关测试同理.
+**注意** `timezone` 的含义根据不同的数据库, 处理亦有不同, 请参考相关测试用例.
 
 ### `Query::create()`
 
