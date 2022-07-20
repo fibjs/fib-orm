@@ -36,6 +36,7 @@ export default wrapSubcommand({
     options: {
         '-O, --out [outPath]': 'path to output json file',
         '--sync': 'sync user definition to database',
+        '--no-alphabet': 'sort properties alphabetically on patch',
     },
 
     description: `read columns information from database, and generate ddl file`,
@@ -64,6 +65,7 @@ export default wrapSubcommand({
         if (options.sync) {
             orm.syncSync();
         }
+        console.notice('[feat] options', options);
 
         const sync = new Sync({ dbdriver: orm.driver.sqlDriver });
         const modelReports: Record<string, {
@@ -92,11 +94,14 @@ export default wrapSubcommand({
                 const tablePatchFile = path.resolve(diffOutDir, `./${tPatchBaseName}.patch`);
 
                 const propritiesDiff = Object.entries(dataStoreProperties).reduce((accu, [mapsTo, prop]) => {
-                    const udP = alphaBetKeySort(userDefinedProperties[mapsTo]) || null;
-                    userDefinedProperties[mapsTo] = udP
+                    let udP = userDefinedProperties[mapsTo] || null;
+                    if (options.alphabet) {
+                        udP = alphaBetKeySort(udP);
+                        userDefinedProperties[mapsTo] = udP;
 
-                    prop = alphaBetKeySort(prop);
-                    dataStoreProperties[mapsTo] = prop;
+                        prop = alphaBetKeySort(prop);
+                        dataStoreProperties[mapsTo] = prop;
+                    }
                     
                     const changes = Diff.diffJson(udP, prop);
                     const patchBaseName = `${tPatchBaseName}-p-${mapsTo}`;
