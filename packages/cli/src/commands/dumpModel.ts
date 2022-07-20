@@ -13,6 +13,7 @@ type IModelFunc = (ORM: typeof import('@fxjs/orm')) => {
 };
 
 function alphaBetKeySort<T extends object>(obj: T) {
+    if (!obj) return obj;
     return Object.keys(obj).sort().reduce((acc, key) => {
         // @ts-ignore
         acc[key] = obj[key];
@@ -79,14 +80,18 @@ export default wrapSubcommand({
 
         getTableDDLs(sync, {
             afterGetTableDDL: (ddl) => {
-                const userDefinedProperties = modelByTable[ddl.collection]?.allProperties || null;
+                const userDefinedProperties = modelByTable[ddl.collection]?.allProperties || {};
                 const dataStoreProperties = ddl.properties;
 
                 const tPatchBaseName = `properties-for-t-[${ddl.collection}]`;
                 const tablePatchFile = path.resolve(diffOutDir, `./${tPatchBaseName}.patch`);
 
                 const propritiesDiff = Object.entries(dataStoreProperties).reduce((accu, [mapsTo, prop]) => {
-                    const udP = userDefinedProperties?.[mapsTo] || null;
+                    const udP = alphaBetKeySort(userDefinedProperties[mapsTo]) || null;
+                    userDefinedProperties[mapsTo] = udP
+
+                    prop = alphaBetKeySort(prop);
+                    dataStoreProperties[mapsTo] = prop;
                     
                     const changes = Diff.diffJson(udP, prop);
                     const patchBaseName = `${tPatchBaseName}-p-${mapsTo}`;
