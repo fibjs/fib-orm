@@ -15,25 +15,21 @@ export declare class CreateQuery implements FxSqlQueryChainBuilder.ChainBuilder_
     /**
      * Set the table name
      * @param table_name
-     * @returns {*}
      */
     table(table_name: string): this;
     /**
      * Add a field
      * @param name
      * @param type
-     * @returns {Object}
      */
     field(name: string, type: FxSqlQueryDialect.DialectFieldType): this;
     /**
      * Set all the fields
      * @param fields
-     * @returns {Object}
      */
     fields(fields?: FxSqlQueryColumns.FieldItemTypeMap): any;
     /**
      * Build a query from the passed params
-     * @returns {string}
      */
     build(): string;
 }

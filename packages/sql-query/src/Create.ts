@@ -18,7 +18,6 @@ export class CreateQuery implements FxSqlQueryChainBuilder.ChainBuilder__Create 
 	/**
 	 * Set the table name
 	 * @param table_name
-	 * @returns {*}
 	 */
 	table (table_name: string) {
 		this.tableName = table_name;
@@ -29,7 +28,6 @@ export class CreateQuery implements FxSqlQueryChainBuilder.ChainBuilder__Create 
 	 * Add a field
 	 * @param name
 	 * @param type
-	 * @returns {Object}
 	 */
 	field (name: string, type: FxSqlQueryDialect.DialectFieldType) {
 		this.structure[name] = type;
@@ -39,7 +37,6 @@ export class CreateQuery implements FxSqlQueryChainBuilder.ChainBuilder__Create 
 	/**
 	 * Set all the fields
 	 * @param fields
-	 * @returns {Object}
 	 */
 	fields (fields?: FxSqlQueryColumns.FieldItemTypeMap) {
 		if (!fields) {
@@ -52,7 +49,6 @@ export class CreateQuery implements FxSqlQueryChainBuilder.ChainBuilder__Create 
 
 	/**
 	 * Build a query from the passed params
-	 * @returns {string}
 	 */
 	build () {
 		if(!this.tableName){

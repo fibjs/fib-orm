@@ -68,7 +68,7 @@ function getOrmSidebar() {
             { text: 'orm-core', link: '/orm-packages/orm-core' },
             { text: 'db-driver', link: '/orm-packages/db-driver' },
             { text: 'knex', link: '/orm-packages/knex' },
-            // { text: 'sql-query', link: '/orm-packages/sql-query' },
+            { text: 'sql-query', link: '/orm-packages/sql-query' },
             { text: 'sql-ddl-sync', link: '/orm-packages/sql-ddl-sync' },
         ] },
     ]

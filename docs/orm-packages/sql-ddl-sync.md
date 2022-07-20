@@ -16,7 +16,7 @@
 
 ## 依赖
 
-sql-ddl-sync 依赖 [db-driver](./db-driver.md) 和数据库进行交互, 你需要单独安装 `@fxjs/db-driver` 以使得 `@fxjs/sql-ddl-sync` 正常工作.
+sql-ddl-sync 依赖 [db-driver](./db-driver.md) 和数据库进行交互, 你需要单独安装 `@fxjs/db-driver` 以使得 `@fxjs/sql-ddl-sync` 来连接数据库.
 
 ```sh
 npm i -S @fxjs/db-driver @fxjs/sql-ddl-sync
@@ -83,7 +83,7 @@ process.exit(0);
 
 ## Sync
 
-### `Sync::Sync(opts: object)`
+### `new Sync::Sync(opts: object)`
 
 - `opts.dbdriver`: (required) [db-driver] 的实例.
 - `opts.syncStrategy`: (optional) 同步策略, 参考[字段同步策略](#字段同步策略)

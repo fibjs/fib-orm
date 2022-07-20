@@ -1,8 +1,10 @@
 ## Object Relational Mapping for fibjs
 
-[![NPM version](https://img.shields.io/npm/v/@fxjs/orm.svg)](https://www.npmjs.org/package/@fxjs/orm)
-[![Build Status](https://travis-ci.org/fxjs-modules/orm.svg)](https://travis-ci.org/fxjs-modules/orm)
-[![Build status](https://ci.appveyor.com/api/projects/status/gjqno52nm2ff2a92?svg=true)](https://ci.appveyor.com/project/richardo2016/orm)
+[![NPM version](https://img.shields.io/npm/v/@fxjs/orm.svg)](https://www.npmjs.org/package/@fxjs/orm)&nbsp;
+[![NPM download](https://img.shields.io/npm/dt/@fxjs/orm.svg)](https://www.npmjs.org/package/@fxjs/orm)&nbsp;
+[![NPM download monthly](https://img.shields.io/npm/dm/@fxjs/orm.svg)](https://www.npmjs.org/package/@fxjs/orm)
+
+[Docs](https://fxjs-modules.github.io/orm/orm/getting-started.html)
 
 ## Install
 
@@ -20,6 +22,7 @@ npm run ci
 
 - MySQL & MariaDB
 - SQLite
+- PostgreSQL
 
 ## Features
 

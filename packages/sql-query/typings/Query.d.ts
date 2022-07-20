@@ -11,12 +11,12 @@ import { FxSqlQueryDialect } from './Typo/Dialect';
 export declare const comparators: import("./Typo").FxSqlQueryComparator.ComparatorHash;
 export declare const Text: FxSqlQuery.TypedQueryObjectWrapper<"text">;
 export declare class Query implements FxSqlQuery.Class_Query {
-    Dialect: FxSqlQueryDialect.Dialect;
+    readonly Dialect: FxSqlQueryDialect.Dialect;
+    readonly knex: FxSqlQuery.Class_Query['knex'];
     private opts;
     private _fns;
     private _proxyFn;
     constructor(_opts?: string | FxSqlQuery.QueryOptions);
-    knex: FxSqlQuery.Class_Query['knex'];
     escape: FxSqlQueryDialect.Dialect['escape'];
     escapeId: FxSqlQueryDialect.Dialect['escapeId'];
     escapeVal: FxSqlQueryDialect.Dialect['escapeVal'];

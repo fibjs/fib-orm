@@ -38,7 +38,7 @@ export namespace FxSqlQuery {
 		constructor (_opts?: string | FxSqlQuery.QueryOptions);
 
 		readonly knex: FxSqlQueryDialect.Dialect['knex']
-		Dialect: FxSqlQueryDialect.Dialect
+		readonly Dialect: FxSqlQueryDialect.Dialect
 
 		escape: FxSqlQueryDialect.Dialect['escape']
 		escapeId: FxSqlQueryDialect.Dialect['escapeId']

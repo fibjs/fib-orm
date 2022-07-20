@@ -21,7 +21,7 @@ export declare namespace FxSqlQuery {
     class Class_Query {
         constructor(_opts?: string | FxSqlQuery.QueryOptions);
         readonly knex: FxSqlQueryDialect.Dialect['knex'];
-        Dialect: FxSqlQueryDialect.Dialect;
+        readonly Dialect: FxSqlQueryDialect.Dialect;
         escape: FxSqlQueryDialect.Dialect['escape'];
         escapeId: FxSqlQueryDialect.Dialect['escapeId'];
         escapeVal: FxSqlQueryDialect.Dialect['escapeVal'];
