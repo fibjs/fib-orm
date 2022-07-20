@@ -6,8 +6,8 @@
 	"main": "lib",
 	"types": "typings/index.d.ts",
 	"bin": {
-		"orm": "./lib/index.js",
-		"orm-cli": "./lib/index.js"
+		"orm": "./bin/orm.js",
+		"orm-cli": "./bin/orm-cli.js"
 	},
 	"repository": {
 		"type": "https",
@@ -42,6 +42,7 @@
 		"access": "public"
 	},
 	"files": [
+		"bin",
 		"lib",
 		"typings"
 	]
