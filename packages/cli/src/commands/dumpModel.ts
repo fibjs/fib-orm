@@ -35,11 +35,12 @@ export default wrapSubcommand({
 
     options: {
         '-O, --out [outPath]': 'path to output json file',
+        '--sync': 'sync user definition to database',
     },
 
     description: `read columns information from database, and generate ddl file`,
 
-    onAction: ([modelFile]) => {
+    onAction: ([modelFile], options) => {
         modelFile = path.resolve(process.cwd(), modelFile);
         const jsonDiffName = path.basename(modelFile, '.js') + '-dump.json';
         const diffOutDir = path.dirname(modelFile);
@@ -59,6 +60,10 @@ export default wrapSubcommand({
         }
 
         const { orm } = (modelFunc as IModelFunc)(ORM);
+
+        if (options.sync) {
+            orm.syncSync();
+        }
 
         const sync = new Sync({ dbdriver: orm.driver.sqlDriver });
         const modelReports: Record<string, {
