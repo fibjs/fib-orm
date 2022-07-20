@@ -43,7 +43,7 @@ npm i -g @fxjs/orm-cli
 
 dumpModel 会打印数据库信息, 该过程中会把「用户定义的 model」和「从实际数据库抽象的 model」之间的 diff 也写入为 patch 文件.
 
-`<modelDefine>.js` 被预期导出一个方法, 该方法中应使用 ORM 连接某个数据库, 并定义一些数据模型. 会根据 ORM 属性定义规范, dumpModel 过程中会对数据库中每个表 table 尝试建模, 得到一些属性定义 `dataStoreProperties`, 同时用户定义的所有属性记为 `userDefinedProperties`.
+`<modelDefine>.js` 被预期导出一个方法, 该方法中应使用 ORM 连接某个数据库, 并定义一些数据模型. 根据 ORM 属性定义规范, dumpModel 过程中会对数据库中每个表 table 尝试建模, 得到一些属性定义 `dataStoreProperties`, 同时用户定义的所有属性记为 `userDefinedProperties`.
 
 一个参考的 `<modelDefine>.js` 文件如下:
 
@@ -81,7 +81,7 @@ module.exports = (ORM) => {
 假设该文件路径为 `/path_to/model-define.js`, 则 dumpModel 会完成如下工作:
 
 - 从数据库中读取信息, 包括表结构, 字段类型, 字段名称等等, 生成 `/path_to/model-define-dump.json` 文件, 包含表结构信息.
-- 生成一个 `/path_to/properties-for-t-user.patch` 文件, 表示 `dataStoreProperties` 和 `userDefinedProperties` 的差异
+- 生成一个 `/path_to/properties-for-t-[user].patch` 文件, 表示 `dataStoreProperties` 和 `userDefinedProperties` 的差异
 
 在执行完 dumpModel 后 这些信息会被保存到 `<modelDefine>.js` 同目录下的 `<modelDefine>-dump.json` 文件中.
 
@@ -89,3 +89,4 @@ module.exports = (ORM) => {
 **选项**
 
 - `--sync`: 是否将用户定义的 model 同步到数据库表结构中.
+- `--no-alphabet`: 禁用在 patch 时将每个 property 定义按字母顺序排序.
