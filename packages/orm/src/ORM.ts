@@ -58,7 +58,7 @@ export const settings = SettingsInstance;
 export import Property   = require("./Property");
 
 export function use(
-	connection: FxOrmDb.DatabaseBase,
+	connection: FxOrmDb.Database,
 	proto: string,
 	opts: FxOrmNS.IUseOptions,
 	cb: (err: Error, db?: FxOrmNS.ORM) => void
@@ -269,8 +269,8 @@ ORM.prototype.define = function (
 		driver_name    : this.driver_name,
 		driver         : this.driver,
 		table          : opts.table || opts.collection || ((m_settings.get("model.namePrefix") || "") + name),
-		// not standard FxOrmProperty.NormalizedPropertyHash here, but we should pass it firstly
-		properties     : properties as FxOrmProperty.NormalizedPropertyHash,
+		// not standard Record<string, FxOrmProperty.NormalizedProperty> here, but we should pass it firstly
+		properties     : properties as Record<string, FxOrmProperty.NormalizedProperty>,
 		__for_extension: opts.__for_extension || false,
 		indexes        : opts.indexes || [],
 		identityCache  : opts.hasOwnProperty("identityCache") ? opts.identityCache : m_settings.get("instance.identityCache"),
@@ -457,6 +457,8 @@ ORM.prototype.trans = function (
 	const connection = this.driver.db.connection;
 	return connection.trans(func.bind(connection));	
 };
+
+export type ORMInstance = FxOrmNS.ORM
 
 export const ErrorCodes = ORMError.codes;
 export const addAdapter = adapters.add;
