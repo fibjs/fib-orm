@@ -29,6 +29,7 @@
 		"@fxjs/cli": "^0.0.6",
 		"@fxjs/db-driver": "^0.2.2",
 		"@fxjs/sql-ddl-sync": "^0.8.5",
+		"@fxjs/sql-query": "^0.8.1",
 		"@types/semver": "^7.3.10",
 		"semver": "^7.3.7"
 	},
