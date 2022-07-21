@@ -1,5 +1,12 @@
 ## Object Relational Mapping for fibjs
 
+**Warning** ⚠️ This repo has beed archived and is no longer maintained, use [`@fxjs/orm`] instead, get source code from [fxjs-modules/orm].
+
+[fxjs-modules/orm]:https://github.com/fxjs-modules/orm/tree/master/packages/orm
+[`@fxjs/orm`]:https://npmjs.com/package/@fxjs/orm
+
+---
+
 [![Build Status](https://travis-ci.org/fibjs/fib-orm.svg)](https://travis-ci.org/fibjs/fib-orm)
 [![NPM version](https://img.shields.io/npm/v/fib-orm.svg)](https://www.npmjs.org/package/fib-orm)
 
