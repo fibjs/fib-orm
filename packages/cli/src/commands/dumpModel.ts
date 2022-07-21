@@ -65,7 +65,6 @@ export default wrapSubcommand({
         if (options.sync) {
             orm.syncSync();
         }
-        console.notice('[feat] options', options);
 
         const sync = new Sync({ dbdriver: orm.driver.sqlDriver });
         const modelReports: Record<string, {
