@@ -243,6 +243,8 @@ export const Instance = function (
 		saveInstanceExtraSync();
 	};
 
+	const oneOneAssocs = Object.values(Model.associations).filter(assoc => assoc.type === 'hasOne');
+
 	const savePersistedSync = function (
 		saveOptions: FxOrmInstance.SaveOptions,
 		data: FxOrmInstance.InstanceDataPayload,
@@ -286,6 +288,21 @@ export const Instance = function (
 		Utilities.filterWhereConditionsInput(conditions, instance.model());
 
 		const syncResponse = Utilities.catchBlocking(() => opts.driver.update(opts.table, changes, conditions));
+		fillBackAssociatedFieldsAfterPersist: {
+			const couldParallel = opts.driver.db.isPool;
+			
+			Utilities.parallelQueryIfPossible(couldParallel, oneOneAssocs, ({ association }) => {
+				Utilities.parallelQueryIfPossible(couldParallel, Object.keys(association.field), propName => {
+					if (!changes.hasOwnProperty(propName)) {
+						return ;
+					}
+					instance[propName] = changes[propName];
+					if (instance.hasOwnProperty(association.name)) {
+						instance[association.getSyncAccessor]();
+					}
+				})
+			})
+		}
 			
 		if (syncResponse.error) {
 			saveError(syncResponse.error)

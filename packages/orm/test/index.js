@@ -27,6 +27,8 @@ function t() {
     run('./integration/association-hasone-reverse.callback.js');
     run('./integration/association-hasone-zeroid.js');
     run('./integration/association-hasone-zeroid.callback.js');
+    run('./integration/association-hasone-issues.js');
+
     run('./integration/event.js');
 
     run('./integration/hook.js');
