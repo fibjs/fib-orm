@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/orm",
-	"version": "1.13.6",
+	"version": "1.13.7",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
@@ -34,11 +34,11 @@
 	},
 	"dependencies": {
 		"@fibjs/enforce": "^0.1.1",
-		"@fxjs/db-driver": "^0.2.2",
+		"@fxjs/db-driver": "^0.2.3",
 		"@fxjs/knex": "^0.3.2",
 		"@fxjs/orm-core": "^0.2.1",
-		"@fxjs/sql-ddl-sync": "^0.8.5",
-		"@fxjs/sql-query": "^0.8.1",
+		"@fxjs/sql-ddl-sync": "^0.8.6",
+		"@fxjs/sql-query": "^0.8.2",
 		"@types/knex": "^0.16.1",
 		"fib-pool": "^1.6.0",
 		"knex": "^0.19.5",
