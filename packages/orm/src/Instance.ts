@@ -253,10 +253,11 @@ export const Instance = function (
 				conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 
 		const savedCheckSync = function (saved: boolean) {
-			if (!saved && !shouldSaveAssocs(saveOptions))
+			const _shouldSaveAssocs = shouldSaveAssocs(saveOptions)
+			if (!saved && !_shouldSaveAssocs)
 				return saveInstanceExtraSync();
 			
-			if (!shouldSaveAssocs(saveOptions)) {
+			if (!_shouldSaveAssocs) {
 				runSyncAfterSaveActions(false);
 				return saveInstanceExtraSync();
 			}
@@ -316,9 +317,9 @@ export const Instance = function (
 
 	const saveAssociationsSync = function (cb?: FxOrmCommon.ExecutionCallback<boolean>): boolean {
 		let pending = 1,
-				// to check if error passed by cb if cb exists
-				error_passed = false,
-				assocSaved: boolean;
+			// to check if error passed by cb if cb exists
+			error_passed = false,
+			assocSaved: boolean;
 
 		const saveAssociationItemSync = function (syncVersionAccessor: string, instances: FxOrmInstance.InstanceDataPayload) {
 			pending += 1;
@@ -641,7 +642,7 @@ export const Instance = function (
 	const collectParamsForSave = function (args: any[]) {
 		var objCount = 0;
 		var data: FxOrmInstance.InstanceDataPayload = {},
-				saveOptions = {};
+			saveOptions = {};
 
 		Helpers.selectArgs(args, function (arg_type, arg) {
 			switch (arg_type) {

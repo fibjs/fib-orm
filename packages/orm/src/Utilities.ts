@@ -219,24 +219,46 @@ export function hasValues (obj: {[k: string]: any}, keys: string[]): boolean {
 	return true;
 };
 
+/**
+ * @description from from <source> object, copy specific ids(determined by <source_model>) to <target> object as
+ * correspoding <associacted_fields>, for example:
+ * 
+ * if <source_model> id: id1, id2
+ * if <associacted_fields>: user_id, production_id
+ * source.id1 = 1, source.id2 = 2
+ * target.user_id = undefined, target.production_id = undefined
+ * 
+ * Then, we will get:
+ * 
+ * target.user_id = 1, target.production_id = 2
+ * 
+ * if target.user_id is not undefined, it wouldn't be overwritten unless <overwrite> is true
+ * 
+ * @param source_model 
+ * @param associacted_fields 
+ * @param source 
+ * @param target 
+ * @param overwrite 
+ */
 export function populateModelIdKeysConditions (
-	model: FxOrmModel.Model,
-	fields: string[],
+	source_model: FxOrmModel.Model,
+	associacted_fields: string[],
 	// source: FxOrmAssociation.AssociationDefinitionOptions | FxOrmInstance.Instance,
 	source: FxOrmInstance.InstanceDataPayload,
 	target: FxSqlQuerySubQuery.SubQueryConditions,
 	overwrite?: boolean
 ): void {
-	for (let i = 0; i < model.id.length; i++) {
-		if (typeof target[fields[i]] === 'undefined' || overwrite !== false) {
-			target[fields[i]] = source[model.id[i]];
-		} else if (Array.isArray(target[fields[i]])) { // that might be conjunction query conditions
-			(target[fields[i]] as FxSqlQueryComparator.SubQueryInput[])
+	const mids = source_model.id;
+	for (let i = 0; i < mids.length; i++) {
+		if (typeof target[associacted_fields[i]] === 'undefined' || overwrite !== false) {
+			target[associacted_fields[i]] = source[mids[i]];
+		} else if (Array.isArray(target[associacted_fields[i]])) { // that might be conjunction query conditions
+			(target[associacted_fields[i]] as FxSqlQueryComparator.SubQueryInput[])
 				.push(
-					source[model.id[i]] as FxSqlQueryComparator.SubQueryInput
+					source[mids[i]] as FxSqlQueryComparator.SubQueryInput
 				);
 		} else {
-			target[fields[i]] = [target[fields[i]], source[model.id[i]]];
+			target[associacted_fields[i]] = [target[associacted_fields[i]], source[mids[i]]];
 		}
 	}
 };

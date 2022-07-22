@@ -28,7 +28,28 @@ export declare function values(obj: any[] | {
 export declare function hasValues(obj: {
     [k: string]: any;
 }, keys: string[]): boolean;
-export declare function populateModelIdKeysConditions(model: FxOrmModel.Model, fields: string[], source: FxOrmInstance.InstanceDataPayload, target: FxSqlQuerySubQuery.SubQueryConditions, overwrite?: boolean): void;
+/**
+ * @description from from <source> object, copy specific ids(determined by <source_model>) to <target> object as
+ * correspoding <associacted_fields>, for example:
+ *
+ * if <source_model> id: id1, id2
+ * if <associacted_fields>: user_id, production_id
+ * source.id1 = 1, source.id2 = 2
+ * target.user_id = undefined, target.production_id = undefined
+ *
+ * Then, we will get:
+ *
+ * target.user_id = 1, target.production_id = 2
+ *
+ * if target.user_id is not undefined, it wouldn't be overwritten unless <overwrite> is true
+ *
+ * @param source_model
+ * @param associacted_fields
+ * @param source
+ * @param target
+ * @param overwrite
+ */
+export declare function populateModelIdKeysConditions(source_model: FxOrmModel.Model, associacted_fields: string[], source: FxOrmInstance.InstanceDataPayload, target: FxSqlQuerySubQuery.SubQueryConditions, overwrite?: boolean): void;
 export declare function getConditions(model: FxOrmModel.Model, fields: string[], from: FxSqlQuerySubQuery.SubQueryConditions): FxSqlQuerySubQuery.SubQueryConditions;
 /**
  * TODO: add comment for this method
