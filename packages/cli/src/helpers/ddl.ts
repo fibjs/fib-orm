@@ -30,8 +30,7 @@ export function getAllTableNames (driver: IDbDriver.ISQLDriver) {
             break;
         }
         case 'sqlite': {
-            const result = driver.execute<{ name: string }[]>(`SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name
-            `);
+            const result = driver.execute<{ name: string }[]>(`SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name`);
             result.forEach((x) => {
                 // skip system tables
                 if (x.name.startsWith('sqlite_')) return ;
