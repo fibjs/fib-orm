@@ -1,7 +1,6 @@
 import FxORMCore = require("@fxjs/orm-core");
 import util  = require('util')
 import { FxOrmSqlDDLSync__Collection } from "./Typo/Collection";
-import { FxOrmSqlDDLSync__Column } from "./Typo/Column";
 import { FxOrmSqlDDLSync__DbIndex } from "./Typo/DbIndex";
 import { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
@@ -10,7 +9,7 @@ import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filt
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 
 import "./Dialects";
-import * as Transformers from './Transformers';
+import { Transformers, IProperty, transformer }  from '@fxjs/orm-property';
 import { IDbDriver } from "@fxjs/db-driver";
 
 const noOp = () => {};
@@ -78,7 +77,7 @@ function processCollection(
  */
 function getIndexName (
 	collection: FxOrmSqlDDLSync__Collection.Collection,
-	prop: FxOrmSqlDDLSync__Column.Property,
+	prop: IProperty,
 	dialect_type: string
 ) {
 	const post = prop.unique ? 'unique' : 'index';
@@ -97,9 +96,9 @@ function getIndexName (
 function getColumnTypeRaw (
 	syncInstance: Sync,
 	collection_name: FxOrmSqlDDLSync.TableName,
-	prop: FxOrmSqlDDLSync__Column.Property,
+	prop: IProperty,
 	opts?: {
-		for?: FxOrmSqlDDLSync__Dialect.DielectGetTypeOpts['for']
+		for?: FxOrmSqlDDLSync__Dialect.PurposeToGetRawType
 	}
 ): false | FxOrmSqlDDLSync__Dialect.DialectResult {
 	let type: false | string | FxOrmSqlDDLSync__Dialect.TypeResult;
@@ -111,7 +110,17 @@ function getColumnTypeRaw (
 		type = syncInstance.types[prop.type].datastoreType(prop);
 	} else { // fallback to driver's types
 		const { for: _for = 'create_table' } = opts || {};
-		type = syncInstance.Dialect.getType(collection_name, prop, syncInstance.dbdriver, { for: _for });
+
+		const dbtype = syncInstance.dbdriver.type;
+		type = transformer(dbtype as any).toStorageType(prop, {
+			collection: collection_name,
+			customTypes: syncInstance.dbdriver?.customTypes,
+			escapeVal: getSqlQueryDialect(dbtype).escapeVal,
+			userOptions: {
+				useDefaultValue: _for === 'create_table',
+			}
+		}).typeValue;
+
 	}
 
 	if (!type)
@@ -141,7 +150,6 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 
 	readonly dbdriver: IDbDriver.ITypedDriver<T>
 	readonly Dialect: FxOrmSqlDDLSync__Dialect.Dialect<T>
-	readonly transformers: FxOrmSqlDDLSync.Transformers<T>
 	/**
 	 * @description customTypes
 	 */
@@ -162,7 +170,6 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		Object.defineProperty(this, 'collections', { value: [], writable: false })
 		Object.defineProperty(this, 'dbdriver', { value: dbdriver, writable: false })
 		Object.defineProperty(this, 'Dialect', { value: dialect(dbdriver.type as any), writable: false })
-		Object.defineProperty(this, 'transformers', { value: (Transformers as any)[dbdriver.type], writable: false })
 	}
 
 	[sync_method: string]: any
@@ -201,7 +208,7 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		let keys: string[] = [];
 
 		for (let k in collection.properties) {
-			let property: FxOrmSqlDDLSync__Column.Property = collection.properties[k],
+			let property: IProperty = collection.properties[k],
 				col: false | FxOrmSqlDDLSync__Dialect.DialectResult;
 
 			property.mapsTo = property.mapsTo || k;
@@ -361,7 +368,7 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 	): FxOrmSqlDDLSync__DbIndex.DbIndexInfo[] {
 		let indexes: FxOrmSqlDDLSync__DbIndex.DbIndexInfo[] = [];
 		let found: boolean,
-			prop: FxOrmSqlDDLSync__Column.Property;
+			prop: IProperty;
 
 		for (let k in collection.properties) {
 			prop = collection.properties[k];
@@ -535,8 +542,8 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 	 * @param column column expected to be synced
 	 */
 	needDefinitionToColumn (
-		property: FxOrmSqlDDLSync__Column.Property,
-		column: FxOrmSqlDDLSync__Column.Property,
+		property: IProperty,
+		column: IProperty,
 		options?: {
 			collection?: string
 		}
