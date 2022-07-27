@@ -39,12 +39,13 @@ export function buildDbDriver (opts: string | FxDbDriverNS.DBConnectionConfig): 
 }
 
 /* model helpers :start */
+// TODO: add test case
 export function pickProperties<T extends FxOrmModel.Model = FxOrmModel.Model>(
     m: T,
-    picker: ((p: FxOrmProperty.NormalizedProperty, m: T) => boolean)
+    picker: ((p: FxOrmProperty.NormalizedProperty, k: string, m: T) => boolean)
 ) {
     return Object.entries(m.allProperties).reduce((accu, [k, prop]) => {
-        if (picker(prop, m)) {
+        if (picker(prop, k, m)) {
             accu[k] = prop
         };
         return accu;

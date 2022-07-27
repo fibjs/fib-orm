@@ -6,7 +6,7 @@ import { FxOrmModel } from './Typo/model';
 import { FxOrmHook } from './Typo/hook';
 import { FxOrmProperty } from "./Typo/property";
 export declare function buildDbDriver(opts: string | FxDbDriverNS.DBConnectionConfig): FxOrmNS.ORMLike | IDbDriver;
-export declare function pickProperties<T extends FxOrmModel.Model = FxOrmModel.Model>(m: T, picker: ((p: FxOrmProperty.NormalizedProperty, m: T) => boolean)): Record<string, FxOrmProperty.NormalizedProperty>;
+export declare function pickProperties<T extends FxOrmModel.Model = FxOrmModel.Model>(m: T, picker: ((p: FxOrmProperty.NormalizedProperty, k: string, m: T) => boolean)): Record<string, FxOrmProperty.NormalizedProperty>;
 export declare function getManyAssociationItemFromInstanceByExtname(instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_HasMany;
 export declare function getOneAssociationItemFromInstanceByExtname(instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_HasOne;
 export declare function getExtendsToAssociationItemFromInstanceByExtname(instance: FxOrmInstance.Instance, extend_name: string): FxOrmAssociation.InstanceAssociationItem_ExtendTos;
