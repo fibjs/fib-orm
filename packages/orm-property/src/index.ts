@@ -5,10 +5,21 @@ export { Transformers };
 export type { IProperty } from './Property';
 
 export function transformer(type: 'mysql'): typeof Transformers['mysql']
+export function transformer(type: 'psql'): typeof Transformers['postgresql']
 export function transformer(type: 'postgresql'): typeof Transformers['postgresql']
 export function transformer(type: 'sqlite'): typeof Transformers['sqlite']
-export function transformer (type: keyof typeof Transformers): typeof Transformers[typeof type] {
-    return Transformers[type];
+export function transformer(type: string) {
+    switch (type) {
+        case 'psql':
+        case 'postgres':
+            return Transformers['postgresql'];
+        case 'postgresql':
+        case 'mysql':
+        case 'sqlite':
+            return Transformers[type];
+        default:
+            throw new Error('Unknown database type');
+    }
 }
 
 export { defineCustomType } from './customTypes';
