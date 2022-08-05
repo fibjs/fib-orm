@@ -2,6 +2,7 @@
 import events = require("events");
 import { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
 import SqlQuery = require("@fxjs/sql-query");
+import { addAdapter } from "./Adapters";
 import type { FxOrmNS } from "./Typo/ORM";
 import type { FxOrmDb } from "./Typo/Db";
 import type { FxOrmError } from "./Typo/Error";
@@ -68,4 +69,4 @@ export declare class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 }
 export declare type ORMInstance = FxOrmNS.ORM;
 export declare const ErrorCodes: FxOrmError.PredefineErrorCodes;
-export declare const addAdapter: (name: string, constructor: FxOrmDMLDriver.DMLDriverConstructor) => void;
+export { addAdapter };

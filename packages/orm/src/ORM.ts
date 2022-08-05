@@ -8,7 +8,7 @@ import SqlQuery       = require("@fxjs/sql-query");
 import ormPluginSyncPatch from './Patch/plugin'
 
 import { Model }      from "./Model";
-import adapters       = require("./Adapters");
+import { addAdapter, getAdapter } from "./Adapters";
 import ORMError       = require("./Error");
 import Utilities      = require("./Utilities");
 
@@ -69,7 +69,7 @@ export function use(
 	}
 
 	try {
-		const DMLDriver   = adapters.get(proto);
+		const DMLDriver   = getAdapter(proto);
 		const settings = Settings.Container(SettingsInstance.get('*'));
 		const driver   = new DMLDriver(null, connection, {
 			debug    : (opts.query && opts.query.debug === 'true'),
@@ -118,7 +118,7 @@ export function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): Fx
 	let orm: FxOrmNS.ORM;
 
 	const syncResult = Utilities.catchBlocking(() => {
-		const DMLDriver = adapters.get(adapterName);
+		const DMLDriver = getAdapter(adapterName);
 		const settings = Settings.Container(SettingsInstance.get('*'));
 		const driver   = new DMLDriver(dbdriver.uri as any, null, {
 			debug    : dbdriver.extend_config.debug ? dbdriver.extend_config.debug : settings.get("connection.debug"),
@@ -437,4 +437,4 @@ export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 export type ORMInstance = FxOrmNS.ORM
 
 export const ErrorCodes = ORMError.codes;
-export const addAdapter = adapters.add;
+export { addAdapter };
