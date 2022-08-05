@@ -1,3 +1,5 @@
+import fs = require('fs');
+import path = require('path');
 import type { FxOrmDMLDriver } from './Typo/DMLDriver';
 
 import "./Drivers/DML";
@@ -5,21 +7,29 @@ import "./Drivers/DML";
 export const add = addAdapter;
 export const get = getAdapter;
 
-// type ISupportedDBDriver = 'mysql' | 'sqlite' | 'postgresql'
-
 const adapters = <{
 	[key: string]: FxOrmDMLDriver.DMLDriverConstructor
 }>{};
 
 function addAdapter(name: string, constructor: FxOrmDMLDriver.DMLDriverConstructor) {
-	adapters[name] = constructor;
+	if (adapters.hasOwnProperty(name)) {
+		throw new Error(`[addAdapter] adapter '${name}' already exists`);
+	}
+
+	Object.defineProperty(adapters, name, {
+		get () {
+			return constructor
+		},
+		configurable: false
+	})
 }
 
 function getAdapter(name: string): FxOrmDMLDriver.DMLDriverConstructor {
+	const modulePath = `./Drivers/DML/${name}`;
 	switch (name) {
 		case 'mysql':
 		case 'sqlite':
-			return require(`./Drivers/DML/${name}`).Driver;
+			return require(modulePath).Driver;
 		case 'pg':
 		case 'psql':
 		case 'postgres':
@@ -29,8 +39,12 @@ function getAdapter(name: string): FxOrmDMLDriver.DMLDriverConstructor {
 	
 	// TODO: support install dml driver from node_modules
 	if (!(name in adapters)) {
-		// trigger error which could be detected by `isDriverNotSupportedError`
-		adapters[name] = require("./Drivers/DML/" + name).Driver;
+		if (!fs.exists(path.resolve(__dirname, modulePath))) {
+			// trigger error which could be detected by `isDriverNotSupportedError`
+			const err = new Error('No such file or directory');
+			(err as any).code = 'MODULE_NOT_FOUND';
+			throw err;
+		}
 	}
 
 	return adapters[name];
