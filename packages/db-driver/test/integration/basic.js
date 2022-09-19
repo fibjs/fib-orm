@@ -357,7 +357,7 @@ describe("DBDriver", function () {
           "protocol": "redis:",
           "slashes": true,
           "query": {},
-          "database": null,
+          "database": "",
           "username": null,
           "password": null,
           "host": "127.0.0.1:6379",
