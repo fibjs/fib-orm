@@ -51,6 +51,18 @@ services:
     # Uncomment this if you want to persist the data.
     volumes:
       - "./dbdata_pg14:/var/lib/postgresql/data"
+  redis:
+    image: 'redis:6.0'
+    restart: always
+    container_name: docker_redis
+    volumes:
+      - "./dbdata_redis6.0/data:/data"
+      - "./dbdata_redis6.0/conf/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "./dbdata_redis6.0/logs:/logs"
+    command:
+      redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6379:6379'
   # mongodb:
   #   image: mongo:5.0
   #   ports:
