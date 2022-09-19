@@ -10,7 +10,8 @@ const testDefinitions = [
 			id: { type: "serial", key: true, serial: true, mapsTo: 'userID' },
 			username: { type: "text", reuqired: true },
 			password: { type: "text", reuqired: true },
-			created_at: { type: "datetime", defaultValue: 'CURRENT_TIMESTAMP' },
+			created_at: { type: "datetime", defaultValue: Date.now },
+			desc: { type: 'text', comment: 'desc field of user'}
 		}
 	],
 	[
@@ -21,7 +22,8 @@ const testDefinitions = [
 			phone: { type: "text", size: 32 },
 			birthday: { type: "date", time: true, defaultValue: new Date('1970-01-01 00:00:00') },
 			photo: { type: "binary" },
-			created_at: { type: "datetime", defaultValue: 'CURRENT_TIMESTAMP' },
+			created_at: { type: "datetime", defaultValue: Date.now },
+			desc: { type: 'text', comment: 'desc field of person'}
 		}
 	],
 	[
@@ -29,7 +31,8 @@ const testDefinitions = [
 			id: { type: "serial", key: true, serial: true },
 			name: { type: "text", reuqired: true },
 			description: { type: "text", reuqired: true },
-			created_at: { type: "datetime", defaultValue: 'CURRENT_TIMESTAMP' },
+			created_at: { type: "datetime", defaultValue: Date.now },
+			desc: { type: 'text', comment: 'desc field of role'}
 		}
 	],
 	[
@@ -38,7 +41,8 @@ const testDefinitions = [
 			type: { type: "text", reuqired: true, index: [ "subject_idx_type_position" ] },
 			position: { type: "text", reuqired: true, index: [ "subject_idx_type_position" ] },
 			description: { type: "text", reuqired: true, index: [ "subject_idx_description" ] },
-			created_at: { type: "datetime", defaultValue: 'CURRENT_TIMESTAMP' },
+			created_at: { type: "datetime", defaultValue: Date.now },
+			desc: { type: 'text', comment: 'desc field of subject'}
 		}
 	]
 ];
@@ -125,8 +129,12 @@ describe(`db: Sync`, function () {
 							table,
 							'created_at'
 						).created_at
-
-					assert.equal(created_at.defaultValue, 'CURRENT_TIMESTAMP')
+					
+					if (common.dbdriver.type === 'psql') {
+						assert.equal(created_at.defaultValue, 'now()')
+					} else {
+						assert.equal(created_at.defaultValue, 'CURRENT_TIMESTAMP')
+					}
 				});
 			});
 		});
@@ -192,12 +200,11 @@ describe(`db: Sync`, function () {
 					)
 				});
 
-				if (common.dialect === 'sqlite') {
+				if (common.dbdriver.type === 'sqlite') {
 					it(`${table}'s column 'updated_at' have no default value`, () => {
 						const props = sync.Dialect.getCollectionPropertiesSync(
 							sync.dbdriver,
 							table,
-							'updated_at'
 						)
 
 						assert.notExist(props.updated_at.defaultValue)
@@ -208,11 +215,22 @@ describe(`db: Sync`, function () {
 						const props = sync.Dialect.getCollectionPropertiesSync(
 							sync.dbdriver,
 							table,
-							'updated_at'
 						)
 
 						assert.exist(props.updated_at.defaultValue)
 						assert.exist(props.expired_at.defaultValue)
+					});
+				}
+
+				if (common.dbdriver.type !== 'sqlite') {
+					it(`${table}'s column 'desc' should has column comment`, () => {
+						const props = sync.Dialect.getCollectionPropertiesSync(
+							sync.dbdriver,
+							table,
+						)
+
+						assert.exist(props.desc.comment)
+						assert.equal(props.desc.comment, `desc field of ${table}`)
 					});
 				}
 			});

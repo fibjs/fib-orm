@@ -8,7 +8,7 @@ import type { FxOrmCommon } from "../../Typo/_common";
 import util = require("util");
 
 import shared = require("./_shared");
-import DDL = require("../DDL/SQL");
+import DDL = require("./_ddl-sql");
 import Sync = require("@fxjs/sql-ddl-sync");
 import { FxSqlQuery, Query }	from "@fxjs/sql-query";
 import utils = require("./_utils");
@@ -42,7 +42,7 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor = function (
 	});
 	if (!this.config.timezone) this.config.timezone = "local";
 
-	Object.defineProperty(this, 'ddlDialect', {
+	Object.defineProperty(this, 'ddlSync', {
 		value: Sync.dialect(this.dialect),
 		writable: false
 	});

@@ -2,6 +2,7 @@
 
 import url = require('url')
 import util = require('util')
+import tty  = require("tty");
 import net = require('net')
 import uuid = require('uuid')
 import ParseQSDotKey = require('parse-querystring-dotkey')
@@ -130,6 +131,15 @@ export function parseConnectionString (input: any): FxDbDriverNS.DBConnectionCon
         'pathname',
     ])
 
+    Object.defineProperty(input, 'database', {
+        set(v) {
+            this.pathname = '/' + v
+        },
+        get() {
+            return unPrefix(this.pathname, '/')
+        },
+    });
+
     input.slashes = !!input.slashes
     input.port = forceInteger(input.port, null)
 
@@ -177,3 +187,22 @@ export function mountPoolToDriver<CONN_TYPE = any> (
 export function arraify<T = any> (item: T | T[]): T[] {
 	return Array.isArray(item) ? item : [item]
 }
+
+export function logDebugSQL (dbtype: string, sql: string, is_sync = true) {
+	let fmt: string;
+
+	if (tty.isatty(process.stdout.fd)) {
+		fmt = "\033[32;1m(orm/%s) \033[34m%s\033[0m\n";
+		sql = sql.replace(/`(.+?)`/g, function (m) { return "\033[31m" + m + "\033[34m"; });
+	} else {
+		fmt = "[SQL/%s] %s\n";
+	}
+
+    const text = util.format(fmt, dbtype, sql);
+
+    if (is_sync) {
+        console.log(text)
+    } else {
+        process.stdout.write(text as any);
+    }
+};

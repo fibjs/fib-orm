@@ -65,7 +65,12 @@ export declare class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.ICon
     [sync_method: string]: any;
 }
 export declare class SQLDriver<CONN_TYPE extends Driver.IConnTypeEnum> extends Driver<CONN_TYPE> implements FxDbDriverNS.SQLDriver {
+    constructor(opts: FxDbDriverNS.ConnectionInputArgs | string);
     currentDb: FxDbDriverNS.SQLDriver['currentDb'];
+    /**
+     * @override
+     */
+    dbExists(dbname: string): boolean;
     /**
      * @override
      */

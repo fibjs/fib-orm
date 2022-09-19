@@ -2,7 +2,7 @@ import util = require('util')
 
 import { Database } from "../DB/sqlite3";
 import shared = require("./_shared");
-import DDL = require("../DDL/SQL");
+import DDL = require("./_ddl-sql");
 import Sync = require("@fxjs/sql-ddl-sync");
 import utils = require("./_utils");
 import * as Utilities from '../../Utilities';
@@ -42,7 +42,7 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function (
 	});
 	if (!this.config.timezone) this.config.timezone = "local";
 
-	Object.defineProperty(this, 'ddlDialect', {
+	Object.defineProperty(this, 'ddlSync', {
 		value: Sync.dialect(this.dialect),
 		writable: false
 	});

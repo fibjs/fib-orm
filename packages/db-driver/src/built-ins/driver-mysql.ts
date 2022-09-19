@@ -5,6 +5,7 @@ import db = require('db')
 import { FxDbDriverNS } from '../Typo';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 import { SQLDriver } from "./base.class";
+import { logDebugSQL } from '../utils';
 
 export default class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbDriverNS.SQLDriver {
     constructor (conn: FxDbDriverNS.ConnectionInputArgs | string) {
@@ -15,6 +16,7 @@ export default class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbD
 
     switchDb (targetDb: string) {
         this.execute(`use \`${targetDb}\``);
+        this.currentDb = targetDb;
     }
     
     open (): Class_MySQL { return super.open() }
@@ -29,7 +31,14 @@ export default class MySQLDriver extends SQLDriver<Class_MySQL> implements FxDbD
 
     getConnection (): Class_MySQL { return db.openMySQL(this.uri) }
 
+    dbExists (dbname: string): boolean {
+        return this.execute(`SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${dbname}'`).length > 0;
+    }
+
     execute<T = any> (sql: string): T {
+        if (this.extend_config.debug_sql) {
+            logDebugSQL('mysql', sql);
+        }
         if (this.isPool)
             return this.pool(conn => conn.execute(sql)) as any;
 

@@ -9,7 +9,7 @@ import util = require("util");
 
 import { Database } from "../DB/mysql";
 import shared = require("./_shared");
-import DDL = require("../DDL/SQL");
+import DDL = require("./_ddl-sql");
 import { FxSqlQuery, Query } from "@fxjs/sql-query";
 import Sync = require("@fxjs/sql-ddl-sync");
 import utils = require("./_utils");
@@ -42,7 +42,7 @@ export const Driver: FxOrmDMLDriver.DMLDriverConstructor_MySQL = function (
 	});
 	if (!this.config.timezone) this.config.timezone = "local";
 
-	Object.defineProperty(this, 'ddlDialect', {
+	Object.defineProperty(this, 'ddlSync', {
 		value: Sync.dialect(this.dialect),
 		writable: false
 	});

@@ -2,7 +2,6 @@ import { IDbDriver } from "@fxjs/db-driver";
 import { FxOrmCoreCallbackNS } from "@fxjs/orm-core";
 import { IProperty } from "@fxjs/orm-property";
 
-import { FxOrmSqlDDLSync__Column } from "./Column";
 import { FxOrmSqlDDLSync__Dialect } from "./Dialect";
 import { FxOrmSqlDDLSync__DbIndex } from "./DbIndex";
 
@@ -56,8 +55,8 @@ export namespace FxOrmSqlDDLSync__Driver {
     }
 
     export interface DbIndexInfo_PostgreSQL extends FxOrmSqlDDLSync__DbIndex.DbIndexInfo {
-        indisprimary: boolean
-        indisunique: boolean
+        indisprimary: "1" | "0"
+        indisunique: "1" | "0"
         relname: string
         attname: string
     }

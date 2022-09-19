@@ -5,11 +5,11 @@ import { FxOrmSqlDDLSync__DbIndex } from "./Typo/DbIndex";
 import { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
 import { FxOrmSqlDDLSync } from "./Typo/_common";
-import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop, psqlGetEnumTypeName, psqlRepairEnumTypes } from './Utils';
+import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop, psqlRepairEnumTypes, parseCollectionIndexes } from './Utils';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 
 import "./Dialects";
-import { Transformers, IProperty, transformer }  from '@fxjs/orm-property';
+import { IProperty, transformer }  from '@fxjs/orm-property';
 import { IDbDriver } from "@fxjs/db-driver";
 
 const noOp = () => {};
@@ -28,6 +28,38 @@ export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType | 'psql') {
 		default:
 			throw new Error(`no dialect with name '${name}'`)
 		}
+}
+
+function updateColumnsComment<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn>(
+	collection: FxOrmSqlDDLSync__Collection.Collection,
+	dbdriver: IDbDriver.ITypedDriver<T>,
+	remote_properties: FxOrmSqlDDLSync__Collection.Collection['properties'],
+) {
+	// TODO: support mysql also
+	if (dbdriver.type !== 'psql') return ;
+
+	const dialect = getSqlQueryDialect(dbdriver.type);
+
+	for (let k in collection.properties) {
+		const prop = collection.properties[k];
+		if (!prop.comment) continue ;
+
+		const remote_prop = remote_properties[k];
+		const mapsTo = prop.mapsTo || k;
+		if (!mapsTo) {
+			this.debug(`[__syncColumnsComment] No mapsTo for property '${k}' in collection '${collection.name}'`);
+			continue ;
+		}
+
+		if (remote_prop.comment === prop.comment) continue ;
+
+		dbdriver.execute(
+			dialect.escape(
+				`comment on column ??.?? is ?`,
+				[ collection.name, mapsTo, prop.comment ]
+			)
+		);
+	}
 }
 
 /**
@@ -67,26 +99,6 @@ function processCollection(
 	syncInstnace.syncCollection(collection, { strategy })
 
 	return true;
-}
-
-/**
- * @description compute system's index name by dialect type
- * 
- * @param collection collection to indexed
- * @param prop column's property
- */
-function getIndexName (
-	collection: FxOrmSqlDDLSync__Collection.Collection,
-	prop: IProperty,
-	dialect_type: string
-) {
-	const post = prop.unique ? 'unique' : 'index';
-
-	if (dialect_type == 'sqlite') {
-		return collection.name + '_' + prop.name + '_' + post;
-	} else {
-		return prop.name + '_' + post;
-	}
 }
 
 /**
@@ -174,14 +186,22 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 
 	[sync_method: string]: any
 	
-	defineCollection (collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties']): this {
-		let idx = this.collections.findIndex(collection => collection.name === collection_name)
-		if (idx >= 0)
-			this.collections.splice(idx, 1)
+	defineCollection (
+		collection_name: string,
+		properties: FxOrmSqlDDLSync__Collection.Collection['properties'],
+	): this {
+		let collectionIdx = this.collections.findIndex(collection => collection.name === collection_name)
+		if (collectionIdx >= 0)
+			this.collections.splice(collectionIdx, 1)
 
+		let index_defs = parseCollectionIndexes(collection_name, properties, this.dbdriver.type);
+		if (typeof this.Dialect.convertIndexes === 'function') {
+			index_defs = this.Dialect.convertIndexes(collection_name, index_defs);
+		}
 		this.collections.push({
-			name       : collection_name,
-			properties : properties
+			name: collection_name,
+			properties,
+			index_defs,
 		});
 			
 		return this;
@@ -241,7 +261,8 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 			collection.name, columns, keys
 		);
 
-		this.syncIndexes(collection.name, this.getCollectionIndexes(collection));
+		this.syncIndexes(collection.name, collection.index_defs);
+		updateColumnsComment(collection, this.dbdriver, this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name));
 
 		return result_1;
 	}
@@ -354,127 +375,37 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 			}
 		}
 
-		const indexes = this.getCollectionIndexes(collection);
-
-		if (indexes.length) this.syncIndexes(collection.name, indexes);
-	}
-
-	/**
-	 * 
-	 * @param collection collection relation to find its indexes
-	 */
-	getCollectionIndexes (
-		collection: FxOrmSqlDDLSync__Collection.Collection
-	): FxOrmSqlDDLSync__DbIndex.DbIndexInfo[] {
-		let indexes: FxOrmSqlDDLSync__DbIndex.DbIndexInfo[] = [];
-		let found: boolean,
-			prop: IProperty;
-
-		for (let k in collection.properties) {
-			prop = collection.properties[k];
-
-			if (prop.unique) {
-				let mixed_arr_unique: (string | true)[] = prop.unique as string[]
-				if (!Array.isArray(prop.unique)) {
-					mixed_arr_unique = [ prop.unique ];
-				}
-
-				for (let i = 0; i < mixed_arr_unique.length; i++) {
-					if (mixed_arr_unique[i] === true) {
-						indexes.push({
-							name    : getIndexName(collection, prop, this.dbdriver.type),
-							unique  : true,
-							columns : [ k ]
-						});
-					} else {
-						found = false;
-
-						for (let j = 0; j < indexes.length; j++) {
-							if (indexes[j].name == mixed_arr_unique[i]) {
-								found = true;
-								indexes[j].columns.push(k);
-								break;
-							}
-						}
-
-						if (!found) {
-							indexes.push({
-								name    : mixed_arr_unique[i] as string,
-								unique  : true,
-								columns : [ k ]
-							});
-						}
-					}
-				}
-			}
-			
-			if (prop.index) {
-				let mixed_arr_index: (string | true)[] = prop.index as string[]
-				if (!Array.isArray(prop.index)) {
-					mixed_arr_index = [ prop.index ];
-				}
-
-				for (let i = 0; i < mixed_arr_index.length; i++) {
-					if (mixed_arr_index[i] === true) {
-						indexes.push({
-							name    : getIndexName(collection, prop, this.dbdriver.type),
-							columns : [ k ]
-						});
-					} else {
-						found = false;
-
-						for (let j = 0; j < indexes.length; j++) {
-							if (indexes[j].name == mixed_arr_index[i]) {
-								found = true;
-								indexes[j].columns.push(k);
-								break;
-							}
-						}
-						if (!found) {
-							indexes.push({
-								name    : mixed_arr_index[i] as string,
-								columns : [ k ]
-							});
-						}
-					}
-				}
-			}
-		}
-
-		if (typeof this.Dialect.convertIndexes == "function") {
-			indexes = this.Dialect.convertIndexes(collection, indexes);
-		}
-
-		return indexes;
+		this.syncIndexes(collection.name, collection.index_defs);
+		updateColumnsComment(collection, this.dbdriver, columns);
 	}
 
 	syncIndexes (
 		collection_name: string,
-		indexes: FxOrmSqlDDLSync__DbIndex.DbIndexInfo[]
+		index_defs: FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[]
 	): void {
-		if (indexes.length == 0) return ;
+		if (index_defs.length == 0) return ;
 
 		const db_indexes = this.Dialect.getCollectionIndexesSync(this.dbdriver, collection_name);
 
-		for (let i = 0; i < indexes.length; i++) {
-			if (!db_indexes.hasOwnProperty(indexes[i].name)) {
-				this.debug("Adding index " + collection_name + "." + indexes[i].name + " (" + indexes[i].columns.join(", ") + ")");
+		for (let i = 0; i < index_defs.length; i++) {
+			if (!db_indexes.hasOwnProperty(index_defs[i].name)) {
+				this.debug("Adding index " + collection_name + "." + index_defs[i].name + " (" + index_defs[i].columns.join(", ") + ")");
 
 				this.total_changes += 1;
 
-				const index = indexes[i];
-				this.Dialect.addIndexSync(this.dbdriver, index.name, index.unique, collection_name, index.columns);
+				const index = index_defs[i];
+				this.Dialect.addIndexSync(this.dbdriver, index.name, index.unique, collection_name, index.columns as string[]);
 				continue;
-			} else if (!db_indexes[indexes[i].name].unique != !indexes[i].unique) {
-				this.debug("Replacing index " + collection_name + "." + indexes[i].name);
+			} else if (!db_indexes[index_defs[i].name].unique != !index_defs[i].unique) {
+				this.debug("Replacing index " + collection_name + "." + index_defs[i].name);
 
 				this.total_changes += 1;
 
-				const index = indexes[i];
+				const index = index_defs[i];
 				this.Dialect.removeIndexSync(this.dbdriver, index.name, collection_name);
-				this.Dialect.addIndexSync(this.dbdriver, index.name, index.unique, collection_name, index.columns);
+				this.Dialect.addIndexSync(this.dbdriver, index.name, index.unique, collection_name, index.columns as string[]);
 			}
-			delete db_indexes[indexes[i].name];
+			delete db_indexes[index_defs[i].name];
 		}
 
 		for (let idx in db_indexes) {
@@ -601,4 +532,3 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 export type { FxOrmSqlDDLSync } from "./Typo/_common";
 export type { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
 export type { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
-export type { FxOrmSqlDDLSync__Column } from "./Typo/Column";
