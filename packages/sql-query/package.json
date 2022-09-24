@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/sql-query",
-	"version": "0.8.3",
+	"version": "0.9.0",
 	"private": false,
 	"description": "",
 	"main": "lib/Query.js",
@@ -27,7 +27,7 @@
 	],
 	"devDependencies": {
 		"@fibjs/types": "^0.34.1",
-		"@fxjs/knex": "^0.3.2",
+		"@fxjs/knex": "^0.4.0",
 		"cross-env": "^5.2.0",
 		"fib-pool": "^1.6.0",
 		"fib-rollup": "^0.4.0",

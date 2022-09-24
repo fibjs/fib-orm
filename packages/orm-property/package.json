@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/orm-property",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"private": false,
 	"description": "",
 	"main": "lib",
@@ -32,6 +32,6 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@fxjs/sql-query": "^0.8.3"
+		"@fxjs/sql-query": "^0.9.0"
 	}
 }

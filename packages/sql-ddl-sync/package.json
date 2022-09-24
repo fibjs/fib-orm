@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/sql-ddl-sync",
-	"version": "0.9.0",
+	"version": "0.10.0",
 	"description": "",
 	"private": false,
 	"publishConfig": {
@@ -46,13 +46,13 @@
 		"@fxjs/orm-core": "*"
 	},
 	"dependencies": {
-		"@fxjs/orm-core": "^0.2.1",
-		"@fxjs/orm-property": "^0.2.0",
-		"@fxjs/sql-query": "^0.8.3"
+		"@fxjs/orm-core": "^0.3.0",
+		"@fxjs/orm-property": "^0.3.0",
+		"@fxjs/sql-query": "^0.9.0"
 	},
 	"devDependencies": {
 		"@fibjs/types": "^0.34.1",
-		"@fxjs/db-driver": "^0.3.0",
+		"@fxjs/db-driver": "^0.4.0",
 		"cross-env": "^5.2.0",
 		"fib-pool": "^1.6.0",
 		"fib-rollup": "^0.4.0",
