@@ -40,7 +40,13 @@ describe("Model.sync", function () {
 
     if (common.dbType() !== 'sqlite') {
         it("support property comment", function () {
-            var A, B, C;
+            var 
+                /** @type {import('../../typings/Typo/Model').FxOrmModel.Model} */
+                A,
+                /** @type {import('../../typings/Typo/Model').FxOrmModel.Model} */
+                B,
+                /** @type {import('../../typings/Typo/Model').FxOrmModel.Model} */
+                C;
     
             A = db.define('a', {
                 name: {
@@ -61,22 +67,45 @@ describe("Model.sync", function () {
                 },
             });
     
-            A.hasMany('bees', B, {}, {
+            A.hasMany('bees', B, {
+                hasmany_merge_field: {
+                    type: 'text',
+                    comment: 'field A_bees.hasmany_merge_field'
+                }
+            }, {
                 reverse: 'eighs'
             });
             A.hasMany('cees', C, {}, {
                 reverse: 'eighs'
             });
-            helper.dropSync([A, B, C]);
+
+            const A_ext = A.extendsTo('ext', {
+                extendsto_field: {
+                    type: 'text',
+                    comment: 'field A_ext.extendsto_field'
+                }
+            });
+            
+            helper.dropSync([A, B, C, A_ext]);
     
             var dbProperties = db.driver.ddlSync.getCollectionPropertiesSync(db.driver.sqlDriver, 'a');
             assert.equal(dbProperties.name.comment, 'field name.a')
-    
+
             var dbProperties = db.driver.ddlSync.getCollectionPropertiesSync(db.driver.sqlDriver, 'b');
             assert.equal(dbProperties.name.comment, 'field name.b')
     
             var dbProperties = db.driver.ddlSync.getCollectionPropertiesSync(db.driver.sqlDriver, 'c');
             assert.equal(dbProperties.name.comment, 'field name.c')
+
+            const A_bees_assoc = A.associations.bees;
+            var dbProperties = db.driver.ddlSync.getCollectionPropertiesSync(db.driver.sqlDriver, A_bees_assoc.association.mergeTable);
+            assert.equal(dbProperties.hasmany_merge_field.comment, 'field A_bees.hasmany_merge_field')
+
+            const A_ext_assoc = A.associations.ext;
+            var dbProperties = db.driver.ddlSync.getCollectionPropertiesSync(db.driver.sqlDriver, A_ext_assoc.association.table);
+            assert.equal(dbProperties.extendsto_field.comment, 'field A_ext.extendsto_field')
+            var dbProperties = db.driver.ddlSync.getCollectionPropertiesSync(db.driver.sqlDriver, A_ext.table);
+            assert.equal(dbProperties.extendsto_field.comment, 'field A_ext.extendsto_field')
         });
     }
 });
