@@ -23,10 +23,9 @@
 	"author": "richardo2016 <richardo2016@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@fibcli/make-cli": "^0.1.1",
+		"@fibcli/make-cli": "^0.1.6",
 		"@fibcli/ora": "^0.1.0",
 		"@fibjs/chalk": "^1.0.0",
-		"@fxjs/cli": "^0.0.6",
 		"@fxjs/db-driver": "^0.4.0",
 		"@fxjs/orm": "^1.14.0",
 		"@fxjs/sql-ddl-sync": "^0.10.0",
