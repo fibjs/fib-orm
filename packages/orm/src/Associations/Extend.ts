@@ -277,7 +277,7 @@ function extendInstance(
 	Utilities.addHiddenPropertyToInstance(Instance, association.setSyncAccessor, function (
 		Extension: FxOrmInstance.Instance | FxOrmInstance.InstanceDataPayload
 	) {
-		const $ref = <Fibjs.AnyObject>{
+		const $ref = <Record<string, any>>{
 			instance: Instance,
 			association: Extension,
 			useChannel: Utilities.reusableChannelGenerator()
@@ -342,7 +342,7 @@ function extendInstance(
 			conditions[fields[i]] = Instance[Model.id[i]];
 		}
 
-		const $ref = <Fibjs.AnyObject>{
+		const $ref = <Record<string, any>>{
 			instance: Instance,
 			removeConditions: conditions,
 			useChannel: Utilities.reusableChannelGenerator()

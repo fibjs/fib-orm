@@ -7,6 +7,6 @@ export default class RedisDriver extends Driver<Class_Redis> implements FxDbDriv
     close(): void;
     ping(): void;
     command<T = any>(cmd: string, ...args: any[]): T;
-    commands<T = any>(cmds: Fibjs.AnyObject, opts?: FxDbDriverNS.CommandDriverCommandOptions): T;
+    commands<T = any>(cmds: Record<string, any>, opts?: FxDbDriverNS.CommandDriverCommandOptions): T;
     getConnection(): Class_Redis;
 }

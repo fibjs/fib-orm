@@ -31,7 +31,7 @@ export default class RedisDriver extends Driver<Class_Redis> implements FxDbDriv
     }
 
     commands<T = any> (
-        cmds: Fibjs.AnyObject,
+        cmds: Record<string, any>,
         opts?: FxDbDriverNS.CommandDriverCommandOptions
     ): T {
         const { parallel = false } = opts || {};

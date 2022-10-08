@@ -335,7 +335,7 @@ function extendInstance(
 		let results = [] as FxOrmInstance.Instance[] | FxOrmInstance.Instance;
 		let hookHandlr = null;
 
-		const $ref = <Fibjs.AnyObject>{
+		const $ref = <Record<string, any>>{
 			instance: Instance,
 			association: association.reversed ? null : OtherInstance,
 			associations: association.reversed ? inst_arr : null,
@@ -412,7 +412,7 @@ function extendInstance(
 	if (!association.reversed && !association.__for_extension) {
 		Utilities.addHiddenUnwritableMethodToInstance(Instance, association.delSyncAccessor, function (
 		) {
-			const $ref = <Fibjs.AnyObject>{
+			const $ref = <Record<string, any>>{
 				instance: Instance,
 				useChannel: Utilities.reusableChannelGenerator()
 			};

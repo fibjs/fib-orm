@@ -442,7 +442,7 @@ function extendInstance(
 	});
 
 	Utilities.addHiddenUnwritableMethodToInstance(Instance, association.setSyncAccessor, function (this: typeof Instance) {
-		const $ref = <Fibjs.AnyObject>{
+		const $ref = <Record<string, any>>{
 			instance: Instance,
 			associations: _flatten(arguments),
 			useChannel: Utilities.reusableChannelGenerator()
@@ -537,7 +537,7 @@ function extendInstance(
 		if (!this.saved())
 			this.saveSync();
 
-		const $ref = <Fibjs.AnyObject>{
+		const $ref = <Record<string, any>>{
 			instance: Instance,
 			associations: Associations,
 			removeConditions: conditions
@@ -613,7 +613,7 @@ function extendInstance(
 
 		const savedAssociations: FxOrmAssociation.InstanceAssociatedInstance[] = [];
 
-		const $ref = <Fibjs.AnyObject>{
+		const $ref = <Record<string, any>>{
 			instance: Instance,
 			associations: Associations,
 			useChannel: Utilities.reusableChannelGenerator()

@@ -26,7 +26,7 @@ export declare class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.ICon
     readonly uid: string;
     get uri(): string;
     readonly config: FxDbDriverNS.DBConnectionConfig;
-    readonly extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig;
+    readonly extend_config: Record<string, any> & FxDbDriverNS.DriverBuiltInExtConfig;
     type: FxDbDriverNS.DriverType;
     connection: CONN_TYPE;
     pool: FibPoolNS.FibPool<CONN_TYPE, any>;

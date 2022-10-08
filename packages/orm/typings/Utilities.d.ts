@@ -1,4 +1,3 @@
-/// <reference types="@fibjs/types" />
 import FxORMCore = require('@fxjs/orm-core');
 import { FxSqlQuery, FxSqlQuerySubQuery } from '@fxjs/sql-query';
 import type { FxOrmInstance } from './Typo/instance';
@@ -137,17 +136,17 @@ export declare function buildAssociationActionHooksPayload(hookName: keyof FxOrm
     association?: FxOrmInstance.InstanceDataPayload;
     associations?: FxOrmInstance.InstanceDataPayload[];
     association_ids?: any[];
-    removeConditions?: Fibjs.AnyObject;
-    $ref: Fibjs.AnyObject;
+    removeConditions?: Record<string, any>;
+    $ref: Record<string, any>;
     useChannel?: Function;
-}): Fibjs.AnyObject;
+}): Record<string, any>;
 export declare function hookHandlerDecorator({ thisArg, onlyOnce }?: {
     thisArg?: any;
     onlyOnce?: boolean;
 }): (hdlr: Function) => any;
 export declare function reusableChannelGenerator(): () => FxOrmHook.HookChannelResults<Function>;
-export declare const createHookHelper: (hooks: Fibjs.AnyObject, hook: keyof FxOrmModel.Hooks | keyof FxOrmAssociation.InstanceAssociationItem['hooks'], { initialHooks }?: Fibjs.AnyObject) => (cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback, opts?: FxOrmModel.ModelHookPatchOptions) => any;
-export declare function attachOnceTypedHookRefToInstance(instance: FxOrmInstance.Instance, type: 'save' | 'create' | 'remove', typedHookRef: Fibjs.AnyObject): void;
+export declare const createHookHelper: (hooks: Record<string, any>, hook: keyof FxOrmModel.Hooks | keyof FxOrmAssociation.InstanceAssociationItem['hooks'], { initialHooks }?: Record<string, any>) => (cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback, opts?: FxOrmModel.ModelHookPatchOptions) => any;
+export declare function attachOnceTypedHookRefToInstance(instance: FxOrmInstance.Instance, type: 'save' | 'create' | 'remove', typedHookRef: Record<string, any>): void;
 export declare function arraify<T = any>(item: T | T[]): T[];
 export declare function isKeyProperty(prop: FxOrmProperty.NormalizedProperty): boolean;
 export declare function isKeyPrimaryProperty(prop: FxOrmProperty.NormalizedProperty): boolean;

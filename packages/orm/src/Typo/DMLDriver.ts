@@ -148,7 +148,7 @@ export namespace FxOrmDMLDriver {
             (Model: FxOrmModel.Model, association: FxOrmAssociation.InstanceAssociationItem): any
         }
         
-        execQuerySync: (query: string, opt: Fibjs.AnyObject) => any
+        execQuerySync: (query: string, opt: Record<string, any>) => any
         /* patched :end */
 
         [ext_key: string]: any

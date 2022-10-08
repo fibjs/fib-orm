@@ -120,7 +120,7 @@ export declare namespace FxOrmDMLDriver {
         hasMany?: {
             (Model: FxOrmModel.Model, association: FxOrmAssociation.InstanceAssociationItem): any;
         };
-        execQuerySync: (query: string, opt: Fibjs.AnyObject) => any;
+        execQuerySync: (query: string, opt: Record<string, any>) => any;
         [ext_key: string]: any;
     }
     type ChainWhereExistsInfoPayload = FxOrmQuery.ChainWhereExistsInfo[];

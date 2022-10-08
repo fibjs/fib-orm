@@ -1,5 +1,5 @@
-/// <reference types="@fibjs/types" />
 /// <reference types="fib-pool" />
+/// <reference types="@fibjs/types" />
 import { FxOrmCoreCallbackNS } from "@fxjs/orm-core";
 export declare namespace FxDbDriverNS {
     type DriverType = 'mysql' | 'sqlite' | 'psql' | 'redis' | 'unknown';
@@ -22,7 +22,7 @@ export declare namespace FxDbDriverNS {
         pool?: boolean | ConnectionPoolOptions;
         debug?: boolean;
         pathname?: string;
-        query?: Fibjs.AnyObject;
+        query?: Record<string, any>;
         href?: string;
         [extra: string]: any;
     }
@@ -107,7 +107,7 @@ export declare namespace FxDbDriverNS {
             <T = any>(cmd: string, ...args: any[]): T;
         };
         commands: {
-            <T = any>(cmds: Fibjs.AnyObject, opts?: CommandDriverCommandOptions): T;
+            <T = any>(cmds: Record<string, any>, opts?: CommandDriverCommandOptions): T;
         };
     }
     interface ServiceDriver {

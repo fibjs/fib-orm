@@ -1,4 +1,3 @@
-/// <reference types="@fibjs/types" />
 import type { FxOrmHook } from "./hook";
 import type { FxOrmModel } from "./model";
 import type { FxOrmProperty } from "./property";
@@ -80,22 +79,22 @@ export declare namespace FxOrmAssociation {
     }
     interface InstanceAssociationItemHooks {
         beforeSet?: {
-            (func: FxOrmHook.HookActionCallback, opts?: FxOrmHook.HookPatchOptions & Fibjs.AnyObject): any;
+            (func: FxOrmHook.HookActionCallback, opts?: FxOrmHook.HookPatchOptions & Record<string, any>): any;
         };
         afterSet?: {
-            (func: FxOrmHook.HookResultCallback, opts?: FxOrmHook.HookPatchOptions & Fibjs.AnyObject): any;
+            (func: FxOrmHook.HookResultCallback, opts?: FxOrmHook.HookPatchOptions & Record<string, any>): any;
         };
         beforeRemove?: {
-            (func: FxOrmHook.HookActionCallback, opts?: FxOrmHook.HookPatchOptions & Fibjs.AnyObject): any;
+            (func: FxOrmHook.HookActionCallback, opts?: FxOrmHook.HookPatchOptions & Record<string, any>): any;
         };
         afterRemove?: {
-            (func: FxOrmHook.HookResultCallback, opts?: FxOrmHook.HookPatchOptions & Fibjs.AnyObject): any;
+            (func: FxOrmHook.HookResultCallback, opts?: FxOrmHook.HookPatchOptions & Record<string, any>): any;
         };
         beforeAdd?: {
-            (func: FxOrmHook.HookActionCallback, opts?: FxOrmHook.HookPatchOptions & Fibjs.AnyObject): any;
+            (func: FxOrmHook.HookActionCallback, opts?: FxOrmHook.HookPatchOptions & Record<string, any>): any;
         };
         afterAdd?: {
-            (func: FxOrmHook.HookResultCallback, opts?: FxOrmHook.HookPatchOptions & Fibjs.AnyObject): any;
+            (func: FxOrmHook.HookResultCallback, opts?: FxOrmHook.HookPatchOptions & Record<string, any>): any;
         };
     }
     interface InstanceAssociationItem extends InstanceAssociationItemHooks {

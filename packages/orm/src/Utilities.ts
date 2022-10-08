@@ -847,12 +847,12 @@ export function buildAssociationActionHooksPayload (
 		association?: FxOrmInstance.InstanceDataPayload,
 		associations?: FxOrmInstance.InstanceDataPayload[],
 		association_ids?: any[],
-		removeConditions?: Fibjs.AnyObject,
-		$ref: Fibjs.AnyObject,
+		removeConditions?: Record<string, any>,
+		$ref: Record<string, any>,
 
 		useChannel?: Function
 	}
-): Fibjs.AnyObject {
+): Record<string, any> {
 	const {
 		$ref = {},
 	} = payload;
@@ -941,7 +941,7 @@ function getChannelInfo () {
 
 export function reusableChannelGenerator () {
 	const DEFAULT_KEY = `$$default`
-	const channelInfos: {[k: string]: Fibjs.AnyObject } = {
+	const channelInfos: {[k: string]: Record<string, any> } = {
 		[DEFAULT_KEY]: getChannelInfo()
 	}
 
@@ -1005,9 +1005,9 @@ export function reusableChannelGenerator () {
 }
 
 export const createHookHelper = function (
-	hooks: Fibjs.AnyObject,
+	hooks: Record<string, any>,
 	hook: keyof FxOrmModel.Hooks | keyof FxOrmAssociation.InstanceAssociationItem['hooks'],
-	{ initialHooks = [] }: Fibjs.AnyObject = {}
+	{ initialHooks = [] }: Record<string, any> = {}
 ) {
 	return function (
 		cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback,
@@ -1051,7 +1051,7 @@ export function attachOnceTypedHookRefToInstance (
 		| 'create'
 		| 'remove'
 		,
-	typedHookRef: Fibjs.AnyObject,
+	typedHookRef: Record<string, any>,
 ) {
 	// ensure instance.$hookRef existed
 	if (!instance.hasOwnProperty('$hookRef')) {

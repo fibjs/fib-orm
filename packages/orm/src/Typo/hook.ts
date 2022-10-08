@@ -21,7 +21,7 @@ export namespace FxOrmHook {
     }
 
     export interface HookWait<CTX_SELF = FxOrmInstance.Instance, TNEXT_THIS=any>{
-        (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookActionCallback | FxOrmCommon.Arraible<HookActionCallback>>, next: FxOrmCommon.GenericCallback<TNEXT_THIS>, opts?: Fibjs.AnyObject): void
+        (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookActionCallback | FxOrmCommon.Arraible<HookActionCallback>>, next: FxOrmCommon.GenericCallback<TNEXT_THIS>, opts?: Record<string, any>): void
     }
 
     export interface HookPatchOptions {

@@ -116,7 +116,7 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
         });
     }
 	readonly config: FxDbDriverNS.DBConnectionConfig;
-	readonly extend_config: Fibjs.AnyObject & FxDbDriverNS.DriverBuiltInExtConfig = {
+	readonly extend_config: Record<string, any> & FxDbDriverNS.DriverBuiltInExtConfig = {
 		pool: false,
 		debug: false
 	};

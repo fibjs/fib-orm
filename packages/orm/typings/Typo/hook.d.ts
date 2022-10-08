@@ -1,4 +1,3 @@
-/// <reference types="@fibjs/types" />
 import { FxOrmCommon } from './_common';
 import type { FxOrmInstance } from './instance';
 export declare namespace FxOrmHook {
@@ -17,7 +16,7 @@ export declare namespace FxOrmHook {
         (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookResultCallback>, _?: RESULT_TYPE, ...args: any): void;
     }
     export interface HookWait<CTX_SELF = FxOrmInstance.Instance, TNEXT_THIS = any> {
-        (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookActionCallback | FxOrmCommon.Arraible<HookActionCallback>>, next: FxOrmCommon.GenericCallback<TNEXT_THIS>, opts?: Fibjs.AnyObject): void;
+        (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookActionCallback | FxOrmCommon.Arraible<HookActionCallback>>, next: FxOrmCommon.GenericCallback<TNEXT_THIS>, opts?: Record<string, any>): void;
     }
     export interface HookPatchOptions {
         /**

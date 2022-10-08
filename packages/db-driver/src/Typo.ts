@@ -30,7 +30,7 @@ export namespace FxDbDriverNS {
         pool?: boolean | ConnectionPoolOptions;
         debug?: boolean;
         pathname?: string
-        query?: Fibjs.AnyObject
+        query?: Record<string, any>
         href?: string
 
         [extra: string]: any
@@ -135,7 +135,7 @@ export namespace FxDbDriverNS {
             <T=any>(cmd: string, ...args: any[]): T;
         }
         commands: {
-            <T=any>(cmds: Fibjs.AnyObject, opts?: CommandDriverCommandOptions): T;
+            <T=any>(cmds: Record<string, any>, opts?: CommandDriverCommandOptions): T;
         }
     }
 

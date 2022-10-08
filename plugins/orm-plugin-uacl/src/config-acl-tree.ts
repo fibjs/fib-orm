@@ -269,14 +269,14 @@ function getACLMessageResult ({
 }: (
     {
         code?: string,
-        data?: Fibjs.AnyObject,
+        data?: Record<string, any>,
         msg?: string
     } | {
         literalCode?: keyof typeof GRANT_ERRCODE,
-        error_data?: Fibjs.AnyObject,
+        error_data?: Record<string, any>,
         error_msg?: string,
     }
-) & Fibjs.AnyObject
+) & Record<string, any>
 
 ): FxORMPluginUACLInternal.ACLMessageResult {
     return {
