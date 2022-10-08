@@ -68,11 +68,9 @@ export declare namespace FxOrmNS {
     interface TransformFibOrmModel2InstanceOptions extends FxOrmModel.ModelOptions {
     }
     type FibORM = ORM;
-    type FibOrmDB = ORM;
     interface FibORMIConnectionOptions extends FxDbDriverNS.ConnectionInputArgs {
         timezone: string;
     }
-    type InstanceOptions = FxOrmInstance.InnerInstanceOptions;
     type OrigAggreteGenerator = (...args: any[]) => FxOrmQuery.IAggregated;
     interface FibOrmFindLikeQueryObject {
         [key: string]: any;

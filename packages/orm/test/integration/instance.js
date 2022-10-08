@@ -6,14 +6,21 @@ var ORM = require('../../');
 
 function assertModelInstance (instance) {
     assert.property(instance, '__opts')
+    assert.property(instance, '__instRtd')
+    assert.isObject(instance.__instRtd, 'one_associations')
     assert.isObject(instance.__opts, 'one_associations')
 
+    assert.isObject(instance.__instRtd, 'many_associations')
     assert.isObject(instance.__opts, 'many_associations')
+    assert.isObject(instance.__instRtd, 'extend_associations')
     assert.isObject(instance.__opts, 'extend_associations')
 
+    assert.property(instance.__instRtd, 'association_properties')
     assert.property(instance.__opts, 'association_properties')
+    assert.property(instance.__instRtd, 'fieldToPropertyMap')
     assert.property(instance.__opts, 'fieldToPropertyMap')
 
+    assert.property(instance.__instRtd, 'associations')
     assert.property(instance.__opts, 'associations')
 }
 
@@ -196,7 +203,7 @@ describe("Model instance", function () {
             person.set('name', 'Dogbert');
             assert.equal(person.name, 'Dogbert');
             assert.equal(person.saved(), false);
-            assert.equal(person.__opts.changes.join(','), 'name');
+            assert.equal(person.__instRtd.changes.join(','), 'name');
         });
 
         it("should do nothing with deep paths when setting to same value", function () {
@@ -219,7 +226,7 @@ describe("Model instance", function () {
 
             assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
             assert.equal(person.saved(), false);
-            assert.equal(person.__opts.changes.join(','), 'data');
+            assert.equal(person.__instRtd.changes.join(','), 'data');
         });
 
         it("should do nothing with deeper paths when setting to same value", function () {
@@ -242,7 +249,7 @@ describe("Model instance", function () {
 
             assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
             assert.equal(person.saved(), false);
-            assert.equal(person.__opts.changes.join(','), 'data');
+            assert.equal(person.__instRtd.changes.join(','), 'data');
         });
 
         it("should mark as dirty with array path when setting to different value", function () {
@@ -254,7 +261,7 @@ describe("Model instance", function () {
 
             assert.equal(JSON.stringify(person.data), JSON.stringify(expected));
             assert.equal(person.saved(), false);
-            assert.equal(person.__opts.changes.join(','), 'data');
+            assert.equal(person.__instRtd.changes.join(','), 'data');
         });
 
         it("should do nothing with invalid paths", function () {
@@ -286,9 +293,9 @@ describe("Model instance", function () {
             assert.equal(person.saved(), true);
             person.markAsDirty('name');
             assert.equal(person.saved(), false);
-            assert.equal(person.__opts.changes.join(','), 'name');
+            assert.equal(person.__instRtd.changes.join(','), 'name');
             person.markAsDirty('data');
-            assert.equal(person.__opts.changes.join(','), 'name,data');
+            assert.equal(person.__instRtd.changes.join(','), 'name,data');
         });
     });
 

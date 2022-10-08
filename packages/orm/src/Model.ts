@@ -76,7 +76,7 @@ export const Model = function (
 			inst_opts = {};
 		}
 
-		var found_assoc = false;
+		let found_assoc = false;
 
 		for (let k in data) {
 			if (k === "extra_field") continue;
@@ -110,7 +110,7 @@ export const Model = function (
 			cascadeRemove  : inst_opts.cascadeRemove
 		};
 
-		const setupAssociations = function (instance: FxOrmInstance.Instance) {
+		const __setupAssociations = function (instance: FxOrmInstance.Instance) {
 			const genHookHandlerForInstance = Utilities.hookHandlerDecorator({ thisArg: instance })
 
 			OneAssociation.extend(model, instance, m_opts.driver, one_associations, { assoc_opts, genHookHandlerForInstance });
@@ -121,7 +121,7 @@ export const Model = function (
 		const instance = new Instance(model, {
 			uid                    : inst_opts.uid, // singleton unique id
 			keys                   : m_opts.keys,
-			is_new                 : inst_opts.is_new || false,
+			isNew                 : inst_opts.isNew || false,
 			isShell                : inst_opts.isShell || false,
 			data                   : data,
 			autoSave               : inst_opts.autoSave || false,
@@ -136,7 +136,7 @@ export const Model = function (
 			many_associations      : many_associations,
 			extend_associations    : extend_associations,
 			association_properties : association_properties,
-			setupAssociations      : setupAssociations,
+			__setupAssociations      : __setupAssociations,
 			fieldToPropertyMap     : fieldToPropertyMap,
 			keyProperties          : keyProperties,
 			events				   : m_opts.ievents
@@ -165,7 +165,7 @@ export const Model = function (
 
 	    if (Array.isArray(m_opts.keys) && Array.isArray(data)) {
 	        if (data.length == m_opts.keys.length) {
-	            var data2: FxOrmModel.ModelInstanceConstructorOptions[0] = {};
+	            const data2: FxOrmModel.ModelInstanceConstructorOptions[0] = {};
 	            for (let i = 0; i < m_opts.keys.length; i++) {
 	                data2[m_opts.keys[i]] = data[i++];
 	            }
@@ -179,7 +179,7 @@ export const Model = function (
 	            throw err;
 	        }
 	    } else if (typeof data === "number" || typeof data === "string") {
-	        var data2: FxOrmModel.ModelInstanceConstructorOptions[0] = {};
+	        const data2: FxOrmModel.ModelInstanceConstructorOptions[0] = {};
 	        data2[m_opts.keys[0]] = data;
 
 	        return createInstanceSync(data2, { isShell: true });
@@ -187,7 +187,7 @@ export const Model = function (
 	        data = {};
 	    }
 
-	    var isNew = false;
+	    let isNew = false;
 
 	    for (let i = 0; i < m_opts.keys.length; i++) {
 	        if (!data.hasOwnProperty(m_opts.keys[i])) {
@@ -201,7 +201,7 @@ export const Model = function (
 		}
 
 	    return createInstanceSync(data, {
-	        is_new: isNew,
+	        isNew,
 	        autoSave: m_opts.autoSave,
 	        cascadeRemove: m_opts.cascadeRemove
 	    });
@@ -397,10 +397,10 @@ export const Model = function (
 	const chainOrRunSync = function (
 		this: FxOrmModel.Model
 	) {
-		var conditions: FxSqlQuerySubQuery.SubQueryConditions = null;
-		var options = <FxOrmModel.ModelOptions__Find>{};
-		var order: FxOrmModel.ModelOptions__Find['order'] = null;
-		var merges: FxOrmQuery.ChainFindMergeInfo[] = [];
+		let conditions: FxSqlQuerySubQuery.SubQueryConditions = null;
+		let options = <FxOrmModel.ModelOptions__Find>{};
+		let order: FxOrmModel.ModelOptions__Find['order'] = null;
+		let merges: FxOrmQuery.ChainFindMergeInfo[] = [];
 
 		Helpers.selectArgs(arguments, (arg_type, arg) => {
 			switch (arg_type) {
@@ -488,7 +488,7 @@ export const Model = function (
 			conditions = Utilities.checkConditions(conditions, one_associations);
 		}
 
-		var chain = new ChainFind(model, {
+		return new ChainFind(model, {
 			only         : options.only || model_fields,
 			keys         : m_opts.keys,
 			table        : base_table,
@@ -532,8 +532,6 @@ export const Model = function (
 				);
 			}
 		});
-
-		return chain;
 	}
 
 	model.findSync = function (
@@ -798,7 +796,7 @@ export const Model = function (
 			itemsParams,
 			(data) => {
 				const item = createInstanceSync(data, {
-					is_new    : true,
+					isNew    : true,
 					autoSave  : m_opts.autoSave,
 					// not fetch associated instance on its creation.
 					autoFetch : false

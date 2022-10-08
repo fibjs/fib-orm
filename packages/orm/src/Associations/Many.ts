@@ -469,8 +469,8 @@ function extendInstance(
 				
 				Instance.$emit(`after:set:${association.name}`, $ref.associations)
 
-				if (Instance.__opts.keys.length === 1) {
-					const [key] = Instance.__opts.keys
+				if (Instance.__instRtd.keys.length === 1) {
+					const [key] = Instance.__instRtd.keys
 					$ref.association_ids = $ref.associations.map((x: FxOrmInstance.InstanceDataPayload) => x[key])
 				}
 			}),
@@ -711,11 +711,11 @@ function extendInstance(
 
 	Object.defineProperty(Instance, association.name, {
 		get: function () {
-			return Instance.__opts.associations[association.name].value;
+			return Instance.__instRtd.associations[association.name].value;
 		},
 		set: function (val) {
-			Instance.__opts.associations[association.name].changed = true;
-			Instance.__opts.associations[association.name].value = val;
+			Instance.__instRtd.associations[association.name].changed = true;
+			Instance.__instRtd.associations[association.name].value = val;
 		},
 		enumerable: true
 	});
@@ -740,6 +740,6 @@ function autoFetchInstance(
 	try {
 		const Assoc  = Instance[association.getSyncAccessor]({}, { autoFetchLimit: opts.autoFetchLimit - 1 });
 		// Set this way to prevent setting 'changed' status
-		Instance.__opts.associations[association.name].value = Assoc;
+		Instance.__instRtd.associations[association.name].value = Assoc;
 	} catch (err) {}
 }

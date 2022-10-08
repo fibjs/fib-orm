@@ -2,7 +2,6 @@ import type { FxOrmCommon } from './_common';
 import type { FxOrmAssociation } from "./assoc";
 import type { FxOrmInstance } from "./instance";
 import type { FxOrmModel } from "./model";
-import type { FxOrmError } from "./Error";
 import type { FxSqlQuerySubQuery } from "@fxjs/sql-query";
 export declare namespace FxOrmSynchronous {
     interface VoidReturn {
@@ -41,23 +40,6 @@ export declare namespace FxOrmSynchronous {
         syncSync: VoidReturn;
         clearSync: VoidReturn;
         dropSync: UnknownReturn;
-        /**
-         * other patched synchronous version method
-         * - lazyLoad: getXXXSync, setXXXSync, removeXXXSync
-         * - association: [addAccessor]Sync, [getAccessor]Sync, [hasAccessor]Sync, [setAccessor]Sync, [removeAccessor]Sync
-         */
-        [ek: string]: any;
-    }
-    interface SynchronizedInstance {
-        saveSync: {
-            (data?: FxOrmInstance.InstanceDataPayload, options?: FxOrmInstance.SaveOptions): FxOrmInstance.Instance;
-        };
-        removeSync: {
-            (): void;
-        };
-        validateSync: {
-            (): false | FxOrmError.ExtendedError[];
-        };
         /**
          * other patched synchronous version method
          * - lazyLoad: getXXXSync, setXXXSync, removeXXXSync

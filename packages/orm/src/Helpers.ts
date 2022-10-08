@@ -54,13 +54,13 @@ export function pickProperties<T extends FxOrmModel.Model = FxOrmModel.Model>(
 /* model helpers :end */
 
 function manyAssocsFromInst (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasMany[] {
-    return instance.__opts.many_associations
+    return instance.__instRtd.many_associations
 }
 function oneAssocsFromInst (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_HasOne[] {
-    return instance.__opts.one_associations
+    return instance.__instRtd.one_associations
 }
 function extendsToAssocsFromInst (instance: FxOrmInstance.Instance): FxOrmAssociation.InstanceAssociationItem_ExtendTos[] {
-    return instance.__opts.extend_associations
+    return instance.__instRtd.extend_associations
 }
 
 /* by instance extname :start */

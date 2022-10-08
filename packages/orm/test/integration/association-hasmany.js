@@ -6,16 +6,16 @@ var { lowerCaseColumn } = require('../support/_helpers');
 var common = require('../common');
 
 function assertModelInstanceWithHasMany(instance) {
-    assert.property(instance, '__opts')
-    assert.isObject(instance.__opts, 'one_associations')
+    assert.property(instance, '__instRtd')
+    assert.isObject(instance.__instRtd, 'one_associations')
 
-    assert.isObject(instance.__opts, 'many_associations')
-    assert.isObject(instance.__opts, 'extend_associations')
+    assert.isObject(instance.__instRtd, 'many_associations')
+    assert.isObject(instance.__instRtd, 'extend_associations')
 
-    assert.property(instance.__opts, 'association_properties')
-    assert.property(instance.__opts, 'fieldToPropertyMap')
+    assert.property(instance.__instRtd, 'association_properties')
+    assert.property(instance.__instRtd, 'fieldToPropertyMap')
 
-    assert.property(instance.__opts, 'associations')
+    assert.property(instance.__instRtd, 'associations')
 }
 
 describe("hasMany", function () {
@@ -919,7 +919,7 @@ describe("hasMany", function () {
             });
             account.addEmailsSync(emails);
 
-            var assoc = account.__opts.many_associations.find(x => x.name === 'emails')
+            var assoc = account.__instRtd.many_associations.find(x => x.name === 'emails')
 
                 ;['bounced', 'text'].forEach((field) => {
                     emails.forEach((email) => {

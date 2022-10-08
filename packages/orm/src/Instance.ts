@@ -3,6 +3,8 @@
 import util 	 = require('util');
 import { EventEmitter } from 'events';
 
+import FxORMCore = require('@fxjs/orm-core');
+
 import Utilities = require("./Utilities");
 import Hook      = require("./Hook");
 import ORMError  = require("./Error");
@@ -31,15 +33,15 @@ export const Instance = function (
 	this: FxOrmInstance.Instance,
 	Model: FxOrmModel.Model, _opts: FxOrmInstance.InstanceConstructorOptions
 ) {
-	const opts: FxOrmInstance.InnerInstanceOptions = util.extend({}, _opts);
-	opts.data = opts.data || {};
-	opts.extra = opts.extra || {};
-	opts.keys = (opts.keys || "id") as string[];
-	opts.changes = (opts.is_new ? Object.keys(opts.data) : []);
-	opts.extrachanges = [];
-	opts.associations = {};
-	opts.events	= util.extend({}, opts.events);
-	opts.originalKeyValues = {};
+	const instRtd: FxOrmInstance.InnerInstanceRuntimeData = util.extend({}, _opts);
+	instRtd.data = instRtd.data || {};
+	instRtd.extra = instRtd.extra || {};
+	instRtd.keys = (instRtd.keys || "id") as string[];
+	instRtd.changes = (instRtd.isNew ? Object.keys(instRtd.data) : []);
+	instRtd.extrachanges = [];
+	instRtd.associations = {};
+	instRtd.events	= util.extend({}, instRtd.events);
+	instRtd.originalKeyValues = {};
 
 	const eventor = new EventEmitter();
 
@@ -50,9 +52,9 @@ export const Instance = function (
 		eventor.emit(event, ...args);
 	};
 	var rememberKeys = function () {
-		for(let i = 0; i < opts.keyProperties.length; i++) {
-			const prop = opts.keyProperties[i];
-			opts.originalKeyValues[prop.name] = opts.data[prop.name];
+		for(let i = 0; i < instRtd.keyProperties.length; i++) {
+			const prop = instRtd.keyProperties[i];
+			instRtd.originalKeyValues[prop.name] = instRtd.data[prop.name];
 		}
 	};
 	var shouldSaveAssocs = function (
@@ -71,7 +73,7 @@ export const Instance = function (
 			alwaysValidate: boolean;
 
 		let validationErr: FxOrmError.ExtendedError | FxOrmError.ExtendedError[]
-		Hook.wait(instance, opts.hooks.beforeValidation, function (err: FxOrmError.ExtendedError) {
+		Hook.wait(instance, instRtd.hooks.beforeValidation, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				validationErr = err;
 				// saveError(err);
@@ -81,17 +83,17 @@ export const Instance = function (
 			const returnAllErrors = Model.settings.get("instance.returnAllErrors");
 			const checks = new enforce.Enforce({ returnAllErrors });
 
-			for (let k in opts.validations) {
+			for (let k in instRtd.validations) {
 				required = false;
 
 				if (Model.allProperties[k]) {
 					required = Model.allProperties[k].required;
 					alwaysValidate = Model.allProperties[k].alwaysValidate;
 				} else {
-					for (let i = 0; i < opts.one_associations.length; i++) {
+					for (let i = 0; i < instRtd.one_associations.length; i++) {
 						/* non-normalized `field` maybe string now */
-						if ((opts.one_associations[i].field as any) === k) {
-							required = opts.one_associations[i].required;
+						if ((instRtd.one_associations[i].field as any) === k) {
+							required = instRtd.one_associations[i].required;
 							break;
 						}
 					}
@@ -100,14 +102,14 @@ export const Instance = function (
 					continue; // avoid validating if property is not required and is "empty"
 				}
 				
-				for (const validator of opts.validations[k] as FibjsEnforce.IValidator[]) {
+				for (const validator of instRtd.validations[k] as FibjsEnforce.IValidator[]) {
 					checks.add(k, validator);
 				}
 			}
 
 			checks.context("instance", instance);
 			checks.context("model", Model);
-			checks.context("driver", opts.driver);
+			checks.context("driver", instRtd.driver);
 
 			const errors = checks.checkSync(instance);
 			if (errors && errors.length)
@@ -124,7 +126,7 @@ export const Instance = function (
 
 		emitCallbackStyleEvent("save", err, instance);
 
-		Hook.trigger(instance, opts.hooks.afterSave, false);
+		Hook.trigger(instance, instRtd.hooks.afterSave, false);
 
 		return instance;
 	};
@@ -148,10 +150,10 @@ export const Instance = function (
 			throw err;
 		}
 		
-		if (opts.is_new) {
+		if (instRtd.isNew) {
 			Utilities.attachOnceTypedHookRefToInstance(instance, 'create', {});
 			Utilities.attachOnceTypedHookRefToInstance(instance, 'save', {});
-			Hook.wait(instance, [ opts.hooks['beforeCreate'], opts.hooks['beforeSave'] ], function (err: FxOrmError.ExtendedError) {
+			Hook.wait(instance, [ instRtd.hooks['beforeCreate'], instRtd.hooks['beforeSave'] ], function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					saveError(err);
 					throw err;
@@ -161,7 +163,7 @@ export const Instance = function (
 			});
 		} else {
 			Utilities.attachOnceTypedHookRefToInstance(instance, 'save', {});
-			Hook.wait(instance, [ opts.hooks['beforeSave'] ], function (err: FxOrmError.ExtendedError) {
+			Hook.wait(instance, [ instRtd.hooks['beforeSave'] ], function (err: FxOrmError.ExtendedError) {
 				if (err) {
 					saveError(err);
 					throw err;
@@ -178,30 +180,30 @@ export const Instance = function (
 		emitCallbackStyleEvent("save", err, instance);
 
 		if (is_create)
-			Hook.trigger(instance, opts.hooks.afterCreate, !err);
+			Hook.trigger(instance, instRtd.hooks.afterCreate, !err);
 
-		Hook.trigger(instance, opts.hooks.afterSave, !err);
+		Hook.trigger(instance, instRtd.hooks.afterSave, !err);
 	};
 	const getInstanceData = function () {
 		const data: FxOrmInstance.InstanceDataPayload = {};
 		let prop: FxOrmProperty.NormalizedProperty;
 
-		for (let k in opts.data) {
-			if (!opts.data.hasOwnProperty(k)) continue;
+		for (let k in instRtd.data) {
+			if (!instRtd.data.hasOwnProperty(k)) continue;
 			prop = Model.allProperties[k];
 
 			if (prop) {
-				if (opts.data[k] == null &&  (prop.type == 'serial' || typeof prop.defaultValue == 'function')) {
+				if (instRtd.data[k] == null &&  (prop.type == 'serial' || typeof prop.defaultValue == 'function')) {
 					continue;
 				}
 
-				if (opts.driver.propertyToValue) {
-					data[k] = opts.driver.propertyToValue(opts.data[k], prop);
+				if (instRtd.driver.propertyToValue) {
+					data[k] = instRtd.driver.propertyToValue(instRtd.data[k], prop);
 				} else {
-					data[k] = opts.data[k];
+					data[k] = instRtd.data[k];
 				}
 			} else {
-				data[k] = opts.data[k];
+				data[k] = instRtd.data[k];
 			}
 		}
 
@@ -209,7 +211,7 @@ export const Instance = function (
 	};
 
 	const resetChanges = function () {
-		opts.changes.length = 0;
+		instRtd.changes.length = 0;
 	}
 	
 	const saveNewSync = function (
@@ -218,20 +220,20 @@ export const Instance = function (
 	) {
 		data = Utilities.transformPropertyNames(data, Model.allProperties);
 
-		const info = opts.driver.insert(opts.table, data, opts.keyProperties);
+		const info = instRtd.driver.insert(instRtd.table, data, instRtd.keyProperties);
 
 		resetChanges();
-		for (let i = 0, prop; i < opts.keyProperties.length; i++) {
-			prop = opts.keyProperties[i];
-			opts.data[prop.name] = info.hasOwnProperty(prop.name) ? info[prop.name] : data[prop.name];
+		for (let i = 0, prop; i < instRtd.keyProperties.length; i++) {
+			prop = instRtd.keyProperties[i];
+			instRtd.data[prop.name] = info.hasOwnProperty(prop.name) ? info[prop.name] : data[prop.name];
 		}
-		opts.is_new = false;
+		instRtd.isNew = false;
 		rememberKeys();
 
 		let err: FxOrmError.ExtendedError;
 		
 		if (shouldSaveAssocs(saveOptions)) {
-			const syncReponse = Utilities.catchBlocking<boolean>(saveAssociationsSync)
+			const syncReponse = FxORMCore.catchBlocking<boolean>(saveAssociationsSync)
 			err = syncReponse.error;
 		}
 		
@@ -262,7 +264,7 @@ export const Instance = function (
 				return saveInstanceExtraSync();
 			}
 			
-			const { error: err, result: assocSaved } = Utilities.catchBlocking<boolean>(saveAssociationsSync)
+			const { error: err, result: assocSaved } = FxORMCore.catchBlocking<boolean>(saveAssociationsSync)
 
 			if (saved || assocSaved) {
 				runSyncAfterSaveActions(false, err);
@@ -276,21 +278,21 @@ export const Instance = function (
 		if (instance.saved())
 			return savedCheckSync(false);
 
-		for (let i = 0; i < opts.changes.length; i++) {
-			changes[opts.changes[i]] = data[opts.changes[i]];
+		for (let i = 0; i < instRtd.changes.length; i++) {
+			changes[instRtd.changes[i]] = data[instRtd.changes[i]];
 		}
 		
-		for (let i = 0; i < opts.keyProperties.length; i++) {
-			const prop = opts.keyProperties[i];
-			conditions[prop.mapsTo] = opts.originalKeyValues[prop.name];
+		for (let i = 0; i < instRtd.keyProperties.length; i++) {
+			const prop = instRtd.keyProperties[i];
+			conditions[prop.mapsTo] = instRtd.originalKeyValues[prop.name];
 		}
 		changes = Utilities.transformPropertyNames(changes, Model.allProperties);
 
 		Utilities.filterWhereConditionsInput(conditions, instance.model());
 
-		const syncResponse = Utilities.catchBlocking(() => opts.driver.update(opts.table, changes, conditions));
+		const syncResponse = FxORMCore.catchBlocking(() => instRtd.driver.update(instRtd.table, changes, conditions));
 		fillBackAssociatedFieldsAfterPersist: {
-			const couldParallel = opts.driver.db.isPool;
+			const couldParallel = instRtd.driver.db.isPool;
 			
 			Utilities.parallelQueryIfPossible(couldParallel, oneOneAssocs, ({ association }) => {
 				Utilities.parallelQueryIfPossible(couldParallel, Object.keys(association.field), propName => {
@@ -326,7 +328,7 @@ export const Instance = function (
 
 			let error: FxOrmError.ExtendedError = null;
 
-			const syncResponse = Utilities.catchBlocking(() => {
+			const syncResponse = FxORMCore.catchBlocking(() => {
 				instance[syncVersionAccessor](instances);
 			});
 			
@@ -343,7 +345,7 @@ export const Instance = function (
 				assocSaved = true;
 			}
 
-			Utilities.takeAwayResult({ error: error, result: assocSaved }, { callback: cb });
+			FxORMCore.takeAwayResult({ error: error, result: assocSaved }, { callback: cb });
 		};
 
 		const _saveOneAssociation = function (assoc: FxOrmAssociation.InstanceAssociationItem) {
@@ -356,7 +358,7 @@ export const Instance = function (
 
 				const instances = instance[assoc.name] as FxOrmInstance.Instance[];
 				Utilities.parallelQueryIfPossible(
-					opts.driver.db.isPool,
+					instRtd.driver.db.isPool,
 					instances,
 					(item) => {
 						if (!item.isInstance) {
@@ -376,15 +378,15 @@ export const Instance = function (
 			saveAssociationItemSync(assoc.setSyncAccessor, instance[assoc.name]);
 		};
 
-		for (let i = 0; i < opts.one_associations.length; i++) {
-			_saveOneAssociation(opts.one_associations[i]);
+		for (let i = 0; i < instRtd.one_associations.length; i++) {
+			_saveOneAssociation(instRtd.one_associations[i]);
 		}
 
 		const _saveManyAssociation = function (assoc: FxOrmAssociation.InstanceAssociationItem) {
 			var assocVal = instance[assoc.name];
 
 			if (!Array.isArray(assocVal)) return;
-			if (!opts.associations[assoc.name].changed) return;
+			if (!instRtd.associations[assoc.name].changed) return;
 
 			for (let j = 0; j < assocVal.length; j++) {
 				if (!assocVal[j].isInstance) {
@@ -395,8 +397,8 @@ export const Instance = function (
 			saveAssociationItemSync(assoc.setSyncAccessor, assocVal);
 		};
 
-		for (let i = 0; i < opts.many_associations.length; i++) {
-			_saveManyAssociation(opts.many_associations[i]);
+		for (let i = 0; i < instRtd.many_associations.length; i++) {
+			_saveManyAssociation(instRtd.many_associations[i]);
 		}
 
 		if (--pending === 0)
@@ -405,38 +407,38 @@ export const Instance = function (
 		return assocSaved;
 	};
 	var getNormalizedExtraDataAtPropertyTime = function () {
-		return opts.extra as Record<string, FxOrmProperty.NormalizedProperty>
+		return instRtd.extra as Record<string, FxOrmProperty.NormalizedProperty>
 	};
 
 	const saveInstanceExtraSync = function (): FxOrmInstance.Instance {
-		if (opts.extrachanges.length === 0)
+		if (instRtd.extrachanges.length === 0)
 			return instance;
 
 		var data: FxOrmInstance.InstanceDataPayload = {};
 		var conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 
-		for (let i = 0; i < opts.extrachanges.length; i++) {
-			if (!opts.data.hasOwnProperty(opts.extrachanges[i])) continue;
+		for (let i = 0; i < instRtd.extrachanges.length; i++) {
+			if (!instRtd.data.hasOwnProperty(instRtd.extrachanges[i])) continue;
 
-			if (getNormalizedExtraDataAtPropertyTime()[opts.extrachanges[i]]) {
-				data[opts.extrachanges[i]] = opts.data[opts.extrachanges[i]];
-				if (opts.driver.propertyToValue) {
-					data[opts.extrachanges[i]] = opts.driver.propertyToValue(data[opts.extrachanges[i]], getNormalizedExtraDataAtPropertyTime()[opts.extrachanges[i]]);
+			if (getNormalizedExtraDataAtPropertyTime()[instRtd.extrachanges[i]]) {
+				data[instRtd.extrachanges[i]] = instRtd.data[instRtd.extrachanges[i]];
+				if (instRtd.driver.propertyToValue) {
+					data[instRtd.extrachanges[i]] = instRtd.driver.propertyToValue(data[instRtd.extrachanges[i]], getNormalizedExtraDataAtPropertyTime()[instRtd.extrachanges[i]]);
 				}
 			} else {
-				data[opts.extrachanges[i]] = opts.data[opts.extrachanges[i]];
+				data[instRtd.extrachanges[i]] = instRtd.data[instRtd.extrachanges[i]];
 			}
 		}
 
-		for (let i = 0; i < opts.extra_info.id.length; i++) {
-			conditions[opts.extra_info.id_prop[i]] = opts.extra_info.id[i];
-			conditions[opts.extra_info.assoc_prop[i]] = opts.data[opts.keys[i]];
+		for (let i = 0; i < instRtd.extra_info.id.length; i++) {
+			conditions[instRtd.extra_info.id_prop[i]] = instRtd.extra_info.id[i];
+			conditions[instRtd.extra_info.assoc_prop[i]] = instRtd.data[instRtd.keys[i]];
 			Utilities.filterWhereConditionsInput(conditions, instance.model());
 		}
 
 		Utilities.filterWhereConditionsInput(conditions, instance.model());
 		
-		opts.driver.update(opts.extra_info.table, data, conditions);
+		instRtd.driver.update(instRtd.extra_info.table, data, conditions);
 
 		return instance;
 	};
@@ -447,27 +449,27 @@ export const Instance = function (
 					changes[key] = value;
 
 		if (Model.properties[key])
-			if (opts.driver.propertyToValue)
-				changes[key] = opts.driver.propertyToValue(changes[key], Model.properties[key]);
+			if (instRtd.driver.propertyToValue)
+				changes[key] = instRtd.driver.propertyToValue(changes[key], Model.properties[key]);
 
-		for (let i = 0; i < opts.keys.length; i++) {
-			conditions[opts.keys[i]] = opts.data[opts.keys[i]];
+		for (let i = 0; i < instRtd.keys.length; i++) {
+			conditions[instRtd.keys[i]] = instRtd.data[instRtd.keys[i]];
 		}
 
 		Utilities.attachOnceTypedHookRefToInstance(instance, 'save', {});
-		Hook.wait(instance, opts.hooks.beforeSave, function (err: FxOrmError.ExtendedError) {
+		Hook.wait(instance, instRtd.hooks.beforeSave, function (err: FxOrmError.ExtendedError) {
 			if (err) {
-				Hook.trigger(instance, opts.hooks.afterSave, false);
+				Hook.trigger(instance, instRtd.hooks.afterSave, false);
 				emitCallbackStyleEvent("save", err, instance);
 				return;
 			}
 
 			Utilities.filterWhereConditionsInput(conditions, instance.model());
-			const syncReponse = Utilities.catchBlocking(() => opts.driver.update(opts.table, changes, conditions))
+			const syncReponse = FxORMCore.catchBlocking(() => instRtd.driver.update(instRtd.table, changes, conditions))
 			if (!syncReponse.error)
-				opts.data[key] = value;
+				instRtd.data[key] = value;
 
-			Hook.trigger(instance, opts.hooks.afterSave, !syncReponse.error);
+			Hook.trigger(instance, instRtd.hooks.afterSave, !syncReponse.error);
 			emitCallbackStyleEvent("save", syncReponse.error, instance);
 		});
 	};
@@ -475,18 +477,18 @@ export const Instance = function (
 		const prop = Model.allProperties[key] || getNormalizedExtraDataAtPropertyTime()[key];
 
 		if (prop) {
-			if ('valueToProperty' in opts.driver) {
-				value = opts.driver.valueToProperty(value, prop);
+			if ('valueToProperty' in instRtd.driver) {
+				value = instRtd.driver.valueToProperty(value, prop);
 			}
-			if (opts.data[key] !== value) {
-				opts.data[key] = value;
+			if (instRtd.data[key] !== value) {
+				instRtd.data[key] = value;
 				return true;
 			}
 		}
 		return false;
 	}
 
-	// ('data.a.b', 5) => opts.data.a.b = 5
+	// ('data.a.b', 5) => instRtd.data.a.b = 5
 	const setPropertyByPath: FxOrmInstance.Instance['set'] = function (path, value) {
 		if (typeof path == 'string') {
 			path = path.split('.');
@@ -514,7 +516,7 @@ export const Instance = function (
 				currObj = currObj[currKey];
 			} else if (currObj[currKey] !== value) {
 				currObj[currKey] = value;
-				opts.changes.push(propName);
+				instRtd.changes.push(propName);
 			}
 		}
 	}
@@ -529,8 +531,8 @@ export const Instance = function (
 		if (instance.hasOwnProperty(key))
 			(global as any).console.log("Overwriting instance property");
 
-		if (key in opts.data) {
-			defaultValue = opts.data[key];
+		if (key in instRtd.data) {
+			defaultValue = instRtd.data[key];
 		} else if (prop && 'defaultValue' in prop) {
 			defaultValue = prop.defaultValue;
 		}
@@ -539,16 +541,16 @@ export const Instance = function (
 
 		Object.defineProperty(instance, key, {
 			get: function () {
-				return opts.data[key];
+				return instRtd.data[key];
 			},
 			set: function (val) {
 				if (prop.key === true) {
-					if (prop.type == 'serial' && opts.data[key] != null) {
+					if (prop.type == 'serial' && instRtd.data[key] != null) {
 						if (!(val === null || val === undefined)) {
 							return ;
 						}
 					} else {
-						opts.originalKeyValues[prop.name] = opts.data[prop.name];
+						instRtd.originalKeyValues[prop.name] = instRtd.data[prop.name];
 					}
 				}
 
@@ -556,10 +558,10 @@ export const Instance = function (
 					return;
 				}
 
-				if (opts.autoSave) {
+				if (instRtd.autoSave) {
 					saveInstanceProperty(key, val);
-				} else if (opts.changes.indexOf(key) === -1) {
-					opts.changes.push(key);
+				} else if (instRtd.changes.indexOf(key) === -1) {
+					instRtd.changes.push(key);
 				}
 			},
 			enumerable: !(prop && !prop.enumerable)
@@ -571,16 +573,16 @@ export const Instance = function (
 		}
 		Object.defineProperty(instance.extra, key, {
 			get: function () {
-				return opts.data[key];
+				return instRtd.data[key];
 			},
 			set: function (val) {
 				setInstanceProperty(key, val);
 
-				/*if (opts.autoSave) {
+				/*if (instRtd.autoSave) {
 					saveInstanceProperty(key, val);
 				}*/
-				if (opts.extrachanges.indexOf(key) === -1) {
-					opts.extrachanges.push(key);
+				if (instRtd.extrachanges.indexOf(key) === -1) {
+					instRtd.extrachanges.push(key);
 				}
 			},
 			enumerable: true
@@ -590,15 +592,15 @@ export const Instance = function (
 	for (let k in Model.allProperties) {
 		addInstanceProperty(k);
 	}
-	for (let k in opts.extra) {
+	for (let k in instRtd.extra) {
 		addInstanceProperty(k);
 	}
 
-	for (let k in opts.methods) {
-		Utilities.addHiddenPropertyToInstance(instance, k, opts.methods[k].bind(instance), { writable: true });
+	for (let k in instRtd.methods) {
+		Utilities.addHiddenPropertyToInstance(instance, k, instRtd.methods[k].bind(instance), { writable: true });
 	}
 
-	for (let k in opts.extra) {
+	for (let k in instRtd.extra) {
 		addInstanceExtraProperty(k);
 	}
 
@@ -697,30 +699,30 @@ export const Instance = function (
 		collectParamsForSave(args);
 
 		process.nextTick(() => {
-			const syncResponse = Utilities.catchBlocking(instance.saveSync, args);
-			Utilities.takeAwayResult({ error: syncResponse.error, result: instance }, { no_throw: !!cb, callback: cb });
+			const syncResponse = FxORMCore.catchBlocking(instance.saveSync, args);
+			FxORMCore.takeAwayResult({ error: syncResponse.error, result: instance }, { no_throw: !!cb, callback: cb });
 		});
 
 		return this;
 	})
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "saved", function (this: typeof instance) {
-		return opts.changes.length === 0;
+		return instRtd.changes.length === 0;
 	});
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "removeSync", function () {
-		if (opts.is_new)
+		if (instRtd.isNew)
 			return ;
 
 		var conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
-		for (let i = 0; i < opts.keys.length; i++) {
-		    conditions[opts.keys[i]] = opts.data[opts.keys[i]];
+		for (let i = 0; i < instRtd.keys.length; i++) {
+		    conditions[instRtd.keys[i]] = instRtd.data[instRtd.keys[i]];
 		}
 
 		let removeErr = null as FxOrmError.ExtendedError;
 
 		Utilities.attachOnceTypedHookRefToInstance(instance, 'remove', {});
-		Hook.wait(instance, opts.hooks.beforeRemove, function (err: FxOrmError.ExtendedError) {
+		Hook.wait(instance, instRtd.hooks.beforeRemove, function (err: FxOrmError.ExtendedError) {
 			if (err) {
 				emitCallbackStyleEvent("remove", err, instance);
 
@@ -731,9 +733,9 @@ export const Instance = function (
 			emitCallbackStyleEvent("beforeRemove", instance);
 			
 			Utilities.filterWhereConditionsInput(conditions, instance.model());
-			const syncResponse = Utilities.catchBlocking(() => opts.driver.remove(opts.table, conditions));
+			const syncResponse = FxORMCore.catchBlocking(() => instRtd.driver.remove(instRtd.table, conditions));
 
-			Hook.trigger(instance, opts.hooks.afterRemove, !syncResponse.error);
+			Hook.trigger(instance, instRtd.hooks.afterRemove, !syncResponse.error);
 
 			emitCallbackStyleEvent("remove", syncResponse.error, instance);
 
@@ -747,8 +749,8 @@ export const Instance = function (
 	})
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "remove", function (cb: FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance>) {
-		const syncReponse = Utilities.catchBlocking(() => instance.removeSync());
-		Utilities.takeAwayResult(syncReponse, { callback: cb });
+		const syncReponse = FxORMCore.catchBlocking(() => instance.removeSync());
+		FxORMCore.takeAwayResult(syncReponse, { callback: cb });
 
 		return this;
 	});
@@ -756,20 +758,20 @@ export const Instance = function (
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "set", setPropertyByPath);
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "markAsDirty", function (propName: string) {
 		if (propName != undefined) {
-			opts.changes.push(propName);
+			instRtd.changes.push(propName);
 		}
 	});
 	
-	Utilities.addHiddenReadonlyPropertyToInstance(instance, "dirtyProperties", function () { return opts.changes; });
+	Utilities.addHiddenReadonlyPropertyToInstance(instance, "dirtyProperties", function () { return instRtd.changes; });
 
 	Utilities.addHiddenPropertyToInstance(instance, "isInstance", true);
 	
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "isPersisted", function (this: typeof instance) {
-		return !opts.is_new;
+		return !instRtd.isNew;
 	});
 
 	Utilities.addHiddenPropertyToInstance(instance, "isShell", function () {
-		return opts.isShell;
+		return instRtd.isShell;
 	});
 
 	Utilities.addHiddenUnwritableMethodToInstance(instance, "validateSync", function () {
@@ -781,39 +783,41 @@ export const Instance = function (
 	});
 
 	Utilities.addHiddenPropertyToInstance(instance, "__singleton_uid", function (this: typeof instance) {
-		return opts.uid;
+		return instRtd.uid;
 	});
 
-	Utilities.addHiddenPropertyToInstance(instance, "__opts", opts);
+	Utilities.addHiddenPropertyToInstance(instance, "__instRtd", instRtd);
+	/* just for compat */
+	Utilities.addHiddenPropertyToInstance(instance, "__opts", instRtd);
 	Utilities.addHiddenPropertyToInstance(instance, "model", function (this: typeof instance) {
 		return Model;
 	});
 
-	for (let i = 0; i < opts.keyProperties.length; i++) {
-		var prop = opts.keyProperties[i];
+	for (let i = 0; i < instRtd.keyProperties.length; i++) {
+		var prop = instRtd.keyProperties[i];
 
-		if (!(prop.name in opts.data)) {
-			opts.changes = Object.keys(opts.data);
+		if (!(prop.name in instRtd.data)) {
+			instRtd.changes = Object.keys(instRtd.data);
 			break;
 		}
 	}
 	rememberKeys();
 
-	opts.setupAssociations(instance);
+	instRtd.__setupAssociations(instance);
 
-	for (let i = 0; i < opts.one_associations.length; i++) {
-		var asc = opts.one_associations[i];
+	for (let i = 0; i < instRtd.one_associations.length; i++) {
+		var asc = instRtd.one_associations[i];
 
 		if (!asc.reversed && !asc.__for_extension) {
 			for (let k in asc.field as Record<string, FxOrmProperty.NormalizedProperty>) {
-				if (!opts.data.hasOwnProperty(k)) {
+				if (!instRtd.data.hasOwnProperty(k)) {
 					addInstanceProperty(k);
 				}
 			}
 		}
 
-		if (asc.name in opts.data) {
-			var d = opts.data[asc.name];
+		if (asc.name in instRtd.data) {
+			var d = instRtd.data[asc.name];
 			var mapper = function (obj: FxOrmInstance.Instance | FxOrmInstance.InstanceDataPayload) {
 				return obj.isInstance ? obj : new asc.model(obj);
 			};
@@ -823,29 +827,29 @@ export const Instance = function (
 			} else {
 				instance[asc.name] = mapper(d);
 			}
-			delete opts.data[asc.name];
+			delete instRtd.data[asc.name];
 		}
 	}
-	for (let i = 0; i < opts.many_associations.length; i++) {
-		var aName = opts.many_associations[i].name;
-		opts.associations[aName] = {
-			changed: false, data: opts.many_associations[i]
+	for (let i = 0; i < instRtd.many_associations.length; i++) {
+		var aName = instRtd.many_associations[i].name;
+		instRtd.associations[aName] = {
+			changed: false, data: instRtd.many_associations[i]
 		};
 
-		if (Array.isArray(opts.data[aName])) {
-			instance[aName] = opts.data[aName];
-			delete opts.data[aName];
+		if (Array.isArray(instRtd.data[aName])) {
+			instance[aName] = instRtd.data[aName];
+			delete instRtd.data[aName];
 		}
 	}
 
-	Object.keys(opts.events).forEach((evtName: FxOrmInstance.InstanceEventType) => {
-		if (typeof opts.events[evtName] !== 'function')
+	Object.keys(instRtd.events).forEach((evtName: FxOrmInstance.InstanceEventType) => {
+		if (typeof instRtd.events[evtName] !== 'function')
 			throw new ORMError("INVALID_EVENT_HANDLER", 'PARAM_MISMATCH');
 
-		instance.on(evtName, opts.events[evtName]);
+		instance.on(evtName, instRtd.events[evtName]);
 	});
 
-	Hook.wait(instance, opts.hooks.afterLoad, function (err: Error) {
+	Hook.wait(instance, instRtd.hooks.afterLoad, function (err: Error) {
 		process.nextTick(() => {
 			emitCallbackStyleEvent("ready", err, instance);
 		});

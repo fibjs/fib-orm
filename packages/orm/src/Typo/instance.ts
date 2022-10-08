@@ -1,11 +1,11 @@
-import { FxOrmAssociation } from "./assoc"
-import { FxOrmDMLDriver } from "./DMLDriver"
+import type { FxOrmAssociation } from "./assoc"
+import type { FxOrmDMLDriver } from "./DMLDriver"
 import type { FxOrmHook } from "./hook"
 import type { FxOrmModel } from "./model"
 import type { FxOrmProperty } from "./property"
-import { FxOrmValidators } from "./Validators"
-import { FxOrmCommon } from "./_common"
-import { FxOrmSynchronous } from "./synchronous"
+import type { FxOrmValidators } from "./Validators"
+import type { FxOrmCommon } from "./_common"
+import type { FxOrmError } from "./Error";
 
 export namespace FxOrmInstance {
     export interface InstanceDataPayload {
@@ -17,7 +17,7 @@ export namespace FxOrmInstance {
         autoFetchLimit?: number
         cascadeRemove?: boolean
         uid?: string
-        is_new?: boolean
+        isNew?: boolean
         isShell?: boolean
         autoSave?: boolean
         extra?: InstanceConstructorOptions['extra']
@@ -27,15 +27,16 @@ export namespace FxOrmInstance {
         saveAssociations?: boolean
     }
 
-    export type InstanceChangeRecords = string[]
-
     export interface InstanceConstructorOptions {
         table: string
         keys?: FxOrmModel.ModelConstructorOptions['keys']
         originalKeyValues?: InstanceDataPayload
 
         data?: InstanceDataPayload
-        changes?: InstanceChangeRecords
+        /**
+         * @description changes records
+         */
+        changes?: string[]
         extra?: string[] | Record<string, FxOrmProperty.NormalizedProperty>
         extra_info?: {
             table: string
@@ -44,7 +45,7 @@ export namespace FxOrmInstance {
             assoc_prop: string[]
         }
 
-        is_new?: boolean
+        isNew?: boolean
         isShell?: boolean
         autoSave?: FxOrmModel.ModelConstructorOptions['autoSave']
         methods?: FxOrmModel.ModelConstructorOptions['methods']
@@ -65,42 +66,48 @@ export namespace FxOrmInstance {
         uid: FxOrmDMLDriver.DriverUidType
         driver: FxOrmDMLDriver.DMLDriver
 
-        setupAssociations: {
-            (instance: Instance): void
-        }
+        /**
+         * @internal
+         */
+        __setupAssociations: (instance: Instance) => void
         fieldToPropertyMap: FxOrmProperty.FieldToPropertyMapType
+        /**
+         * @internal
+         */
         events?: {
             [k: string]: FxOrmCommon.GenericCallback<any>
         }
     }
 
-    export interface InnerInstanceOptions extends InstanceConstructorOptions {
+    export interface InnerInstanceRuntimeData extends InstanceConstructorOptions {
         associations?: {
             [key: string]: FxOrmAssociation.InstanceAssociationItemInformation
         }
-        extrachanges: InstanceChangeRecords
+        extrachanges: string[]
     }
 
     export type InstanceConstructor = new (model: FxOrmModel.Model, opts: InstanceConstructorOptions) => FxOrmInstance.Instance
 
     export type InstanceEventType = 
         'ready' | 'save' | 'beforeRemove' | 'remove'
-    export interface Instance extends FxOrmSynchronous.SynchronizedInstance {
-        saved(): boolean;
-        remove(callback: FxOrmCommon.VoidCallback): Instance;
-        validate: {
-            (callback: FxOrmCommon.ValidatorCallback): void
-        };
+    export interface Instance {
         on(event: InstanceEventType | string, callback: FxOrmCommon.GenericCallback<any>): Instance;
         $on: Class_EventEmitter['on']
         $off: Class_EventEmitter['off']
         $emit: Class_EventEmitter['emit']
+
+        validate(callback: FxOrmCommon.ValidatorCallback): void;
+        validateSync(): false | FxOrmError.ExtendedError[]
         
         save(callback?: FxOrmCommon.VoidCallback): Instance;
         save(data: InstanceDataPayload, callback?: FxOrmCommon.VoidCallback): Instance;
         save(data: InstanceDataPayload, options: SaveOptions, callback?: FxOrmCommon.VoidCallback): Instance;
+        saveSync(data?: FxOrmInstance.InstanceDataPayload, options?: FxOrmInstance.SaveOptions): FxOrmInstance.Instance
+
         saved(): boolean;
+
         remove(callback?: FxOrmCommon.VoidCallback): Instance;
+        removeSync(): void
 
         /**
          * @noenum
@@ -123,14 +130,16 @@ export namespace FxOrmInstance {
         dirtyProperties: {[key: string]: any};
 
         /**
+         * @internal
          * @noenum
          */
         __singleton_uid(): string | number;
 
         /**
+         * @internal
          * @noenum
          */
-        __opts?: InnerInstanceOptions;
+        __instRtd?: InnerInstanceRuntimeData;
 
         /**
          * @noenum
@@ -158,6 +167,11 @@ export namespace FxOrmInstance {
                 useChannel: FxOrmHook.HookChannel
             },
         }
+        /**
+         * other patched synchronous version method
+         * - lazyLoad: getXXXSync, setXXXSync, removeXXXSync
+         * - association: [addAccessor]Sync, [getAccessor]Sync, [hasAccessor]Sync, [setAccessor]Sync, [removeAccessor]Sync
+         */
 
         [extraProperty: string]: any;
     }

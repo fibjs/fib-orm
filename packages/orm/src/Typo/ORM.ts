@@ -102,15 +102,10 @@ export namespace FxOrmNS {
     export interface TransformFibOrmModel2InstanceOptions extends FxOrmModel.ModelOptions {}
 
     export type FibORM = ORM
-    // bad annotation but 'db' is used as like 'orm' ever, so we use 'FibOrmDB' to substitute FibORM
-    export type FibOrmDB = ORM
 
     export interface FibORMIConnectionOptions extends FxDbDriverNS.ConnectionInputArgs {
         timezone: string;
     }
-
-    // for compability
-    export type InstanceOptions = FxOrmInstance.InnerInstanceOptions
 
     export type OrigAggreteGenerator = (...args: any[]) => FxOrmQuery.IAggregated
 
