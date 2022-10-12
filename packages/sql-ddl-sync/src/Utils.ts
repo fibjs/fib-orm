@@ -199,7 +199,7 @@ export function parseCollectionIndexes (
                 if (mixed_arr_unique[i] === true) {
                     indexes.push({
                         collection,
-                        name    : getIndexName(collection, prop, this.dbdriver.type),
+                        name    : getIndexName(collection, prop, driver_type),
                         unique  : true,
                         columns : [ k ]
                     });
