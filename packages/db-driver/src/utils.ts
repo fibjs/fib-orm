@@ -5,6 +5,9 @@ import util = require('util')
 import tty  = require("tty");
 import net = require('net')
 import uuid = require('uuid')
+import io = require("io");
+import child_process = require("child_process");
+
 import ParseQSDotKey = require('parse-querystring-dotkey')
 import FibPool = require('fib-pool');
 import { FxDbDriverNS } from './Typo'
@@ -206,3 +209,24 @@ export function logDebugSQL (dbtype: string, sql: string, is_sync = true) {
         process.stdout.write(text as any);
     }
 };
+
+export function detectWindowsCodePoints () {
+    let codepoints = '';
+    const isWindows = process.platform === 'win32';
+    if (isWindows) {
+        try {
+            const p = child_process.spawn('cmd', "/c chcp".split(' '));
+            const stdout = new io.BufferedStream(p.stdout);
+            const output = stdout.readLines().join(' ');
+    
+            const matches = output.match(/\d+/g);
+            codepoints = matches?.[0];
+        } catch (error) {
+        }
+    }
+
+    return {
+        isWindows,
+        codepoints
+    };
+}

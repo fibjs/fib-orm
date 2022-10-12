@@ -5,7 +5,9 @@ import db = require('db')
 import { FxDbDriverNS } from '../Typo';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 import { SQLDriver } from "./base.class";
-import { logDebugSQL } from '../utils';
+import { logDebugSQL, detectWindowsCodePoints } from '../utils';
+
+const win32CpInfo = detectWindowsCodePoints();
 
 export default class PostgreSQLDriver extends SQLDriver<Class_DbConnection> implements FxDbDriverNS.SQLDriver {
     constructor (conn: FxDbDriverNS.ConnectionInputArgs | string) {
@@ -27,7 +29,20 @@ export default class PostgreSQLDriver extends SQLDriver<Class_DbConnection> impl
         this.currentDb = targetDb;
     }
     
-    open (): Class_DbConnection { return super.open() }
+    open (): Class_DbConnection {
+        if (!win32CpInfo.codepoints) return super.open();
+
+        const conn = super.open() as Class_DbConnection & { codec?: string };
+
+        // TODO: support common codepoints -> postgresql-encoding
+        if (conn.codec && win32CpInfo.codepoints === '936') {
+            conn.codec = 'GBK';
+        } else if (conn.codec === 'utf8' && win32CpInfo.codepoints !== '65001') {
+            console.error(`system default code points is '${win32CpInfo.codepoints}', but odbc try to use codec UTF8 with codepoints 65001, refer to https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers to set connection.codec as UTF8`);
+        }
+
+        return conn;
+    }
     close (): void {
         if (this.connection) this.connection.close()
     }

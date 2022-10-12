@@ -9,3 +9,7 @@ export declare function parsePoolConfig(input: boolean | FxDbDriverNS.Connection
 export declare function mountPoolToDriver<CONN_TYPE = any>(driver: any, poolSetting?: any): void;
 export declare function arraify<T = any>(item: T | T[]): T[];
 export declare function logDebugSQL(dbtype: string, sql: string, is_sync?: boolean): void;
+export declare function detectWindowsCodePoints(): {
+    isWindows: boolean;
+    codepoints: string;
+};
