@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/db-driver",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "",
 	"keywords": [
 		"mysql",
@@ -31,12 +31,12 @@
 	},
 	"analyse": false,
 	"dependencies": {
-		"@fxjs/orm-core": "^0.3.0",
+		"@fxjs/orm-core": "^0.3.1",
 		"parse-querystring-dotkey": "^1.0.3"
 	},
 	"devDependencies": {
 		"@fibjs/types": "^0.35.0",
-		"@fxjs/knex": "^0.4.0",
+		"@fxjs/knex": "^0.4.1",
 		"cross-env": "^5.2.0",
 		"fib-pool": "^1.6.0",
 		"fib-rollup": "^0.4.0",
