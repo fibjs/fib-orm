@@ -42,7 +42,8 @@ import { filterDate } from './Where/filterDate';
  * 9. [ 'property1', '-property2' ] (ORDER BY property1 ASC, property2 DESC)
  * ...
  */
-const ZIS = [ "A", "Z" ] as FxSqlQuery.OrderNormalizedTuple[1][]
+type IOrderFlag = FxSqlQuery.OrderNormalizedTuple[1];
+const ZIS = [ "A", "Z" ] as IOrderFlag[]
 export function standardizeOrder (
 	order: FxOrmModel.ModelOptions__Find['order']
 ): FxOrmQuery.OrderNormalizedTupleMixin {
@@ -482,21 +483,25 @@ export function transformOrderPropertyNames (
 ) {
 	if (!order) return order;
 
-	var newOrder: FxOrmQuery.ChainFindOptions['order'] = JSON.parse(JSON.stringify(order));
+	const newOrder: FxOrmQuery.ChainFindOptions['order'] = JSON.parse(JSON.stringify(order));
 
 	// Rename order properties according to mapsTo
 	for (let i = 0, item: typeof newOrder[any]; i < newOrder.length; i++) {
 		item = newOrder[i];
 
-		// [ ['SQL..??', [arg1, arg2]]
+		// [ 'SQL..??', [arg1, arg2]]
 		if (Array.isArray(item[1])) continue;
 
 		if (Array.isArray(item[0])) {
 			// [ ['table or alias Name', 'propName'], 'Z']
-			item[0][1] = properties[item[0][1]].mapsTo;
+			let maybePropertyName = item[0][1], orderFlag: IOrderFlag = 'A';
+			[maybePropertyName, orderFlag] = standardizeOrder(maybePropertyName)[0] as FxOrmQuery.OrderNormalizedTupleWithoutTable;
+			if (!item[1]) { item[1] = orderFlag; }
+			item[0][1] = properties[maybePropertyName].mapsTo;
 		} else {
+			const [maybePropertyName] = standardizeOrder(item[0])[0] as FxOrmQuery.OrderNormalizedTupleWithoutTable;
 			// normal order
-			item[0] = properties[item[0]].mapsTo;
+			item[0] = properties[maybePropertyName].mapsTo;
 		}
 	}
 	return newOrder;
