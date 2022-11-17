@@ -150,3 +150,4 @@ export declare function attachOnceTypedHookRefToInstance(instance: FxOrmInstance
 export declare function arraify<T = any>(item: T | T[]): T[];
 export declare function isKeyProperty(prop: FxOrmProperty.NormalizedProperty): boolean;
 export declare function isKeyPrimaryProperty(prop: FxOrmProperty.NormalizedProperty): boolean;
+export declare function coercePositiveInt<T extends number | undefined | null = undefined>(value: any, fallbackValue?: T): number | T;

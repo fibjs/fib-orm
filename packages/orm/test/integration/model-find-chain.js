@@ -91,9 +91,16 @@ describe("Model.find() chaining", function () {
     describe(".limit(N)", function () {
         before(setup());
 
-        it("should limit results to N items", function () {
-            var instances = Person.find().limit(2).runSync();
-            assert.propertyVal(instances, "length", 2);
+        describe("should limit results to N items", () => {
+            it("number type", function () {
+                var instances = Person.find().limit(2).runSync();
+                assert.propertyVal(instances, "length", 2);
+            });
+        
+            it("limit could be string", function () {
+                var instances = Person.find().limit("2").runSync();
+                assert.propertyVal(instances, "length", 2);
+            });
         });
     });
 

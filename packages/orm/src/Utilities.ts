@@ -1089,3 +1089,11 @@ export function isKeyProperty(prop: FxOrmProperty.NormalizedProperty) {
 export function isKeyPrimaryProperty(prop: FxOrmProperty.NormalizedProperty) {
 	return prop.key && prop.klass === 'primary';
 }
+
+export function coercePositiveInt<T extends number | undefined | null = undefined>(value: any, fallbackValue: T = undefined): number | T {
+	const num = parseInt(value, 10);
+	
+	if (Number.isNaN(num)) return fallbackValue;
+
+	return Math.abs(num);
+}

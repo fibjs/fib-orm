@@ -4,7 +4,7 @@ test.setup();
 var helper = require('../support/spec_helper');
 var ORM = require('../../');
 
-describe("Model.find() chaining", function () {
+describe("Model.find() chaining - callback", function () {
     var db = null;
     var Person = null;
     var Dog = null;
@@ -91,12 +91,20 @@ describe("Model.find() chaining", function () {
     describe(".limit(N)", function () {
         before(setup());
 
-        it("should limit results to N items", function (done) {
-            Person.find().limit(2).run((err, instances) => {
-                assert.propertyVal(instances, "length", 2);
-                done();
+        describe("should limit results to N items", () => {
+            it("number type", function (done) {
+                Person.find().limit(2).run((err, instances) => {
+                    assert.propertyVal(instances, "length", 2);
+                    done();
+                });
             });
-            
+
+            it("limit could be string", function (done) {
+                Person.find().limit("2").run((err, instances) => {
+                    assert.propertyVal(instances, "length", 2);
+                    done();
+                });
+            });
         });
     });
 

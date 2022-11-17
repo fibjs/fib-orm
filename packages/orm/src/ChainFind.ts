@@ -49,10 +49,10 @@ const ChainFind = function (
 		let foundItems: FxOrmInstance.InstanceDataPayload[];
 
 		foundItems = opts.driver.find(opts.only, opts.table, conditions, {
-			limit  : opts.limit,
+			limit  : Utilities.coercePositiveInt(opts.limit, undefined),
 			order  : order,
 			merge  : merges,
-			offset : opts.offset,
+			offset : Utilities.coercePositiveInt(opts.offset, undefined),
 			exists : opts.exists.map(existCond => {
 				const maybeAssoc = Object.values(Model.associations).find(({ association }) => association.mergeTable === existCond.table)?.association;
 				const mergeProps = maybeAssoc?.props || null;
