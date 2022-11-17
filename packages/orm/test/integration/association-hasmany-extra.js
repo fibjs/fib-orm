@@ -248,39 +248,98 @@ describe("hasMany extra properties", function () {
                 });
             });
 
-            it("could get A from B with filter to join table", function () {
-                var Deco = Pet.find(
-                    { name: "Deco" },
-                ).firstSync();
+            describe("could get A from B with filter to join table", function () {
+                it("only join_where", () => {
+                    var Deco = Pet.find({ name: "Deco" }).firstSync();
 
-                var Mutt = Pet.find(
-                    { name: "Mutt" }, 
-                ).firstSync();
+                    var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
-                var JohnForDeco = Deco.getOwners(
-                    {},
-                    {
-                        join_where: {
-                            since: ORM.eq(since_list[0])
-                        }
-                    } 
-                ).firstSync();
-                Deco.extra = JohnForDeco.extra;
+                    var JohnForDeco = Deco.getOwners(
+                        {},
+                        {
+                            join_where: { since: ORM.eq(since_list[0])}
+                        } 
+                    ).firstSync();
+                    Deco.extra = JohnForDeco.extra;
 
-                var JohnForMutt = Mutt.getOwners(
-                    {},
-                    {
-                        join_where: {
-                            since: ORM.eq(since_list[1])
-                        }
-                    } 
-                ).firstSync();
-                Mutt.extra = JohnForMutt.extra;
+                    var JohnForMutt = Mutt.getOwners(
+                        {},
+                        {
+                            join_where: { since: ORM.eq(since_list[1])}
+                        } 
+                    ).firstSync();
+                    Mutt.extra = JohnForMutt.extra;
 
-                var John = new Person(JohnForMutt);
-                John.pets = [Deco, Mutt];
+                    var John = new Person(JohnForMutt);
+                    John.pets = [Deco, Mutt];
 
-                assertion_people_for_get_with_join_where([John]);
+                    assertion_people_for_get_with_join_where([John]);
+                });
+                
+                it("with limit", () => {
+                    var Deco = Pet.find({ name: "Deco" }).firstSync();
+                    var Mutt = Pet.find({ name: "Mutt" }).firstSync();
+
+                    var JohnForDeco = Deco.getOwners(
+                        {},
+                        {
+                            join_where: { since: ORM.eq(since_list[0]) },
+                            limit: 50, // see generate sql by turn on `debug_sql`
+                        } 
+                    ).allSync()[0];
+                    Deco.extra = JohnForDeco.extra;
+
+                    var JohnForMutt = Mutt.getOwners(
+                        {},
+                        {
+                            join_where: { since: ORM.eq(since_list[1]) },
+                            limit: 50, // see generate sql by turn on `debug_sql`
+                        } 
+                    ).allSync()[0];
+                    Mutt.extra = JohnForMutt.extra;
+
+                    var John = new Person(JohnForMutt);
+                    John.pets = [Deco, Mutt];
+
+                    assertion_people_for_get_with_join_where([John]);
+                });
+                
+                
+                it("with limit/order", () => {
+                    var Deco = Pet.find({ name: "Deco" }).firstSync();
+                    var Mutt = Pet.find({ name: "Mutt" }).firstSync();
+
+                    var JohnsForDeco = Deco.getOwners(
+                        {},
+                        {
+                            join_where: { since: ORM.eq(since_list[0]) },
+                            limit: 50,
+                            /**
+                             * In real world, code below is pointless, you can just pass '-name',
+                             * and `name` would be considered as Deco's owner(Person type), and you
+                             * SHOULDN't specify the `Pet.table` here because it's wrong! NEVER do that
+                             * as you can pass it in fact
+                             */
+                            order: [[Person.table, 'name'], 'Z'] // see generate sql by turn on `debug_sql`
+                        } 
+                    ).allSync();
+                    Deco.extra = JohnsForDeco[0].extra;
+
+                    var JohnsForMutt = Mutt.getOwners(
+                        {},
+                        {
+                            join_where: { since: ORM.eq(since_list[1]) },
+                            limit: 50,
+                            order: '-name' // see generate sql by turn on `debug_sql`
+                        } 
+                    ).allSync();
+                    Mutt.extra = JohnsForMutt[0].extra;
+
+                    var John = new Person(JohnsForMutt[0]);
+                    John.pets = [Deco, Mutt];
+
+                    assertion_people_for_get_with_join_where([John]);
+                });
             });
         });
     });

@@ -158,18 +158,61 @@ describe("hasMany", function () {
                 assert.equal(pets.length, 1);
             });
 
-            it("should allow to specify conditions", function () {
-                var John = Person.find({
-                    name: "John"
-                }).firstSync();
+            describe("should allow to specify conditions", function () {
+                it("where", () => {
+                    var John = Person.find({
+                        name: "John"
+                    }).firstSync();
 
-                var pets = John.getPetsSync({
-                    name: "Mutt"
+                    var pets = John.getPetsSync({
+                        name: "Mutt"
+                    });
+
+                    assert.ok(Array.isArray(pets));
+                    assert.equal(pets.length, 1);
+                    assert.equal(pets[0].name, "Mutt");
                 });
+                
+                it("limit", () => {
+                    var John = Person.find({
+                        name: "John"
+                    }).firstSync();
 
-                assert.ok(Array.isArray(pets));
-                assert.equal(pets.length, 1);
-                assert.equal(pets[0].name, "Mutt");
+                    var pets = John.getPetsSync({
+                    }, {
+                        limit: 1
+                    });
+
+                    assert.ok(Array.isArray(pets));
+                    assert.equal(pets.length, 1);
+                    assert.equal(pets[0].name, "Deco");
+                    
+                    var pets = John.getPetsSync({
+                    }, {
+                        limit: 1,
+                        order: '-name'
+                    });
+
+                    assert.ok(Array.isArray(pets));
+                    assert.equal(pets.length, 1);
+                    assert.equal(pets[0].name, "Mutt");
+                });
+                
+                it("order", () => {
+                    var John = Person.find({
+                        name: "John"
+                    }).firstSync();
+
+                    var pets = John.getPetsSync({
+                    }, {
+                        order: '-name'
+                    });
+
+                    assert.ok(Array.isArray(pets));
+                    assert.equal(pets.length, 2);
+                    assert.equal(pets[0].name, "Mutt");
+                    assert.equal(pets[1].name, "Deco");
+                });
             });
 
             it("should return a chain if no callback defined", function () {
