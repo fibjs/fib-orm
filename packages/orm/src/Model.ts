@@ -243,6 +243,10 @@ export const Model = function (
 	};
 
 	model.syncSync = function () {
+		if (typeof m_opts.driver.doSync !== "function") {
+			throw new ORMError("Driver does not support Model.sync()", 'NO_SUPPORT', { model: m_opts.table })
+		}
+
 		m_opts.driver.doSync({
 			repair_column		: !!model.settings.get(`model.dbsync.repair_column.${model.name}`),
 			allow_drop_column   : !!model.settings.get(`model.dbsync.allow_drop_column.${model.name}`),
@@ -262,13 +266,7 @@ export const Model = function (
 		this:FxOrmModel.Model,
 		cb?: FxOrmCommon.GenericCallback<FxOrmSqlDDLSync.SyncResult>
 	) {
-		const syncResponse = Utilities.catchBlocking(() => {
-			if (typeof m_opts.driver.sync !== "function") {
-				throw new ORMError("Driver does not support Model.sync()", 'NO_SUPPORT', { model: m_opts.table })
-			}
-
-			model.syncSync();
-		});
+		const syncResponse = Utilities.catchBlocking(model.syncSync, [], { thisArg: model });
 		Utilities.takeAwayResult(syncResponse, { callback: cb });
 
 		return this;
