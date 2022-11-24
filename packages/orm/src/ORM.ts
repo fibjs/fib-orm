@@ -32,21 +32,32 @@ import * as validators from "./Validators";
 import * as Settings from "./Settings";
 import * as singleton from "./Singleton";
 
-// @deprecated : start
+/** @deprecated use require('@fxjs/sql-query').Text instead */
 export const Text = SqlQuery.Text;
+/** @deprecated use require('@fxjs/sql-query').comparators.between instead */
 export const between = SqlQuery.comparators.between;
+/** @deprecated use require('@fxjs/sql-query').comparators.not_between instead */
 export const not_between = SqlQuery.comparators.not_between;
+/** @deprecated use require('@fxjs/sql-query').comparators.like instead */
 export const like = SqlQuery.comparators.like;
+/** @deprecated use require('@fxjs/sql-query').comparators.not_like instead */
 export const not_like = SqlQuery.comparators.not_like;
+/** @deprecated use require('@fxjs/sql-query').comparators.eq instead */
 export const eq = SqlQuery.comparators.eq;
+/** @deprecated use require('@fxjs/sql-query').comparators.ne instead */
 export const ne = SqlQuery.comparators.ne;
+/** @deprecated use require('@fxjs/sql-query').comparators.gt instead */
 export const gt = SqlQuery.comparators.gt;
+/** @deprecated use require('@fxjs/sql-query').comparators.gte instead */
 export const gte = SqlQuery.comparators.gte;
+/** @deprecated use require('@fxjs/sql-query').comparators.lt instead */
 export const lt = SqlQuery.comparators.lt;
+/** @deprecated use require('@fxjs/sql-query').comparators.lte instead */
 export const lte = SqlQuery.comparators.lte;
+/** @deprecated use require('@fxjs/sql-query').comparators.in instead */
 module.exports.in = SqlQuery.comparators.in;
+/** @deprecated use require('@fxjs/sql-query').comparators.not_in instead */
 export const not_in = SqlQuery.comparators.not_in;
-// @deprecated : end
 
 export const enforce = Enforces;
 

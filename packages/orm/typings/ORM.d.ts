@@ -18,17 +18,29 @@ import * as Helpers from "./Helpers";
 import * as validators from "./Validators";
 import * as Settings from "./Settings";
 import * as singleton from "./Singleton";
+/** @deprecated use require('@fxjs/sql-query').Text instead */
 export declare const Text: SqlQuery.FxSqlQuery.TypedQueryObjectWrapper<"text", any>;
+/** @deprecated use require('@fxjs/sql-query').comparators.between instead */
 export declare const between: SqlQuery.FxSqlQueryComparatorFunction.between;
+/** @deprecated use require('@fxjs/sql-query').comparators.not_between instead */
 export declare const not_between: SqlQuery.FxSqlQueryComparatorFunction.not_between;
+/** @deprecated use require('@fxjs/sql-query').comparators.like instead */
 export declare const like: SqlQuery.FxSqlQueryComparatorFunction.like;
+/** @deprecated use require('@fxjs/sql-query').comparators.not_like instead */
 export declare const not_like: SqlQuery.FxSqlQueryComparatorFunction.not_like;
+/** @deprecated use require('@fxjs/sql-query').comparators.eq instead */
 export declare const eq: SqlQuery.FxSqlQueryComparatorFunction.eq;
+/** @deprecated use require('@fxjs/sql-query').comparators.ne instead */
 export declare const ne: SqlQuery.FxSqlQueryComparatorFunction.ne;
+/** @deprecated use require('@fxjs/sql-query').comparators.gt instead */
 export declare const gt: SqlQuery.FxSqlQueryComparatorFunction.gt;
+/** @deprecated use require('@fxjs/sql-query').comparators.gte instead */
 export declare const gte: SqlQuery.FxSqlQueryComparatorFunction.gte;
+/** @deprecated use require('@fxjs/sql-query').comparators.lt instead */
 export declare const lt: SqlQuery.FxSqlQueryComparatorFunction.lt;
+/** @deprecated use require('@fxjs/sql-query').comparators.lte instead */
 export declare const lte: SqlQuery.FxSqlQueryComparatorFunction.lte;
+/** @deprecated use require('@fxjs/sql-query').comparators.not_in instead */
 export declare const not_in: SqlQuery.FxSqlQueryComparatorFunction.not_in;
 export declare const enforce: FibjsEnforce.ExportModule;
 export declare const settings: FxOrmSettings.SettingInstance;
