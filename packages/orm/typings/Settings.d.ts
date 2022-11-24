@@ -39,3 +39,4 @@ export declare const defaults: () => {
     };
 };
 export declare function Container(settings: object): FxOrmSettings.SettingInstance;
+export declare const defaultSettingsInstance: FxOrmSettings.SettingInstance;

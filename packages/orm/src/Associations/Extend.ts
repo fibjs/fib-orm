@@ -2,7 +2,7 @@ import util = require('util')
 
 import Hook = require("../Hook");
 import _cloneDeep = require('lodash.clonedeep');
-import ORMError   = require("../Error");
+import ORMError from "../Error";
 import Singleton  = require("../Singleton");
 import Utilities  = require("../Utilities");
 import Helpers  = require("../Helpers");

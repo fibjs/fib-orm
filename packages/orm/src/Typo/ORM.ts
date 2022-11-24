@@ -225,7 +225,11 @@ export namespace FxOrmNS {
         settings: FxOrmSettings.SettingInstance;
         driver_name: string;
         driver: FxOrmDMLDriver.DMLDriver;
+        /**
+         * @deprecated use orm.comparators directly
+         */
         tools: FxSqlQueryComparator.ComparatorHash;
+        comparators: FxSqlQueryComparator.ComparatorHash;
         models: { [key: string]: FxOrmModel.Model };
         plugins: Plugin[];
         customTypes: { [key: string]: FxOrmProperty.CustomPropertyType };

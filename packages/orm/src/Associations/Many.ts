@@ -7,7 +7,7 @@ import _flatten = require('lodash.flatten')
 import Hook = require("../Hook");
 import Settings = require("../Settings");
 import Property = require("../Property");
-import ORMError = require("../Error");
+import ORMError from "../Error";
 import Utilities = require("../Utilities");
 import { ACCESSOR_KEYS, addAssociationInfoToModel } from './_utils';
 import { listFindByChainOrRunSync } from '../Model';

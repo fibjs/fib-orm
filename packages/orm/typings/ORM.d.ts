@@ -1,53 +1,10 @@
-/// <reference types="@fibjs/enforce" />
 import events = require("events");
-import { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
-import SqlQuery = require("@fxjs/sql-query");
-import { addAdapter } from "./Adapters";
 import type { FxOrmNS } from "./Typo/ORM";
-import type { FxOrmDb } from "./Typo/Db";
-import type { FxOrmError } from "./Typo/Error";
 import type { FxOrmCommon } from "./Typo/_common";
 import type { FxOrmDMLDriver } from "./Typo/DMLDriver";
 import type { FxOrmCoreCallbackNS } from "@fxjs/orm-core";
 import type { FxOrmModel } from "./Typo/model";
 import type { FxOrmSettings } from "./Typo/settings";
-import * as Helpers from "./Helpers";
-/**
- * @deprecated
- */
-import * as validators from "./Validators";
-import * as Settings from "./Settings";
-import * as singleton from "./Singleton";
-/** @deprecated use require('@fxjs/sql-query').Text instead */
-export declare const Text: SqlQuery.FxSqlQuery.TypedQueryObjectWrapper<"text", any>;
-/** @deprecated use require('@fxjs/sql-query').comparators.between instead */
-export declare const between: SqlQuery.FxSqlQueryComparatorFunction.between;
-/** @deprecated use require('@fxjs/sql-query').comparators.not_between instead */
-export declare const not_between: SqlQuery.FxSqlQueryComparatorFunction.not_between;
-/** @deprecated use require('@fxjs/sql-query').comparators.like instead */
-export declare const like: SqlQuery.FxSqlQueryComparatorFunction.like;
-/** @deprecated use require('@fxjs/sql-query').comparators.not_like instead */
-export declare const not_like: SqlQuery.FxSqlQueryComparatorFunction.not_like;
-/** @deprecated use require('@fxjs/sql-query').comparators.eq instead */
-export declare const eq: SqlQuery.FxSqlQueryComparatorFunction.eq;
-/** @deprecated use require('@fxjs/sql-query').comparators.ne instead */
-export declare const ne: SqlQuery.FxSqlQueryComparatorFunction.ne;
-/** @deprecated use require('@fxjs/sql-query').comparators.gt instead */
-export declare const gt: SqlQuery.FxSqlQueryComparatorFunction.gt;
-/** @deprecated use require('@fxjs/sql-query').comparators.gte instead */
-export declare const gte: SqlQuery.FxSqlQueryComparatorFunction.gte;
-/** @deprecated use require('@fxjs/sql-query').comparators.lt instead */
-export declare const lt: SqlQuery.FxSqlQueryComparatorFunction.lt;
-/** @deprecated use require('@fxjs/sql-query').comparators.lte instead */
-export declare const lte: SqlQuery.FxSqlQueryComparatorFunction.lte;
-/** @deprecated use require('@fxjs/sql-query').comparators.not_in instead */
-export declare const not_in: SqlQuery.FxSqlQueryComparatorFunction.not_in;
-export declare const enforce: FibjsEnforce.ExportModule;
-export declare const settings: FxOrmSettings.SettingInstance;
-export * as Property from "./Property";
-export declare function use(connection: FxOrmDb.Database, proto: string, opts: FxOrmNS.IUseOptions, cb: (err: Error, db?: FxOrmNS.ORM) => void): any;
-export declare function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): FxOrmNS.ORMLike;
-export declare function connect<T extends IDbDriver.ISQLConn = any>(uri?: string | FxDbDriverNS.DBConnectionConfig, cb?: FxOrmCoreCallbackNS.ExecutionCallback<IDbDriver<T>>): FxOrmNS.ORMLike;
 export declare class ORM extends events.EventEmitter implements FxOrmNS.ORM {
     validators: FxOrmNS.ORM['validators'];
     enforce: FxOrmNS.ORM['enforce'];
@@ -55,6 +12,7 @@ export declare class ORM extends events.EventEmitter implements FxOrmNS.ORM {
     driver_name: FxOrmNS.ORM['driver_name'];
     driver: FxOrmNS.ORM['driver'];
     tools: FxOrmNS.ORM['tools'];
+    comparators: FxOrmNS.ORM['comparators'];
     models: FxOrmNS.ORM['models'];
     plugins: FxOrmNS.ORM['plugins'];
     customTypes: FxOrmNS.ORM['customTypes'];
@@ -79,7 +37,3 @@ export declare class ORM extends events.EventEmitter implements FxOrmNS.ORM {
     rollback(): void;
     trans<T>(func: FxOrmCoreCallbackNS.ExecutionCallback<T>): boolean;
 }
-export declare type ORMInstance = FxOrmNS.ORM;
-export declare const ErrorCodes: FxOrmError.PredefineErrorCodes;
-export { addAdapter, Helpers, validators, Settings, singleton, };
-export declare function definePlugin<TOpts extends object>(definition: FxOrmNS.PluginConstructFn<TOpts>): FxOrmNS.PluginConstructFn<TOpts, FxOrmNS.ORM>;

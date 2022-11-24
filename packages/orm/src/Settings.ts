@@ -129,3 +129,5 @@ function unset(key: string, obj: any) {
 		obj[key.substr(0, p)] = {};
 	}
 }
+
+export const defaultSettingsInstance = Container(defaults());

@@ -1,4 +1,5 @@
-import ORMError   = require("./Error");
+import ORMError from "./Error";
+
 import { FxOrmDb } from "./Typo/Db";
 import { FxOrmQuery } from "./Typo/query";
 import { FxOrmCommon } from "./Typo/_common";

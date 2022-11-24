@@ -9,7 +9,7 @@ import Diff = require('diff');
 import { getTableDDLs, IModelProperties, IRawColumns } from '../helpers/ddl';
 
 type IModelFunc = (ORM: typeof import('@fxjs/orm')) => {
-    orm: import('@fxjs/orm/typings/ORM').ORMInstance
+    orm: import('@fxjs/orm').FxOrmNS.ORM
 };
 
 function alphaBetKeySort<T extends object>(obj: T) {

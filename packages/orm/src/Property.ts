@@ -1,5 +1,5 @@
 import _cloneDeep = require('lodash.clonedeep');
-import ORMError = require("./Error");
+import ORMError from "./Error";
 import { FxOrmModel } from './Typo/model';
 import { FxOrmNS } from './Typo/ORM';
 import { FxOrmProperty } from './Typo/property';

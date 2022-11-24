@@ -7,7 +7,7 @@ import FxORMCore = require('@fxjs/orm-core');
 
 import Utilities = require("./Utilities");
 import Hook      = require("./Hook");
-import ORMError  = require("./Error");
+import ORMError from "./Error";
 import enforce   = require("@fibjs/enforce");
 import * as Helpers from './Helpers';
 

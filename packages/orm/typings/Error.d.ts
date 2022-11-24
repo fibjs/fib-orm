@@ -1,14 +1,11 @@
 import { FxOrmError } from "./Typo/Error";
-declare const _default: {
-    new (message: string, code?: keyof FxOrmError.PredefineErrorCodes, extras?: any): {
-        [k: string]: any;
-        name: string;
-        message: string;
-        code: number | string;
-        literalCode: string;
-        toString(): string;
-        stack?: string;
-    };
-    codes: FxOrmError.PredefineErrorCodes;
-};
-export = _default;
+export default class ORMError extends Error {
+    static codes: FxOrmError.PredefineErrorCodes;
+    name: string;
+    message: string;
+    code: number | string;
+    literalCode: string;
+    [k: string]: any;
+    constructor(message: string, code?: keyof FxOrmError.PredefineErrorCodes, extras?: any);
+    toString(): string;
+}

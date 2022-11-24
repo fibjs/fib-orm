@@ -2,7 +2,7 @@ import util = require('util')
 
 import Hook = require("../Hook");
 import Utilities = require("../Utilities");
-import ORMError = require("../Error");
+import ORMError from "../Error";
 import { ACCESSOR_KEYS, addAssociationInfoToModel } from './_utils';
 import { listFindByChainOrRunSync } from '../Model';
 import * as Helpers from '../Helpers';

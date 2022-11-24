@@ -11,7 +11,7 @@ const codes: FxOrmError.PredefineErrorCodes = {
   BAD_MODEL        : 15
 };
 
-export = class ORMError extends Error {
+export default class ORMError extends Error {
   static codes = codes;
   
   name: string = 'ORMError';

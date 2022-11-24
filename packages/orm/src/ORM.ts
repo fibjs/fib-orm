@@ -2,19 +2,15 @@ import util           = require("util");
 import events         = require("events");
 import uuid			  = require('uuid')
 
-import { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
-
 import SqlQuery       = require("@fxjs/sql-query");
 import ormPluginSyncPatch from './Patch/plugin'
 
 import { Model }      from "./Model";
-import { addAdapter, getAdapter } from "./Adapters";
-import ORMError       = require("./Error");
+import ORMError from "./Error";
 import Utilities      = require("./Utilities");
 import Enforces = require("@fibjs/enforce");
 
 import type { FxOrmNS } from "./Typo/ORM";
-import type { FxOrmDb } from "./Typo/Db";
 import type { FxOrmError } from "./Typo/Error";
 import type { FxOrmCommon } from "./Typo/_common";
 import type { FxOrmDMLDriver } from "./Typo/DMLDriver";
@@ -23,169 +19,9 @@ import type { FxOrmModel } from "./Typo/model";
 import type { FxOrmProperty } from "./Typo/property";
 import type { FxOrmSettings } from "./Typo/settings";
 
-import * as Helpers from "./Helpers";
-/**
- * @deprecated
- */
 import * as validators from "./Validators";
 
 import * as Settings from "./Settings";
-import * as singleton from "./Singleton";
-
-/** @deprecated use require('@fxjs/sql-query').Text instead */
-export const Text = SqlQuery.Text;
-/** @deprecated use require('@fxjs/sql-query').comparators.between instead */
-export const between = SqlQuery.comparators.between;
-/** @deprecated use require('@fxjs/sql-query').comparators.not_between instead */
-export const not_between = SqlQuery.comparators.not_between;
-/** @deprecated use require('@fxjs/sql-query').comparators.like instead */
-export const like = SqlQuery.comparators.like;
-/** @deprecated use require('@fxjs/sql-query').comparators.not_like instead */
-export const not_like = SqlQuery.comparators.not_like;
-/** @deprecated use require('@fxjs/sql-query').comparators.eq instead */
-export const eq = SqlQuery.comparators.eq;
-/** @deprecated use require('@fxjs/sql-query').comparators.ne instead */
-export const ne = SqlQuery.comparators.ne;
-/** @deprecated use require('@fxjs/sql-query').comparators.gt instead */
-export const gt = SqlQuery.comparators.gt;
-/** @deprecated use require('@fxjs/sql-query').comparators.gte instead */
-export const gte = SqlQuery.comparators.gte;
-/** @deprecated use require('@fxjs/sql-query').comparators.lt instead */
-export const lt = SqlQuery.comparators.lt;
-/** @deprecated use require('@fxjs/sql-query').comparators.lte instead */
-export const lte = SqlQuery.comparators.lte;
-/** @deprecated use require('@fxjs/sql-query').comparators.in instead */
-module.exports.in = SqlQuery.comparators.in;
-/** @deprecated use require('@fxjs/sql-query').comparators.not_in instead */
-export const not_in = SqlQuery.comparators.not_in;
-
-export const enforce = Enforces;
-
-const SettingsInstance = Settings.Container(Settings.defaults());
-export const settings = SettingsInstance;
-
-export * as Property   from "./Property";
-
-export function use(
-	connection: FxOrmDb.Database,
-	proto: string,
-	opts: FxOrmNS.IUseOptions,
-	cb: (err: Error, db?: FxOrmNS.ORM) => void
-): any {
-	if (typeof opts === "function") {
-		cb = opts;
-		opts = <FxOrmNS.IUseOptions>{};
-	}
-
-	try {
-		const DMLDriver   = getAdapter(proto);
-		const settings = Settings.Container(SettingsInstance.get('*'));
-		const driver   = new DMLDriver(null, connection, {
-			debug    : (opts.query && opts.query.debug === 'true'),
-			settings : settings
-		});
-
-		return cb(null, new ORM(proto, driver, settings));
-	} catch (err) {
-		return cb(err);
-	}
-};
-
-function isOrmLikeErrorEmitter (parsedDBDriver: IDbDriver | FxOrmNS.ORMLike): parsedDBDriver is FxOrmNS.ORMLike {
-	return !parsedDBDriver.hasOwnProperty('host') && parsedDBDriver instanceof events.EventEmitter
-}
-
-export function connectSync(opts?: string | FxDbDriverNS.DBConnectionConfig): FxOrmNS.ORMLike {
-	Helpers.selectArgs(arguments, function (type, arg) {
-		switch (type) {
-			default:
-				opts = arg;
-				break
-		}
-	});
-
-	const dbdriver = Helpers.buildDbDriver(opts);
-
-	/**
-	 * @pointless
-	 */
-	if (isOrmLikeErrorEmitter(dbdriver)) {
-        const errWaitor = Utilities.getErrWaitor(true);
-        dbdriver.on('connect', (err: FxOrmError.ExtendedError) => {
-            errWaitor.err = err;
-            errWaitor.evt.set();
-        });
-        errWaitor.evt.wait();
-        
-        if (errWaitor.err)
-            throw errWaitor.err;
-
-        return dbdriver;
-	}
-	
-	let adapterName = dbdriver.config.protocol.replace(/:$/, '');
-	let orm: FxOrmNS.ORM;
-
-	const syncResult = Utilities.catchBlocking(() => {
-		const DMLDriver = getAdapter(adapterName);
-		const settings = Settings.Container(SettingsInstance.get('*'));
-		const driver   = new DMLDriver(dbdriver.uri as any, null, {
-			debug    : dbdriver.extend_config.debug ? dbdriver.extend_config.debug : settings.get("connection.debug"),
-			pool     : dbdriver.extend_config.pool ? dbdriver.extend_config.pool  : settings.get("connection.pool"),
-			settings : settings
-		});
-
-		driver.connect();
-
-		orm = new ORM(adapterName, driver, settings);
-
-		return orm;
-	});
-
-	if (syncResult.error && Utilities.isDriverNotSupportedError(syncResult.error)) {
-		syncResult.error = new ORMError("Connection protocol not supported - have you installed the database driver for " + adapterName + "?", 'NO_SUPPORT');
-	}
-
-	Utilities.takeAwayResult(syncResult, { no_throw: false });
-
-	return orm;
-}
-
-export function connect <T extends IDbDriver.ISQLConn = any> (
-	uri?: string | FxDbDriverNS.DBConnectionConfig,
-	cb?: FxOrmCoreCallbackNS.ExecutionCallback<IDbDriver<T>>
-): FxOrmNS.ORMLike {
-
-	let args = Array.prototype.slice.apply(arguments);
-	Helpers.selectArgs(args, function (type, arg) {
-		switch (type) {
-			case 'function':
-				cb = arg;
-				break
-		}
-	});
-	args = args.filter((x: any) => x !== cb);
-
-	const syncResponse = Utilities.catchBlocking<FxOrmNS.ORMLike>(connectSync, args);
-
-	let orm: FxOrmNS.ORMLike = null;
-	if (syncResponse.error)
-		orm = Utilities.ORM_Error(syncResponse.error, cb);
-	else
-		orm = syncResponse.result;
-
-	Utilities.takeAwayResult(syncResponse, {
-		// no throw it, it could be processed with event handler
-		no_throw: true,
-		callback: cb
-	});
-
-	process.nextTick(() => {
-		orm.emit("connect", syncResponse.error, !syncResponse.error ? orm : null);
-	});
-
-	return orm;
-};
 
 export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 	validators: FxOrmNS.ORM['validators'];
@@ -194,6 +30,7 @@ export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 	driver_name: FxOrmNS.ORM['driver_name'];
 	driver: FxOrmNS.ORM['driver'];
 	tools: FxOrmNS.ORM['tools'];
+	comparators: FxOrmNS.ORM['comparators'];
 	models: FxOrmNS.ORM['models'];
 	plugins: FxOrmNS.ORM['plugins'];
 	customTypes: FxOrmNS.ORM['customTypes'];
@@ -212,6 +49,7 @@ export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 		this.driver      = driver;
 		this.driver.uid  = uuid.node().hex();
 		this.tools       = {...SqlQuery.comparators};
+		this.comparators       = {...SqlQuery.comparators};
 		this.models      = {};
 		this.plugins     = [];
 		this.customTypes = {};
@@ -441,19 +279,4 @@ export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 		const connection = this.driver.db.connection;
 		return connection.trans(func.bind(connection));	
 	};
-}
-
-export type ORMInstance = FxOrmNS.ORM
-
-export const ErrorCodes = ORMError.codes;
-export {
-	addAdapter,
-	Helpers,
-	validators,
-	Settings,
-	singleton,
-};
-
-export function definePlugin<TOpts extends object>(definition: FxOrmNS.PluginConstructFn<TOpts>) {
-	return definition;
 }

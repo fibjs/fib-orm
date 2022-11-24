@@ -99,37 +99,37 @@ describe("Date Type", function () {
 
         it("find - comps", function () {
             var who = Person.oneSync({
-                birthday: db.tools.lte(birthday_input_for_find)
+                birthday: db.comparators.lte(birthday_input_for_find)
             });
             assert_found(who);
 
             var who = Person.oneSync({
-                birthday: db.tools.gte(birthday_input_for_find)
+                birthday: db.comparators.gte(birthday_input_for_find)
             });
             assert_found(who);
 
             var who = Person.oneSync({
-                birthday: db.tools.ne(birthday_input_for_find)
+                birthday: db.comparators.ne(birthday_input_for_find)
             });
             assert.notExist(who);
 
             var who = Person.oneSync({
-                birthday: db.tools.lt(birthday_input_for_find)
+                birthday: db.comparators.lt(birthday_input_for_find)
             });
             assert.notExist(who);
 
             var who = Person.oneSync({
-                birthday: db.tools.gt(birthday_input_for_find)
+                birthday: db.comparators.gt(birthday_input_for_find)
             });
             assert.notExist(who);
 
             var who = Person.oneSync({
                 or: [
                     {
-                        birthday: db.tools.lt(birthday_input_for_find)
+                        birthday: db.comparators.lt(birthday_input_for_find)
                     },
                     {
-                        birthday: db.tools.gt(birthday_input_for_find)
+                        birthday: db.comparators.gt(birthday_input_for_find)
                     }
                 ]
             });
@@ -138,10 +138,10 @@ describe("Date Type", function () {
             var who = Person.oneSync({
                 and: [
                     {
-                        birthday: db.tools.lt(birthday_input_for_find)
+                        birthday: db.comparators.lt(birthday_input_for_find)
                     },
                     {
-                        birthday: db.tools.gt(birthday_input_for_find)
+                        birthday: db.comparators.gt(birthday_input_for_find)
                     }
                 ]
             });
@@ -150,17 +150,17 @@ describe("Date Type", function () {
             var who = Person.oneSync({
                 and: [
                     {
-                        birthday: db.tools.gt(birthday_input_between_from)
+                        birthday: db.comparators.gt(birthday_input_between_from)
                     },
                     {
-                        birthday: db.tools.lt(birthday_input_between_to)
+                        birthday: db.comparators.lt(birthday_input_between_to)
                     }
                 ]
             });
             assert_found(who);
 
             var who = Person.oneSync({
-                birthday: db.tools.between(birthday_input_for_find, birthday_input_between_to)
+                birthday: db.comparators.between(birthday_input_for_find, birthday_input_between_to)
             });
             assert_found(who);
         });
@@ -173,7 +173,7 @@ describe("Date Type", function () {
             assert.equal(count, 1);
 
             var count = Person.countSync({
-                birthday: db.tools.ne(birthday_input_for_find)
+                birthday: db.comparators.ne(birthday_input_for_find)
             });
 
             assert.equal(count, 0);
@@ -203,14 +203,14 @@ describe("Date Type", function () {
             assert.strictEqual(rows[0].max_$id, 1);
 
             var rows = Person.aggregate(selects, {
-                birthday: db.tools.gt(birthday_input_for_find)
+                birthday: db.comparators.gt(birthday_input_for_find)
             }).count('id').groupBy(...selects).getSync();
 
             assert.strictEqual(rows.length, 0);
 
             var [count, min, max] = Person
                 .aggregate({
-                    birthday: db.tools.gt(birthday_input_for_find)
+                    birthday: db.comparators.gt(birthday_input_for_find)
                 })
                 .count('id')
                 .groupBy(...selects)

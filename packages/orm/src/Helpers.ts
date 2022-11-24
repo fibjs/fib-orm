@@ -5,7 +5,9 @@ import {
 } from "@fxjs/db-driver";
 import Hook           = require('./Hook');
 import Utilities      = require("./Utilities");
-import ORMError       = require("./Error");
+
+import ORMError from "./Error";
+
 import { FxOrmNS } from './Typo/ORM';
 import { FxOrmInstance } from './Typo/instance';
 import { FxOrmAssociation } from './Typo/assoc';

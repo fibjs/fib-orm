@@ -14,7 +14,7 @@ import Property          = require("./Property");
 import Singleton         = require("./Singleton");
 import Utilities         = require("./Utilities");
 import Validators        = require("./Validators");
-import ORMError          = require("./Error");
+import ORMError from "./Error";
 import Hook              = require("./Hook");
 import AggregateFunctions = require("./AggregateFunctions");
 import * as Helpers from './Helpers';
