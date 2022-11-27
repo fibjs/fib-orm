@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/sql-ddl-sync",
-	"version": "0.10.2",
+	"version": "0.10.3",
 	"description": "",
 	"private": false,
 	"publishConfig": {
@@ -47,8 +47,8 @@
 	},
 	"dependencies": {
 		"@fxjs/orm-core": "^0.3.1",
-		"@fxjs/orm-property": "^0.3.1",
-		"@fxjs/sql-query": "^0.9.1"
+		"@fxjs/orm-property": "^0.3.2",
+		"@fxjs/sql-query": "^0.9.2"
 	},
 	"devDependencies": {
 		"@fibjs/types": "^0.35.0",
