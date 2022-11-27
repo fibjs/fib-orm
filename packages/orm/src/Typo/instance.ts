@@ -99,7 +99,7 @@ export namespace FxOrmInstance {
 
     export type Instance<
         TProperties extends Record<string, FieldRuntimeType> = Record<string, FieldRuntimeType>,
-        Methods extends Record<string, (...args: any) => any> = any
+        Methods extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>
     > = {
         on(event: InstanceEventType | string, callback: FxOrmCommon.GenericCallback<any>): Instance;
         $on: Class_EventEmitter['on']
@@ -154,8 +154,7 @@ export namespace FxOrmInstance {
         /**
          * @noenum
          */
-        // model: Model;
-        model(): FxOrmModel.Model;
+        model(): FxOrmModel.Model<TProperties, Methods>;
 
         /**
          * @internal

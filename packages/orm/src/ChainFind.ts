@@ -207,7 +207,7 @@ const ChainFind = function (
 		},
 		
 		/* methods to ChainInstance :start */
-		each: function (cb?: FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance>) {
+		each: function (cb) {
 			return ChainInstance(this, cb);
 		},
 		/* methods to ChainInstance :end */
@@ -250,7 +250,7 @@ const ChainFind = function (
 				opts.conditions.__sql.push(args as any);
 			}
 
-			return chainRunSync();
+			return chainRunSync() as any;
 		},
 
 		count: function (cb?) {
@@ -337,7 +337,7 @@ const ChainFind = function (
 			return this;
 		},
 		runSync: function () {
-			return chainRunSync();
+			return chainRunSync() as any;
 		},
 		/* sync, callback-as-run style methods :end */
 	};

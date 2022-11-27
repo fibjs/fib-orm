@@ -1,4 +1,5 @@
 import * as ORM from '@src';
+import { expectType } from 'ts-expect';
 
 const UserDef = ORM.defineModel((orm) => {
     const User = orm.define('users', {
@@ -11,6 +12,22 @@ const UserDef = ORM.defineModel((orm) => {
             },
             getName() {
                 return this.name;
+            },
+            accessModel1() {
+                const UserModel = this.model();
+
+                return UserModel.find().firstSync().name;
+            },
+            markSelfInference() {
+                const instance = User.find().firstSync() as typeof this
+
+                return instance;
+            },
+            create() {
+                const instance = this.model().create({});
+                // expectType<ORM.FxOrmModel.GetInstanceTypeFrom<typeof User>>(instance);
+
+                return instance.name
             }
         }
     });

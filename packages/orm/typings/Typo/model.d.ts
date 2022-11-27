@@ -67,30 +67,24 @@ export declare namespace FxOrmModel {
             <T = any>(list: ModelFindByDescriptorItem[], self_conditions: FxOrmModel.ModelQueryConditions__Find, cb?: FxOrmCommon.ExecutionCallback<T>): FxOrmQuery.IChainFind;
         };
         create: {
-            (data: FxOrmInstance.InstanceDataPayload, callback?: ModelMethodCallback__CreateItem): Model;
-            (data: FxOrmInstance.InstanceDataPayload, options?: ModelOptions__Create, callback?: ModelMethodCallback__CreateItem): Model;
+            (data: FxOrmInstance.InstanceDataPayload, callback?: ModelMethodCallback__CreateItem): typeof data extends any[] ? FxOrmInstance.Instance<PropertyTypes, Methods>[] : FxOrmInstance.Instance<PropertyTypes, Methods>;
+            (data: FxOrmInstance.InstanceDataPayload, options?: ModelOptions__Create, callback?: ModelMethodCallback__CreateItem): typeof data extends any[] ? FxOrmInstance.Instance<PropertyTypes, Methods>[] : FxOrmInstance.Instance<PropertyTypes, Methods>;
         };
-        clear: {
-            (...args: any[]): Model;
-        };
-        get: {
-            (...ids: any[]): Model;
-        };
+        clear(...args: any[]): this;
+        get(...ids: any[]): this;
         chain: {
             (conditions?: FxOrmModel.ModelQueryConditions__Find, ...args: (FxOrmModel.ModelOptions__Find | OrderListOrLimitOffer)[]): FxOrmQuery.IChainFind;
         };
-        find: {
-            (conditions?: ModelQueryConditions__Find): FxOrmQuery.IChainFind;
-            (callback: ModelMethodCallback__Find): Model;
-            (conditions: ModelQueryConditions__Find, callback: ModelMethodCallback__Find): Model;
-            (conditions: ModelQueryConditions__Find, options: ModelOptions__Find): FxOrmQuery.IChainFind;
-            (conditions: ModelQueryConditions__Find, options: ModelOptions__Find, callback: ModelMethodCallback__Find): Model;
-            (conditions: ModelQueryConditions__Find, limit_order?: OrderListOrLimitOffer, limit_order2?: OrderListOrLimitOffer): FxOrmQuery.IChainFind;
-            (conditions: ModelQueryConditions__Find, limit_order: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): Model;
-            (conditions: ModelQueryConditions__Find, limit_order: OrderListOrLimitOffer, limit_order2: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): Model;
-        };
-        all: Model['find'];
-        where: Model['find'];
+        find(conditions?: ModelQueryConditions__Find): FxOrmQuery.IChainFind<PropertyTypes, Methods>;
+        find(callback: ModelMethodCallback__Find): this;
+        find(conditions: ModelQueryConditions__Find, callback: ModelMethodCallback__Find): this;
+        find(conditions: ModelQueryConditions__Find, options: ModelOptions__Find): FxOrmQuery.IChainFind<PropertyTypes, Methods>;
+        find(conditions: ModelQueryConditions__Find, options: ModelOptions__Find, callback: ModelMethodCallback__Find): this;
+        find(conditions: ModelQueryConditions__Find, limit_order?: OrderListOrLimitOffer, limit_order2?: OrderListOrLimitOffer): FxOrmQuery.IChainFind<PropertyTypes, Methods>;
+        find(conditions: ModelQueryConditions__Find, limit_order: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): this;
+        find(conditions: ModelQueryConditions__Find, limit_order: OrderListOrLimitOffer, limit_order2: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): this;
+        all: this['find'];
+        where: this['find'];
         /**
          * not like other methods, you must provide callback to those methods
          * - `one`
@@ -123,6 +117,7 @@ export declare namespace FxOrmModel {
         };
         [property: string]: any;
     }
+    export type GetInstanceTypeFrom<T> = T extends Model<infer U, infer S> ? FxOrmInstance.Instance<U, S> : never;
     export type FindByListStyleFunctionArgs<T = any> = [
         FxOrmModel.ModelFindByDescriptorItem[],
         FxOrmModel.ModelQueryConditions__Find,
@@ -183,9 +178,7 @@ export declare namespace FxOrmModel {
         autoFetchLimit?: ModelConstructorOptions['autoFetchLimit'];
         hooks?: ModelConstructorOptions['hooks'];
         validations?: ModelConstructorOptions['validations'];
-        methods?: {
-            [P: string]: (this: FxOrmInstance.Instance<TProperties>, ...args: any) => any;
-        };
+        methods?: Record<string, (this: FxOrmInstance.Instance<TProperties>, ...args: any) => any>;
         identityCache?: ModelConstructorOptions['identityCache'];
         cascadeRemove?: ModelConstructorOptions['cascadeRemove'];
         ievents?: ModelConstructorOptions['ievents'];

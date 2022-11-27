@@ -82,7 +82,7 @@ export declare namespace FxOrmInstance {
     };
     export type InstanceConstructor = new (model: FxOrmModel.Model, opts: InstanceConstructorOptions) => FxOrmInstance.Instance;
     export type InstanceEventType = 'ready' | 'save' | 'beforeRemove' | 'remove';
-    export type Instance<TProperties extends Record<string, FieldRuntimeType> = Record<string, FieldRuntimeType>, Methods extends Record<string, (...args: any) => any> = any> = {
+    export type Instance<TProperties extends Record<string, FieldRuntimeType> = Record<string, FieldRuntimeType>, Methods extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>> = {
         on(event: InstanceEventType | string, callback: FxOrmCommon.GenericCallback<any>): Instance;
         $on: Class_EventEmitter['on'];
         $off: Class_EventEmitter['off'];
@@ -129,7 +129,7 @@ export declare namespace FxOrmInstance {
         /**
          * @noenum
          */
-        model(): FxOrmModel.Model;
+        model(): FxOrmModel.Model<TProperties, Methods>;
         /**
          * @internal
          *

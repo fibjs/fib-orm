@@ -135,48 +135,42 @@ export declare namespace FxOrmQuery {
     }
     type AggregateConstructor = new (opts: AggregateConstructorOptions) => IAggregated;
     type ChainFindGenerator = new (Model: FxOrmModel.Model, opts: FxOrmQuery.ChainFindOptions) => IChainFind;
-    interface IChainFind {
-        model: FxOrmModel.Model;
+    interface IChainFind<HP extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>, HM extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>> {
+        model: FxOrmModel.Model<HP, HM>;
         options: ChainFindInstanceOptions;
-        only(...args: (string | string[])[]): IChainFind;
-        omit(...args: (string | string[])[]): IChainFind;
-        skip(offset: number): IChainFind;
-        offset(offset: number): IChainFind;
-        order(propertyOrderDesc: string, order?: FxOrmQuery.OrderNormalizedTuple[1]): IChainFind;
-        order(...orders: FxOrmQuery.OrderSeqRawTuple): IChainFind;
-        orderRaw(str: FxOrmQuery.OrderSqlStyleTuple[0], args?: FxOrmQuery.OrderSqlStyleTuple[1]): IChainFind;
-        limit(limit: number): IChainFind;
-        count(callback?: FxOrmCommon.ExecutionCallback<number>): IChainFind;
+        only(...args: (string | string[])[]): this;
+        omit(...args: (string | string[])[]): this;
+        skip(offset: number): this;
+        offset(offset: number): this;
+        order(propertyOrderDesc: string, order?: FxOrmQuery.OrderNormalizedTuple[1]): this;
+        order(...orders: FxOrmQuery.OrderSeqRawTuple): this;
+        orderRaw(str: FxOrmQuery.OrderSqlStyleTuple[0], args?: FxOrmQuery.OrderSqlStyleTuple[1]): this;
+        limit(limit: number): this;
+        count(callback?: FxOrmCommon.ExecutionCallback<number>): this;
         countSync(): number;
-        remove(callback?: FxOrmCommon.ExecutionCallback<FxOrmQuery.RemoveResult>): IChainFind;
+        remove(callback?: FxOrmCommon.ExecutionCallback<FxOrmQuery.RemoveResult>): this;
         removeSync(): FxOrmQuery.RemoveResult;
-        find: {
-            (...conditions: (FxOrmModel.ModelQueryConditionsItem | FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance[]>)[]): IChainFind;
-        };
+        find<T = FxOrmInstance.Instance<HP, HM>[]>(...conditions: (FxOrmModel.ModelQueryConditionsItem | FxOrmCommon.ExecutionCallback<T>)[]): this;
         findSync: {
-            (...conditions: (FxOrmModel.ModelQueryConditionsItem | FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance[]>)[]): FxOrmInstance.Instance[];
+            <T = FxOrmInstance.Instance<HP, HM>[]>(...conditions: (FxOrmModel.ModelQueryConditionsItem | FxOrmCommon.ExecutionCallback<T>)[]): T;
         };
-        all: IChainFind['find'];
-        allSync: IChainFind['findSync'];
-        where: IChainFind['find'];
-        whereSync: IChainFind['findSync'];
-        whereExists: {
-            (...exists: FxOrmQuery.ChainWhereExistsInfo[]): IChainFind;
-            (exists: FxOrmQuery.ChainWhereExistsInfo[]): IChainFind;
-        };
-        run(callback?: FxOrmQuery.IChainInstanceCallbackFn): IChainFind;
-        runSync(): FxOrmInstance.Instance[];
-        first(callback?: FxOrmCommon.GenericCallback<FxOrmInstance.Instance>): IChainFind;
-        firstSync(): FxOrmInstance.Instance;
-        last(callback?: FxOrmCommon.GenericCallback<FxOrmInstance.Instance>): IChainFind;
-        lastSync(): FxOrmInstance.Instance;
+        all: this['find'];
+        allSync: this['findSync'];
+        where: this['find'];
+        whereSync: this['findSync'];
+        whereExists(...exists: FxOrmQuery.ChainWhereExistsInfo[]): this;
+        whereExists(exists: FxOrmQuery.ChainWhereExistsInfo[]): this;
+        run(callback?: FxOrmQuery.IChainInstanceCallbackFn): this;
+        runSync<T = FxOrmInstance.Instance<HP, HM>[]>(): T;
+        first(callback?: FxOrmCommon.GenericCallback<FxOrmInstance.Instance<HP, HM> | null>): this;
+        firstSync(): FxOrmInstance.Instance<HP, HM> | null;
+        last(callback?: FxOrmCommon.GenericCallback<FxOrmInstance.Instance<HP, HM> | null>): this;
+        lastSync(): FxOrmInstance.Instance<HP, HM> | null;
         each: {
-            (cb?: FxOrmCommon.ExecutionCallback<FxOrmInstance.Instance>): IChainInstance;
+            <T = FxOrmInstance.Instance<HP, HM>>(cb?: FxOrmCommon.ExecutionCallback<T>): IChainInstance;
         };
-        eager: {
-            (...assocs: string[]): IChainFind;
-            (assocs: string[]): IChainFind;
-        };
+        eager(...assocs: string[]): this;
+        eager(assocs: string[]): this;
         [extraProperty: string]: any;
     }
     interface IChainInstanceCallbackFn {
