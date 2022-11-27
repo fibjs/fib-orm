@@ -834,7 +834,7 @@ export const Model = function (
 	// control current owned fields
 	const currFields: {[k: string]: true} = {};
 
-	model.findBy = function <T = any> (...args: any[]): FxOrmQuery.IChainFind {
+	model.findBy = function (...args: any[]): FxOrmQuery.IChainFind {
 		if (Array.isArray(args[0])) {
 			const [by_list, self_conditions = {}, self_options, cb] = args as FxOrmModel.FindByListStyleFunctionArgs
 			return listFindByChainOrRunSync(model, self_conditions, by_list, self_options, { callback: cb }) as FxOrmQuery.IChainFind;
@@ -844,14 +844,14 @@ export const Model = function (
 		return soloFindByChainOrRunSync(model, association_name, self_conditions, findby_options, { callback: cb, is_sync: false }) as FxOrmQuery.IChainFind;
 	}
 
-	model.findBySync = function <T = any> (...args: any[]): FxOrmInstance.Instance[] {
+	model.findBySync = function (...args: any[]) {
 		if (Array.isArray(args[0])) {
 			const [by_list, self_conditions = {}, self_options] = args as FxOrmModel.FindByListStyleFunctionArgs
-			return listFindByChainOrRunSync(model, self_conditions, by_list, self_options, { is_sync: true }) as FxOrmInstance.Instance[];
+			return listFindByChainOrRunSync(model, self_conditions, by_list, self_options, { is_sync: true }) as any;
 		}
 		
 		const [association_name, self_conditions, findby_options] = args as FxOrmModel.FindByItemStyleFunctionArgs
-		return soloFindByChainOrRunSync(model, association_name, self_conditions, findby_options, { is_sync: true }) as FxOrmInstance.Instance[];
+		return soloFindByChainOrRunSync(model, association_name, self_conditions, findby_options, { is_sync: true }) as any;
 	}
 
 	model.addProperty = function (propIn, options) {

@@ -17,7 +17,7 @@ import { FxOrmError } from "./Error";
 export declare namespace FxOrmModel {
     export type ModelInstanceConstructorOptions = (string | number | FxOrmInstance.InstanceDataPayload)[];
     export type OrderListOrLimitOffer = number | string | string[];
-    export interface Model<PropertyTypes extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>, Methods extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>> extends ModelHooks, FxOrmSynchronous.SynchronizedModel {
+    export interface Model<PropertyTypes extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>, Methods extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>> extends ModelHooks, FxOrmSynchronous.SynchronizedModel<PropertyTypes, Methods> {
         (): FxOrmInstance.Instance<PropertyTypes, Methods>;
         new (): FxOrmInstance.Instance<PropertyTypes, Methods>;
         (...data: ModelInstanceConstructorOptions): FxOrmInstance.Instance<PropertyTypes, Methods>;

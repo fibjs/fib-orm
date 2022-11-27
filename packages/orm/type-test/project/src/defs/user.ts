@@ -24,10 +24,17 @@ const UserDef = ORM.defineModel((orm) => {
                 return instance;
             },
             create() {
-                const instance = this.model().create({});
-                // expectType<ORM.FxOrmModel.GetInstanceTypeFrom<typeof User>>(instance);
-
-                return instance.name
+                let inst = User.find({ name: '' }).firstSync();
+                if (!inst) {
+                    inst = User.createSync({
+                        name: '',
+                        description: '',
+                    });
+                } else {
+                    inst.saveSync({
+                        description: '',
+                    });
+                }
             }
         }
     });
