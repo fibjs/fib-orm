@@ -42,29 +42,15 @@ export namespace FxOrmNS {
     
     export type Instance = FxOrmInstance.Instance
     export type Hooks = FxOrmModel.Hooks
-    export type FibOrmFixedExtendModel = FxOrmModel.Model
 
-    export type ModelPropertyDefinition = FxOrmModel.ModelPropertyDefinition
-    export type OrigDetailedModelProperty = FxOrmModel.OrigDetailedModelProperty
-    export type OrigDetailedModelPropertyHash = FxOrmModel.OrigDetailedModelPropertyHash
-    export type OrigModelPropertyDefinition = FxOrmModel.ComplexModelPropertyDefinition
-
-    /**
-     * @deprecated
-     */
-    export type ModelPropertyDefinitionHash = {
-        [key: string]: ComplexModelPropertyDefinition
-    }
-    export type ModelOptions = FxOrmModel.ModelOptions
-    export type OrigHooks = FxOrmModel.Hooks
+    export type ModelOptions = FxOrmModel.ModelDefineOptions
     
     export type ComplexModelPropertyDefinition = FxOrmModel.ComplexModelPropertyDefinition
-    export type FibOrmFixedModelOptions = FxOrmModel.ModelOptions
+    
     export type PatchedSyncfiedModelOrInstance = FxOrmPatch.PatchedSyncfiedModelOrInstance
     export type PatchedSyncfiedInstanceWithDbWriteOperation = FxOrmPatch.PatchedSyncfiedInstanceWithDbWriteOperation
     export type PatchedSyncfiedInstanceWithAssociations = FxOrmPatch.PatchedSyncfiedInstanceWithAssociations
 
-    // export type SettingsContainerGenerator = FxOrmSettings.SettingsContainerGenerator
     export type SettingInstance = FxOrmSettings.SettingInstance
 
     export type ModelOptions__Find = FxOrmModel.ModelOptions__Find
@@ -99,10 +85,6 @@ export namespace FxOrmNS {
         [extensibleProperty: string]: any
     }
 
-    export interface TransformFibOrmModel2InstanceOptions extends FxOrmModel.ModelOptions {}
-
-    export type FibORM = ORM
-
     export interface FibORMIConnectionOptions extends FxDbDriverNS.ConnectionInputArgs {
         timezone: string;
     }
@@ -134,15 +116,9 @@ export namespace FxOrmNS {
         autoFetch?: boolean
     }
 
-    export interface InstanceAutoFetchOptions extends ModelAutoFetchOptions {
-    }
-
-    export interface ModelExtendOptions {
-
-    }
-    export interface InstanceExtendOptions extends ModelExtendOptions {
-
-    }
+    export interface InstanceAutoFetchOptions extends ModelAutoFetchOptions {}
+    export interface ModelExtendOptions {}
+    export interface InstanceExtendOptions extends ModelExtendOptions {}
     /* instance/model computation/transform about :end */
 
     /**
@@ -163,7 +139,7 @@ export namespace FxOrmNS {
     export type PluginConstructFn<T2 = PluginOptions, T1 extends ORM = ORM> = (orm: T1, opts: T2) => Plugin
     export interface Plugin {
         beforeDefine?: {
-            (name?: string, properties?: Record<string, ModelPropertyDefinition>, opts?: FxOrmModel.ModelOptions): void
+            (name?: string, properties?: Record<string, ComplexModelPropertyDefinition>, opts?: FxOrmModel.ModelDefineOptions): void
         }
         define?: {
             (model?: FxOrmModel.Model, orm?: ORM): void
@@ -184,7 +160,7 @@ export namespace FxOrmNS {
                 opts?: {
                     association_name?: string,
                     ext_model?: Model,
-                    assoc_props?: Record<string, ModelPropertyDefinition>,
+                    assoc_props?: Record<string, FxOrmModel.ModelPropertyDefinition>,
                     assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_HasMany
                 }
             ): void
@@ -194,27 +170,52 @@ export namespace FxOrmNS {
                 model?: FxOrmModel.Model,
                 opts?: {
                     association_name?: string,
-                    properties?: FxOrmModel.DetailedPropertyDefinitionHash,
+                    properties?: Record<string, FxOrmModel.ModelPropertyDefinition>,
                     assoc_options?: FxOrmAssociation.AssociationDefinitionOptions_ExtendsTo
                 }
             ): void
         }
     }
 
-    export interface ORMConstructor {
-        new (driver_name: string, driver: FxOrmDMLDriver.DMLDriver, settings: FxOrmSettings.SettingInstance): ORM
-        prototype: ORM
+    /**
+     * @description leave here for augmention on consumer of this package,
+     * 
+     * all models declared here would be considered as memebers of `orm.models`, e.g.
+     * 
+     * ```ts
+     * const User = orm.define('user', { ... });
+     * 
+     * declare module '@fxjs/orm' {
+     *    export namespace FxOrmNS {
+     *      export GlobalModels {
+     *         users: typeof User
+     *      }
+     *    }
+     * }
+     * ```
+     */
+    export interface GlobalModels {
+        [key: string]: FxOrmModel.Model
     }
 
     export interface ORMLike extends Class_EventEmitter {
         use: {
             (plugin: PluginConstructFn, options?: PluginOptions): ThisType<ORMLike>;
         }
-        define: Function
-        sync: Function
-        load: Function
+        define: <
+            T extends Record<string, ComplexModelPropertyDefinition>,
+            U extends FxOrmModel.ModelDefineOptions<FxOrmModel.GetPropertiesType<T>>
+        >(
+            name: string,
+            properties: T,
+            opts?: U
+        ) => FxOrmModel.Model<FxOrmModel.GetPropertiesType<T>, Exclude<U['methods'], void>>;
+        sync(callback: FxOrmCommon.VoidCallback): this;
+        syncSync(): void;
+        load(file: string, callback: FxOrmCommon.VoidCallback): any;
 
         driver?: FxOrmDMLDriver.DMLDriver
+        models: GlobalModels;
 
         [k: string]: any
     }
@@ -225,16 +226,10 @@ export namespace FxOrmNS {
         settings: FxOrmSettings.SettingInstance;
         driver_name: string;
         driver: FxOrmDMLDriver.DMLDriver;
-        /**
-         * @deprecated use orm.comparators directly
-         */
-        tools: FxSqlQueryComparator.ComparatorHash;
         comparators: FxSqlQueryComparator.ComparatorHash;
-        models: { [key: string]: FxOrmModel.Model };
         plugins: Plugin[];
         customTypes: { [key: string]: FxOrmProperty.CustomPropertyType };
 
-        define(name: string, properties: Record<string, ModelPropertyDefinition>, opts?: FxOrmModel.ModelOptions): FxOrmModel.Model;
         defineType(name: string, type: FxOrmProperty.CustomPropertyType): this;
         
         load(file: string, callback: FxOrmCommon.VoidCallback): any;
@@ -243,8 +238,6 @@ export namespace FxOrmNS {
         close(callback: FxOrmCommon.VoidCallback): this;
         sync(callback: FxOrmCommon.VoidCallback): this;
         drop(callback: FxOrmCommon.VoidCallback): this;
-
-        syncSync(): void;
 
         begin: FxDbDriverNS.SQLDriver['begin'];
         commit: FxDbDriverNS.SQLDriver['commit'];

@@ -42,6 +42,7 @@ export const Instance = function (
 	instRtd.associations = {};
 	instRtd.events	= util.extend({}, instRtd.events);
 	instRtd.originalKeyValues = {};
+	instRtd.__validationData = instRtd.__validationData || {};
 
 	const eventor = new EventEmitter();
 
@@ -68,6 +69,9 @@ export const Instance = function (
 			return !!saveOptions.saveAssociations;
 		}
 	};
+
+	const returnAllErrors = Model.settings.get("instance.returnAllErrors");
+
 	const handleValidationsSync = function (): FxOrmError.ExtendedError | FxOrmError.ExtendedError[] {
 		let required: boolean,
 			alwaysValidate: boolean;
@@ -80,7 +84,6 @@ export const Instance = function (
 				return ;
 			}
 
-			const returnAllErrors = Model.settings.get("instance.returnAllErrors");
 			const checks = new enforce.Enforce({ returnAllErrors });
 
 			for (let k in instRtd.validations) {
@@ -131,6 +134,36 @@ export const Instance = function (
 		return instance;
 	};
 
+	const throwErrorIfExistsOnSave = function (errors: FxOrmError.ExtendedError | FxOrmError.ExtendedError[], forceList = false) {
+		const origErrorIsList = Array.isArray(errors);
+		
+		const validationId = Utilities.getUUID();
+		instRtd.__validationData[validationId] = Utilities.arraify(errors).filter(Boolean);
+
+		const setErrors = (errors: FxOrmError.ExtendedError | FxOrmError.ExtendedError[]) => {
+			instRtd.__validationData[validationId] = Utilities.arraify(errors).filter(Boolean);
+		};
+
+		Hook.trigger(instance, instRtd.hooks.afterValidation, {
+			errors: instRtd.__validationData[validationId].slice(0),
+			setErrors
+		});
+
+		const tmp = Utilities.arraify(instRtd.__validationData[validationId]);
+		delete instRtd.__validationData[validationId];
+
+		const firstErr = Utilities.firstEl(tmp);
+		if (!firstErr) return ;
+
+		if (origErrorIsList) {
+			saveError(tmp);
+			throw tmp;
+		} else {
+			saveError(firstErr);
+			throw firstErr;
+		}
+	}
+
 	const saveInstanceSync = function (
 		saveOptions: FxOrmInstance.SaveOptions,
 	) {
@@ -143,12 +176,7 @@ export const Instance = function (
 
 		instance_saving = true;
 
-		// TODO: maybe error list
-		const err = handleValidationsSync();
-		if (err) {
-			saveError(err);
-			throw err;
-		}
+		throwErrorIfExistsOnSave(handleValidationsSync(), returnAllErrors);
 		
 		if (instRtd.isNew) {
 			Utilities.attachOnceTypedHookRefToInstance(instance, 'create', {});
@@ -787,7 +815,7 @@ export const Instance = function (
 	});
 
 	Utilities.addHiddenPropertyToInstance(instance, "__instRtd", instRtd);
-	/* just for compat */
+	/* just for compat, use __instRtd plz */
 	Utilities.addHiddenPropertyToInstance(instance, "__opts", instRtd);
 	Utilities.addHiddenPropertyToInstance(instance, "model", function (this: typeof instance) {
 		return Model;

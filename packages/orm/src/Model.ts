@@ -37,7 +37,7 @@ import type {
 const AvailableHooks: (keyof FxOrmModel.Hooks)[] = [
 	"beforeCreate", "afterCreate",
 	"beforeSave", "afterSave",
-	"beforeValidation",
+	"beforeValidation", "afterValidation",
 	"beforeRemove", "afterRemove",
 	"afterLoad",
 	"afterAutoFetch"
@@ -978,7 +978,7 @@ export const Model = function (
 	ExtendAssociation.prepare(model, { one_associations, many_associations, extend_associations }, { db: m_opts.db });
 
 	return model;
-} as any as FxOrmModel.ModelConstructor;
+} as any as (new (opts: FxOrmModel.ModelDefineOptions) => FxOrmModel.Model);
 
 function soloFindByChainOrRunSync <T = any>(
 	model: FxOrmModel.Model,
