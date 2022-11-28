@@ -52,15 +52,31 @@ const UserDef = ORM.defineModel((orm) => {
     });
     
     const Role = orm.define('role', {
-        name: String,
+        name: { type: 'text' as const },
+        description: 'text',
         permissions: [
             'admin' as const,
             'visitor' as const
         ],
+        customType: {
+            type: 'customJson' as const,
+        }
     }, {
         methods: {
+            getName() {
+                expectType<string>(this.name);
+                return this.name;
+            },
+            getDescription () {
+                expectType<string>(this.description);
+                return this.description;
+            },
             getPermission() {
                 return this.permissions;
+            },
+            getCustomeType() {
+                expectType<ORM.FxOrmModel.GlobalCustomModelType['customJson']>(this.customType);
+                return this.customType;
             }
         }
     });
@@ -77,6 +93,12 @@ declare module '@fxjs/orm' {
         export interface GlobalModels {
             users: Defs['User'];
             role: Defs['Role'];
+        }
+    }
+    
+    export namespace FxOrmModel {
+        interface GlobalCustomModelType {
+            customJson: { foo1: 'bar1' }
         }
     }
 }

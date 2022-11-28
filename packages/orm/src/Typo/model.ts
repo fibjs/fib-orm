@@ -315,14 +315,14 @@ export namespace FxOrmModel {
     }
 
     export type PrimitiveConstructor =
-        | String | StringConstructor
-        | Boolean | BooleanConstructor
-        | Number | NumberConstructor
-        | Date | DateConstructor
-        | Object | ObjectConstructor
+        | StringConstructor
+        | BooleanConstructor
+        | NumberConstructor
+        | DateConstructor
+        | ObjectConstructor
 
     export type ComplexModelPropertyDefinition = 
-        ModelPropertyDefinition
+    ModelPropertyDefinition
         | (PrimitiveConstructor & {
             name: string
         })
@@ -331,13 +331,14 @@ export namespace FxOrmModel {
 
     
     export type GetPrimitiveFromConstructor<T extends PrimitiveConstructor = PrimitiveConstructor> =
-        T extends String | StringConstructor ? string : 
-        T extends Number | NumberConstructor ? number :
-        T extends Boolean | BooleanConstructor ? boolean :
-        T extends Date | DateConstructor ? number | Date :
-        T extends Object | ObjectConstructor | Class_Buffer ? any : never
-
-    type PropertyTypeEnum = import('@fxjs/orm-property').IProperty['PropertyType'];
+        T extends StringConstructor ? string : 
+        T extends NumberConstructor ? number :
+        T extends BooleanConstructor ? boolean :
+        T extends DateConstructor ? number | Date :
+        T extends ObjectConstructor | Class_Buffer ? any : never
+    
+    // type PropertyTypeEnum = import('@fxjs/orm-property/lib/Property').PropertyType;
+    type PropertyTypeEnum = 'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point';
     type GetPrimitiveFromOrmPropertyType<T extends PropertyTypeEnum = PropertyTypeEnum> =
         T extends 'text' ? string : 
         T extends 'enum' ? any[] : 
@@ -355,13 +356,16 @@ export namespace FxOrmModel {
     }
 
     export type GetPropertiesTypeFromDefinition<T extends ComplexModelPropertyDefinition> = 
-        T extends string ? (T extends PropertyTypeEnum ? GetPrimitiveFromOrmPropertyType<PropertyTypeEnum> : string) :
+        T extends string ? (T extends PropertyTypeEnum ? GetPrimitiveFromOrmPropertyType<T> : 
+            GlobalCustomModelType[T] extends void ? never : GlobalCustomModelType[T]
+        ) :
         T extends [...infer S] ? S[number] :
         T extends ModelPropertyDefinition ? 
             T['type'] extends 'enum' ? Exclude<T['values'], void>[number] :
             T['type'] extends PropertyTypeEnum ? GetPrimitiveFromOrmPropertyType<T['type'] & PropertyTypeEnum> : 
-            GlobalCustomModelType[T['type']] extends void ? unknown : GlobalCustomModelType[T['type']]:
-        T extends FxOrmModel.PrimitiveConstructor ? FxOrmModel.GetPrimitiveFromConstructor<T>
+            (GlobalCustomModelType[T['type']] extends void ? never : GlobalCustomModelType[T['type']]) :
+            // T['type'] extends PrimitiveConstructor ? GetPrimitiveFromConstructor<T['type']> :
+        T extends PrimitiveConstructor ? GetPrimitiveFromConstructor<T>
         : unknown
 
     export type GetPropertiesType<T extends Record<string, ComplexModelPropertyDefinition>> = {
