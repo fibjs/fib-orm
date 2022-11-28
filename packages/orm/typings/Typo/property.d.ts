@@ -28,7 +28,7 @@ export declare namespace FxOrmProperty {
     };
     type PropertyType = 'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point';
     /**
-     * @description use for augumenting model's properties type
+     * @description used for augumenting model's properties type
      */
     interface GlobalCustomModelType {
     }
