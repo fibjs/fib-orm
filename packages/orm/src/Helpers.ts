@@ -177,7 +177,7 @@ export function tryGetAssociationItemFromModel (extend_name: string, _model: FxO
 /* by ext_name x assoc_model :end */
 
 /* hooks :start */
-export function prependHook (hooks: FxOrmModel.Hooks, hookName: FxOrmModel.keyofHooks, preLogic: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback): void {
+export function prependHook (hooks: FxOrmModel.Hooks, hookName: keyof FxOrmModel.Hooks, preLogic: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback): void {
 	if (typeof hooks[hookName] === 'function') {
 		var oldHook = hooks[hookName];
 		
@@ -209,7 +209,7 @@ export function prependHook (hooks: FxOrmModel.Hooks, hookName: FxOrmModel.keyof
 	}
 }
 
-export function preReplaceHook (m: FxOrmModel.Model, opts: FxOrmModel.ModelDefineOptions, hookName: FxOrmModel.keyofHooks, cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void): void {
+export function preReplaceHook (m: FxOrmModel.Model, opts: FxOrmModel.ModelDefineOptions, hookName: keyof FxOrmModel.Hooks, cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void): void {
     var _oldHook: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback;
     if (opts !== undefined && opts.hooks)
         _oldHook = opts.hooks[hookName] as typeof _oldHook;

@@ -36,6 +36,18 @@ const UserDef = ORM.defineModel((orm) => {
                     });
                 }
             }
+        },
+        hooks: {
+            beforeSave() {
+                expectType<string>(this.name);
+                expectType<number>(this.age);
+            },
+            afterSave() {
+                // expectType<boolean>(success);
+                
+                expectType<string>(this.name);
+                expectType<number>(this.age);
+            }
         }
     });
     

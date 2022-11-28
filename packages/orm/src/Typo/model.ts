@@ -24,7 +24,7 @@ export namespace FxOrmModel {
 
     export type OrderListOrLimitOffer = number | string | string[]
 
-    export interface Model <
+    export interface Model<
         PropertyTypes extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>,
         Methods extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>,
     > extends ModelHooks, FxOrmSynchronous.SynchronizedModel<PropertyTypes, Methods> {
@@ -197,15 +197,16 @@ export namespace FxOrmModel {
         // extra select fields for hasmany-assoc
         extra_select?: string[]
     }
-
-    export interface ModelConstructorOptions {
+    export interface ModelConstructorOptions<
+        TProperties extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>
+    > {
         name: string
         db: FxOrmNS.ORM
         settings: FxOrmSettings.SettingInstance
         driver_name: string
         driver: FxOrmDMLDriver.DMLDriver
         table: string
-        properties: Record<string, FxOrmProperty.NormalizedProperty>
+        properties: Record<keyof TProperties, FxOrmProperty.NormalizedProperty>
         __for_extension: boolean
         indexes: string[]
         
@@ -217,8 +218,8 @@ export namespace FxOrmModel {
         autoFetch: boolean
         autoFetchLimit: number
         cascadeRemove: boolean
-        hooks: Hooks
-        methods: {[method_name: string]: Function}
+        hooks: Hooks<FxOrmInstance.Instance<TProperties>>
+        methods: Record<string, (this: FxOrmInstance.Instance<TProperties>, ...args: any) => any>
         validations: FxOrmValidators.IValidatorHash
         ievents: FxOrmInstance.InstanceConstructorOptions['events']
     }
@@ -229,42 +230,41 @@ export namespace FxOrmModel {
         /**
          * pririoty: table > collection
          */
-        table?: ModelConstructorOptions['table']
-        collection?: ModelConstructorOptions['table']
+        table?: ModelConstructorOptions<TProperties>['table']
+        collection?: ModelConstructorOptions<TProperties>['table']
 
         /**
          * @dirty would be deprecated
          */
-        __for_extension?: ModelConstructorOptions['__for_extension']
-        indexes?: ModelConstructorOptions['indexes']
+        __for_extension?: ModelConstructorOptions<TProperties>['__for_extension']
+        indexes?: ModelConstructorOptions<TProperties>['indexes']
         // keys composition, it's array-like
-        id?: ModelConstructorOptions['keys']
-        autoSave?: ModelConstructorOptions['autoSave']
-        autoFetch?: ModelConstructorOptions['autoFetch']
-        autoFetchLimit?: ModelConstructorOptions['autoFetchLimit']
-        hooks?: ModelConstructorOptions['hooks']
-        validations?: ModelConstructorOptions['validations']
+        id?: ModelConstructorOptions<TProperties>['keys']
+        autoSave?: ModelConstructorOptions<TProperties>['autoSave']
+        autoFetch?: ModelConstructorOptions<TProperties>['autoFetch']
+        autoFetchLimit?: ModelConstructorOptions<TProperties>['autoFetchLimit']
+        hooks?: ModelConstructorOptions<TProperties>['hooks']
+        validations?: ModelConstructorOptions<TProperties>['validations']
         methods?: Record<string, (this: FxOrmInstance.Instance<TProperties>, ...args: any) => any>
-        identityCache?: ModelConstructorOptions['identityCache']
-        cascadeRemove?: ModelConstructorOptions['cascadeRemove']
-        ievents?: ModelConstructorOptions['ievents']
+        identityCache?: ModelConstructorOptions<TProperties>['identityCache']
+        cascadeRemove?: ModelConstructorOptions<TProperties>['cascadeRemove']
+        ievents?: ModelConstructorOptions<TProperties>['ievents']
         useSelfSettings?: boolean
         [extensibleProperty: string]: any;
     };
 
-    export interface Hooks {
-        beforeValidation?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>;
-        afterValidation?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback>
-        beforeCreate?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>;
-        afterCreate?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback>;
-        beforeSave?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>;
-        afterSave?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback>;
-        afterLoad?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>;
-        afterAutoFetch?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>;
-        beforeRemove?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>;
-        afterRemove?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback>;
+    export interface Hooks<TThis = FxOrmInstance.Instance> {
+        beforeValidation?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
+        afterValidation?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback<TThis>>
+        beforeCreate?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
+        afterCreate?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback<TThis>>;
+        beforeSave?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
+        afterSave?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback<TThis>>;
+        afterLoad?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
+        afterAutoFetch?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
+        beforeRemove?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
+        afterRemove?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback<TThis>>;
     }
-    export type keyofHooks = keyof Hooks
 
     export interface ModelHookPatchOptions extends FxOrmHook.HookPatchOptions {
     }

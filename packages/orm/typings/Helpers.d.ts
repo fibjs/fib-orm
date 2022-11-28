@@ -20,8 +20,8 @@ export declare function getOneAssociationItemFromModel(ext_name: string, _model:
 export declare function getExtendsToAssociationItemFromModel(ext_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem_ExtendTos;
 export declare function getAssociationItemFromModel(reltype: string, extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem;
 export declare function tryGetAssociationItemFromModel(extend_name: string, _model: FxOrmModel.Model): FxOrmAssociation.InstanceAssociationItem;
-export declare function prependHook(hooks: FxOrmModel.Hooks, hookName: FxOrmModel.keyofHooks, preLogic: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback): void;
-export declare function preReplaceHook(m: FxOrmModel.Model, opts: FxOrmModel.ModelDefineOptions, hookName: FxOrmModel.keyofHooks, cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void): void;
+export declare function prependHook(hooks: FxOrmModel.Hooks, hookName: keyof FxOrmModel.Hooks, preLogic: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback): void;
+export declare function preReplaceHook(m: FxOrmModel.Model, opts: FxOrmModel.ModelDefineOptions, hookName: keyof FxOrmModel.Hooks, cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void): void;
 export declare const hookTrigger: FxOrmHook.HookTrigger<any, any>;
 export declare const hookWait: FxOrmHook.HookWait<FxOrmInstance.Instance<Record<string, FxOrmInstance.FieldRuntimeType>, Record<string, (...args: any) => any>>, any>;
 export declare function selectArgs(args: ArrayLike<any>, callback: {
