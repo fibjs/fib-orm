@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/orm",
-	"version": "1.15.0-alpha.3",
+	"version": "1.15.0-alpha.4",
 	"description": "",
 	"main": "lib",
 	"types": "typings/index.d.ts",
