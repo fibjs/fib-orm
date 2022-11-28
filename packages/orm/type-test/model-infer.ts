@@ -78,9 +78,10 @@ declare var customType1: FxOrmModel.GetPropertiesTypeFromDefinition<{
 expectType<unknown>(customType1)
 
 declare module "../src" {
-    export namespace FxOrmModel {
+    export namespace FxOrmProperty {
         interface GlobalCustomModelType {
             customJson: { foo: 'bar' }
+            customJson1: unknown
         }
     }
 }

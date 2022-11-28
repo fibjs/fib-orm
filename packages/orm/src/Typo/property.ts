@@ -31,8 +31,27 @@ export namespace FxOrmProperty {
             (prop?: FxOrmProperty.NormalizedProperty, helper?: FxSqlQuery.Class_Query): any
         }
     }
+    export type DataStoreProperty = IProperty & {
+        // restrain it, not expanded to `string`
+        type: PropertyType | keyof GlobalCustomModelType
+    };
     
-    export type DataStoreProperty = IProperty;
+    // type PropertyType = import('@fxjs/orm-property/lib/Property').PropertyType;
+    export type PropertyType = 'text' | 'integer' | 'number' | 'serial' | 'boolean' | 'date' | 'binary' | 'object' | 'enum' | 'point';
+    /**
+     * @description used for augumenting model's properties type
+     */
+    export interface GlobalCustomModelType {
+    }
+    
+    export type GetPrimitiveFromOrmPropertyType<T extends PropertyType = PropertyType> =
+        T extends 'text' ? string : 
+        T extends 'enum' ? any[] : 
+        T extends 'integer' | 'number' | 'serial' ? number :
+        T extends 'boolean' ? boolean :
+        T extends 'date' ? number | Date :
+        T extends 'binary' | 'object' | 'point' ? any : never
+    
     /**
      * @description useful when pass property's option(such as type, big, ...etc) internally, useless for exposed api.
      * 

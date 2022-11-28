@@ -203,7 +203,7 @@ export namespace FxOrmNS {
             (plugin: PluginConstructFn, options?: PluginOptions): ThisType<ORMLike>;
         }
         define: <
-            T extends Record<string, ComplexModelPropertyDefinition>,
+            T extends Record<string, FxOrmModel.ComplexModelPropertyDefinition>,
             U extends FxOrmModel.ModelDefineOptions<FxOrmModel.GetPropertiesType<T>>
         >(
             name: string,
