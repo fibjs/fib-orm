@@ -228,7 +228,7 @@ export declare namespace FxOrmModel {
     type GlobalModelType = FxOrmProperty.GlobalCustomModelType & {
         [P in FxOrmProperty.PropertyType]: FxOrmProperty.GetPrimitiveFromOrmPropertyType<P>;
     };
-    export type GetPropertiesTypeFromDefinition<T extends ComplexModelPropertyDefinition> = T extends keyof GlobalModelType ? GlobalModelType[T] : T extends [...infer S] ? S[number] : T extends ModelPropertyDefinition ? T['type'] extends 'enum' ? Exclude<T['values'], void>[number] : (T['type'] extends keyof GlobalModelType ? GlobalModelType[T['type']] : unknown) : T extends PrimitiveConstructor ? GetPrimitiveFromConstructor<T> : unknown;
+    export type GetPropertiesTypeFromDefinition<T extends ComplexModelPropertyDefinition> = T extends keyof GlobalModelType ? GlobalModelType[T] : T extends [...infer S] ? S : T extends ModelPropertyDefinition ? T['type'] extends 'enum' ? Exclude<T['values'], void> : (T['type'] extends keyof GlobalModelType ? GlobalModelType[T['type']] : unknown) : T extends PrimitiveConstructor ? GetPrimitiveFromConstructor<T> : unknown;
     export type GetPropertiesType<T extends Record<string, ComplexModelPropertyDefinition>> = {
         [K in keyof T]: FxOrmModel.GetPropertiesTypeFromDefinition<T[K]>;
     };
