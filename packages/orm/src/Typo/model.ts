@@ -324,9 +324,9 @@ export namespace FxOrmModel {
     
     export type GetPropertiesTypeFromDefinition<T extends ComplexModelPropertyDefinition> = 
         T extends keyof GlobalModelType ? GlobalModelType[T]:
-        T extends [...infer S] ? S :
+        T extends [...infer S] ? S[number] :
         T extends ModelPropertyDefinition ? 
-            T['type'] extends 'enum' ? Exclude<T['values'], void> :
+            T['type'] extends 'enum' ? Exclude<T['values'], void>[number] :
             (T['type'] extends keyof GlobalModelType ? GlobalModelType[T['type']] : unknown) :
             // T['type'] extends PrimitiveConstructor ? GetPrimitiveFromConstructor<T['type']> :
         T extends PrimitiveConstructor ? GetPrimitiveFromConstructor<T>

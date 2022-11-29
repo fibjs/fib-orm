@@ -54,10 +54,10 @@ declare var enums1: FxOrmModel.GetPropertiesTypeFromDefinition<{
     type: 'enum',
     values: ['a', 'b', 'c']
 }>
-expectType<('a' | 'b' | 'c')[]>(enums1)
+expectType<'a' | 'b' | 'c'>(enums1)
 
 declare var enums2: FxOrmModel.GetPropertiesTypeFromDefinition<['a', 'b', 'c']>
-expectType<('a' | 'b' | 'c')[]>(enums2)
+expectType<'a' | 'b' | 'c'>(enums2)
 
 // object
 declare var object1: FxOrmModel.GetPropertiesTypeFromDefinition<{
@@ -125,8 +125,8 @@ expectType<number>(definitions.age1)
 expectType<number>(definitions.age2)
 expectType<number>(definitions.age3)
 
-expectType<('male' | 'female')[]>(definitions.gender1)
-expectType<('male' | 'female')[]>(definitions.gender2)
+expectType<'male' | 'female'>(definitions.gender1)
+expectType<'male' | 'female'>(definitions.gender2)
 
 
 expectType<boolean>(definitions.isStudent1)
