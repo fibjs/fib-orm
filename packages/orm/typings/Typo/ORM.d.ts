@@ -21,33 +21,61 @@ export declare namespace FxOrmNS {
     type Hooks = FxOrmModel.Hooks;
     type ModelOptions = FxOrmModel.ModelDefineOptions;
     type ComplexModelPropertyDefinition = FxOrmModel.ComplexModelPropertyDefinition;
+    /** @deprecated would be deprecated >= 1.16.x */
     type PatchedSyncfiedModelOrInstance = FxOrmPatch.PatchedSyncfiedModelOrInstance;
+    /** @deprecated would be deprecated >= 1.16.x */
     type PatchedSyncfiedInstanceWithDbWriteOperation = FxOrmPatch.PatchedSyncfiedInstanceWithDbWriteOperation;
+    /** @deprecated would be deprecated >= 1.16.x */
     type PatchedSyncfiedInstanceWithAssociations = FxOrmPatch.PatchedSyncfiedInstanceWithAssociations;
+    /** @deprecated would be deprecated >= 1.16.x */
     type SettingInstance = FxOrmSettings.SettingInstance;
+    /** @deprecated would be deprecated >= 1.16.x */
     type ModelOptions__Find = FxOrmModel.ModelOptions__Find;
+    /** @deprecated would be deprecated >= 1.16.x */
     type ModelQueryConditions__Find = FxOrmModel.ModelQueryConditions__Find;
+    /** @deprecated would be deprecated >= 1.16.x */
     type ModelMethodCallback__Find = FxOrmModel.ModelMethodCallback__Find;
+    /** @deprecated would be deprecated >= 1.16.x */
     type ModelMethodCallback__Count = FxOrmModel.ModelMethodCallback__Count;
+    /** @deprecated would be deprecated >= 1.16.x */
     type InstanceDataPayload = FxOrmInstance.InstanceDataPayload;
+    /** @deprecated would be deprecated >= 1.16.x */
     type InstanceAssociationItem_HasMany = FxOrmAssociation.InstanceAssociationItem_HasMany;
+    /** @deprecated would be deprecated >= 1.16.x */
     type InstanceAssociationItem_HasOne = FxOrmAssociation.InstanceAssociationItem_HasOne;
+    /** @deprecated would be deprecated >= 1.16.x */
     type InstanceAssociationItem_ExtendTos = FxOrmAssociation.InstanceAssociationItem_ExtendTos;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryConditionInTypeType = FxOrmQuery.QueryConditionInTypeType;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_SimpleEq = FxOrmQuery.QueryCondition_SimpleEq;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_eq = FxOrmQuery.QueryCondition_eq;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_ne = FxOrmQuery.QueryCondition_ne;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_gt = FxOrmQuery.QueryCondition_gt;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_gte = FxOrmQuery.QueryCondition_gte;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_lt = FxOrmQuery.QueryCondition_lt;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_lte = FxOrmQuery.QueryCondition_lte;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_like = FxOrmQuery.QueryCondition_like;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_not_like = FxOrmQuery.QueryCondition_not_like;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_between = FxOrmQuery.QueryCondition_between;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_not_between = FxOrmQuery.QueryCondition_not_between;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_in = FxOrmQuery.QueryCondition_in;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryCondition_not_in = FxOrmQuery.QueryCondition_not_in;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryConditionAtomicType = FxOrmQuery.QueryConditionAtomicType;
+    /** @deprecated would be deprecated >= 1.16.x */
     type QueryConditions = FxOrmQuery.QueryConditions;
     interface ExtensibleError extends Error {
         [extensibleProperty: string]: any;
@@ -55,6 +83,7 @@ export declare namespace FxOrmNS {
     interface FibORMIConnectionOptions extends FxDbDriverNS.ConnectionInputArgs {
         timezone: string;
     }
+    /** @deprecated would be deprecated >= 1.16.x */
     type OrigAggreteGenerator = (...args: any[]) => FxOrmQuery.IAggregated;
     interface FibOrmFindLikeQueryObject {
         [key: string]: any;

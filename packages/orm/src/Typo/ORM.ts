@@ -47,37 +47,65 @@ export namespace FxOrmNS {
     
     export type ComplexModelPropertyDefinition = FxOrmModel.ComplexModelPropertyDefinition
     
+    /** @deprecated would be deprecated >= 1.16.x */
     export type PatchedSyncfiedModelOrInstance = FxOrmPatch.PatchedSyncfiedModelOrInstance
+    /** @deprecated would be deprecated >= 1.16.x */
     export type PatchedSyncfiedInstanceWithDbWriteOperation = FxOrmPatch.PatchedSyncfiedInstanceWithDbWriteOperation
+    /** @deprecated would be deprecated >= 1.16.x */
     export type PatchedSyncfiedInstanceWithAssociations = FxOrmPatch.PatchedSyncfiedInstanceWithAssociations
 
+    /** @deprecated would be deprecated >= 1.16.x */
     export type SettingInstance = FxOrmSettings.SettingInstance
 
+    /** @deprecated would be deprecated >= 1.16.x */
     export type ModelOptions__Find = FxOrmModel.ModelOptions__Find
+    /** @deprecated would be deprecated >= 1.16.x */
     export type ModelQueryConditions__Find = FxOrmModel.ModelQueryConditions__Find
+    /** @deprecated would be deprecated >= 1.16.x */
     export type ModelMethodCallback__Find = FxOrmModel.ModelMethodCallback__Find
+    /** @deprecated would be deprecated >= 1.16.x */
     export type ModelMethodCallback__Count = FxOrmModel.ModelMethodCallback__Count
     
+    /** @deprecated would be deprecated >= 1.16.x */
     export type InstanceDataPayload = FxOrmInstance.InstanceDataPayload
+    /** @deprecated would be deprecated >= 1.16.x */
     export type InstanceAssociationItem_HasMany = FxOrmAssociation.InstanceAssociationItem_HasMany
+    /** @deprecated would be deprecated >= 1.16.x */
     export type InstanceAssociationItem_HasOne = FxOrmAssociation.InstanceAssociationItem_HasOne
+    /** @deprecated would be deprecated >= 1.16.x */
     export type InstanceAssociationItem_ExtendTos = FxOrmAssociation.InstanceAssociationItem_ExtendTos
 
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryConditionInTypeType = FxOrmQuery.QueryConditionInTypeType
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_SimpleEq = FxOrmQuery.QueryCondition_SimpleEq
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_eq = FxOrmQuery.QueryCondition_eq
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_ne = FxOrmQuery.QueryCondition_ne
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_gt = FxOrmQuery.QueryCondition_gt
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_gte = FxOrmQuery.QueryCondition_gte
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_lt = FxOrmQuery.QueryCondition_lt
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_lte = FxOrmQuery.QueryCondition_lte
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_like = FxOrmQuery.QueryCondition_like
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_not_like = FxOrmQuery.QueryCondition_not_like
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_between = FxOrmQuery.QueryCondition_between
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_not_between = FxOrmQuery.QueryCondition_not_between
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_in = FxOrmQuery.QueryCondition_in
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryCondition_not_in = FxOrmQuery.QueryCondition_not_in
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryConditionAtomicType = FxOrmQuery.QueryConditionAtomicType
+    /** @deprecated would be deprecated >= 1.16.x */
     export type QueryConditions = FxOrmQuery.QueryConditions
     /* compatible :end */
     
@@ -89,6 +117,7 @@ export namespace FxOrmNS {
         timezone: string;
     }
 
+    /** @deprecated would be deprecated >= 1.16.x */
     export type OrigAggreteGenerator = (...args: any[]) => FxOrmQuery.IAggregated
 
     export interface FibOrmFindLikeQueryObject {
