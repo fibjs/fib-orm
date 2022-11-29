@@ -79,12 +79,53 @@ const UserDef = ORM.defineModel((orm) => {
                 expectType<ORM.FxOrmProperty.GlobalCustomModelType['customJson']>(this.customType);
                 return this.customType;
             }
+        },
+        hooks: {
+            beforeValidation(next) {
+                expectType<ORM.FxOrmHook.HookActionNextor>(next);
+            },
+            afterValidation(payload) {
+                expectType<ORM.FxOrmError.ExtendedError[]>(payload.errors);
+                expectType<(errors: ORM.FxOrmError.ExtendedError[]) => void>(payload.setErrors);
+            },
+            beforeCreate(next) {
+                expectType<ORM.FxOrmHook.HookActionNextor>(next);
+            },
+            afterCreate(success) {
+                expectType<boolean>(success);
+            },
+            beforeSave(next) {
+                expectType<ORM.FxOrmHook.HookActionNextor>(next);
+            },
+            afterSave(success) {
+                expectType<boolean>(success);
+            },
+            beforeRemove(next) {
+                expectType<ORM.FxOrmHook.HookActionNextor>(next);
+            },
+            afterRemove(success) {
+                expectType<boolean>(success);
+            },
+            afterLoad(next) {
+                expectType<ORM.FxOrmHook.HookActionNextor>(next);
+            },
+            afterAutoFetch(next) {
+                expectType<ORM.FxOrmHook.HookActionNextor>(next);
+            }
         }
     });
 
     User().getAge();
 
+    User.beforeCreate((next) => {
+        expectType<ORM.FxOrmHook.HookActionNextor>(next);
+    });
+
     Role().getPermission();
+
+    Role.afterCreate(success => {
+        expectType<boolean>(success);
+    });
 
     return { User, Role };
 });

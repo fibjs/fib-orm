@@ -193,7 +193,7 @@ export function prependHook (hooks: FxOrmModel.Hooks, hookName: keyof FxOrmModel
 				next()
 		}
 		
-		hooks[hookName] = function (next: Function|boolean) {
+		hooks[hookName] = function (next: any) {
 			if (preLogic.length > 0) {
 				var self = this
 				return preLogic.call(this, function () {
@@ -209,12 +209,17 @@ export function prependHook (hooks: FxOrmModel.Hooks, hookName: keyof FxOrmModel
 	}
 }
 
-export function preReplaceHook (m: FxOrmModel.Model, opts: FxOrmModel.ModelDefineOptions, hookName: keyof FxOrmModel.Hooks, cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void): void {
+export function preReplaceHook (
+    m: FxOrmModel.Model,
+    opts: FxOrmModel.ModelDefineOptions,
+    hookName: keyof FxOrmModel.Hooks,
+    cb: (this: FxOrmInstance.Instance, inst: FxOrmInstance.Instance) => void
+): void {
     var _oldHook: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback;
     if (opts !== undefined && opts.hooks)
         _oldHook = opts.hooks[hookName] as typeof _oldHook;
 
-    m[hookName](function (this: FxOrmInstance.Instance, next: boolean | FxOrmHook.HookActionNextFunction) {
+    m[hookName](function (this: FxOrmInstance.Instance, next: any) {
         cb.call(this, this);
 
         if (_oldHook) {

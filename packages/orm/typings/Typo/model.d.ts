@@ -17,7 +17,7 @@ import { FxOrmError } from "./Error";
 export declare namespace FxOrmModel {
     export type ModelInstanceConstructorOptions = (string | number | FxOrmInstance.InstanceDataPayload)[];
     export type OrderListOrLimitOffer = number | string | string[];
-    export interface Model<PropertyTypes extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>, Methods extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>> extends ModelHooks, FxOrmSynchronous.SynchronizedModel<PropertyTypes, Methods> {
+    export interface Model<PropertyTypes extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>, Methods extends Record<string, (...args: any) => any> = Record<string, (...args: any) => any>> extends ModelHooksModifier, FxOrmSynchronous.SynchronizedModel<PropertyTypes, Methods> {
         (): FxOrmInstance.Instance<PropertyTypes, Methods>;
         new (): FxOrmInstance.Instance<PropertyTypes, Methods>;
         (...data: ModelInstanceConstructorOptions): FxOrmInstance.Instance<PropertyTypes, Methods>;
@@ -185,7 +185,10 @@ export declare namespace FxOrmModel {
     }
     export interface Hooks<TThis = FxOrmInstance.Instance> {
         beforeValidation?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
-        afterValidation?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback<TThis>>;
+        afterValidation?: FxOrmCommon.Arraible<FxOrmHook.HookRetPayloadCallback<TThis, {
+            errors: FxOrmError.ExtendedError[];
+            setErrors: (errors: FxOrmError.ExtendedError[]) => void;
+        }>>;
         beforeCreate?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
         afterCreate?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback<TThis>>;
         beforeSave?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
@@ -195,42 +198,20 @@ export declare namespace FxOrmModel {
         beforeRemove?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback<TThis>>;
         afterRemove?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback<TThis>>;
     }
+    type __Item<T extends any> = T extends (infer U)[] ? U : T;
     export interface ModelHookPatchOptions extends FxOrmHook.HookPatchOptions {
     }
-    export interface ModelHooks {
-        beforeValidation?: {
-            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any;
-        };
-        afterValidation?: {
-            (func: FxOrmHook.HookResultCallback<FxOrmInstance.Instance, {
-                errors: FxOrmError.ExtendedError;
-                setErrors: (errors: FxOrmError.ExtendedError | FxOrmError.ExtendedError[]) => void;
-            }>, opts?: ModelHookPatchOptions): void;
-        };
-        beforeCreate?: {
-            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any;
-        };
-        afterCreate?: {
-            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any;
-        };
-        beforeSave?: {
-            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any;
-        };
-        afterSave?: {
-            (func: FxOrmHook.HookResultCallback, opts?: ModelHookPatchOptions): any;
-        };
-        afterLoad?: {
-            (func: FxOrmHook.HookResultCallback, opts?: ModelHookPatchOptions): any;
-        };
-        afterAutoFetch?: {
-            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any;
-        };
-        beforeRemove?: {
-            (func: FxOrmHook.HookActionCallback, opts?: ModelHookPatchOptions): any;
-        };
-        afterRemove?: {
-            (func: FxOrmHook.HookResultCallback, opts?: ModelHookPatchOptions): any;
-        };
+    export interface ModelHooksModifier {
+        beforeValidation?: (func: __Item<Hooks['beforeValidation']>, opts?: ModelHookPatchOptions) => any;
+        afterValidation?: (func: __Item<Hooks['afterValidation']>, opts?: ModelHookPatchOptions) => void;
+        beforeCreate?: (func: __Item<Hooks['beforeCreate']>, opts?: ModelHookPatchOptions) => any;
+        afterCreate?: (func: __Item<Hooks['afterCreate']>, opts?: ModelHookPatchOptions) => any;
+        beforeSave?: (func: __Item<Hooks['beforeSave']>, opts?: ModelHookPatchOptions) => any;
+        afterSave?: (func: __Item<Hooks['afterSave']>, opts?: ModelHookPatchOptions) => any;
+        afterLoad?: (func: __Item<Hooks['afterLoad']>, opts?: ModelHookPatchOptions) => any;
+        afterAutoFetch?: (func: __Item<Hooks['afterAutoFetch']>, opts?: ModelHookPatchOptions) => any;
+        beforeRemove?: (func: __Item<Hooks['beforeRemove']>, opts?: ModelHookPatchOptions) => any;
+        afterRemove?: (func: __Item<Hooks['afterRemove']>, opts?: ModelHookPatchOptions) => any;
     }
     export interface ModelPropertyDefinition extends FxOrmProperty.DataStoreProperty {
         key?: boolean;

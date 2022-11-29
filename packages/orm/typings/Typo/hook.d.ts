@@ -1,22 +1,19 @@
 import { FxOrmCommon } from './_common';
 import type { FxOrmInstance } from './instance';
 export declare namespace FxOrmHook {
-    export interface HookActionNextFunction<TTHIS = FxOrmInstance.Instance> {
+    export interface HookActionNextor<TTHIS = FxOrmInstance.Instance> {
         (this: TTHIS, err?: Error | null): any;
     }
     export interface HookActionCallback<TTHIS = FxOrmInstance.Instance, TPAYLOAD = any> {
-        (this: TTHIS, next?: HookActionNextFunction): any;
-        (this: TTHIS, arg1?: TPAYLOAD, next?: HookActionNextFunction): any;
-    }
-    export interface HookResultCallback<TTHIS = FxOrmInstance.Instance, TPAYLOAD = any> {
-        (this: TTHIS, success?: boolean): any;
-        (this: TTHIS, arg1?: TPAYLOAD, success?: boolean): any;
-    }
-    export interface HookTrigger<CTX_SELF = FxOrmInstance.Instance, RESULT_TYPE = boolean> {
-        (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookResultCallback>, _?: RESULT_TYPE, ...args: any): void;
+        (this: TTHIS, next?: HookActionNextor): any;
     }
     export interface HookWait<CTX_SELF = FxOrmInstance.Instance, TNEXT_THIS = any> {
         (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookActionCallback | FxOrmCommon.Arraible<HookActionCallback>>, next: FxOrmCommon.GenericCallback<TNEXT_THIS>, opts?: Record<string, any>): void;
+    }
+    export type HookResultCallback<TTHIS = FxOrmInstance.Instance> = ((this: TTHIS, success?: boolean) => any);
+    export type HookRetPayloadCallback<TTHIS = FxOrmInstance.Instance, TPAYLOAD = any, TResult = boolean> = (this: TTHIS, arg1?: TPAYLOAD, success?: TResult) => any;
+    export interface HookTrigger<CTX_SELF = FxOrmInstance.Instance, RESULT_TYPE = boolean> {
+        (self: CTX_SELF, cur: FxOrmCommon.Arraible<HookResultCallback | HookRetPayloadCallback>, _?: RESULT_TYPE, ...args: any): void;
     }
     export interface HookPatchOptions {
         /**

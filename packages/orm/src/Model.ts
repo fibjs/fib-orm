@@ -967,7 +967,7 @@ export const Model = function (
 
 	// setup hooks
 	for (let k in AvailableHooks) {
-		model[AvailableHooks[k]] = Utilities.createHookHelper(m_opts.hooks, AvailableHooks[k], { initialHooks });
+		model[AvailableHooks[k]] = Utilities.createHookHelper(m_opts.hooks, AvailableHooks[k], { initialHooks }) as any;
 	}
 
 	Utilities.addUnwritableProperty(model, 'associations', {}, { configurable: false })

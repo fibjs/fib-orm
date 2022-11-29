@@ -23,8 +23,7 @@ export const trigger: FxOrmHook.HookTrigger<any, any> = function () {
 	})
 };
 
-
-const waitHooks = function (self: any, hooksHandlers: FxOrmHook.HookActionCallback[], next: FxOrmHook.HookActionNextFunction, payload?: any) {
+const waitHooks = function (self: any, hooksHandlers: FxOrmHook.HookActionCallback[], next: FxOrmHook.HookActionNextor, payload?: any) {
 	const list = payload ? [payload] : []
 	hooksHandlers = Array.from(hooksHandlers);
 	
