@@ -21,50 +21,50 @@ const UserDef = ORM.defineModel((orm) => {
 
     User.hasOne('article', Article, {
         hooks: {
-            beforeSet({ $refs }) {
-                expectType<ORM.FxOrmInstance.Instance>($refs.instance);
-                expectType<ORM.FxOrmInstance.Instance>($refs.association);
+            beforeSet({ $ref }) {
+                expectType<ORM.FxOrmInstance.Instance>($ref.instance);
+                expectType<ORM.FxOrmInstance.Instance>($ref.association);
             },
-            afterSet({ $refs }) {
-                expectType<ORM.FxOrmInstance.Instance>($refs.instance);
-                expectType<ORM.FxOrmInstance.Instance>($refs.association);
+            afterSet({ $ref }) {
+                expectType<ORM.FxOrmInstance.Instance>($ref.instance);
+                expectType<ORM.FxOrmInstance.Instance>($ref.association);
             },
-            beforeRemove({ $refs }) {
-                expectType<Record<string, any>>($refs.removeConditions);
+            beforeRemove({ $ref }) {
+                expectType<Record<string, any>>($ref.removeConditions);
             },
-            afterRemove({ $refs }) {
-                expectType<Record<string, any>>($refs.removeConditions);
+            afterRemove({ $ref }) {
+                expectType<Record<string, any>>($ref.removeConditions);
             },
         }
     });
 
     User.extendsTo('last_article', Article, {
         hooks: {
-            beforeRemove({ $refs }) {
-                expectType<any[]>($refs.association_ids);
+            beforeRemove({ $ref }) {
+                expectType<any[]>($ref.association_ids);
             },
         }
     });
 
     User.hasMany('articles', Article, {}, {
         hooks: {
-            beforeAdd({ $refs }) {
-                expectType<ORM.FxOrmInstance.Instance>($refs.instance);
-                expectType<ORM.FxOrmInstance.Instance>($refs.association);
+            beforeAdd({ $ref }) {
+                expectType<ORM.FxOrmInstance.Instance>($ref.instance);
+                expectType<ORM.FxOrmInstance.Instance>($ref.association);
             },
-            afterAdd({ $refs }) {
-                expectType<ORM.FxOrmInstance.Instance>($refs.instance);
-                expectType<ORM.FxOrmInstance.Instance>($refs.association);
+            afterAdd({ $ref }) {
+                expectType<ORM.FxOrmInstance.Instance>($ref.instance);
+                expectType<ORM.FxOrmInstance.Instance>($ref.association);
             },
-            beforeRemove({ $refs }) {
-                expectType<any[]>($refs.association_ids);
-                expectType<ORM.FxOrmInstance.Instance[]>($refs.associations);
-                expectType<Record<string, any>>($refs.removeConditions);
+            beforeRemove({ $ref }) {
+                expectType<any[]>($ref.association_ids);
+                expectType<ORM.FxOrmInstance.Instance[]>($ref.associations);
+                expectType<Record<string, any>>($ref.removeConditions);
             },
-            afterRemove({ $refs }) {
-                expectType<any[]>($refs.association_ids);
-                expectType<ORM.FxOrmInstance.Instance[]>($refs.associations);
-                expectType<Record<string, any>>($refs.removeConditions);
+            afterRemove({ $ref }) {
+                expectType<any[]>($ref.association_ids);
+                expectType<ORM.FxOrmInstance.Instance[]>($ref.associations);
+                expectType<Record<string, any>>($ref.removeConditions);
             },
         }
     });

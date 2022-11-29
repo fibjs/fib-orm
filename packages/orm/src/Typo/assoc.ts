@@ -119,7 +119,7 @@ export namespace FxOrmAssociation {
         association_ids?: any[]
         removeConditions?: Record<string, any>
         useChannel?: () => FxOrmHook.HookChannelResults<Function>
-        $refs?: {
+        $ref?: {
             instance?: __AssocHooksCtx['instance']
             association?: __AssocHooksCtx['association']
             associations?: __AssocHooksCtx['associations']
