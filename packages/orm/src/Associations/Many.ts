@@ -217,7 +217,6 @@ export function extend(
 	associations: FxOrmAssociation.InstanceAssociationItem_HasMany[],
 	cfg: {
 		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany,
-		genHookHandlerForInstance: Function
 	}
 ) {
 	for (let i = 0; i < associations.length; i++) {
@@ -269,12 +268,9 @@ function extendInstance(
 	Driver: FxOrmDMLDriver.DMLDriver,
 	association: FxOrmAssociation.InstanceAssociationItem_HasMany,
 	cfg: {
-		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany,
-		genHookHandlerForInstance: Function
+		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasMany
 	}
 ) {
-	const { genHookHandlerForInstance } = cfg
-
 	if (Model.settings.get("instance.cascadeRemove")) {
 		Instance.on("beforeRemove", function () {
 			Instance[association.delAccessor]();
@@ -442,7 +438,7 @@ function extendInstance(
 	});
 
 	Utilities.addHiddenUnwritableMethodToInstance(Instance, association.setSyncAccessor, function (this: typeof Instance) {
-		const $ref = <Record<string, any>>{
+		const $ref = <FxOrmAssociation.__AssocHooksCtx>{
 			instance: Instance,
 			associations: _flatten(arguments),
 			useChannel: Utilities.reusableChannelGenerator()
@@ -453,7 +449,7 @@ function extendInstance(
 		Hook.wait(
 			Instance,
 			association.hooks[`beforeSet`],
-			genHookHandlerForInstance(() => {
+			Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 				Instance.$emit(`before:set:${association.name}`, $ref.associations)
 
 				Instance.$emit(`before-del-extension:${association.setAccessor}`)
@@ -474,10 +470,10 @@ function extendInstance(
 					$ref.association_ids = $ref.associations.map((x: FxOrmInstance.InstanceDataPayload) => x[key])
 				}
 			}),
-			Utilities.buildAssociationActionHooksPayload('beforeSet', { $ref })
+			Utilities.buildAssocHooksContext('beforeSet', { $ref })
 		);
 
-		Hook.trigger(Instance, association.hooks[`afterSet`], Utilities.buildAssociationActionHooksPayload('afterSet', { $ref }))
+		Hook.trigger(Instance, association.hooks[`afterSet`], Utilities.buildAssocHooksContext('afterSet', { $ref }))
 
 		return results;
 	});
@@ -545,7 +541,7 @@ function extendInstance(
 		Hook.wait(
 			Instance,
 			association.hooks[`beforeRemove`],
-			genHookHandlerForInstance(() => {
+			Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 				const Associations = $ref.associations
 				Instance.$emit(`before:del:${association.name}`)
 				if (Driver.hasMany) {
@@ -569,10 +565,10 @@ function extendInstance(
 				Driver.remove(association.mergeTable, $ref.removeConditions);
 				Instance.$emit(`after:del:${association.name}`)
 			}),
-			Utilities.buildAssociationActionHooksPayload('beforeRemove', { $ref })
+			Utilities.buildAssocHooksContext('beforeRemove', { $ref })
 		);
 		
-		Hook.trigger(Instance, association.hooks[`afterRemove`], Utilities.buildAssociationActionHooksPayload('afterRemove', { $ref }))
+		Hook.trigger(Instance, association.hooks[`afterRemove`], Utilities.buildAssocHooksContext('afterRemove', { $ref }))
 
 		return this;
 	});
@@ -621,7 +617,7 @@ function extendInstance(
 		Hook.wait(
 			Instance,
 			association.hooks[`beforeAdd`],
-			genHookHandlerForInstance(() => {
+			Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 				Instance.$emit(`before:add:${association.name}`, $ref.associations);
 				Utilities.parallelQueryIfPossible(
 					Driver.isPool,
@@ -652,7 +648,6 @@ function extendInstance(
 						
 						Instance.$emit(`before-association-save:${association.addAccessor}`, $ref.associations)
 
-						// @deprecated
 						if (isExtraNonEmpty()) {
 							Hook.wait(Association, association.hooks.beforeSave, saveAssociation, add_opts);
 						} else {
@@ -669,10 +664,10 @@ function extendInstance(
 
 				Instance.$emit(`after:add:${association.name}`, savedAssociations)
 			}),
-			Utilities.buildAssociationActionHooksPayload('beforeAdd', { $ref })
+			Utilities.buildAssocHooksContext('beforeAdd', { $ref })
 		);
 
-		Hook.trigger(Instance, association.hooks[`afterAdd`], Utilities.buildAssociationActionHooksPayload('afterAdd', { $ref }))
+		Hook.trigger(Instance, association.hooks[`afterAdd`], Utilities.buildAssocHooksContext('afterAdd', { $ref }))
 
 		return savedAssociations;
 	});

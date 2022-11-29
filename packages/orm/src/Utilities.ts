@@ -845,47 +845,41 @@ export function bindInstance (instance: FxOrmInstance.Instance, fn: Function) {
 	return fn.bind(instance)
 }
 
-export function buildAssociationActionHooksPayload (
+export function buildAssocHooksContext(
 	hookName: keyof FxOrmAssociation.InstanceAssociationItem['hooks'],
 	payload: {
-		instance?: FxOrmInstance.Instance,
-		association?: FxOrmInstance.InstanceDataPayload,
-		associations?: FxOrmInstance.InstanceDataPayload[],
-		association_ids?: any[],
-		removeConditions?: Record<string, any>,
-		$ref: Record<string, any>,
-
-		useChannel?: Function
+		$ref: FxOrmAssociation.__AssocHooksCtx,
+		useChannel?: FxOrmAssociation.__AssocHooksCtx['useChannel']
 	}
 ): Record<string, any> {
 	const {
-		$ref = {},
-	} = payload;
-
-	const {
-		instance = $ref.instance || null,
-		association = $ref.association || null,
-		associations = $ref.associations || [],
-		association_ids = $ref.associations_ids || [],
-		removeConditions = $ref.removeConditions || {},
+		$ref = {} as FxOrmAssociation.__AssocHooksCtx,
 		useChannel = $ref.useChannel || reusableChannelGenerator()
 	} = payload;
 
+	const {
+		instance = null,
+		association = null,
+		associations = [],
+		association_ids = [],
+		removeConditions = {},
+	} = $ref;
+
 	if (!instance)
-		throw `[buildAssociationActionHooksPayload] instance is required`
+		throw `[buildAssocHooksContext] instance is required`
 
 	if (!$ref || typeof $ref !== 'object')
-		throw `[buildAssociationActionHooksPayload]$ref must be valid Object`
+		throw `[buildAssocHooksContext]$ref must be valid Object`
 
-	const self = $ref;
-	if (!self.hasOwnProperty('$ref') || Object.getOwnPropertyDescriptor(self, '$ref').configurable)
-		Object.defineProperty(self, '$ref', { get () { return self }, configurable: false, enumerable: true})
+	const ctx = $ref;
+	if (!ctx.hasOwnProperty('$ref') || Object.getOwnPropertyDescriptor(ctx, '$ref').configurable)
+		Object.defineProperty(ctx, '$ref', { get () { return ctx }, configurable: false, enumerable: true})
 
-	self.association = association
-	self.associations = associations
-	self.association_ids = association_ids
+	ctx.association = association
+	ctx.associations = associations
+	ctx.association_ids = association_ids
 
-	self.useChannel = useChannel
+	ctx.useChannel = useChannel
 
 	switch (hookName) {
 		case 'beforeSet':
@@ -895,44 +889,43 @@ export function buildAssociationActionHooksPayload (
 		case 'afterAdd':
 			break
 		case 'beforeRemove':
-			self.removeConditions = removeConditions
+			ctx.removeConditions = removeConditions
 			break
 		case 'afterRemove':
-			self.removeConditions = removeConditions
+			ctx.removeConditions = removeConditions
 			break
 	}
 
-	return self
+	return ctx
 }
 
-export function hookHandlerDecorator (
-	{
-		thisArg = null,
-		onlyOnce = true
-	}:
-	{
+export function makeHandlerDecorator(
+	opts: {
 		thisArg?: any
 		onlyOnce?: boolean
-	} = {}
+	} = {},
+	hdlr: () => any
 ) {
-	return (hdlr: Function): any => {
-		let finishOnce = false
+	const {
+		thisArg = null,
+		onlyOnce = true
+	} = opts;
+	let finishOnce = false
 
-		return (err: any) => {
-			if (onlyOnce && finishOnce) {
-				console.warn(`[hookHandlerDecorator] this function was once only`)
-				return ;
-			}
-			
-			finishOnce === true;
-
-			if (err)
-				throw err;
-
-			if (err === false) return ;
-
-			return hdlr.call(thisArg)
+	return (err: FxOrmCommon.Arraible<FxOrmError.ExtendedError> | false) => {
+		if (onlyOnce && finishOnce) {
+			console.warn(`[makeHandlerDecorator] this function was once only`)
+			return ;
 		}
+		
+		finishOnce === true;
+
+		if (err)
+			throw err;
+
+		if (err === false) return ;
+
+		return hdlr.call(thisArg)
 	}
 }
 

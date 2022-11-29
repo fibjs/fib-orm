@@ -531,8 +531,17 @@ describe("Validations", function () {
             }
 
             assert.isTrue(hookTriggered);
+
             // try to save invalid data to database, expect error occured
-            assert.equal(errMsg, 'NOT NULL constraint failed: person.name');
+            if (db.driver.dialect === 'mysql') {
+                assert.equal(errMsg, `Column 'name' cannot be null`);
+            } else if (db.driver.dialect === 'sqlite') {
+                assert.equal(errMsg, 'NOT NULL constraint failed: person.name');
+            } else if (db.driver.dialect === 'postgresql') {
+                assert.equal(errMsg, `ERROR: null value in column \"name\" of relation \"person\" violates not-null constraint\nDETAIL: Failing row contains (null, 4, 1).;\nError while executing the query`);
+            } else {
+                throw new Error(`Unknown dialect: ${db.driver.dialect}`);
+            }
         });
 
         it("allow part errors", function () {

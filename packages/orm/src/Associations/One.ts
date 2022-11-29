@@ -177,7 +177,6 @@ export function extend (
 	associations: FxOrmAssociation.InstanceAssociationItem_HasOne[],
 	cfg: {
 		assoc_opts: any,
-		genHookHandlerForInstance: Function
 	}
 ) {
 	for (let i = 0; i < associations.length; i++) {
@@ -209,11 +208,8 @@ function extendInstance(
 	association: FxOrmAssociation.InstanceAssociationItem_HasOne,
 	cfg: {
 		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasOne,
-		genHookHandlerForInstance: Function
 	}
 ) {
-	const { genHookHandlerForInstance } = cfg
-	
 	Utilities.addHiddenUnwritableMethodToInstance(Instance, association.hasSyncAccessor, function (_has_opts?: FxOrmAssociation.AccessorOptions_has) {
 		if (!Utilities.hasValues(Instance, Object.keys(association.field)))
 			return false;
@@ -335,7 +331,7 @@ function extendInstance(
 		let results = [] as FxOrmInstance.Instance[] | FxOrmInstance.Instance;
 		let hookHandlr = null;
 
-		const $ref = <Record<string, any>>{
+		const $ref = <FxOrmAssociation.__AssocHooksCtx>{
 			instance: Instance,
 			association: association.reversed ? null : OtherInstance,
 			associations: association.reversed ? inst_arr : null,
@@ -343,7 +339,7 @@ function extendInstance(
 		};
 
 		if (association.reversed) {
-			hookHandlr = genHookHandlerForInstance(() => {
+			hookHandlr = Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 				Instance.saveSync();
 
 				const runReversed = function (other: FxOrmInstance.Instance) {
@@ -364,7 +360,7 @@ function extendInstance(
 				);
 			})
 		} else {
-			hookHandlr = genHookHandlerForInstance(() => {
+			hookHandlr = Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 				const runNonReversed = function (oinst: FxOrmInstance.Instance) {
 					Instance.$emit(`before:set:${association.name}`, oinst)
 
@@ -378,7 +374,7 @@ function extendInstance(
 					return oinst;
 				}
 				
-				results = runNonReversed($ref.association)
+				results = runNonReversed($ref.association as FxOrmInstance.Instance)
 				
 				// link
 				Instance.saveSync({}, { saveAssociations: false });
@@ -389,9 +385,9 @@ function extendInstance(
 			Instance,
 			association.hooks[`beforeSet`],
 			hookHandlr,
-			Utilities.buildAssociationActionHooksPayload('beforeSet', { $ref })
+			Utilities.buildAssocHooksContext('beforeSet', { $ref })
 		);
-		Hook.trigger(Instance, association.hooks['afterSet'], Utilities.buildAssociationActionHooksPayload('afterSet', { $ref }));
+		Hook.trigger(Instance, association.hooks['afterSet'], Utilities.buildAssocHooksContext('afterSet', { $ref }));
 		
 		return results;
 	});
@@ -419,7 +415,7 @@ function extendInstance(
 			Hook.wait(
 				Instance,
 				association.hooks[`beforeRemove`],
-				Utilities.hookHandlerDecorator({ thisArg: Instance })(() => {
+				Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 					Instance.$emit(`before:del:${association.name}`);
 					for (let k in association.field) {
 						if (association.field.hasOwnProperty(k)) {
@@ -431,9 +427,9 @@ function extendInstance(
 					delete Instance[association.name];
 					Instance.$emit(`after:del:${association.name}`)
 				}),
-				Utilities.buildAssociationActionHooksPayload('beforeRemove', { $ref })
+				Utilities.buildAssocHooksContext('beforeRemove', { $ref })
 			);
-			Hook.trigger(Instance, association.hooks['afterRemove'], Utilities.buildAssociationActionHooksPayload('afterRemove', { $ref }));
+			Hook.trigger(Instance, association.hooks['afterRemove'], Utilities.buildAssocHooksContext('afterRemove', { $ref }));
 
 			return this;
 		}, {});

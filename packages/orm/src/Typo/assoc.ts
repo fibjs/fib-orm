@@ -70,15 +70,12 @@ export namespace FxOrmAssociation {
         reverseAssociation?: string
 
         hooks?: InstanceAssociationItem['hooks'] & {
-            /**
-             * @_1st_arg { associations: [] }
-             */
-            beforeAdd?: FxOrmHook.HookActionCallback
-            afterAdd?: FxOrmHook.HookResultCallback
+            beforeAdd?: FxOrmHook.HookActionWithCtxCallback<FxOrmInstance.Instance, __AssocHooksCtx>
+            afterAdd?: FxOrmHook.HookRetOnlyPayloadCallback<FxOrmInstance.Instance, __AssocHooksCtx>
             /** @deprecated */
             beforeSave?: {
-                (next?: Function): void;
-                (extra: any, next?: Function): void;
+                (next?: FxOrmHook.HookActionNextor): void;
+                (extra: any, next?: FxOrmHook.HookActionNextor): void;
             }
         }
         mergeTable?: string
@@ -114,17 +111,38 @@ export namespace FxOrmAssociation {
         }
     }
 
+    /** @internal */
+    export type __AssocHooksCtx = {
+        instance?: FxOrmInstance.Instance
+        association?: FxOrmInstance.Instance
+        associations?: (FxOrmInstance.Instance)[]
+        association_ids?: any[]
+        removeConditions?: Record<string, any>
+        useChannel?: () => FxOrmHook.HookChannelResults<Function>
+        $refs?: {
+            instance?: __AssocHooksCtx['instance']
+            association?: __AssocHooksCtx['association']
+            associations?: __AssocHooksCtx['associations']
+            association_ids?: __AssocHooksCtx['association_ids']
+            removeConditions?: __AssocHooksCtx['removeConditions']
+            useChannel?: __AssocHooksCtx['useChannel']
+        }
+    }
+
     export interface InstanceAssociationItem extends InstanceAssociationItemHooks {
         name: string
         model: FxOrmModel.Model
         field: string /* | string[] */ | Record<string, FxOrmProperty.NormalizedProperty>
         hooks: {
-            beforeSet?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>
-            afterSet?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback>
-            beforeRemove?: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback>
-            afterRemove?: FxOrmCommon.Arraible<FxOrmHook.HookResultCallback>
+            beforeSet?: FxOrmCommon.Arraible<FxOrmHook.HookActionWithCtxCallback<FxOrmInstance.Instance, __AssocHooksCtx>>
+            afterSet?: FxOrmCommon.Arraible<FxOrmHook.HookRetOnlyPayloadCallback<FxOrmInstance.Instance, __AssocHooksCtx>>
+            beforeRemove?: FxOrmCommon.Arraible<FxOrmHook.HookActionWithCtxCallback<FxOrmInstance.Instance, __AssocHooksCtx>>
+            afterRemove?: FxOrmCommon.Arraible<FxOrmHook.HookRetOnlyPayloadCallback<FxOrmInstance.Instance, __AssocHooksCtx>>
 
-            [k: string]: FxOrmCommon.Arraible<FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback>
+            [k: string]: FxOrmCommon.Arraible<
+                FxOrmHook.HookActionWithCtxCallback<FxOrmInstance.Instance, __AssocHooksCtx>
+                | FxOrmHook.HookRetOnlyPayloadCallback<FxOrmInstance.Instance, __AssocHooksCtx>
+            >
         }
         
         // is the association is extendsTo

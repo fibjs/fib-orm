@@ -111,11 +111,9 @@ export const Model = function (
 		};
 
 		const __setupAssociations = function (instance: FxOrmInstance.Instance) {
-			const genHookHandlerForInstance = Utilities.hookHandlerDecorator({ thisArg: instance })
-
-			OneAssociation.extend(model, instance, m_opts.driver, one_associations, { assoc_opts, genHookHandlerForInstance });
-			ManyAssociation.extend(model, instance, m_opts.driver, many_associations, { assoc_opts, genHookHandlerForInstance });
-			ExtendAssociation.extend(model, instance, m_opts.driver, extend_associations, { assoc_opts, genHookHandlerForInstance });
+			OneAssociation.extend(model, instance, m_opts.driver, one_associations, { assoc_opts });
+			ManyAssociation.extend(model, instance, m_opts.driver, many_associations, { assoc_opts });
+			ExtendAssociation.extend(model, instance, m_opts.driver, extend_associations, { assoc_opts });
 		};
 
 		const instance = new Instance(model, {

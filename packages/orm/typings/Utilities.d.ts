@@ -131,19 +131,14 @@ export declare function generateUID4ChainFind(m_opts: FxOrmModel.ModelConstructo
 export declare function generateUID4Model(m_opts: FxOrmModel.ModelConstructorOptions): string;
 export declare function makeIdForDriverTable(driver_uid: string, table: string): string;
 export declare function bindInstance(instance: FxOrmInstance.Instance, fn: Function): any;
-export declare function buildAssociationActionHooksPayload(hookName: keyof FxOrmAssociation.InstanceAssociationItem['hooks'], payload: {
-    instance?: FxOrmInstance.Instance;
-    association?: FxOrmInstance.InstanceDataPayload;
-    associations?: FxOrmInstance.InstanceDataPayload[];
-    association_ids?: any[];
-    removeConditions?: Record<string, any>;
-    $ref: Record<string, any>;
-    useChannel?: Function;
+export declare function buildAssocHooksContext(hookName: keyof FxOrmAssociation.InstanceAssociationItem['hooks'], payload: {
+    $ref: FxOrmAssociation.__AssocHooksCtx;
+    useChannel?: FxOrmAssociation.__AssocHooksCtx['useChannel'];
 }): Record<string, any>;
-export declare function hookHandlerDecorator({ thisArg, onlyOnce }?: {
+export declare function makeHandlerDecorator(opts: {
     thisArg?: any;
     onlyOnce?: boolean;
-}): (hdlr: Function) => any;
+}, hdlr: () => any): (err: FxOrmCommon.Arraible<FxOrmError.ExtendedError> | false) => any;
 export declare function reusableChannelGenerator(): () => FxOrmHook.HookChannelResults<Function>;
 export declare const createHookHelper: (hooks: Record<string, any>, hook: keyof FxOrmModel.Hooks | keyof FxOrmAssociation.InstanceAssociationItem['hooks'], { initialHooks }?: Record<string, any>) => (cb: FxOrmHook.HookActionCallback | FxOrmHook.HookResultCallback, opts?: FxOrmModel.ModelHookPatchOptions) => any;
 export declare function attachOnceTypedHookRefToInstance(instance: FxOrmInstance.Instance, type: 'save' | 'create' | 'remove', typedHookRef: Record<string, any>): void;

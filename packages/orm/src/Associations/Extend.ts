@@ -179,7 +179,6 @@ export function extend (
 	associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[],
 	cfg: {
 		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasOne,
-		genHookHandlerForInstance: Function
 	}
 ) {
 	for (let i = 0; i < associations.length; i++) {
@@ -210,12 +209,9 @@ function extendInstance(
 	Driver: FxOrmDMLDriver.DMLDriver,
 	association: FxOrmAssociation.InstanceAssociationItem_ExtendTos,
 	cfg: {
-		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasOne,
-		genHookHandlerForInstance: Function
+		assoc_opts: FxOrmAssociation.AssociationDefinitionOptions_HasOne
 	}
 ) {
-	const { genHookHandlerForInstance } = cfg
-
 	Utilities.addHiddenPropertyToInstance(Instance, association.hasSyncAccessor, function () {
 		if (!Instance[Model.id + ''])
 			throw new ORMError("Instance not saved, cannot get extension", 'NOT_DEFINED', { model: Model.table });
@@ -285,7 +281,7 @@ function extendInstance(
 		Hook.wait(
 			Instance,
 			association.hooks[`beforeSet`],
-			genHookHandlerForInstance(() => {
+			Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 				let Extension = $ref.association
 				Instance.$emit(`before:set:${association.name}`, Extension);
 
@@ -311,10 +307,10 @@ function extendInstance(
 				
 				Instance.$emit(`after:set:${association.name}`, Extension);
 			}),
-			Utilities.buildAssociationActionHooksPayload('beforeSet', { $ref })
+			Utilities.buildAssocHooksContext('beforeSet', { $ref })
 		);
 		
-		Hook.trigger(Instance, association.hooks['afterSet'], Utilities.buildAssociationActionHooksPayload('afterSet', { $ref }));
+		Hook.trigger(Instance, association.hooks['afterSet'], Utilities.buildAssocHooksContext('afterSet', { $ref }));
 
 		return $ref.association;
 	});
@@ -350,7 +346,7 @@ function extendInstance(
 		Hook.wait(
 			Instance,
 			association.hooks[`beforeRemove`],
-			genHookHandlerForInstance(() => {
+			Utilities.makeHandlerDecorator({ thisArg: Instance }, () => {
 				const extensions = association.model.findSync($ref.removeConditions)
 
 				Instance.$emit(`before:del:${association.name}`, extensions);
@@ -360,10 +356,10 @@ function extendInstance(
 				}
 				Instance.$emit(`after:del:${association.name}`, extensions);
 			}),
-			Utilities.buildAssociationActionHooksPayload('beforeRemove', { $ref })
+			Utilities.buildAssocHooksContext('beforeRemove', { $ref })
 		);
 
-		Hook.trigger(Instance, association.hooks['afterRemove'], Utilities.buildAssociationActionHooksPayload('afterRemove', { $ref }));
+		Hook.trigger(Instance, association.hooks['afterRemove'], Utilities.buildAssocHooksContext('afterRemove', { $ref }));
 
 		return ;
 	});

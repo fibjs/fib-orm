@@ -1,5 +1,4 @@
 import util = require('util');
-import coroutine = require('coroutine');
 
 import * as Utilities from './Utilities';
 import { FxOrmHook } from './Typo/hook';

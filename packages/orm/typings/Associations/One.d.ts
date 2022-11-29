@@ -12,6 +12,5 @@ export declare function prepare(Model: FxOrmModel.Model, assocs: {
 }): void;
 export declare function extend(Model: FxOrmModel.Model, Instance: FxOrmInstance.Instance, Driver: FxOrmDMLDriver.DMLDriver, associations: FxOrmAssociation.InstanceAssociationItem_HasOne[], cfg: {
     assoc_opts: any;
-    genHookHandlerForInstance: Function;
 }): void;
 export declare function autoFetch(Instance: FxOrmInstance.Instance, associations: FxOrmAssociation.InstanceAssociationItem[], opts: FxOrmAssociation.AutoFetchInstanceOptions, parallel: boolean): void;
