@@ -269,12 +269,14 @@ describe('select - postgresql', () => {
   })
 
   it('from: error assertion', () => {
-    assert.throws(() => {
+    const { errMsg } = common.runProcAndCatch(() => {
       common.Select()
         .from('table1 as custom_t1').select('id1', 'id2', 'name')
         .from('table2 as custom_t2', [], 'table1', [])
         .build()
-    })
+    });
+
+    assert.equal(errMsg, '[SQL-QUERY] both from_id & to_id cannot be empty!')
   })
 });
 

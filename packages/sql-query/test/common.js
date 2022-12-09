@@ -60,3 +60,17 @@ common.isSupportBigInt = function(){
 	}catch(error){}
 	return false;
 }
+
+common.runProcAndCatch = function(proc) {
+	let errMsg = '';
+	let error = null;
+
+	try {
+		proc();
+	} catch (e) {
+		error = e;
+		errMsg = e.message;
+	}
+
+	return { errMsg, error }
+}
