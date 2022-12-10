@@ -72,11 +72,13 @@ export function getKnexInstance (
 	driver: FxOrmDMLDriver.DMLDriver
 ) {
 	if (!driver.query.knex)
-		throw `driver.query.knex must be init firstly!`
+		throw new Error(`[getKnexInstance] driver.query.knex must be init firstly!`);
+
 	Object.defineProperty(driver, 'knex', {
-		value: driver.knex,
+		get () {
+			return driver.getQuery().knex;
+		},
 		configurable: false,
-		writable: false
 	});
 }
 

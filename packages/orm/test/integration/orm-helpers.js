@@ -40,6 +40,12 @@ describe("ORM.Helpers", function () {
         return db.closeSync();
     });
 
+    it('should has internal property driver.knex', () => {
+        assert.exist(db.driver.knex);
+        assert.isFunction(db.driver.knex.select);
+        assert.isFunction(db.driver.knex.table);
+    });
+
     describe("#pickProperties", function () {
         before(setup(true));
 
