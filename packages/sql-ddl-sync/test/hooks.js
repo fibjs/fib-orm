@@ -101,6 +101,31 @@ exports.useTest = (options = {}) => {
         });
     }
 
+    function getTableComment (table = tableName) {
+		if (dbdriver.type === 'psql') {
+			var result = dbdriver.execute(
+                Dialects[dbdriver.type].escape(
+                    "SELECT obj_description(oid) FROM pg_class WHERE relname = ?",
+                    [table]
+                )
+                
+            );
+
+            return result[0].obj_description;
+		} else if (dbdriver.type === 'mysql') {
+			var result = dbdriver.execute(
+                Dialects[dbdriver.type].escape(
+                    "SELECT TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+                    [database, table]
+                )
+			);
+
+            return result[0].TABLE_COMMENT;
+		} else if (dbdriver.type === 'sqlite') {
+			// var result = dbdriver.execute();
+		}
+    }
+
     return {
         ctx: {
             tableName,
@@ -114,6 +139,7 @@ exports.useTest = (options = {}) => {
             dropDatabase,
             switchDatabase,
             dropTable,
+            getTableComment
         }
     }
 }

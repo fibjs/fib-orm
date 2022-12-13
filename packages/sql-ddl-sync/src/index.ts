@@ -21,6 +21,7 @@ import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 import "./Dialects";
 import { IProperty, transformer }  from '@fxjs/orm-property';
 import { IDbDriver } from "@fxjs/db-driver";
+import { ALTER_TABLE_COMMENT } from "./SQL";
 
 const noOp = () => {};
 
@@ -40,14 +41,28 @@ export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType | 'psql') {
 		}
 }
 
+function alterCollectionComment<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn>(
+	collection: FxOrmSqlDDLSync__Collection.Collection,
+	dbdriver: IDbDriver.ITypedDriver<T>,
+) {
+	if (dbdriver.type === 'sqlite') return ;
+
+	// don't remove old comment if not provided
+	if (!collection.comment) return '';
+
+	dbdriver.execute(
+		ALTER_TABLE_COMMENT(dbdriver.type, collection.name, collection.comment)
+	);
+}
+
 function updateColumnsComment<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn>(
 	collection: FxOrmSqlDDLSync__Collection.Collection,
 	dbdriver: IDbDriver.ITypedDriver<T>,
 	remote_properties: FxOrmSqlDDLSync__Collection.Collection['properties'],
 ) {
-	// TODO: support mysql also
 	if (dbdriver.type !== 'psql') return ;
 
+	// TODO: support mysql also
 	const dialect = getSqlQueryDialect(dbdriver.type);
 
 	for (let k in collection.properties) {
@@ -57,7 +72,7 @@ function updateColumnsComment<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn>
 		const remote_prop = remote_properties[k];
 		const mapsTo = prop.mapsTo || k;
 		if (!mapsTo) {
-			this.debug(`[__syncColumnsComment] No mapsTo for property '${k}' in collection '${collection.name}'`);
+			this.debug(`[updateColumnsComment] No mapsTo for property '${k}' in collection '${collection.name}'`);
 			continue ;
 		}
 
@@ -199,6 +214,9 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 	defineCollection (
 		collection_name: string,
 		properties: FxOrmSqlDDLSync__Collection.Collection['properties'],
+		options?: {
+			comment: FxOrmSqlDDLSync__Collection.Collection['comment']
+		}
 	): this {
 		let collectionIdx = this.collections.findIndex(collection => collection.name === collection_name)
 		if (collectionIdx >= 0)
@@ -223,6 +241,7 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 			name: collection_name,
 			properties,
 			index_defs,
+			comment: options?.comment,
 		});
 			
 		return this;
@@ -277,7 +296,7 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		
 		const result_1 = this.Dialect.createCollectionSync(
 			this.dbdriver,
-			collection.name, columns, keys
+			collection.name, columns, keys, { comment: collection.comment }
 		);
 
 		this.syncIndexes(collection.name, collection.index_defs);
@@ -309,6 +328,8 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 
 		if (!collection)
 			throw new Error('[syncCollection] invalid collection')
+
+		alterCollectionComment(collection, this.dbdriver);
 
 		let {
 			columns = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name),
@@ -395,7 +416,6 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		}
 
 		this.syncIndexes(collection.name, collection.index_defs);
-		updateColumnsComment(collection, this.dbdriver, columns);
 	}
 
 	syncIndexes (

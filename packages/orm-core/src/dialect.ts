@@ -24,6 +24,10 @@ export namespace FxOrmDialect {
 	// 	escapeVal (val: EscapeArgType): string
 	// }
 
+    type __AlertTableOptions = {
+        comment?: string
+    }
+
     /**
      * @description DDLDialect is dialct helpers to interact with database backend,
      * to check if database has some features, get/remove data from it, or update date in it
@@ -54,10 +58,10 @@ export namespace FxOrmDialect {
             <T extends any = any>(driver: TDriver, name: string): T[]
         }
         createCollection: {
-            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[], cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void
+            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[], opts?: __AlertTableOptions, cb?: FxOrmCoreCallbackNS.ExecutionCallback<T>): void
         }
         createCollectionSync: {
-            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[]): T
+            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[], opts?: __AlertTableOptions): T
         }
         dropCollection: {
             <T extends any = any>(driver: TDriver, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void

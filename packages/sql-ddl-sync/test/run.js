@@ -9,6 +9,7 @@ require('./integration/dialect-sqlite')
 require('./integration/dialect-postgresql')
 
 require('./fixtures/property-meta')
+require('./features/collection-comment')
 
 if (process.env.URI)
     require('./run-db')

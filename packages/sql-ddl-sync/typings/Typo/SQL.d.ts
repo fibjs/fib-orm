@@ -3,6 +3,7 @@ export declare namespace FxOrmSqlDDLSync__SQL {
         name: string;
         keys?: string[];
         columns?: string[];
+        comment?: string;
     }
     interface IndexOptions extends TableOptions {
         unique?: boolean;

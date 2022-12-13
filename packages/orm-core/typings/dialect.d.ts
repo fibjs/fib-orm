@@ -1,11 +1,14 @@
 import { FxOrmCoreCallbackNS } from "./callback";
 export declare namespace FxOrmDialect {
-    type EscapeArgType = string | number | boolean | Date | String | Number | RegExp | Symbol;
+    export type EscapeArgType = string | number | boolean | Date | String | Number | RegExp | Symbol;
+    type __AlertTableOptions = {
+        comment?: string;
+    };
     /**
      * @description DDLDialect is dialct helpers to interact with database backend,
      * to check if database has some features, get/remove data from it, or update date in it
      */
-    interface DDLDialect<TDriver extends any> {
+    export interface DDLDialect<TDriver extends any> {
         hasCollection: {
             (driver: TDriver, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<boolean>): void;
         };
@@ -31,10 +34,10 @@ export declare namespace FxOrmDialect {
             <T extends any = any>(driver: TDriver, name: string): T[];
         };
         createCollection: {
-            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[], cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void;
+            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[], opts?: __AlertTableOptions, cb?: FxOrmCoreCallbackNS.ExecutionCallback<T>): void;
         };
         createCollectionSync: {
-            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[]): T;
+            <T extends any = any>(driver: TDriver, name: string, columns: string[], keys: string[], opts?: __AlertTableOptions): T;
         };
         dropCollection: {
             <T extends any = any>(driver: TDriver, name: string, cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): void;
@@ -73,4 +76,5 @@ export declare namespace FxOrmDialect {
             <T extends any = any>(driver: TDriver, name: string, column: string): T;
         };
     }
+    export {};
 }

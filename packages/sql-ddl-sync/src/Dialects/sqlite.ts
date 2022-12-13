@@ -164,19 +164,20 @@ export const getCollectionProperties: IDialect['getCollectionProperties'] = func
 };
 
 export const createCollectionSync: IDialect['createCollectionSync'] = function (
-	dbdriver, name, columns, keys
+	dbdriver, name, columns, keys, opts
 ) {
 	return dbdriver.execute(
 		SQL.CREATE_TABLE({
 			name: name,
 			columns: columns,
-			keys: keys
+			keys: keys,
+			comment: opts.comment
 		}, 'sqlite')
 	)
 };
 
 export const createCollection: IDialect['createCollection'] = function (
-	dbdriver, name, columns, keys, cb
+	dbdriver, name, columns, keys, opts, cb
 ) {
 	const exposedErrResults = FxORMCore.Utils.exposeErrAndResultFromSyncMethod(
 		() => createCollectionSync(dbdriver, name, columns, keys)

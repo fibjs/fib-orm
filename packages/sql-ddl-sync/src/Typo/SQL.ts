@@ -4,6 +4,8 @@ export namespace FxOrmSqlDDLSync__SQL {
 
         keys?: string[]
         columns?: string[]
+
+        comment?: string
     }
 
     export interface IndexOptions extends TableOptions {

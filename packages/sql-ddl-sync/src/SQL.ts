@@ -16,8 +16,31 @@ export function CREATE_TABLE (
 
 	sql += ")";
 
+	if (options.comment && db_type === 'mysql') {
+		sql += ` COMMENT ${getSqlQueryDialect(db_type).escapeVal(options.comment)}`;
+	}
+
 	return sql;
 };
+
+export function ALTER_TABLE_COMMENT (
+	db_type: FxDbDriverNS.DriverType,
+	table: string,
+	comment?: string
+) {
+	switch (db_type) {
+		case 'mysql': {
+			return `ALTER TABLE ${getSqlQueryDialect(db_type).escapeId(table)} COMMENT ${getSqlQueryDialect(db_type).escapeVal(comment || '')}`;
+		}
+		case 'psql': {
+			return `COMMENT ON TABLE ${getSqlQueryDialect(db_type).escapeId(table)} IS ${comment ? getSqlQueryDialect(db_type).escapeVal(comment) : 'null'}`;
+		}
+		case 'sqlite':
+		default: {
+			throw new Error(`[SQL] ALTER_TABLE_COMMENT: not supported db_type: ${db_type}!`)
+		}
+	}
+}
 
 export function DROP_TABLE (
 	options: FxOrmSqlDDLSync__SQL.TableOptions,

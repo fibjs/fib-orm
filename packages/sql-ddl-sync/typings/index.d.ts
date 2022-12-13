@@ -26,7 +26,9 @@ export declare class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
     private debug;
     constructor(options: FxOrmSqlDDLSync.SyncOptions<T>);
     [sync_method: string]: any;
-    defineCollection(collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties']): this;
+    defineCollection(collection_name: string, properties: FxOrmSqlDDLSync__Collection.Collection['properties'], options?: {
+        comment: FxOrmSqlDDLSync__Collection.Collection['comment'];
+    }): this;
     findCollection(collection_name: string): FxOrmSqlDDLSync__Collection.Collection;
     defineType(type: string, proto: FxOrmSqlDDLSync__Driver.CustomPropertyType<T>): this;
     /**

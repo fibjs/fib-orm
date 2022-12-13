@@ -7,6 +7,11 @@ export namespace FxOrmSqlDDLSync__Collection {
         name: string
         properties: Record<string, IProperty>
 
+        /**
+         * @description collection level comment, pointless for some database such as sqlite
+         */
+        comment: string
+
         index_defs: FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[]
         
         // [ext_k: string]: any
