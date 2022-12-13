@@ -20,12 +20,22 @@ describe("transformer('mysql').toStorageType", function () {
 		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", size: 2 }, ctx).typeValue.should.equal("SMALLINT");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", size: 8 }, ctx).typeValue.should.equal("BIGINT");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "number", rational: false }, ctx).typeValue.should.equal("INTEGER");
+		
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true }, ctx).typeValue.should.equal("INTEGER UNSIGNED");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 4 }, ctx).typeValue.should.equal("INTEGER UNSIGNED");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 2 }, ctx).typeValue.should.equal("SMALLINT UNSIGNED");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 8 }, ctx).typeValue.should.equal("BIGINT UNSIGNED");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "number", unsigned: true, rational: false }, ctx).typeValue.should.equal("INTEGER UNSIGNED");
 	});
 
 	it("should detect rational numbers", function () {
 		Transformer.toStorageType({ mapsTo: 'abc', type: "number" }, ctx).typeValue.should.equal("FLOAT");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "number", size: 4 }, ctx).typeValue.should.equal("FLOAT");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "number", size: 8 }, ctx).typeValue.should.equal("DOUBLE");
+		
+		Transformer.toStorageType({ mapsTo: 'abc', type: "number", unsigned: true }, ctx).typeValue.should.equal("FLOAT UNSIGNED");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "number", unsigned: true, size: 4 }, ctx).typeValue.should.equal("FLOAT UNSIGNED");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "number", unsigned: true, size: 8 }, ctx).typeValue.should.equal("DOUBLE UNSIGNED");
 	});
 
 	it("should detect booleans", function () {
@@ -103,7 +113,7 @@ describe("transformer('mysql').rawToProperty", function () {
 			groups: [
 				[
 					{ "Field": "id", "Type": "int", "Null": "NO", "Key": "PRI", "Default": "", "Extra": "auto_increment", "Size": "" },
-					{ serial: true, unsigned: true, primary: true, required: true, mapsTo: 'id', defaultValue: '', type: 'serial', size: 4 }
+					{ serial: true, key: true, unsigned: true, primary: true, required: true, mapsTo: 'id', defaultValue: '', type: 'serial', size: 4 }
 				],
 				[
 					{ "Field": "age", "Type": "int", "Null": "YES", "Key": "", "Default": "18", "Extra": "", "Size": "" },

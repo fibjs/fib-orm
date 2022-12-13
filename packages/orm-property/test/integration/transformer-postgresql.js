@@ -20,6 +20,13 @@ describe("transformer('postgresql').toStorageType", function () {
 		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", size: 2 }, ctx).typeValue.should.equal("SMALLINT");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", size: 8 }, ctx).typeValue.should.equal("BIGINT");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "number", rational: false }, ctx).typeValue.should.equal("INTEGER");
+
+		// there's no unsigned in postgresql, see https://stackoverflow.com/a/31833279
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true }, ctx).typeValue.should.equal("INTEGER");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 4 }, ctx).typeValue.should.equal("INTEGER");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 2 }, ctx).typeValue.should.equal("SMALLINT");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 8 }, ctx).typeValue.should.equal("BIGINT");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "number", unsigned: true, rational: false }, ctx).typeValue.should.equal("INTEGER");
 	});
 
 	it("should detect rational numbers", function () {

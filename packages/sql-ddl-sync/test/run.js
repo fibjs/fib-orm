@@ -8,6 +8,8 @@ require('./integration/dialect-mysql')
 require('./integration/dialect-sqlite')
 require('./integration/dialect-postgresql')
 
+require('./fixtures/property-meta')
+
 if (process.env.URI)
     require('./run-db')
 

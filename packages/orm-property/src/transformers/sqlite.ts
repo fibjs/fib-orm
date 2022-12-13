@@ -61,6 +61,8 @@ export const rawToProperty: ITransformers['rawToProperty'] = function (
             // http://www.sqlite.org/faq.html#q1
             if (dCol.pk == 1) {
                 prop.type = "serial";
+                prop.serial = true;
+                prop.key = true;
             } else {
                 prop.type = "integer";
             }

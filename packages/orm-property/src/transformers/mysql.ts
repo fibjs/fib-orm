@@ -1,4 +1,4 @@
-import { IPropTransformer, IProperty, PropertyType, __StringType, ICustomPropertyType } from "../Property"
+import { IPropTransformer, IProperty, PropertyType, __StringType } from "../Property"
 import { COLUMN_NUMER_TYPE_IDX, filterPropertyDefaultValue } from "../Utils"
 
 export type ColumnType_MySQL = PropertyType
@@ -139,25 +139,26 @@ function colInfoToProperty(colInfo: ColumnInfoMySQL) {
     filterRawColumns(colInfo);
 
     let Type = colInfo.Type + ''
-    if (Type.indexOf(" ") > 0) {
-        colInfo.SubType = Type.substr(Type.indexOf(" ") + 1).split(/\s+/);
-        Type = Type.substr(0, Type.indexOf(" "));
+    const spaceIdx = Type.indexOf(" ");
+    if (spaceIdx > 0) {
+        colInfo.SubType = Type.slice(spaceIdx + 1).split(/\s+/);
+        Type = Type.slice(0, spaceIdx);
     }
 
     // match_result
     let [_, _type, _size] = Type.match(/^(.+)\((\d+)\)$/) || [] as any[];
-    if (_) {
-        colInfo.Size = parseInt(_size, 10);
-        Type = _type;
-    }
+    if (_) colInfo.Size = parseInt(_size, 10);
+    const narrowType = !_ ? Type.toUpperCase() : _type.toUpperCase();
 
     if (colInfo.Extra.toUpperCase() == "AUTO_INCREMENT") {
         property.serial = true;
+        property.key = true;
         property.unsigned = true;
     }
 
-    if (colInfo.Key == "PRI") {
+    if (colInfo.Key === "PRI") {
         property.primary = true;
+        property.key = true;
     }
 
     if (colInfo.Null.toUpperCase() == "NO") {
@@ -167,15 +168,16 @@ function colInfoToProperty(colInfo: ColumnInfoMySQL) {
         property.defaultValue = colInfo.Default;
     }
 
-    switch (Type.toUpperCase()) {
+    switch (narrowType) {
         case "SMALLINT":
         case "INTEGER":
         case "BIGINT":
         case "INT":
             property.type = "integer";
             property.size = 4; // INT
+            if (colInfo.SubType?.includes('unsigned')) property.unsigned = true;
             for (let k in columnSizes.integer) {
-                if ((columnSizes.integer as any)[k] == Type.toUpperCase()) {
+                if ((columnSizes.integer as any)[k] == narrowType) {
                     property.size = k;
                     break;
                 }
@@ -185,8 +187,9 @@ function colInfoToProperty(colInfo: ColumnInfoMySQL) {
         case "DOUBLE":
             property.type = "number";
             property.rational = true;
+            if (colInfo.SubType?.includes('unsigned')) property.unsigned = true;
             for (let k in columnSizes.floating) {
-                if ((columnSizes.floating as any)[k] == Type.toUpperCase()) {
+                if ((columnSizes.floating as any)[k] == narrowType) {
                     property.size = k;
                     break;
                 }
@@ -222,13 +225,13 @@ function colInfoToProperty(colInfo: ColumnInfoMySQL) {
             property.type = "point";
             break;
         default:
-            let [_2, _enum_value_str] = Type.match(/^enum\('(.+)'\)$/) || [] as any;
+            let [_2, _enum_value_str] = narrowType.toLowerCase().match(/^enum\('(.+)'\)$/) || [] as any;
             if (_2) {
                 property.type = "enum";
                 property.values = _enum_value_str.split(/'\s*,\s*'/);
                 break;
             }
-            throw new Error(`Unknown property type '${Type}'`);
+            throw new Error(`Unknown property type '${narrowType}'`);
     }
 
     if (property.serial) {
@@ -282,9 +285,16 @@ export const toStorageType: IPropTransformer<ColumnInfoMySQL>['toStorageType'] =
 			break;
 		case "integer":
 			result.typeValue = (columnSizes.integer as any)[property.size] || columnSizes.integer[COLUMN_NUMER_TYPE_IDX.INTEGER];
+            if (property.unsigned) { result.typeValue += " UNSIGNED"; }
 			break;
+        /**
+         * @notice As of MySQL 8.0.17, the UNSIGNED attribute is deprecated for columns of type FLOAT, DOUBLE, and DECIMAL (and any synonyms); you should expect support for it to be removed in a future version of MySQL. Consider using a simple CHECK constraint instead for such columns.
+         * 
+         * @see https://dev.mysql.com/doc/refman/8.0/en/numeric-type-syntax.html
+         */
 		case "number":
 			result.typeValue = (columnSizes.floating as any)[property.size] || columnSizes.floating[COLUMN_NUMER_TYPE_IDX.INTEGER];
+            if (property.unsigned) { result.typeValue += " UNSIGNED"; }
 			break;
 		case "serial":
 			property.type = "number";

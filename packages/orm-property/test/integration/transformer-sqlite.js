@@ -19,6 +19,13 @@ describe("transformer('sqlite').toStorageType", function () {
 		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", size: 2 }, ctx).typeValue.should.equal("INTEGER");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", size: 8 }, ctx).typeValue.should.equal("INTEGER");
 		Transformer.toStorageType({ mapsTo: 'abc', type: "number", rational: false }, ctx).typeValue.should.equal("INTEGER");
+
+		// it's pointless to specify unsigned for integer on sqlite, see "Affinity Name Examples" at https://www.sqlite.org/datatype3.html
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true }, ctx).typeValue.should.equal("INTEGER");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 4 }, ctx).typeValue.should.equal("INTEGER");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 2 }, ctx).typeValue.should.equal("INTEGER");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "integer", unsigned: true, size: 8 }, ctx).typeValue.should.equal("INTEGER");
+		Transformer.toStorageType({ mapsTo: 'abc', type: "number", unsigned: true, rational: false }, ctx).typeValue.should.equal("INTEGER");
 	});
 
 	it("should detect rational numbers", function () {
@@ -80,7 +87,7 @@ describe("transformer('sqlite').rawToProperty", function () {
 			groups: [
 				[
 					{ "cid": 1, "name": "id", "type": "INTEGER", "notnull": 1, "dflt_value": null, "pk": 1 },
-					{ key: true, required: true, type: 'serial', mapsTo: 'id' }
+					{ key: true, required: true, type: 'serial', serial: true, mapsTo: 'id' }
 				],
 			],
 		},

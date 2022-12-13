@@ -109,6 +109,8 @@ export const rawToProperty: IPropTransformer<ColumnInfoPostgreSQL>['rawToPropert
         case "BIGINT":
             if (typeof dCol.column_default == 'string' && dCol.column_default.indexOf('nextval(') == 0) {
                 property.type = "serial";
+                property.key = true;
+                property.serial = true;
             } else {
                 property.type = "integer";
             }
