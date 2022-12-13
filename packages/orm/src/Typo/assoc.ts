@@ -200,12 +200,29 @@ export namespace FxOrmAssociation {
         __for_extension?: boolean;
     }
 
+    /**
+     * @description information collected from code like:
+     * 
+     * ```js
+     * Host.hasMany(Other, {
+     *  mergeTable: 'merge_table',
+     *  mergeId: ['host_id'], // optional,
+     *  mergeAssocId: ['other_id']
+     * })
+     * ```
+     */
     export interface InstanceAssociationItem_HasMany extends InstanceAssociationItem {
         props: Record<string, FxOrmProperty.NormalizedProperty>
         // hooks: HasManyHooks
 
         mergeTable: string
+        /**
+         * @description associated properties linked to Host on merge table
+         */
         mergeId: Record<string, FxOrmProperty.NormalizedProperty>
+        /**
+         * @description associated properties linked to Other on merge table
+         */
         mergeAssocId: Record<string, FxOrmProperty.NormalizedProperty>
 
         getAccessor: string
@@ -226,7 +243,8 @@ export namespace FxOrmAssociation {
     }
 
     export interface ModelAssociationMethod__Options {
-        // only valid for hasMany assoc
+        // only valid for hasMany assoc :start
+        /** @internal */
         join_where?: FxOrmModel.ModelFindByDescriptorItem['join_where']
         extra?: FxOrmModel.ModelOptions__Find['extra']
         extra_info?: {
@@ -235,6 +253,7 @@ export namespace FxOrmAssociation {
             id_prop: string[]
             assoc_prop: string[]
         }
+        // only valid for hasMany assoc :start
     }
 
     export interface ModelAssociationMethod__FindOptions extends FxOrmModel.ModelOptions__Find, ModelAssociationMethod__Options {

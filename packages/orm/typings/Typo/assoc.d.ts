@@ -157,10 +157,27 @@ export declare namespace FxOrmAssociation {
         required?: boolean;
         __for_extension?: boolean;
     }
+    /**
+     * @description information collected from code like:
+     *
+     * ```js
+     * Host.hasMany(Other, {
+     *  mergeTable: 'merge_table',
+     *  mergeId: ['host_id'], // optional,
+     *  mergeAssocId: ['other_id']
+     * })
+     * ```
+     */
     interface InstanceAssociationItem_HasMany extends InstanceAssociationItem {
         props: Record<string, FxOrmProperty.NormalizedProperty>;
         mergeTable: string;
+        /**
+         * @description associated properties linked to Host on merge table
+         */
         mergeId: Record<string, FxOrmProperty.NormalizedProperty>;
+        /**
+         * @description associated properties linked to Other on merge table
+         */
         mergeAssocId: Record<string, FxOrmProperty.NormalizedProperty>;
         getAccessor: string;
         setAccessor: string;
@@ -176,6 +193,7 @@ export declare namespace FxOrmAssociation {
         data?: InstanceAssociationItem;
     }
     interface ModelAssociationMethod__Options {
+        /** @internal */
         join_where?: FxOrmModel.ModelFindByDescriptorItem['join_where'];
         extra?: FxOrmModel.ModelOptions__Find['extra'];
         extra_info?: {

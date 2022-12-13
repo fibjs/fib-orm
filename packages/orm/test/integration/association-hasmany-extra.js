@@ -2,6 +2,7 @@ var test = require('test')
 test.setup()
 
 var helper = require('../support/spec_helper');
+var { runProcAndCatch } = require('../support/_helpers');
 var ORM = require('../../');
 
 function cutOffMilliSecond (time) {
@@ -186,21 +187,35 @@ describe("hasMany extra properties", function () {
                 });
             });
 
-            it("could get B from A with filter to join table", function () {
+            it("implicit join_where: could get B from A with filter to join table", function () {
+                var John = Person.find(
+                    { name: "John" }, 
+                ).firstSync();
+
+                var Deco = John.getPets({
+                    since: ORM.eq(since_list[0])
+                }).firstSync();
+
+                var Mutt = John.getPets({
+                    since: ORM.eq(since_list[1])
+                }).firstSync();
+
+                John.pets = [Deco, Mutt];
+
+                assertion_people_for_get_with_join_where([John]);
+            });
+                
+            it('explicit join_where: could get B from A with filter to join table', () => {
                 var John = Person.find(
                     { name: "John" }, 
                 ).firstSync();
 
                 var Deco = John.getPets({}, {
-                    join_where: {
-                        since: ORM.eq(since_list[0])
-                    }
+                    join_where: { since: ORM.eq(since_list[0]) }
                 }).firstSync();
 
                 var Mutt = John.getPets({}, {
-                    join_where: {
-                        since: ORM.eq(since_list[1])
-                    }
+                    join_where: { since: ORM.eq(since_list[1]) }
                 }).firstSync();
 
                 John.pets = [Deco, Mutt];
@@ -208,15 +223,25 @@ describe("hasMany extra properties", function () {
                 assertion_people_for_get_with_join_where([John]);
             });
 
-            it("find item with non-exists join where condition", function () {
+            it("implicit join_where: find item with non-exists join where condition", function () {
+                var John = Person.find(
+                    { name: "John" }, 
+                ).firstSync();
+                
+                var Invalid = John.getPets({
+                    since: ORM.lt(since_list[0])
+                }).firstSync();
+                
+                assert.isNull(Invalid);
+            });
+
+            it("explicit join_where: find item with non-exists join where condition", function () {
                 var John = Person.find(
                     { name: "John" }, 
                 ).firstSync();
                 
                 var Invalid = John.getPets({}, {
-                    join_where: {
-                        since: ORM.lt(since_list[0])
-                    }
+                    join_where: { since: ORM.lt(since_list[0]) }
                 }).firstSync();
                 
                 assert.isNull(Invalid);
@@ -249,9 +274,28 @@ describe("hasMany extra properties", function () {
             });
 
             describe("could get A from B with filter to join table", function () {
-                it("only join_where", () => {
+                it("implicit join_where: only join_where", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
+                    var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
+                    var JohnForDeco = Deco.getOwners(
+                        { since: ORM.eq(since_list[0]) },
+                    ).firstSync();
+                    Deco.extra = JohnForDeco.extra;
+
+                    var JohnForMutt = Mutt.getOwners(
+                        { since: ORM.eq(since_list[1]) }
+                    ).firstSync();
+                    Mutt.extra = JohnForMutt.extra;
+
+                    var John = new Person(JohnForMutt);
+                    John.pets = [Deco, Mutt];
+
+                    assertion_people_for_get_with_join_where([John]);
+                });
+                
+                it("explicit join_where: only join_where", () => {
+                    var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
                     var JohnForDeco = Deco.getOwners(
@@ -275,8 +319,30 @@ describe("hasMany extra properties", function () {
 
                     assertion_people_for_get_with_join_where([John]);
                 });
+
+                it("implicit join_where: with limit", () => {
+                    var Deco = Pet.find({ name: "Deco" }).firstSync();
+                    var Mutt = Pet.find({ name: "Mutt" }).firstSync();
+
+                    var JohnForDeco = Deco.getOwners(
+                        { since: ORM.eq(since_list[0]) },
+                        { limit: 50 } // see generated sql by turn on `debug_sql`
+                    ).allSync()[0];
+                    Deco.extra = JohnForDeco.extra;
+
+                    var JohnForMutt = Mutt.getOwners(
+                        { since: ORM.eq(since_list[1]) },
+                        { limit: 50 } // see generated sql by turn on `debug_sql`
+                    ).allSync()[0];
+                    Mutt.extra = JohnForMutt.extra;
+
+                    var John = new Person(JohnForMutt);
+                    John.pets = [Deco, Mutt];
+
+                    assertion_people_for_get_with_join_where([John]);
+                });
                 
-                it("with limit", () => {
+                it("explicit join_where: with limit", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
@@ -284,7 +350,7 @@ describe("hasMany extra properties", function () {
                         {},
                         {
                             join_where: { since: ORM.eq(since_list[0]) },
-                            limit: 50, // see generate sql by turn on `debug_sql`
+                            limit: 50, // see generated sql by turn on `debug_sql`
                         } 
                     ).allSync()[0];
                     Deco.extra = JohnForDeco.extra;
@@ -293,7 +359,7 @@ describe("hasMany extra properties", function () {
                         {},
                         {
                             join_where: { since: ORM.eq(since_list[1]) },
-                            limit: 50, // see generate sql by turn on `debug_sql`
+                            limit: 50, // see generated sql by turn on `debug_sql`
                         } 
                     ).allSync()[0];
                     Mutt.extra = JohnForMutt.extra;
@@ -304,8 +370,35 @@ describe("hasMany extra properties", function () {
                     assertion_people_for_get_with_join_where([John]);
                 });
                 
+                it("implicit join_where: with limit/order", () => {
+                    var Deco = Pet.find({ name: "Deco" }).firstSync();
+                    var Mutt = Pet.find({ name: "Mutt" }).firstSync();
+
+                    var JohnsForDeco = Deco.getOwners(
+                        { since: ORM.eq(since_list[0]) },
+                        {
+                            limit: 50,
+                            order: [[Person.table, 'name'], 'Z'] // see generated sql by turn on `debug_sql`
+                        } 
+                    ).allSync();
+                    Deco.extra = JohnsForDeco[0].extra;
+
+                    var JohnsForMutt = Mutt.getOwners(
+                        { since: ORM.eq(since_list[1]) },
+                        {
+                            limit: 50,
+                            order: '-name' // see generated sql by turn on `debug_sql`
+                        } 
+                    ).allSync();
+                    Mutt.extra = JohnsForMutt[0].extra;
+
+                    var John = new Person(JohnsForMutt[0]);
+                    John.pets = [Deco, Mutt];
+
+                    assertion_people_for_get_with_join_where([John]);
+                });
                 
-                it("with limit/order", () => {
+                it("explicit join_where: with limit/order", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
@@ -320,7 +413,7 @@ describe("hasMany extra properties", function () {
                              * SHOULDN't specify the `Pet.table` here because it's wrong! NEVER do that
                              * as you can pass it in fact
                              */
-                            order: [[Person.table, 'name'], 'Z'] // see generate sql by turn on `debug_sql`
+                            order: [[Person.table, 'name'], 'Z'] // see generated sql by turn on `debug_sql`
                         } 
                     ).allSync();
                     Deco.extra = JohnsForDeco[0].extra;
@@ -330,7 +423,7 @@ describe("hasMany extra properties", function () {
                         {
                             join_where: { since: ORM.eq(since_list[1]) },
                             limit: 50,
-                            order: '-name' // see generate sql by turn on `debug_sql`
+                            order: '-name' // see generated sql by turn on `debug_sql`
                         } 
                     ).allSync();
                     Mutt.extra = JohnsForMutt[0].extra;
@@ -405,10 +498,6 @@ describe("hasMany extra properties", function () {
                     {
                         order: 'name',
                         autoFetch: true,
-                        // find options for associated model `Pet`,
-                        // {accessor}_find_options
-                        [`pets_find_options`]: {
-                        }
                     }
                 ).firstSync();
 
@@ -439,7 +528,7 @@ describe("hasMany extra properties", function () {
                     });
             });
 
-            it("use wrong extra data find A with `findByB()`", function (/* done */) {
+            it("use mismatch extra data find A with `findByB()`", function (/* done */) {
                 var John = Person.findByPets(
                     { name: "Mutt" }, 
                     // find options for host model `Person`
@@ -458,10 +547,6 @@ describe("hasMany extra properties", function () {
                         ],
                         order: 'name',
                         autoFetch: true,
-                        // find options for associated model `Pet`,
-                        // {accessor}_find_options
-                        [`find_options:person`]: {
-                        }
                     }
                 ).firstSync();
 
@@ -557,17 +642,21 @@ describe("hasMany extra properties", function () {
                 });
             });
 
-            it("could find A with `findBy('extB')`", function (done) {
+            it('conditions is required', () => {
+                var { errMsg } = runProcAndCatch(() => {
+                    Person.findBySync('pets');
+                });
+
+                assert.equal(errMsg, '.findByPets() is missing a conditions object');
+            });
+
+            it("no extra properties as conditions - could find A with `findBy('extB')`", function (done) {
                 var John = Person.findBy('pets', 
                     { name: "Mutt" }, 
                     // find options for host model `Person`
                     {
                         order: 'name',
                         autoFetch: true,
-                        // find options for associated model `Pet`,
-                        // {accessor}_find_options
-                        [`pets_find_options`]: {
-                        }
                     }
                 ).firstSync();
 
@@ -598,49 +687,29 @@ describe("hasMany extra properties", function () {
                     });
             });
 
-            it("use wrong extra data find A with `findBy('extB')`", function (/* done */) {
+            it("implicit join find: use mismatch extra data find A with `findBy('extB')`", function (/* done */) {
                 var John = Person.findBy('pets', 
-                    { name: "Mutt" }, 
+                    {
+                        name: "Mutt",
+                        // 1day after test since
+                        since: Date.now() + 86400 * 1e3
+                    }, 
                     // find options for host model `Person`
                     {
-                        exists: [
-                            {
-                                table: 'person_pets',
-                                link: [
-                                    'pets_id', 'id'
-                                ],
-                                conditions: {
-                                    // 1day after test since
-                                    since: Date.now() + 86400 * 1e3
-                                }
-                            }
-                        ],
                         order: 'name',
                         autoFetch: true,
-                        // find options for associated model `Pet`,
-                        // {accessor}_find_options
-                        [`find_options:person`]: {
-                        }
                     }
                 ).firstSync();
 
                 assert.ok(John === null);
 
                 var John = Person.findBy('pets', 
-                    { name: "Mutt" }, 
+                    {
+                        name: "Mutt",
+                        since: ORM.ne(since)
+                    }, 
                     // find options for host model `Person`
                     {
-                        exists: [
-                            {
-                                table: 'person_pets',
-                                link: [
-                                    'pets_id', 'id'
-                                ],
-                                conditions: {
-                                    since: ORM.ne(since)
-                                }
-                            }
-                        ],
                         order: 'name',
                         autoFetch: true
                     }
@@ -649,7 +718,141 @@ describe("hasMany extra properties", function () {
                 assert.ok(John === null);
             });
 
-            it("use right extra data find A with `findBy('extB')`", function () {
+            describe("explicit join find: use mismatch extra data find A with `findBy('extB')`", function (/* done */) {
+                it('use greater since property', () => {
+                    var John = Person.findBy('pets', 
+                        { name: "Mutt" }, 
+                        // find options for host model `Person`
+                        {
+                            /**
+                             * @notice in fact, in workflow of `findBy('extB')`,
+                             * 1. the whole exists would be overridden/corrected
+                             * 2. `table`, `link` would be overridden/corrected
+                             * 3. conditions would be collected from 2nd argument of `findBy('extB')`
+                             * 
+                             * we just write here to make it clear
+                             */
+                            exists: [
+                                {
+                                    table: 'person_pets',
+                                    link: [ 'pets_id', 'id' ],
+                                    conditions: {
+                                        // 1day after test since
+                                        since: Date.now() + 86400 * 1e3
+                                    }
+                                }
+                            ],
+                            order: 'name',
+                            autoFetch: true,
+                        }
+                    ).firstSync();
+
+                    assert.ok(John === null);
+                });
+
+                it('not equal the correct since property', () => {
+                    var John = Person.findBy('pets', 
+                        { name: "Mutt" }, 
+                        // find options for host model `Person`
+                        {
+                            exists: [
+                                {
+                                    table: 'person_pets',
+                                    link: [
+                                        'pets_id', 'id'
+                                    ],
+                                    conditions: {
+                                        since: ORM.ne(since)
+                                    }
+                                }
+                            ],
+                            order: 'name',
+                            autoFetch: true
+                        }
+                    ).firstSync();
+
+                    assert.ok(John === null);
+                });
+
+                it('correct association conditions, but base conditions mismatch', () => {
+                    // multiple associations
+                    var John = Person.findBy(
+                        [
+                            {
+                                association_name: 'pets',
+                                conditions: { name: "Mutt" }
+                            },
+                            {
+                                association_name: 'pets',
+                                conditions: { since: since }
+                            }
+                        ], 
+                        {
+                            name: "NonExistedPerson"
+                        }, 
+                        {
+                            order: 'name',
+                            autoFetch: true
+                        }
+                    ).firstSync();
+
+                    assert.equal(John, null);
+                });
+            });
+
+            describe("implicit join find: use right extra data find A with `findBy('extB')`", function () {
+                const conditionsList = [
+                    {since: since},
+                    {since: ORM.eq(since)},
+                    {since: {eq: since}},
+                ];
+
+                it(`by only one association' conditions`, () => {
+                    conditionsList.forEach((conditions) => {
+                        var John = Person.findBy('pets', 
+                            {
+                                name: "Mutt",
+                                since: conditions.since,
+                            },
+                            {
+                                order: 'name',
+                                autoFetch: true
+                            }
+                        ).firstSync();
+
+                        assert.property(John, "pets");
+                        assertion_people_for_findby([John]);
+                    });
+                });
+
+                it(`by multiple associations' conditions`, () => {
+                    conditionsList.forEach((conditions) => {
+                        var John = Person.findBy(
+                            [
+                                {
+                                    association_name: 'pets',
+                                    conditions: { name: "Mutt" }
+                                },
+                                {
+                                    association_name: 'pets',
+                                    conditions: { since: conditions.since }
+                                }
+                            ], 
+                            {
+                            }, 
+                            {
+                                order: 'name',
+                                autoFetch: true
+                            }
+                        ).firstSync();
+    
+                        assert.property(John, "pets");
+                        assertion_people_for_findby([John]);
+                    });
+                });
+            });
+            
+            it.skip("explicit whereExists: use right extra data find A with `findBy('extB')`", function () {
                 ;[
                     [
                         {since: since},
@@ -662,8 +865,17 @@ describe("hasMany extra properties", function () {
                     ]
                 ].forEach(([conditions]) => {
                     var John = Person.findBy('pets', 
-                        { name: "Mutt" },
                         {
+                            name: "Mutt",
+                        },
+                        {
+                            /**
+                             * @notice in fact, in workflow of `findBy('extB')`,
+                             * 1. `table`, `link` would be overridden/corrected
+                             * 2. conditions would be collected from 2nd argument of `findBy('extB')`
+                             * 
+                             * we just write here to make it clear
+                             */
                             exists: [
                                 {
                                     table: 'person_pets',
