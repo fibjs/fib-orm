@@ -59,7 +59,7 @@ ORM 目前支持内置的 property 类型有:
 | 字段名 | 类型 | 意义 |
 | ---- | ---- | ---- |
 | `size` | `enum`: `2`, `4`, `8` | 2: `short`/`smallint`; 4: `integer`; 8: `long`/`bigint`. 若传入了其它值, 则修改为 4. |
-| `unsigned` | `boolean` | 是否为无符号整数. |
+| `unsigned` | `boolean` | 是否为无符号整数. 该选项仅对 `mysql` 有意义. |
 | `serial` | `boolean` |  是否为自增整数, 若为 truthy, type 会被转化为 `serial` |
 
 ### 浮点数 `number`
@@ -68,12 +68,17 @@ ORM 目前支持内置的 property 类型有:
 
 | 字段名 | 类型 | 意义 |
 | ---- | ---- | ---- |
+| `unsigned` | `boolean` | 是否为无符号浮点数. 该选项仅对 `mysql < 8.0` 有意义. |
 | `rational` | `boolean` | 是否为浮点数, 默认为 truthy, 若指定为 `false`, type 会被转化为 `integer` |
 
 
 ### 自增整数 `serial`
 
 表示自增整数.
+
+**注意** 
+- 指定字段 `{ "type": "serial" }` 或 `{ serial: true }` 是等价的, 会隐式地启用 `{ "primary": "true" }`.
+- 对于 `mysql` 而言, 会隐式地启用 `{ "primary": "true", key: "true" }`
 
 ### 布尔值 `boolean`
 
