@@ -174,94 +174,109 @@ export function psqlRepairEnumTypes (
 	}
 }
 /**
- * 
- * @param collection collection relation to find its indexes
+ * @internal
  */
-export function parseCollectionIndexes (
+export function extractCollectionIndexes (
     collection: FxOrmSqlDDLSync__Collection.Collection['name'],
-    properties: FxOrmSqlDDLSync__Collection.Collection['properties'],
-    driver_type: string
+    property_key: string,
+    property: IProperty,
+    driver_type: string,
+    ret_indexes: FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[] = []
 ): FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[] {
-    const indexes: FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[] = [];
-    let found: boolean,
-        prop: IProperty;
+    let found: boolean;
 
-    for (let k in properties) {
-        prop = properties[k];
+    if (property.unique) {
+        let mixed_arr_unique: (string | true)[] = property.unique as string[]
+        if (!Array.isArray(property.unique)) {
+            mixed_arr_unique = [ property.unique ];
+        }
 
-        if (prop.unique) {
-            let mixed_arr_unique: (string | true)[] = prop.unique as string[]
-            if (!Array.isArray(prop.unique)) {
-                mixed_arr_unique = [ prop.unique ];
-            }
+        for (let i = 0; i < mixed_arr_unique.length; i++) {
+            if (mixed_arr_unique[i] === true) {
+                ret_indexes.push({
+                    collection,
+                    name    : getIndexName(collection, property, driver_type),
+                    unique  : true,
+                    columns : [ property_key ]
+                });
+            } else {
+                found = false;
 
-            for (let i = 0; i < mixed_arr_unique.length; i++) {
-                if (mixed_arr_unique[i] === true) {
-                    indexes.push({
+                for (let j = 0; j < ret_indexes.length; j++) {
+                    if (ret_indexes[j].name == mixed_arr_unique[i]) {
+                        found = true;
+                        ret_indexes[j].columns.push(property_key);
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    ret_indexes.push({
                         collection,
-                        name    : getIndexName(collection, prop, driver_type),
+                        name    : mixed_arr_unique[i] as string,
                         unique  : true,
-                        columns : [ k ]
+                        columns : [ property_key ]
                     });
-                } else {
-                    found = false;
-
-                    for (let j = 0; j < indexes.length; j++) {
-                        if (indexes[j].name == mixed_arr_unique[i]) {
-                            found = true;
-                            indexes[j].columns.push(k);
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        indexes.push({
-                            collection,
-                            name    : mixed_arr_unique[i] as string,
-                            unique  : true,
-                            columns : [ k ]
-                        });
-                    }
                 }
             }
         }
-        
-        if (prop.index) {
-            let mixed_arr_index: (string | true)[] = prop.index as string[]
-            if (!Array.isArray(prop.index)) {
-                mixed_arr_index = [ prop.index ];
-            }
+    }
+    
+    if (property.index) {
+        let mixed_arr_index: (string | true)[] = property.index as string[]
+        if (!Array.isArray(property.index)) {
+            mixed_arr_index = [ property.index ];
+        }
 
-            for (let i = 0; i < mixed_arr_index.length; i++) {
-                if (mixed_arr_index[i] === true) {
-                    indexes.push({
+        for (let i = 0; i < mixed_arr_index.length; i++) {
+            if (mixed_arr_index[i] === true) {
+                ret_indexes.push({
+                    collection,
+                    name: getIndexName(collection, property, driver_type),
+                    unique: false,
+                    columns: [ property_key ]
+                });
+            } else {
+                found = false;
+
+                for (let j = 0; j < ret_indexes.length; j++) {
+                    if (ret_indexes[j].name == mixed_arr_index[i]) {
+                        found = true;
+                        ret_indexes[j].columns.push(property_key);
+                        break;
+                    }
+                }
+                if (!found) {
+                    ret_indexes.push({
                         collection,
-                        name: getIndexName(collection, prop, driver_type),
+                        name: mixed_arr_index[i] as string,
+                        columns: [ property_key ],
                         unique: false,
-                        columns: [ k ]
                     });
-                } else {
-                    found = false;
-
-                    for (let j = 0; j < indexes.length; j++) {
-                        if (indexes[j].name == mixed_arr_index[i]) {
-                            found = true;
-                            indexes[j].columns.push(k);
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        indexes.push({
-                            collection,
-                            name: mixed_arr_index[i] as string,
-                            columns: [ k ],
-                            unique: false,
-                        });
-                    }
                 }
             }
         }
     }
 
-    return indexes;
+    return ret_indexes;
+}
+
+/** @internal this will change input */
+export function normalizeDefinedProperty (
+    property: IProperty,
+    driver_type: string,
+) {
+    if (driver_type === 'mysql') {
+        /**
+         * for mysql, on creating table, column with meta auto_increment
+         * should be specified as primary key explicitly on table-level
+         */
+        if (property.serial || property.type === 'serial') {
+            property.type = 'serial';
+            property.key = true;
+            property.primary = true;
+        }
+    }
+
+    return property;
 }

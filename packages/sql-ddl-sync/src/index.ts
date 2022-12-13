@@ -5,7 +5,17 @@ import { FxOrmSqlDDLSync__DbIndex } from "./Typo/DbIndex";
 import { FxOrmSqlDDLSync__Dialect } from "./Typo/Dialect";
 import { FxOrmSqlDDLSync__Driver } from "./Typo/Driver";
 import { FxOrmSqlDDLSync } from "./Typo/_common";
-import { getSqlQueryDialect, logJson, getCollectionMapsTo_PropertyNameDict, filterPropertyDefaultValue, filterSyncStrategy, filterSuppressColumnDrop, psqlRepairEnumTypes, parseCollectionIndexes } from './Utils';
+import {
+	getSqlQueryDialect,
+	logJson,
+	getCollectionMapsTo_PropertyNameDict,
+	filterPropertyDefaultValue,
+	filterSyncStrategy,
+	filterSuppressColumnDrop,
+	psqlRepairEnumTypes,
+	extractCollectionIndexes,
+	normalizeDefinedProperty,
+} from './Utils';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 
 import "./Dialects";
@@ -194,10 +204,21 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		if (collectionIdx >= 0)
 			this.collections.splice(collectionIdx, 1)
 
-		let index_defs = parseCollectionIndexes(collection_name, properties, this.dbdriver.type);
+		properties = { ...properties };
+		
+		let index_defs: FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[] = [];
+		for (let k in properties) {
+			// reassign it
+			properties[k] = { ...properties[k] };
+			properties[k].mapsTo = properties[k].mapsTo || k;
+			extractCollectionIndexes(collection_name, k, properties[k], this.dbdriver.type, index_defs);
+			normalizeDefinedProperty(properties[k], this.dbdriver.type);
+		}
+
 		if (typeof this.Dialect.convertIndexes === 'function') {
 			index_defs = this.Dialect.convertIndexes(collection_name, index_defs);
 		}
+
 		this.collections.push({
 			name: collection_name,
 			properties,
@@ -230,8 +251,6 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 		for (let k in collection.properties) {
 			let property: IProperty = collection.properties[k],
 				col: false | FxOrmSqlDDLSync__Dialect.DialectResult;
-
-			property.mapsTo = property.mapsTo || k;
 
 			col = getColumnTypeRaw(this, collection.name, property, { for: 'create_table' });
 

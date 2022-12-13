@@ -31,8 +31,9 @@ export declare function filterSuppressColumnDrop(suppressColumnDrop: boolean, db
 export declare function psqlGetEnumTypeName(collection_name: string, column_name: string): string;
 export declare function psqlRepairEnumTypes(columns: Record<string, IProperty> | IProperty[], collection_name: string, dbdriver: IDbDriver.ITypedDriver<Class_DbConnection>): void;
 /**
- *
- * @param collection collection relation to find its indexes
+ * @internal
  */
-export declare function parseCollectionIndexes(collection: FxOrmSqlDDLSync__Collection.Collection['name'], properties: FxOrmSqlDDLSync__Collection.Collection['properties'], driver_type: string): FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[];
+export declare function extractCollectionIndexes(collection: FxOrmSqlDDLSync__Collection.Collection['name'], property_key: string, property: IProperty, driver_type: string, ret_indexes?: FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[]): FxOrmSqlDDLSync__DbIndex.CollectionDbIndexInfo[];
+/** @internal this will change input */
+export declare function normalizeDefinedProperty(property: IProperty, driver_type: string): IProperty;
 export {};
