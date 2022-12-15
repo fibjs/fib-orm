@@ -132,7 +132,7 @@ describe("Model.sync", function () {
             assert.equal(dbProperties.extendsto_field.comment, 'field A_ext.extendsto_field')
         });
         
-        it.only("support table comment", function () {
+        it("support table comment", function () {
             var 
                 /** @type {import('../../typings/Typo/Model').FxOrmModel.Model} */
                 A;

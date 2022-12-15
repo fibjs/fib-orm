@@ -134,7 +134,11 @@ export declare namespace FxOrmModel {
         association_name: string;
         conditions?: ModelQueryConditions__Find;
         options?: FxOrmAssociation.ModelAssociationMethod__FindByOptions;
-        join_where?: FxOrmModel.ModelQueryConditions__Find;
+        /**
+         * @deprecated extra where conditions fields for hasmany-assoc
+         * @internal
+         */
+        join_where?: FxOrmAssociation.ModelAssociationMethod__FindOptions['join_where'];
         extra_select?: string[];
     }
     export interface ModelConstructorOptions<TProperties extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>> {

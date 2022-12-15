@@ -1082,18 +1082,18 @@ export function listFindByChainOrRunSync (
 			}
 
 			const extraProps = (association as FxOrmAssociation.InstanceAssociationItem_HasMany).props;
-			const extraWhere = Utilities.extractHasManyExtraConditions(
+			let extra_where = Utilities.extractHasManyExtraConditions(
 				association as FxOrmAssociation.InstanceAssociationItem_HasMany,
 				by_item_conditions
 			);
 
-			const join_where = { ...by_item.join_where };
-			Utilities.filterWhereConditionsInput(join_where, model);
+			extra_where = { ...by_item.join_where, ...extra_where };
+			Utilities.filterWhereConditionsInput(extra_where, model);
 
 			merges.push({
 				from: { table: Utilities.tableAlias(ljoin_info.table, ljoin_info.alias), field: ljoin_info.ids },
 				to: { table: left_info.table, field: left_info.ids },
-				where : [ ljoin_info.alias, join_where ],
+				where : [ ljoin_info.alias, extra_where ],
 				table : left_info.alias,
 				select: (by_item.extra_select || []).filter(x => extraProps.hasOwnProperty(x))
 			});

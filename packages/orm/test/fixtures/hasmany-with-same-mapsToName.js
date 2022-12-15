@@ -75,7 +75,7 @@ describe("hasMany with extra properties", function () {
         });
     });
 
-    describe("getAccessor with join_where", function () {
+    describe("getAccessor with extra properties as conditions", function () {
        const bt = cutOffMilliSecond(new Date());
         const since_list = Array.apply(null, {length: 2}).fill(undefined).map((_, idx) => {
             return new Date(bt.getTime() + 86400 * 1e3 * idx)

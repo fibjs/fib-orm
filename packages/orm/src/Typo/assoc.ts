@@ -244,8 +244,8 @@ export namespace FxOrmAssociation {
 
     export interface ModelAssociationMethod__Options {
         // only valid for hasMany assoc :start
-        /** @internal */
-        join_where?: FxOrmModel.ModelFindByDescriptorItem['join_where']
+        /** @deprecated use `extra_where` directly */
+        join_where?: FxOrmModel.ModelQueryConditions__Find
         /** @internal */
         extra?: FxOrmModel.ModelOptions__Find['extra']
         /** @internal */

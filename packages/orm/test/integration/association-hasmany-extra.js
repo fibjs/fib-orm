@@ -133,7 +133,7 @@ describe("hasMany extra properties", function () {
         });
     });
 
-    describe("getAccessor with join_where", function () {
+    describe("getAccessor with extra properties as conditions", function () {
        const bt = cutOffMilliSecond(new Date());
         const since_list = Array.apply(null, {length: 2}).fill(undefined).map((_, idx) => {
             return new Date(bt.getTime() + 86400 * 1e3 * idx)
@@ -187,7 +187,7 @@ describe("hasMany extra properties", function () {
                 });
             });
 
-            it("implicit join_where: could get B from A with filter to join table", function () {
+            it("implicit extra_where: could get B from A with filter to join table", function () {
                 var John = Person.find(
                     { name: "John" }, 
                 ).firstSync();
@@ -223,7 +223,7 @@ describe("hasMany extra properties", function () {
                 assertion_people_for_get_with_join_where([John]);
             });
 
-            it("implicit join_where: find item with non-exists join where condition", function () {
+            it("implicit extra_where: find item with non-exists join where condition", function () {
                 var John = Person.find(
                     { name: "John" }, 
                 ).firstSync();
@@ -274,7 +274,7 @@ describe("hasMany extra properties", function () {
             });
 
             describe("could get A from B with filter to join table", function () {
-                it("implicit join_where: only join_where", () => {
+                it("implicit extra_where: only extra_where", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
@@ -294,7 +294,7 @@ describe("hasMany extra properties", function () {
                     assertion_people_for_get_with_join_where([John]);
                 });
                 
-                it("explicit join_where: only join_where", () => {
+                it("[deprecated] explicit join_where: only extra_where", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
@@ -320,7 +320,7 @@ describe("hasMany extra properties", function () {
                     assertion_people_for_get_with_join_where([John]);
                 });
 
-                it("implicit join_where: with limit", () => {
+                it("implicit extra_where: with limit", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
@@ -342,7 +342,7 @@ describe("hasMany extra properties", function () {
                     assertion_people_for_get_with_join_where([John]);
                 });
                 
-                it("explicit join_where: with limit", () => {
+                it("[deprecated] explicit join_where: with limit", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
@@ -370,7 +370,7 @@ describe("hasMany extra properties", function () {
                     assertion_people_for_get_with_join_where([John]);
                 });
                 
-                it("implicit join_where: with limit/order", () => {
+                it("implicit extra_where: with limit/order", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 
@@ -398,7 +398,7 @@ describe("hasMany extra properties", function () {
                     assertion_people_for_get_with_join_where([John]);
                 });
                 
-                it("explicit join_where: with limit/order", () => {
+                it("[deprecated] explicit join_where: with limit/order", () => {
                     var Deco = Pet.find({ name: "Deco" }).firstSync();
                     var Mutt = Pet.find({ name: "Mutt" }).firstSync();
 

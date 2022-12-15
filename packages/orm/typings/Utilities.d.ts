@@ -72,7 +72,7 @@ export declare function wrapFieldObject(params: {
  */
 export declare function formatAssociatedField(model: FxOrmModel.Model, name: string, required: boolean, reversed: boolean): Record<string, FxOrmProperty.NormalizedProperty>;
 /** @internal */
-export declare function extractHasManyExtraConditions(association: FxOrmAssociation.InstanceAssociationItem_HasMany, conditions: FxOrmModel.ModelFindByDescriptorItem['conditions'], join_where?: FxOrmModel.ModelFindByDescriptorItem['join_where']): FxOrmModel.ModelQueryConditions__Find;
+export declare function extractHasManyExtraConditions(association: FxOrmAssociation.InstanceAssociationItem_HasMany, conditions: FxOrmModel.ModelFindByDescriptorItem['conditions'], extra_where?: FxOrmModel.ModelFindByDescriptorItem['conditions']): FxOrmModel.ModelQueryConditions__Find;
 export declare function convertPropToJoinKeyProp(props: Record<string, FxOrmProperty.NormalizedProperty>, opts: {
     required: boolean;
     makeKey: boolean;

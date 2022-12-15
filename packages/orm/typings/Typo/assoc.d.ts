@@ -193,8 +193,8 @@ export declare namespace FxOrmAssociation {
         data?: InstanceAssociationItem;
     }
     interface ModelAssociationMethod__Options {
-        /** @internal */
-        join_where?: FxOrmModel.ModelFindByDescriptorItem['join_where'];
+        /** @deprecated use `extra_where` directly */
+        join_where?: FxOrmModel.ModelQueryConditions__Find;
         /** @internal */
         extra?: FxOrmModel.ModelOptions__Find['extra'];
         /** @internal */

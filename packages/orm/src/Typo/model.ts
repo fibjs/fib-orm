@@ -192,8 +192,11 @@ export namespace FxOrmModel {
         // findby options
         options?: FxOrmAssociation.ModelAssociationMethod__FindByOptions,
 
-        // extra where conditions fields for hasmany-assoc
-        join_where?: FxOrmModel.ModelQueryConditions__Find
+        /**
+         * @deprecated extra where conditions fields for hasmany-assoc
+         * @internal
+         */
+        join_where?: FxOrmAssociation.ModelAssociationMethod__FindOptions['join_where']
         // extra select fields for hasmany-assoc
         extra_select?: string[]
     }

@@ -401,10 +401,10 @@ export function formatAssociatedField (
 export function extractHasManyExtraConditions (
 	association: FxOrmAssociation.InstanceAssociationItem_HasMany,
 	conditions: FxOrmModel.ModelFindByDescriptorItem['conditions'],
-	join_where?: FxOrmModel.ModelFindByDescriptorItem['join_where'],
+	extra_where?: FxOrmModel.ModelFindByDescriptorItem['conditions'],
 ) {
 	// extract extra info on conditions
-	let extra_where = { ...join_where } as typeof join_where;
+	extra_where = { ...extra_where } as typeof extra_where;
 	// populate out conditions in extra, not belonging to either one model of associations
 	for (let k in conditions) {
 		if (association.props[k]) {
