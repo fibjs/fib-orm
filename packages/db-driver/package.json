@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/db-driver",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"description": "",
 	"keywords": [
 		"mysql",
@@ -31,7 +31,7 @@
 	},
 	"analyse": false,
 	"dependencies": {
-		"@fxjs/orm-core": "^0.3.1",
+		"@fxjs/orm-core": "^0.3.2",
 		"parse-querystring-dotkey": "^1.0.3"
 	},
 	"devDependencies": {
