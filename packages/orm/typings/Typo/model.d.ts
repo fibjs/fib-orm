@@ -144,6 +144,7 @@ export declare namespace FxOrmModel {
         driver_name: string;
         driver: FxOrmDMLDriver.DMLDriver;
         table: string;
+        tableComment: string;
         properties: Record<keyof TProperties, FxOrmProperty.NormalizedProperty>;
         __for_extension: boolean;
         indexes: string[];
@@ -164,6 +165,7 @@ export declare namespace FxOrmModel {
          * pririoty: table > collection
          */
         table?: ModelConstructorOptions<TProperties>['table'];
+        tableComment?: ModelConstructorOptions<TProperties>['tableComment'];
         collection?: ModelConstructorOptions<TProperties>['table'];
         /**
          * @dirty would be deprecated

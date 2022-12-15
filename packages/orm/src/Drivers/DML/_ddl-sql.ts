@@ -32,7 +32,9 @@ export const doSync: FxOrmDMLDriver.DMLDriver['doSync'] = function (
 		}
 	}
 
-	syncInstance.defineCollection(opts.table, opts.allProperties);
+	syncInstance.defineCollection(opts.table, opts.allProperties, {
+		comment: opts?.tableComment
+	});
 
 	for (
 		let i = 0, props = <Record<string, FxOrmProperty.NormalizedProperty>>{};

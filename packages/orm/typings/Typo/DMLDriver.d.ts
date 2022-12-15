@@ -181,6 +181,7 @@ export declare namespace FxOrmDMLShared {
         one_associations: FxOrmAssociation.InstanceAssociationItem_HasOne[];
         many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[];
         extend_associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[];
+        tableComment?: string;
         /**
          * @default true
          */

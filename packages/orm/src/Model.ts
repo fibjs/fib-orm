@@ -251,6 +251,7 @@ export const Model = function (
 			extension           : m_opts.__for_extension,
 			id                  : m_opts.keys,
 			table               : m_opts.table,
+			tableComment		: m_opts.tableComment,
 			allProperties       : allProperties,
 			indexes             : m_opts.indexes || [],
 			customTypes         : m_opts.db.customTypes,

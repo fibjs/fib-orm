@@ -4,7 +4,7 @@ test.setup()
 require("should");
 const { useTest } = require('../hooks');
 
-describe.only("collection comment", function () {
+describe("collection comment", function () {
 	const {
 		ctx,
 		helpers

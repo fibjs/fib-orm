@@ -123,6 +123,7 @@ export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 			driver_name    : this.driver_name,
 			driver         : this.driver,
 			table          : opts.table || opts.collection || ((m_settings.get("model.namePrefix") || "") + name),
+			tableComment   : opts.tableComment || '',
 			// not standard Record<string, FxOrmProperty.NormalizedProperty> here, but we should pass it firstly
 			properties     : properties as Record<string, FxOrmProperty.NormalizedProperty>,
 			__for_extension: opts.__for_extension || false,

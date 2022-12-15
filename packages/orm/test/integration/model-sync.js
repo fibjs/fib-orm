@@ -1,9 +1,33 @@
 var helper = require('../support/spec_helper');
 var common = require('../common');
-var ORM = require('../../');
 
 describe("Model.sync", function () {
+    /** @type {import('../../').ORM} */
     var db = null;
+
+    function getTableComment (table) {
+        const dbdriver = db.driver.sqlDriver
+        if (dbdriver.type === 'psql') {
+            var result = dbdriver.execute(
+                db.driver.query.Dialect.escape(
+                    "SELECT obj_description(oid) FROM pg_class WHERE relname = ?",
+                    [table]
+                )
+            );
+    
+            return result[0].obj_description;
+        } else if (dbdriver.type === 'mysql') {
+            var result = dbdriver.execute(
+                db.driver.query.Dialect.escape(
+                    "SELECT TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+                    [db.driver.config.database, table]
+                )
+            );
+    
+            return result[0].TABLE_COMMENT;
+        } else if (dbdriver.type === 'sqlite') {
+        }
+    }
 
     before(function () {
         db = helper.connect();
@@ -106,6 +130,26 @@ describe("Model.sync", function () {
             assert.equal(dbProperties.extendsto_field.comment, 'field A_ext.extendsto_field')
             var dbProperties = db.driver.ddlSync.getCollectionPropertiesSync(db.driver.sqlDriver, A_ext.table);
             assert.equal(dbProperties.extendsto_field.comment, 'field A_ext.extendsto_field')
+        });
+        
+        it.only("support table comment", function () {
+            var 
+                /** @type {import('../../typings/Typo/Model').FxOrmModel.Model} */
+                A;
+    
+            A = db.define('a', {
+                name: {
+                    type: 'text',
+                    comment: 'field name.a'
+                },
+            }, {
+                tableComment: 'table comment for a'
+            });
+            
+            helper.dropSync([A]);
+    
+            var comment = getTableComment('a');
+            assert.equal(comment, 'table comment for a')
         });
     }
 });

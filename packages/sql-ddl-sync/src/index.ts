@@ -113,6 +113,8 @@ function processCollection(
 
 	const { strategy = syncInstnace.strategy } = opts || {};
 
+	alterCollectionComment(collection, syncInstnace.dbdriver);
+
 	switch (strategy) {
 		case 'soft':
 			return is_processed
@@ -328,8 +330,6 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 
 		if (!collection)
 			throw new Error('[syncCollection] invalid collection')
-
-		alterCollectionComment(collection, this.dbdriver);
 
 		let {
 			columns = this.Dialect.getCollectionPropertiesSync(this.dbdriver, collection.name),

@@ -227,6 +227,7 @@ export namespace FxOrmDMLShared {
         many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[]
         extend_associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[]
 
+        tableComment?: string
         /**
          * @default true
          */
