@@ -158,7 +158,7 @@ function buildOrGroup(
 		const normalizedKey = getComparisonKey(Dialect, where.table, k);
 
 		let non_conj_where_conditem_value: FxSqlQuerySubQuery.NonConjunctionInputValue
-			= transformSqlComparatorLiteralObject(where_conditem_value, normalizedKey as string, where.wheres) || where_conditem_value;
+			= transformSqlComparatorLiteralObject(where_conditem_value) || where_conditem_value;
 
 		if (isSqlComparatorPayload(non_conj_where_conditem_value)) {
 			op = non_conj_where_conditem_value.sql_comparator();
@@ -364,8 +364,6 @@ function isSqlComparatorPayload (
 
 function transformSqlComparatorLiteralObject (
 	non_special_kv: FxSqlQuerySubQuery.NonConjunctionInputValue,
-	payload_k: string,
-	payload: FxSqlQuerySubQuery.SubQueryBuildDescriptor['wheres']
 ): false | FxSqlQueryComparator.QueryComparatorObject {
 	if (typeof non_special_kv !== 'object') return false;
 
@@ -399,10 +397,7 @@ function transformSqlComparatorLiteralObject (
 	const apply_args = in_input_arr && !is_in_style ? input : [input];
 	const result = fn.apply(null, apply_args);
 
-	payload[payload_k] = result;
 	return result;
-
-	return false;
 }
 
 function isConjunctionWhereConditionInput (

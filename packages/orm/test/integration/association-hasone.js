@@ -432,6 +432,43 @@ describe("hasOne", function () {
         });
     });
 
+    describe("run count from ChainFinder from findBy*(), conditions with literal kv", function () {
+        before(setup());
+
+        it("findBy*(): runSync() then countSync()", function () {
+            var finder = Leaf.findByTree({
+                type: { eq: 'pine' }
+            });
+
+            var leafs = finder.runSync();
+
+            assert.ok(Array.isArray(leafs));
+            assert.ok(leafs.length == 1);
+
+            var leafCount = finder.countSync();
+            assert.ok(leafCount == 1);
+        });
+
+        it("batch findBy: runSync() then countSync()", function () {
+            var finder = Leaf.findBy([
+                {
+                    extend: "tree",
+                    conditions: {
+                        type: { eq: 'pine' }
+                    }
+                }
+            ]);
+
+            var leafs = finder.runSync();
+
+            assert.ok(Array.isArray(leafs));
+            assert.ok(leafs.length == 1);
+
+            var leafCount = finder.countSync();
+            assert.ok(leafCount == 1);
+        });
+    });
+
 
     describe("mapsTo", function () {
         describe("with `mapsTo` set via `hasOne`", function () {
