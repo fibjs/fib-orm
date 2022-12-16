@@ -232,6 +232,110 @@ function shared (queryOptions) {
   )
 }
 
+function shared_repeat_build (queryOptions) {
+  var qWhere = { col: 1 };
+  var qWhereInput = { ...qWhere };
+  assert.equal(
+      common.Select(queryOptions).from('table1').where(qWhereInput).build(),
+      'select * from `table1` where `col` = 1'
+  )
+  assert.equal(
+      common.Select(queryOptions).from('table1').where(qWhereInput).build(),
+      'select * from `table1` where `col` = 1'
+  )
+  assert.deepEqual(qWhere, qWhereInput);
+
+  var qWhere = { col: common.Query.comparators.eq(null) };
+  var qWhereInput = { ...qWhere };
+  assert.equal(
+      common.Select(queryOptions).from('table1').where(qWhereInput).build(),
+      'select * from `table1` where `col` is null'
+  )
+  assert.equal(
+      common.Select(queryOptions).from('table1').where(qWhereInput).build(),
+      'select * from `table1` where `col` is null'
+  )
+  assert.deepEqual(qWhere, qWhereInput);
+
+  var qWhere = { col: common.Query.comparators.ne(null) };
+  var qWhereInput = { ...qWhere };
+  assert.equal(
+      common.Select(queryOptions).from('table1').where(qWhere).build(),
+      'select * from `table1` where `col` is not null'
+  )
+  assert.equal(
+      common.Select(queryOptions).from('table1').where(qWhere).build(),
+      'select * from `table1` where `col` is not null'
+  )
+  assert.deepEqual(qWhere, qWhereInput);
+  
+  var qWhere = { col: common.Query.comparators.ne(null) };
+  var qWhereInput = { ...qWhere };
+  assert.equal(
+      common.Select(queryOptions).from('table1').where('table1', qWhere).build(),
+      'select * from `table1` where `t1`.`col` is not null'
+  )
+  assert.equal(
+      common.Select(queryOptions).from('table1').where('table1', qWhere).build(),
+      'select * from `table1` where `t1`.`col` is not null'
+  )
+  assert.deepEqual(qWhere, qWhereInput);
+  
+  var qWhere = ['table1', { col: 1 }, 't2', { col: 2 }];
+  var qWhereInput = [ ...qWhere ];
+  assert.equal(
+      common.Select(queryOptions).from('table1')
+          .from('table2', 'id', 'id')
+          .where(...qWhereInput).build(),
+      'select * from `table1` as `t1` inner join `table2` as `t2` on `t2`.`id` = `t1`.`id` where `t1`.`col` = 1 and `t2`.`col` = 2'
+  )
+  assert.equal(
+      common.Select(queryOptions).from('table1')
+          .from('table2', 'id', 'id')
+          .where(...qWhereInput).build(),
+      'select * from `table1` as `t1` inner join `table2` as `t2` on `t2`.`id` = `t1`.`id` where `t1`.`col` = 1 and `t2`.`col` = 2'
+  )
+  assert.deepEqual(qWhere, qWhereInput);
+  
+  var qWhere = ['table1', { "weight": common.Query.comparators.ne(987654321) }];
+  var qWhereInput = [ qWhere[0], { ...qWhere[1] } ];
+  assert.equal(
+      common.Select(queryOptions).from('table1')
+          .from('table1', 'id', 'table2', 'merge_id')
+          .where(...qWhereInput)
+          .build(),
+      'select * from `table1` as `t1` inner join `table1` as `t2` on `t2`.`id` = `table2`.`merge_id` where `t1`.`weight` <> 987654321'
+  )
+  assert.equal(
+      common.Select(queryOptions).from('table1')
+          .from('table1', 'id', 'table2', 'merge_id')
+          .where(...qWhereInput)
+          .build(),
+      'select * from `table1` as `t1` inner join `table1` as `t2` on `t2`.`id` = `table2`.`merge_id` where `t1`.`weight` <> 987654321'
+  )
+  assert.deepEqual(qWhere, qWhereInput);
+  
+  var qWhere = ['table1', { "weight": common.Query.comparators.ne(987654321) }];
+  var qWhereInput = [ qWhere[0], { ...qWhere[1] } ];
+  assert.equal(
+      common.Select(queryOptions).from('table2')
+          .from('table1', ['merge_id'], 'table2', ['id'])
+          .where(...qWhereInput)
+          .count(null, 'c')
+          .build(),
+      'select COUNT(*) as `c` from `table2` as `t1` inner join `table1` as `t2` on `t2`.`merge_id` = `t1`.`id` where `t2`.`weight` <> 987654321'
+  )
+  assert.equal(
+      common.Select(queryOptions).from('table2')
+          .from('table1', ['merge_id'], 'table2', ['id'])
+          .where(...qWhereInput)
+          .count(null, 'c')
+          .build(),
+      'select COUNT(*) as `c` from `table2` as `t1` inner join `table1` as `t2` on `t2`.`merge_id` = `t1`.`id` where `t2`.`weight` <> 987654321'
+  )
+  assert.deepEqual(qWhere, qWhereInput);
+}
+
 describe('where', () => {
   it('mysql', () => {
     const queryOptions = { dialect: 'mysql' }
@@ -243,6 +347,11 @@ describe('where', () => {
       "select * from `table1` where `col` = 'a\\''"
     )
   })
+
+  it('mysql - repeat build', () => {
+    shared_repeat_build({ dialect: 'mysql' })
+  })
+
   it('sqlite', () => {
     const queryOptions = { dialect: 'sqlite' }
     shared(queryOptions)
@@ -261,6 +370,10 @@ describe('where', () => {
       common.Select(queryOptions).from('table1').where({ col: true }).build(),
       'select * from `table1` where `col` = 1'
     )
+  })
+
+  it('sqlite - repeat build', () => {
+    shared_repeat_build({ dialect: 'sqlite' })
   })
 })
 

@@ -225,7 +225,7 @@ export class SelectQuery implements FxSqlQueryChainBuilder.ChainBuilder__Select 
 			if (whereConditions[i] === null) {
 				continue;
 			}
-			if (typeof whereConditions[i] == "string") {
+			if (typeof whereConditions[i] === "string") {
 				/**
 				 * deal with input like this:
 				 * [
@@ -250,7 +250,7 @@ export class SelectQuery implements FxSqlQueryChainBuilder.ChainBuilder__Select 
 				pushNonEmptyWhereItem()
 				whereItem = {
 					table: null,
-					wheres: whereConditions[i] as FxSqlQuerySubQuery.SubQueryBuildDescriptor['wheres']
+					wheres: { ...whereConditions[i] as FxSqlQuerySubQuery.SubQueryBuildDescriptor['wheres'] }
 				};
 			}
 		}
