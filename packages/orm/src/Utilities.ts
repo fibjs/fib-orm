@@ -12,6 +12,7 @@ import {
 	FxSqlQuerySubQuery,
 	FxSqlQueryComparator,
 	FxSqlQuerySql,
+	FxSqlQueryDialect,
 } from '@fxjs/sql-query';
 import { selectArgs } from './Helpers';
 
@@ -25,6 +26,8 @@ import { FxOrmNS } from './Typo/ORM';
 import { FxOrmError } from './Typo/Error';
 import { FxOrmHook } from './Typo/hook';
 import { filterDate } from './Where/filterDate';
+import { FxOrmDMLDriver } from './Typo/DMLDriver';
+import ORMError from './Error';
 
 /**
  * Order should be a String (with the property name assumed ascending)
@@ -104,7 +107,7 @@ export function standardizeOrder (
 
 export function addTableToStandardedOrder (
 	order: FxOrmQuery.OrderNormalizedTupleMixin,
-	table_alias: string
+	table_alias: string | FxSqlQuerySql.SqlFromTableInput
 ): FxOrmQuery.ChainFindOptions['order'] {
 	const new_order: FxOrmQuery.ChainFindOptions['order'] = []
 	for (let i = 0, item: typeof order[any]; i < order.length; i++) {
@@ -416,6 +419,21 @@ export function extractHasManyExtraConditions (
 	return extra_where
 }
 
+/**
+ * @description top conditions means that conditions which matches query's top select.
+ */
+export function extractSelectTopConditions (
+	conditions: FxOrmModel.ModelOptions__Find['conditions'],
+	topFields: string[],
+) {
+	const topConditions = util.pick(conditions, topFields);
+	
+	return {
+		topConditions,
+		tableConditions: util.omit(conditions, topFields)
+	}
+}
+
 // If the parent associations key is `serial`, the join tables
 // key should be changed to `integer`.
 export function convertPropToJoinKeyProp (
@@ -498,7 +516,8 @@ export function transformPropertyNames (
 };
 
 export function transformOrderPropertyNames (
-	order: FxOrmQuery.ChainFindOptions['order'], properties: Record<string, FxOrmProperty.NormalizedProperty>
+	order: FxOrmQuery.ChainFindOptions['order'],
+	properties: Record<string, FxOrmProperty.NormalizedProperty>
 ) {
 	if (!order) return order;
 
@@ -580,7 +599,7 @@ export function combineMergeInfoToArray (
 }
 
 export function parseTableInputForSelect (ta_str: string) {
-	const [pure_table, alias = pure_table] = QueryHelpers.parseTableInputStr(ta_str)
+	const [pure_table, alias = typeof pure_table === 'string' ? pure_table : ''] = QueryHelpers.parseTableInputStr(ta_str)
 
 	return {
 		pure_table,
@@ -589,14 +608,19 @@ export function parseTableInputForSelect (ta_str: string) {
 	}
 }
 
-export const parseTableInputStr = QueryHelpers.parseTableInputStr;
+export function tableAlias (
+	table: string | FxSqlQuerySql.SqlFromTableInput,
+	alias: string = typeof table === 'string' ? table : '',
+	same_suffix: string = ''
+) {
+	if (QueryHelpers.maybeKnexRawOrQueryBuilder(table)) {
+		if (!alias) {
+			throw new Error(`[tableAlias] when table is knex.raw or knex.queryBuilder, alias must be provided!`)
+		}
+		return alias;
+	}
 
-// export function tableAlias (table: string, alias: string = table, same_suffix: string = '') {
-// 	return `${table} as ${alias}${same_suffix ? ` ${same_suffix}` : ''}`
-// }
-
-export function tableAlias (table: string, alias: string = table) {
-	return `${table} as ${alias}`
+	return `${table} ${alias}${same_suffix ? ` ${same_suffix}` : ''}`
 }
 
 export function tableAliasCalculatorInOneQuery () {
@@ -723,9 +747,15 @@ export function parallelQueryIfPossible<T = any, RESP = any> (
  */
 export function filterWhereConditionsInput (
 	conditions: FxSqlQuerySubQuery.SubQueryConditions,
-	host: { allProperties: Record<string, FxOrmProperty.NormalizedProperty> }
+	host: {
+		properties: Record<string, FxOrmProperty.NormalizedProperty>
+	} | FxOrmModel.Model
 ): FxSqlQuerySubQuery.SubQueryConditions {
-	filterDate(conditions, host);
+	if (host.properties) {
+		filterDate(conditions, { properties: host.properties });
+	} else {
+		filterDate(conditions, { properties: (host as FxOrmModel.Model).allProperties });
+	}
 
 	return conditions;
 }
@@ -745,6 +775,23 @@ export function addUnwritableProperty (
 			writable: false
 		}
 	)
+}
+
+export function addHiddenReadonlyProperty (
+	obj: any,
+	property: string,
+	getter: () => any,
+	propertyConfiguration: PropertyDescriptor = {}
+) {
+	Object.defineProperty(
+		obj,
+		property,
+		{
+			get: getter,
+			...propertyConfiguration,
+			enumerable: false
+		}
+	);
 }
 
 export function addHiddenUnwritableMethodToInstance (
@@ -1126,4 +1173,140 @@ export function coercePositiveInt<T extends number | undefined | null = undefine
 
 export function getUUID () {
 	return uuid.snowflake().hex()
+}
+
+export const DEFAULT_GENERATE_SQL_QUERY_SELECT: FxOrmDMLDriver.DMLDriver_FindOptions['generateSqlSelect']
+= function (ctx) {
+	return this.query.select()
+		.from(ctx.fromTuple)
+		.select(ctx.selectFields)
+}
+
+export function isVirtualViewModel (model: FxOrmModel.Model) {
+	return (
+		Object.keys(model.allProperties).length === 0
+		&& Object.keys(model.virtualProperties).length > 0
+	)
+}
+
+export function disAllowOpForVModel (model: FxOrmModel.Model, opName: string) {
+	if (isVirtualViewModel(model)) {
+		throw new ORMError(`operation '${opName}' not supported for virtual model`, 'NO_SUPPORT', { model: model.name });
+	}
+}
+
+export function normalizeVirtualViewOption (
+	virtualView: FxOrmModel.ModelDefineOptions['virtualView'],
+	knex: import('@fxjs/knex').Knex,
+): FxOrmModel.ModelConstructorOptions['virtualView'] {
+	let result: FxOrmModel.ModelConstructorOptions['virtualView'] = {
+		disabled: true,
+		subQuery: '()'
+	};
+
+	if (!virtualView) {
+		return result;
+	} else if (typeof virtualView === 'string') {
+		result = {
+			disabled: false,
+			subQuery: virtualView as `(${string})`
+		}
+	} else if (QueryHelpers.maybeKnexRawOrQueryBuilder(virtualView)) {
+		result = {
+			disabled: false,
+			subQuery: knex.raw(virtualView.toQuery()).wrap('(', ')').toQuery() as `(${string})`
+		}
+	} else if (typeof virtualView === 'object') {
+		result = {
+			disabled: !!virtualView.disabled,
+			subQuery: virtualView.subQuery
+		}
+	}
+
+	if (!QueryHelpers.isWrapperdSubQuerySelect(result?.subQuery)) {
+		throw new Error(`[normalizeVirtualViewOption] invalid virtualView.subQuery: ${result?.subQuery}, it must be knex.raw(...), knex's query build, or sub query string wrapped with ()`)
+	}
+
+	return result;
+}
+
+/** @internal only for plugin developers */
+export function __wrapTableSourceAsGneratingSqlSelect(
+	{
+		virtualView,
+		customSelect: _customSelect,
+		generateSqlSelect,
+	}: {
+		virtualView: FxOrmModel.ModelConstructorOptions['virtualView'],
+		customSelect?: FxOrmModel.ModelDefineOptions['customSelect']
+		generateSqlSelect?: FxOrmModel.ModelDefineOptions['generateSqlSelect'],
+	},
+	opts: {
+		dialect: FxSqlQueryDialect.Dialect,
+		modelTable: string,
+	}
+): FxOrmModel.ModelDefineOptions['generateSqlSelect'] {
+	const {
+		modelTable, dialect
+	} = opts;
+
+	if (!virtualView.disabled) {
+		return function (ctx, querySelect) {
+			querySelect
+				.from(`${virtualView.subQuery} as ${modelTable}`)
+				.select(ctx.selectVirtualFields)
+
+			return querySelect;
+		}
+	}
+
+	if (!_customSelect) return generateSqlSelect;
+
+	const customSelect = arraify(_customSelect).filter(x => !!x && typeof x === 'object').map((tfq) => {
+		return {
+			from: arraify(tfq.from).filter(Boolean),
+			select: arraify(tfq.select)
+				.map(select => {
+					return typeof select === 'function' ? select(dialect) : select
+				})
+				.filter(Boolean),
+			wheres: (typeof tfq.wheres === 'string' ? { __sql: [[tfq.wheres]] } : tfq.wheres) as Exclude<typeof tfq.wheres, string>,
+		}
+	});
+
+	return function (ctx) {
+        const qSelect = this.query.select()
+          .from([ctx.table, ctx.table]) // specify the alias as table name itself
+          .select(ctx.selectFields)
+
+		customSelect.forEach((tfq) => {
+			if (tfq.from.length) {
+				tfq.from.forEach(fromItem => {
+					// pre convert string like `a` as `[a, a]`
+					if (typeof fromItem === 'string' && !QueryHelpers.isWrapperdSubQuerySelect(fromItem)) {
+						let [tableName = ctx.table, tableAlias] = QueryHelpers.parseTableInputStr(fromItem, this.query.Dialect.type);
+						tableAlias = tableAlias || tableName as string;
+						qSelect.from([tableName, tableAlias]);
+					} else {
+						qSelect.from(fromItem);
+					}
+				})
+			} else {
+				qSelect.from([ctx.table, ctx.table])
+			}
+
+			const select = [...new Set([
+				...ctx.selectVirtualFields,
+				...tfq.select
+			])]
+
+			if (select.length) qSelect.select(select);
+
+			if (tfq.wheres) {
+				qSelect.where(tfq.wheres)
+			};
+		});
+
+		return qSelect;
+	}
 }

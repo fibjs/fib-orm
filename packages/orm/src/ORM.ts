@@ -115,29 +115,46 @@ export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 		}
 	
 		const m_settings = opts.useSelfSettings ? Settings.Container(this.settings.get('*')) : this.settings;
-	
+
+		const virtualView = Utilities.normalizeVirtualViewOption(opts.virtualView, this.driver.knex);
+
+		const modelTable = opts.table || opts.collection || ((m_settings.get("model.namePrefix") || "") + name);
+
+		const generateSqlSelect = Utilities.__wrapTableSourceAsGneratingSqlSelect(
+			{
+				virtualView,
+				customSelect: opts.customSelect,
+				generateSqlSelect: opts.generateSqlSelect,
+			}, {
+				dialect: this.driver.query.Dialect,
+				modelTable,
+			}
+		);
+
 		this.models[name] = new Model({
-			name		   : name,
-			db             : this,
-			settings       : m_settings,
-			driver_name    : this.driver_name,
-			driver         : this.driver,
-			table          : opts.table || opts.collection || ((m_settings.get("model.namePrefix") || "") + name),
-			tableComment   : opts.tableComment || '',
+			name		   	: name,
+			db             	: this,
+			settings       	: m_settings,
+			driver_name    	: this.driver_name,
+			driver         	: this.driver,
+			table          	: opts.table || opts.collection || ((m_settings.get("model.namePrefix") || "") + name),
+			tableComment   	: opts.tableComment || '',
+			virtualView		: virtualView,
+			generateSqlSelect,
 			// not standard Record<string, FxOrmProperty.NormalizedProperty> here, but we should pass it firstly
-			properties     : properties as Record<string, FxOrmProperty.NormalizedProperty>,
-			__for_extension: opts.__for_extension || false,
-			indexes        : opts.indexes || [],
-			identityCache  : opts.hasOwnProperty("identityCache") ? opts.identityCache : m_settings.get("instance.identityCache"),
-			keys           : opts.id,
-			autoSave       : opts.hasOwnProperty("autoSave") ? opts.autoSave : m_settings.get("instance.autoSave"),
-			autoFetch      : opts.hasOwnProperty("autoFetch") ? opts.autoFetch : m_settings.get("instance.autoFetch"),
-			autoFetchLimit : opts.autoFetchLimit || m_settings.get("instance.autoFetchLimit"),
-			cascadeRemove  : opts.hasOwnProperty("cascadeRemove") ? opts.cascadeRemove : m_settings.get("instance.cascadeRemove"),
-			hooks          : opts.hooks || {},
-			methods        : opts.methods || {},
-			validations    : opts.validations || {},
-			ievents		   : opts.ievents || {},
+			properties     	: properties as Record<string, FxOrmProperty.NormalizedProperty>,
+			__for_extension	: opts.__for_extension || false,
+			indexes        	: opts.indexes || [],
+			identityCache  	: opts.hasOwnProperty("identityCache") ? opts.identityCache : m_settings.get("instance.identityCache"),
+			keys           	: opts.id,
+			autoSave       	: opts.hasOwnProperty("autoSave") ? opts.autoSave : m_settings.get("instance.autoSave"),
+			autoFetch      	: opts.hasOwnProperty("autoFetch") ? opts.autoFetch : m_settings.get("instance.autoFetch"),
+			autoFetchLimit 	: opts.autoFetchLimit || m_settings.get("instance.autoFetchLimit"),
+			cascadeRemove  	: opts.hasOwnProperty("cascadeRemove") ? opts.cascadeRemove : m_settings.get("instance.cascadeRemove"),
+			hooks          	: opts.hooks || {},
+			methods        	: opts.methods || {},
+			validations    	: opts.validations || {},
+			ievents		   	: opts.ievents || {},
 	
 			instanceCacheSize : opts.hasOwnProperty("instanceCacheSize") ? opts.instanceCacheSize : m_settings.get("instance.cacheSize"),
 		});
@@ -147,7 +164,7 @@ export class ORM extends events.EventEmitter implements FxOrmNS.ORM {
 				this.plugins[i].define(this.models[name], this);
 			}
 		}
-	
+
 		return this.models[name] as any;
 	};
 

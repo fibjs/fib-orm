@@ -53,7 +53,7 @@ export const Model = function (
 	const many_associations: FxOrmAssociation.InstanceAssociationItem_HasMany[] = [];
 	const extend_associations: FxOrmAssociation.InstanceAssociationItem_ExtendTos[] = [];
 	const association_properties: string[] = [];
-	const model_fields: FxSqlQueryColumns.SelectInputArgType[] = [];
+	const model_selectable_fields: FxSqlQueryColumns.SelectInputArgType[] = [];
 	const fieldToPropertyMap: FxOrmProperty.FieldToPropertyMapType = {};
 	/**
 	 * @description compared to m_opts.properties, allProperties means all properties including:
@@ -63,6 +63,19 @@ export const Model = function (
 	 *  were added by `addProperty` method
 	 */
 	const allProperties: Record<string, FxOrmProperty.NormalizedProperty> = {};
+	const virtualProperties: Record<string, FxOrmProperty.NormalizedProperty> = {};
+	// const __propertiesByName = new Proxy<typeof allProperties>(allProperties, {
+	// 	get: (target, prop) => {
+	// 		return target[prop as string] || virtualProperties[prop as string];
+	// 	},
+	// 	has: (target, prop) => {
+	// 		return Reflect.has(target, prop) || (prop in virtualProperties);
+	// 	},
+	// 	ownKeys: (target) => {
+	// 		return Reflect.ownKeys(target).concat(Object.keys(virtualProperties));
+	// 	}
+	// });
+
 	const keyProperties: FxOrmProperty.NormalizedProperty[] = [];
 	
 	const initialHooks = Object.assign({}, m_opts.hooks)
@@ -119,7 +132,7 @@ export const Model = function (
 		const instance = new Instance(model, {
 			uid                    : inst_opts.uid, // singleton unique id
 			keys                   : m_opts.keys,
-			isNew                 : inst_opts.isNew || false,
+			isNew                  : inst_opts.isNew || false,
 			isShell                : inst_opts.isShell || false,
 			data                   : data,
 			autoSave               : inst_opts.autoSave || false,
@@ -140,7 +153,7 @@ export const Model = function (
 			events				   : m_opts.ievents
 		});
 		
-		if (model_fields !== null) {
+		if (model_selectable_fields !== null) {
 			LazyLoad.extend(instance, model, m_opts.properties);
 		}
 
@@ -207,6 +220,11 @@ export const Model = function (
 
 	Utilities.addUnwritableProperty(model, 'name', m_opts.name || m_opts.table, { configurable: false })
 	Utilities.addUnwritableProperty(model, 'allProperties', allProperties, { configurable: false })
+	Utilities.addUnwritableProperty(model, 'virtualProperties', virtualProperties, { configurable: false })
+	Utilities.addHiddenReadonlyProperty(model, '__propertiesByName', function () {
+		return Object.assign({}, allProperties, virtualProperties);
+	}, { configurable: false })
+
 	Utilities.addUnwritableProperty(model, 'properties', m_opts.properties, { configurable: false })
 	Utilities.addUnwritableProperty(model, 'settings', m_opts.settings, { configurable: false })
 	Utilities.addUnwritableProperty(model, 'keys', m_opts.keys, { configurable: false })
@@ -216,10 +234,14 @@ export const Model = function (
 	), { configurable: false })
 
 	model.dropSync = function (
-		this:FxOrmModel.Model,
+		this: FxOrmModel.Model,
 	) {
 		if (typeof m_opts.driver.doDrop !== "function") {
 			throw new ORMError("Driver does not support Model.drop()", 'NO_SUPPORT', { model: m_opts.table });
+		}
+
+		if (Utilities.isVirtualViewModel(model)) {
+			return ;
 		}
 
 		return m_opts.driver.doDrop({
@@ -243,6 +265,13 @@ export const Model = function (
 	model.syncSync = function () {
 		if (typeof m_opts.driver.doSync !== "function") {
 			throw new ORMError("Driver does not support Model.sync()", 'NO_SUPPORT', { model: m_opts.table })
+		}
+
+		if (Utilities.isVirtualViewModel(model)) {
+			if (m_opts.driver.ddlSync.hasCollectionSync(m_opts.driver.sqlDriver, m_opts.table)) {
+				console.warn(`model '${model.name}' defined as virtual view model, but collection with same already exists.`)
+			}
+			return ;
 		}
 
 		m_opts.driver.doSync({
@@ -294,7 +323,10 @@ export const Model = function (
 		this: FxOrmModel.Model,
 		...args
 	) {
-		
+		if (!keyProperties.length) {
+			Utilities.disAllowOpForVModel(model, 'model.get');
+		}
+
 		const conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 		let prop: FxOrmProperty.NormalizedProperty;
 
@@ -320,12 +352,21 @@ export const Model = function (
 			err: FxOrmError.ExtendedError
 
 		function deferGet () {
+			const vFields = Object.entries(model.virtualProperties).map(([k, p]) => p.mapsTo || k);;
+			const { tableConditions, topConditions } = Utilities.extractSelectTopConditions(conditions, vFields);
+
 			try {
 				founditems = m_opts.driver.find(
-					model_fields,
+					model_selectable_fields,
 					m_opts.table,
-					conditions,
-					{ limit: 1 }
+					tableConditions,
+					{
+						limit: 1,
+						topConditions,
+						selectVirtualFields: vFields,
+						generateSqlSelect: m_opts.generateSqlSelect,
+						
+					}
 				);
 			} catch (ex) {
 				err = ex;
@@ -500,20 +541,21 @@ export const Model = function (
 		}
 
 		return new ChainFind(model, {
-			only         : options.only || model_fields,
-			keys         : m_opts.keys,
-			table        : base_table,
-			driver       : m_opts.driver,
-			conditions   : conditions,
-			associations : many_associations,
-			limit        : options.limit,
-			order        : normalized_order,
-			merge        : merges,
-			exists		 : options.exists || [],
-			offset       : options.offset,
-			properties   : allProperties,
+			only: options.only || model_selectable_fields,
+			keys: m_opts.keys,
+			table: base_table,
+			driver: m_opts.driver,
+			conditions: conditions,
+			associations: many_associations,
+			limit: options.limit,
+			order: normalized_order,
+			merge: merges,
+			exists: options.exists || [],
+			offset: options.offset,
+			properties: model.__propertiesByName,
 			keyProperties: keyProperties,
-			newInstanceSync  : function (data: any) {
+			generateSqlSelect: m_opts.generateSqlSelect,
+			newInstanceSync: function (data: any) {
 				// We need to do the rename before we construct the UID & do the cache lookup
 				// because the cache is loaded using propertyName rather than fieldName
 				Utilities.renameDatastoreFieldsToPropertyNames(data, fieldToPropertyMap);
@@ -615,6 +657,8 @@ export const Model = function (
 	};
 
 	model.countSync = function (conditions) {
+		Utilities.disAllowOpForVModel(model, 'model.count');
+
 		if (conditions) {
 			conditions = Utilities.checkConditions(conditions, one_associations);
 			Utilities.filterWhereConditionsInput(conditions, model);
@@ -660,6 +704,8 @@ export const Model = function (
 	}
 
 	model.aggregate = function () {
+		Utilities.disAllowOpForVModel(model, 'model.aggregate');
+
 		var conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 		var propertyList: string[] = [];
 
@@ -689,6 +735,8 @@ export const Model = function (
 	};
 
 	model.existsSync = function (...ids) {
+		Utilities.disAllowOpForVModel(model, 'model.exists');
+
 		let conditions = <FxSqlQuerySubQuery.SubQueryConditions>{};
 
 		/**
@@ -783,6 +831,8 @@ export const Model = function (
 	}
 
 	model.createSync = function (): any {
+		Utilities.disAllowOpForVModel(model, 'model.create');
+
 		let create_single: boolean      = false;
 		let opts: FxOrmModel.ModelOptions__Create = {};
 		let itemsParams: FxOrmInstance.InstanceDataPayload[] = []
@@ -825,10 +875,14 @@ export const Model = function (
 	};
 
 	model.clearSync = function () {
+		Utilities.disAllowOpForVModel(model, 'model.clear');
+		
 		return m_opts.driver.clear(m_opts.table);
 	};
 
 	model.clear = function (cb?) {
+		Utilities.disAllowOpForVModel(model, 'model.clear');
+
 		m_opts.driver.clear(m_opts.table, function (err: Error) {
 			if (typeof cb === "function") cb(err);
 		});
@@ -874,6 +928,8 @@ export const Model = function (
 			customTypes: m_opts.db.customTypes, settings: m_opts.settings
 		});
 
+		if (!m_opts.virtualView.disabled) { prop.virtual = true;  }
+
 		if (prop.type === 'serial') {
 			prop.key = true;
 			prop.klass = prop.klass || 'primary';
@@ -902,7 +958,17 @@ export const Model = function (
 				break;
 		}
 
-		allProperties[prop.name]        = prop;
+		if (!prop.virtual) { allProperties[prop.name] = prop; }
+		else {
+			virtualProperties[prop.name] = prop;
+			// TODO: should we force virtual view without keys?
+			m_opts.keys = m_opts.keys.filter(key => key !== prop.name);
+			prop.required = false;
+			prop.index = false;
+			prop.primary = false;
+			delete prop.klass;
+		}
+
 		fieldToPropertyMap[prop.mapsTo] = prop;
 
 		if (prop.required) {
@@ -915,12 +981,17 @@ export const Model = function (
 
 		if (prop.lazyload !== true && !currFields[prop.name]) {
 			currFields[prop.name] = true;
+
+			if (prop.virtual) {
+				return prop;
+			}
+			
 			if ((cType = m_opts.db.customTypes[prop.type]) && cType.datastoreGet) {
-				model_fields.push({
+				model_selectable_fields.push({
 					a: prop.mapsTo, sql: cType.datastoreGet(prop, m_opts.db.driver.query)
 				});
 			} else {
-				model_fields.push(prop.mapsTo);
+				model_selectable_fields.push(prop.mapsTo);
 			}
 		}
 
@@ -948,8 +1019,12 @@ export const Model = function (
 		}
 	}
 
+	if (Object.keys(m_opts.properties).every((k) => m_opts.properties[k].virtual === true)) {
+		m_opts.virtualView.disabled = false;
+	}
+
 	// If no keys are defined add the default one
-	if (m_opts.keys.length == 0 && !Object.values(m_opts.properties).some((p: FxOrmProperty.NormalizedProperty) => p.key === true)) {
+	if (m_opts.virtualView.disabled && m_opts.keys.length == 0 && !Object.values(m_opts.properties).some((p: FxOrmProperty.NormalizedProperty) => p.key === true)) {
 		m_opts.properties[m_opts.settings.get("properties.primary_key")] = {
 			type: 'serial', key: true, required: false, klass: 'primary'
 		} as FxOrmProperty.NormalizedProperty;
@@ -971,7 +1046,7 @@ export const Model = function (
 	}
 
 	// if no any serial-type, keyPrimiary property
-	if (keyProperties.length == 0) {
+	if (m_opts.virtualView.disabled && keyProperties.length === 0) {
 		if (keyP) // use keyPrimary as the only keyProperties
 			keyProperties.push(keyP);
 		else
@@ -1022,7 +1097,7 @@ function soloFindByChainOrRunSync <T = any>(
 
 export function listFindByChainOrRunSync (
 	model: FxOrmModel.Model,
-	self_conditions: FxOrmModel.ModelQueryConditions__Find,
+	self_conditions: FxOrmQuery.QueryConditions__Find,
 	by_list: FxOrmModel.ModelFindByDescriptorItem[],
 	self_options: FxOrmModel.ModelOptions__Find,
 	opts: FxOrmCommon.SyncCallbackInputArags

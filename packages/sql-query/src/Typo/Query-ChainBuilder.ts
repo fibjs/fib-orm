@@ -12,6 +12,7 @@ export namespace FxSqlQueryChainBuilder {
 	export interface ChainBuilderOptions extends FxSqlQuery.QueryOptions {}
 
 	export interface ChainBuilder {
+		readonly knex: FxSqlQuery.Class_Query['knex']
 		build(): string
 	}
 
@@ -51,7 +52,7 @@ export namespace FxSqlQueryChainBuilder {
 		where: (...whereConditions: (FxSqlQuerySubQuery.SubQueryBuildDescriptor['wheres'] | FxSqlQuerySubQuery.WhereExistsTuple_Flatten[0])[]) => this
 		whereExists: (
 			table: string,
-			table_link: string,
+			table_link: string | FxSqlQuerySql.SqlFromTableInput,
 			link: FxSqlQuerySql.WhereExistsLinkTuple,
 			cond: FxSqlQuerySubQuery.SubQueryBuildDescriptor['wheres']
 		) => this

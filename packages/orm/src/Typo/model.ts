@@ -16,6 +16,7 @@ import { FxOrmNS } from "./ORM"
 import type {
     FxSqlQuerySubQuery,
     FxSqlQuerySql,
+    FxSqlQueryChainBuilder,
 } from '@fxjs/sql-query';
 import { FxOrmError } from "./Error"
 
@@ -47,7 +48,8 @@ export namespace FxOrmModel {
         keys: string[];
 
         allProperties: Record<string, FxOrmProperty.NormalizedProperty>
-
+        virtualProperties: Record<string, FxOrmProperty.NormalizedProperty>
+        
         /* property operation :start */
         addProperty(
             propIn: FxOrmProperty.NormalizedProperty,
@@ -56,6 +58,9 @@ export namespace FxOrmModel {
                 klass?: FxOrmProperty.KlassType
             } | false
         ): FxOrmProperty.NormalizedProperty
+
+        /** @internal */
+        readonly __propertiesByName: Record<string, FxOrmProperty.NormalizedProperty>
         /* property operation :end */
 
         sync(callback?: FxOrmCommon.GenericCallback<FxOrmSqlDDLSync.SyncResult>): Model;
@@ -97,7 +102,7 @@ export namespace FxOrmModel {
             ): FxOrmQuery.IChainFind
             <T = any>(
                 list: ModelFindByDescriptorItem[],
-                self_conditions: FxOrmModel.ModelQueryConditions__Find,
+                self_conditions: FxOrmQuery.QueryConditions__Find,
                 cb?: FxOrmCommon.ExecutionCallback<T>
             ): FxOrmQuery.IChainFind
         }
@@ -112,19 +117,19 @@ export namespace FxOrmModel {
         get(...ids: any[]): this
         
         chain: {
-            (conditions?: FxOrmModel.ModelQueryConditions__Find, ...args: (FxOrmModel.ModelOptions__Find | OrderListOrLimitOffer)[]): FxOrmQuery.IChainFind;
+            (conditions?: FxOrmQuery.QueryConditions__Find, ...args: (FxOrmModel.ModelOptions__Find | OrderListOrLimitOffer)[]): FxOrmQuery.IChainFind;
         }
 
-        find(conditions?: ModelQueryConditions__Find): FxOrmQuery.IChainFind<PropertyTypes, Methods>
+        find(conditions?: FxOrmQuery.QueryConditions__Find): FxOrmQuery.IChainFind<PropertyTypes, Methods>
         find(callback: ModelMethodCallback__Find): this
-        find(conditions: ModelQueryConditions__Find, callback: ModelMethodCallback__Find): this
+        find(conditions: FxOrmQuery.QueryConditions__Find, callback: ModelMethodCallback__Find): this
                     
-        find(conditions: ModelQueryConditions__Find, options: ModelOptions__Find): FxOrmQuery.IChainFind<PropertyTypes, Methods>
-        find(conditions: ModelQueryConditions__Find, options: ModelOptions__Find, callback: ModelMethodCallback__Find): this
-        find(conditions: ModelQueryConditions__Find, limit_order?: OrderListOrLimitOffer, limit_order2?: OrderListOrLimitOffer): FxOrmQuery.IChainFind<PropertyTypes, Methods>
+        find(conditions: FxOrmQuery.QueryConditions__Find, options: ModelOptions__Find): FxOrmQuery.IChainFind<PropertyTypes, Methods>
+        find(conditions: FxOrmQuery.QueryConditions__Find, options: ModelOptions__Find, callback: ModelMethodCallback__Find): this
+        find(conditions: FxOrmQuery.QueryConditions__Find, limit_order?: OrderListOrLimitOffer, limit_order2?: OrderListOrLimitOffer): FxOrmQuery.IChainFind<PropertyTypes, Methods>
                     
-        find(conditions: ModelQueryConditions__Find, limit_order: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): this
-        find(conditions: ModelQueryConditions__Find, limit_order: OrderListOrLimitOffer, limit_order2: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): this
+        find(conditions: FxOrmQuery.QueryConditions__Find, limit_order: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): this
+        find(conditions: FxOrmQuery.QueryConditions__Find, limit_order: OrderListOrLimitOffer, limit_order2: OrderListOrLimitOffer, callback: ModelMethodCallback__Find): this
 
         all: this['find']
         where: this['find']
@@ -139,15 +144,15 @@ export namespace FxOrmModel {
          */
         one: {
             (callback: ModelMethodCallback__Get): Model;
-            (conditions: ModelQueryConditions__Find, callback: ModelMethodCallback__Get): Model;
-            (conditions: ModelQueryConditions__Find, options: ModelOptions__Find, callback: ModelMethodCallback__Get): Model;
-            (conditions: ModelQueryConditions__Find, order: string[], callback: ModelMethodCallback__Get): Model;
-            (conditions: ModelQueryConditions__Find, limit: number, callback: ModelMethodCallback__Get): Model;
+            (conditions: FxOrmQuery.QueryConditions__Find, callback: ModelMethodCallback__Get): Model;
+            (conditions: FxOrmQuery.QueryConditions__Find, options: ModelOptions__Find, callback: ModelMethodCallback__Get): Model;
+            (conditions: FxOrmQuery.QueryConditions__Find, order: string[], callback: ModelMethodCallback__Get): Model;
+            (conditions: FxOrmQuery.QueryConditions__Find, limit: number, callback: ModelMethodCallback__Get): Model;
         }
 
         count: {
             (callback: ModelMethodCallback__Count): Model;
-            (conditions: ModelQueryConditions__Find, callback: ModelMethodCallback__Count): Model;
+            (conditions: FxOrmQuery.QueryConditions__Find, callback: ModelMethodCallback__Count): Model;
         }
 
         exists: {
@@ -155,9 +160,9 @@ export namespace FxOrmModel {
         }
 
         aggregate: {
-            (conditions: ModelQueryConditions__Find): FxOrmQuery.IAggregated;
+            (conditions: FxOrmQuery.QueryConditions__Find): FxOrmQuery.IAggregated;
             (properties: string[]): FxOrmQuery.IAggregated;
-            (conditions: ModelQueryConditions__Find, properties: string[]): FxOrmQuery.IAggregated;
+            (conditions: FxOrmQuery.QueryConditions__Find, properties: string[]): FxOrmQuery.IAggregated;
         }
         /* data operation api :end */
 
@@ -172,7 +177,7 @@ export namespace FxOrmModel {
 
     export type FindByListStyleFunctionArgs<T = any> = [
         FxOrmModel.ModelFindByDescriptorItem[],
-        FxOrmModel.ModelQueryConditions__Find,
+        FxOrmQuery.QueryConditions__Find,
         FxOrmModel.ModelOptions__Find,
         FxOrmCommon.ExecutionCallback<T>
     ]
@@ -188,7 +193,7 @@ export namespace FxOrmModel {
         // association name
         association_name: string,
         // findby conditions 
-        conditions?: ModelQueryConditions__Find,
+        conditions?: FxOrmQuery.QueryConditions__Find,
         // findby options
         options?: FxOrmAssociation.ModelAssociationMethod__FindByOptions,
 
@@ -196,7 +201,7 @@ export namespace FxOrmModel {
          * @deprecated extra where conditions fields for hasmany-assoc
          * @internal
          */
-        join_where?: FxOrmAssociation.ModelAssociationMethod__FindOptions['join_where']
+         join_where?: FxOrmAssociation.ModelAssociationMethod__FindOptions['join_where']
         // extra select fields for hasmany-assoc
         extra_select?: string[]
     }
@@ -207,17 +212,28 @@ export namespace FxOrmModel {
         db: FxOrmNS.ORM
         settings: FxOrmSettings.SettingInstance
         driver_name: string
-        driver: FxOrmDMLDriver.DMLDriver
-        table: string
+        driver: FxOrmQuery.ChainFindOptions['driver']
+        table: FxOrmQuery.ChainFindOptions['table']
         tableComment: string
+        generateSqlSelect?: FxOrmQuery.ChainFindOptions['generateSqlSelect']
         properties: Record<keyof TProperties, FxOrmProperty.NormalizedProperty>
+        /** @internal */
         __for_extension: boolean
+        /**
+         * @description if enabled, this model will be a virtual model,
+         * all Properties will be coerced to virtual property
+         */
+        virtualView: {
+            disabled?: boolean
+            subQuery: `(${string})`
+        }
+
         indexes: string[]
         
         identityCache: boolean
         instanceCacheSize: number
         
-        keys: string[]
+        keys: FxOrmQuery.ChainFindOptions['keys']
         autoSave: boolean
         autoFetch: boolean
         autoFetchLimit: number
@@ -227,6 +243,8 @@ export namespace FxOrmModel {
         validations: FxOrmValidators.IValidatorHash
         ievents: FxOrmInstance.InstanceConstructorOptions['events']
     }
+
+    type __ItOrItsArray<T> = T | T[]
     
     export interface ModelDefineOptions<
         TProperties extends Record<string, FxOrmInstance.FieldRuntimeType> = Record<string, FxOrmInstance.FieldRuntimeType>
@@ -235,9 +253,30 @@ export namespace FxOrmModel {
          * pririoty: table > collection
          */
         table?: ModelConstructorOptions<TProperties>['table']
-        tableComment?: ModelConstructorOptions<TProperties>['tableComment']
-        collection?: ModelConstructorOptions<TProperties>['table']
+        
+        /**
+         * @advanced
+         * @description use to specify the query source on DMLDriver's `find` excution,
+         * 
+         * if enable this, then:
+         * - `table` will be ignored on generate SQL select
+         * - all put-like operations will be disabled for this model
+         * - `generateSqlSelect` would be ignored
+         * 
+         * @warning if use this option, you must ensure the `selectTableSource` is a valid
+         */
+        customSelect?: __ItOrItsArray<{
+            // subQuery: FxSqlQuerySql.SqlTableInputType
+            from: __ItOrItsArray<FxSqlQuerySql.SqlTableInputType>
+            select?: FxSqlQuerySql.SqlSelectFieldsType[]
+            wheres?: string | Parameters<FxSqlQueryChainBuilder.ChainBuilder__Select['where']>[0] & object
+        }>
+        generateSqlSelect?: ModelConstructorOptions<TProperties>['generateSqlSelect']
+        virtualView?: false | string | FxSqlQuerySql.SqlFromTableInput
+            | ModelConstructorOptions<TProperties>['virtualView']
 
+        collection?: ModelConstructorOptions<TProperties>['table']
+        tableComment?: ModelConstructorOptions<TProperties>['tableComment']
         /**
          * @dirty would be deprecated
          */
@@ -374,13 +413,10 @@ export namespace FxOrmModel {
 
     export interface ModelOptions__Get extends ModelOptions__Find {}
 
-    export interface ModelQueryConditions__Find extends FxSqlQuerySubQuery.SubQueryConditions {
-        [property: string]: any
-    }
+    /** @deprecated use `FxOrmQuery.QueryConditions__Find` directly */
+    export type ModelQueryConditions__Find = FxOrmQuery.QueryConditions__Find;
 
-    export type ModelQueryConditionsItem = FxSqlQuerySql.SqlFragmentStr | ModelQueryConditions__Find
-
-    export type ModelMethodOptions_Find = FxOrmCommon.IdType | ModelQueryConditions__Find
+    export type ModelMethodOptions_Find = FxOrmCommon.IdType | FxOrmQuery.QueryConditions__Find
 
     export type ModelMethodCallback__Boolean = FxOrmCommon.GenericCallback<Boolean>
     export type ModelMethodCallback__Find = FxOrmCommon.GenericCallback<FxOrmInstance.Instance[]>

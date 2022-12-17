@@ -75,42 +75,60 @@ function convertTimezone(tz: FxSqlQuery.FxSqlQueryTimezone): false | number {
 }
 
 export function get_table_alias (
-	sql: FxSqlQuerySql.SqlQueryChainDescriptor, table: string
+	sql: FxSqlQuerySql.SqlQueryChainDescriptor, table: string | FxSqlQuerySql.SqlFromTableInput
 ): string {
 	for (let i = 0; i < sql.from.length; i++) {
 		if (sql.from[i].table == table) {
 			return pickAliasFromFromDescriptor(sql.from[i]);
 		}
 	}
-	return table;
+
+	return typeof table === 'string' ? table : '';
 };
 
-// export function parse_table_alias (
-// 	table: string, sql: FxSqlQuerySql.SqlQueryChainDescriptor
-// ): string {
-// 	let [_, table_alias] = parseTableInputStr(table)
-// 	if (table_alias)
-// 		return table_alias;
+// TODO: add test about it
+function unwrapIdentifier (identifier: string = '', dialect: FxSqlQueryDialect.DialectType): string {
+	switch (dialect) {
+		case 'postgresql':			
+			return identifier.replace(/^"|"$/g, '')
+		case 'sqlite':
+		case 'mysql':			
+			return identifier.replace(/^`|`$/g, '')
+	}
 
-// 	return get_table_alias(sql, table)
-// }
+	return identifier;
+}
 
-export function parseTableInputStr ( table_name: FxSqlQuerySql.SqlTableInputType ): FxSqlQuerySql.SqlTableTuple {
+export function parseTableInputStr (
+	table_name: FxSqlQuerySql.SqlTableInputType,
+	dialect?: FxSqlQueryDialect.DialectType,
+): FxSqlQuerySql.SqlTableTuple {
 	if (!table_name)
-		throw `invalid input table_name!`
+		throw new Error(`[parseTableInputStr] invalid input table_name!`)
 
 	let ta_tuple: FxSqlQuerySql.SqlTableTuple = ['', ''];
 
 	if (typeof table_name === 'string') {
 		table_name = table_name.trim()
 
-		if (table_name.indexOf(' as ') > 0) {
-			ta_tuple = table_name.split(' as ').slice(0, 2) as FxSqlQuerySql.SqlTableTuple
+		let idx = table_name.lastIndexOf(' as ');
+		if (idx > 0) {
+			ta_tuple = [
+				table_name.slice(0, idx).trim(),
+				table_name.slice(idx + 4).trim()
+			] as FxSqlQuerySql.SqlTableTuple
 		} else {
 			ta_tuple = table_name.split(' ').slice(0, 2) as FxSqlQuerySql.SqlTableTuple
 		}
+	} else if (maybeKnexRawOrQueryBuilder(table_name)) {
+		ta_tuple = [table_name, ''] as FxSqlQuerySql.SqlTableTuple
 	} else {
 		ta_tuple = table_name.slice(0, 2) as FxSqlQuerySql.SqlTableTuple
+	}
+
+	if (dialect) {
+		if (typeof ta_tuple[0] === 'string') ta_tuple[0] = unwrapIdentifier(ta_tuple[0], dialect)
+		ta_tuple[1] = unwrapIdentifier(ta_tuple[1], dialect)
 	}
 
 	return ta_tuple
@@ -124,7 +142,9 @@ export function pickColumnAsFromSelectFieldsDescriptor(sitem: FxSqlQuerySql.SqlS
 	return sitem.as || sitem.a
 }
 
-export function autoIncreatementTableIndex (from: FxSqlQuerySql.SqlQueryChainDescriptor['from']) {
+export function autoIncreatementTableIndex (
+	from: FxSqlQuerySql.SqlQueryChainDescriptor['from']
+) {
 	return from.length + 1;
 }
 
@@ -166,6 +186,9 @@ export function bufferToString (buffer: Class_Buffer | string, dialect: FxSqlQue
 }
 
 export function escapeValForKnex (val: any, Dialect: FxSqlQueryDialect.Dialect, opts: FxSqlQueryChainBuilder.ChainBuilderOptions) {
+	// no escape for `knex.raw(...)`, `knex.ref(...)` and subquery
+	if (maybeKnexRawOrQueryBuilder(val)) return val;
+
 	// never escapeVal those types with `Dialect.escapeVal`, knex would escape them automatically
 	const _type = typeof val;
 
@@ -216,4 +239,58 @@ export function cutOffOrderDirectionFromColumnFirstStr (col_name: string): {
 	}
 
 	return result
+}
+
+export function maybeKnexSubQuery(input: any): input is import('@fxjs/knex').Knex.QueryBuilder {
+	return typeof input?.toQuery === "function";
+}
+
+export function maybeKnexRaw(input: any): input is import('@fxjs/knex').Knex.Raw {
+	return typeof input?.toQuery === "function";
+}
+
+export function maybeKnexRawOrQueryBuilder(input: any): input is import('@fxjs/knex').Knex.QueryBuilder | import('@fxjs/knex').Knex.Raw {
+	return typeof input?.toQuery === "function";
+}
+
+export function isWrapperdSubQuerySelect (sql: any): sql is `(${string})` {
+	return typeof sql === 'string' && /^\(\s*SELECT\s.*\)$/i.test(sql)
+}
+
+/** @internal */
+export function convertSqlFromTable (
+	sql_from_item: FxSqlQuerySql.QueryFromDescriptor,
+	knex: import('@fxjs/knex').Knex,
+	isSubQuery: boolean = isWrapperdSubQuerySelect((sql_from_item.table as any)?.trim?.()),
+) {
+	// from: select subquery as table
+	return maybeKnexRawOrQueryBuilder(sql_from_item.table) ? knex.raw(sql_from_item.table).wrap('(', ')')
+		: isSubQuery ? knex.raw(sql_from_item.table.trim()).wrap('', '')
+		: sql_from_item.table;
+}
+
+export class ChainBuilderBase implements FxSqlQueryChainBuilder.ChainBuilder {
+	// readonly Dialect: FxSqlQueryDialect.Dialect
+	readonly knex: FxSqlQuery.Class_Query['knex']
+
+	constructor (protected Dialect: FxSqlQueryDialect.Dialect) {
+		Object.defineProperty(this, 'Dialect', {
+			get () {
+				return Dialect;
+			},
+			configurable: false
+		});
+
+		Object.defineProperty(this, 'knex', {
+			get () {
+				return Dialect.knex;
+			},
+			configurable: false
+		});
+	}
+
+	/**
+	 * @override
+	 */
+	build(): string { return ''; };
 }

@@ -17,6 +17,7 @@ import type { FxOrmModel } from '../Typo/model';
 import type { FxOrmProperty } from '../Typo/property';
 import type { FxOrmDMLDriver } from '../Typo/DMLDriver';
 import type { FxOrmCommon } from '../Typo/_common';
+import type { FxOrmQuery } from '../Typo/query';
 
 function noOperation (...args: any[]) {};
 
@@ -45,6 +46,8 @@ export function prepare (
 		properties: Record<string, FxOrmModel.ModelPropertyDefinition>,
 		assoc_options: FxOrmAssociation.AssociationDefinitionOptions_ExtendsTo
 	) {
+		Utilities.disAllowOpForVModel(Model, 'model.extendsTo');
+
 		assoc_options = assoc_options || {};
 
 		for (let i = 0; i < db.plugins.length; i++) {
@@ -123,7 +126,7 @@ export function prepare (
 		const findByAccessorChainOrRunSync = function (is_sync: boolean = false) {
 			return function () {
 				var cb: FxOrmModel.ModelMethodCallback__Find = null,
-					conditions: FxOrmModel.ModelQueryConditions__Find = null,
+					conditions: FxOrmQuery.QueryConditions__Find = null,
 					options: FxOrmAssociation.ModelAssociationMethod__FindOptions = {};
 
 				const args = Array.prototype.slice.apply(arguments)

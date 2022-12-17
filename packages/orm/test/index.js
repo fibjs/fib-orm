@@ -45,6 +45,7 @@ function t() {
     run('./integration/model-create.js');
     run('./integration/model-create.callback.js');
     run('./integration/model-exists.js');
+    run('./integration/model-driver-custom-select.js');
     run('./integration/model-find-chain.js');
     run('./integration/model-find-chain.callback.js');
     run('./integration/model-find-mapsto.js');
@@ -61,6 +62,8 @@ function t() {
     run('./integration/model-save.callback.js');
     run('./integration/model-sync.js');
     run('./integration/model-sync.callback.js');
+    run('./integration/model-virtual-view.js');
+    
 
     run('./integration/predefined-validators.js');
 
