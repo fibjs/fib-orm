@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/sql-query",
-	"version": "0.9.4",
+	"version": "0.10.0-alpha.0",
 	"private": false,
 	"description": "",
 	"main": "lib/Query.js",

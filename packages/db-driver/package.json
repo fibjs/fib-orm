@@ -1,6 +1,6 @@
 {
 	"name": "@fxjs/db-driver",
-	"version": "0.4.3",
+	"version": "0.5.0-alpha.0",
 	"description": "",
 	"keywords": [
 		"mysql",
