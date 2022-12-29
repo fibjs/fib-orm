@@ -150,6 +150,22 @@ describe("Model.sync", function () {
     
             var comment = getTableComment('a');
             assert.equal(comment, 'table comment for a')
+
+            // re-define to test update table comment
+            A = db.define('a', {
+                name: {
+                    type: 'text',
+                    comment: 'field name.a'
+                },
+            }, {
+                tableComment: 'table comment for a 2'
+            });
+
+            // you can update existed table's comment
+            A.syncSync()
+    
+            var comment = getTableComment('a');
+            assert.equal(comment, 'table comment for a 2')
         });
     }
 });
