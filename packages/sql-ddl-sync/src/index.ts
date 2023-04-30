@@ -365,7 +365,10 @@ export class Sync<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn> {
 							this.dbdriver,
 							collection.name,
 							col.value,
-							last_k
+							// for sqlite, added column must be the last one,
+							// we pass empty string to make `addCollectionColumnSync`
+							// find last column automatically
+							this.dbdriver.type === 'sqlite' ? '' : last_k,
 						)
 
 						this.total_changes += 1;
