@@ -156,7 +156,9 @@ function getColumnTypeRaw (
 			customTypes: syncInstance.dbdriver?.customTypes,
 			escapeVal: getSqlQueryDialect(dbtype).escapeVal,
 			userOptions: {
-				useDefaultValue: _for === 'create_table',
+				useDefaultValue: _for === 'create_table' || (
+					dbtype === 'sqlite' && ['add_column', 'alter_column'].includes(_for)
+				),
 			}
 		}).typeValue;
 

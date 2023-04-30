@@ -224,25 +224,26 @@ export const hasCollectionColumns: IDialect['hasCollectionColumns'] = function (
 export const addCollectionColumnSync: IDialect['addCollectionColumnSync'] = function (
 	dbdriver, name, column, after_column
 ) {
-	const rows = dbdriver.execute<any[]>(
-		getSqlQueryDialect('sqlite').escape(
-			"SELECT name FROM pragma_table_info(?) ORDER BY cid DESC LIMIT 1;", [name]
-		)
-	)
+	// const rows = dbdriver.execute<any[]>(
+	// 	getSqlQueryDialect('sqlite').escape(
+	// 		"SELECT name FROM pragma_table_info(?) ORDER BY cid DESC LIMIT 1;", [name]
+	// 	)
+	// )
 
-	const lastColName = rows[0].name;
+	// const lastColName = rows[0].name;
 
-	if (after_column && lastColName.toLowerCase() !== after_column.toLowerCase()) {
-		throw new Error(`Only support add column after last column ${lastColName}`);
-	}
+	// if (after_column && lastColName.toLowerCase() !== after_column.toLowerCase()) {
+	// 	throw new Error(`Only support add column after last column ${lastColName}`);
+	// }
 	
-	after_column = lastColName;
+	// after_column = lastColName;
 
 	return dbdriver.execute(
 		SQL.ALTER_TABLE_ADD_COLUMN({
 			name: name,
 			column: column,
-			after: after_column
+			after: undefined,
+			first: undefined
 		}, 'sqlite')
 	)
 };

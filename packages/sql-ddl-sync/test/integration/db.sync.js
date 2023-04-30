@@ -200,27 +200,16 @@ describe(`db: Sync`, function () {
 					)
 				});
 
-				if (common.dbdriver.type === 'sqlite') {
-					it(`${table}'s column 'updated_at' have no default value`, () => {
-						const props = sync.Dialect.getCollectionPropertiesSync(
-							sync.dbdriver,
-							table,
-						)
+				
+				it(`${table}'s column 'updated_at' should have default value`, () => {
+					const props = sync.Dialect.getCollectionPropertiesSync(
+						sync.dbdriver,
+						table,
+					)
 
-						assert.notExist(props.updated_at.defaultValue)
-						assert.notExist(props.expired_at.defaultValue)
-					});
-				} else {
-					it(`${table}'s column 'updated_at' should have default value`, () => {
-						const props = sync.Dialect.getCollectionPropertiesSync(
-							sync.dbdriver,
-							table,
-						)
-
-						assert.exist(props.updated_at.defaultValue)
-						assert.exist(props.expired_at.defaultValue)
-					});
-				}
+					assert.exist(props.updated_at.defaultValue)
+					assert.exist(props.expired_at.defaultValue)
+				});
 
 				if (common.dbdriver.type !== 'sqlite') {
 					it(`${table}'s column 'desc' should has column comment`, () => {
