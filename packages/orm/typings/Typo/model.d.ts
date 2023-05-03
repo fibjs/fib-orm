@@ -66,7 +66,7 @@ export declare namespace FxOrmModel {
         };
         findBy: {
             <T = any>(association_name: ModelFindByDescriptorItem['association_name'], conditions?: ModelFindByDescriptorItem['conditions'], options?: ModelFindByDescriptorItem['options'], cb?: FxOrmCommon.ExecutionCallback<T>): FxOrmQuery.IChainFind;
-            <T = any>(list: ModelFindByDescriptorItem[], self_conditions: FxOrmQuery.QueryConditions__Find, cb?: FxOrmCommon.ExecutionCallback<T>): FxOrmQuery.IChainFind;
+            <T = any>(list: ModelFindByDescriptorItem[], self_conditions: FxOrmQuery.QueryConditions__Find, options?: ModelFindByDescriptorItem['options'], cb?: FxOrmCommon.ExecutionCallback<T>): FxOrmQuery.IChainFind;
         };
         create: {
             (data: FxOrmInstance.InstanceDataPayload, callback?: ModelMethodCallback__CreateItem): typeof data extends any[] ? FxOrmInstance.Instance<PropertyTypes, Methods>[] : FxOrmInstance.Instance<PropertyTypes, Methods>;

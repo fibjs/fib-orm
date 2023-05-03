@@ -103,6 +103,7 @@ export namespace FxOrmModel {
             <T = any>(
                 list: ModelFindByDescriptorItem[],
                 self_conditions: FxOrmQuery.QueryConditions__Find,
+                options?: ModelFindByDescriptorItem['options'],
                 cb?: FxOrmCommon.ExecutionCallback<T>
             ): FxOrmQuery.IChainFind
         }
