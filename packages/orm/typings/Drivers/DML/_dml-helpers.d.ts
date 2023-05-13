@@ -13,3 +13,7 @@ export declare function filterFieldsOnFind(ctx: {
 }, ret: {
     selectFields: FxSqlQueryColumns.SelectInputArgType[];
 }): void;
+/**
+ * @description for point from sqlite, which stored as text actually
+ */
+export declare function unwrapQuote(stringVal: string): string;

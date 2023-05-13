@@ -139,7 +139,7 @@ Driver.prototype.execSimpleQuery = function (
 
 Driver.prototype.find = function (
 	this: FxOrmDMLDriver.DMLDriver_PostgreSQL,
-	selectFields, table, conditions, opts, cb: FxOrmCommon.GenericCallback<any>
+	selectFields, table, conditions, opts
 ) {
 	const { from_tuple, pure_table, alias } = Utilities.parseTableInputForSelect(table);
 	const ctx = {
@@ -168,7 +168,7 @@ Driver.prototype.find = function (
 	utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
 	utils.buildExistsToQuery.apply(this, [q, alias, opts.exists]);
 
-	return this.execSimpleQuery(q.build(), cb);
+	return this.execSimpleQuery(q.build());
 };
 
 Driver.prototype.count = function (

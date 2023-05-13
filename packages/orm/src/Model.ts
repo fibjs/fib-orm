@@ -320,8 +320,6 @@ export const Model = function (
 		return { options, ids }
 	}
 
-	const isMySQL = m_opts.driver.db.type === 'mysql';
-
 	model.getSync = function (
 		this: FxOrmModel.Model,
 		...args
@@ -358,7 +356,7 @@ export const Model = function (
 			const vFields = Object.entries(model.virtualProperties).map(([k, p]) => p.mapsTo || k);;
 			const { tableConditions, topConditions } = Utilities.extractSelectTopConditions(conditions, vFields);
 
-			const __pointTypeMapsTo = !isMySQL ? [] : pickPointTypeFields(m_opts.driver, allProperties);
+			const __pointTypeMapsTo = pickPointTypeFields(m_opts.driver, allProperties);
 
 			try {
 				founditems = m_opts.driver.find(

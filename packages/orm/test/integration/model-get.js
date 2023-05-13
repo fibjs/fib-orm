@@ -238,7 +238,7 @@ describe("Model.get()", function () {
     });
 
     describe("with a point property type", function () {
-        if (common.dbType() == 'sqlite' || common.dbType() == 'mongodb') return;
+        if (common.dbType() == 'mongodb') return;
 
         const point = { x: 51.5177, y: -0.0968 };
         function assertPoint(locPoint) {

@@ -315,7 +315,7 @@ describe('Model.get() - callback', function () {
   })
 
   describe('with a point property type', function () {
-    if (common.dbType() == 'sqlite' || common.dbType() == 'mongodb') return
+    if (common.dbType() == 'mongodb') return
     
     const point = { x: 51.5177, y: -0.0968 };
     function assertPoint(locPoint) {
@@ -347,10 +347,13 @@ describe('Model.get() - callback', function () {
           assert.isTrue(person.location instanceof Object);
           assertPoint(person.location);
 
-          const pulledPerson = Person.getSync(person.id);
-          assertPoint(pulledPerson.location);
+          Person.get(person.id, (err, pulledPerson) => {
+            assert.equal(err, null);
 
-          return done()
+            assertPoint(pulledPerson.location);
+
+            return done();
+          });
         })
       })
     })

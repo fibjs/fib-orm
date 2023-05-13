@@ -32,7 +32,7 @@ export function pickPointTypeFields(
 	dmlDriver: FxOrmDMLDriver.DMLDriver,
 	modelProperties: Record<string, FxOrmProperty.NormalizedProperty>
 ): string[] {
-	if (dmlDriver.db.type !== 'mysql') return [];
+	if (!['mysql', 'sqlite'].includes(dmlDriver.db.type)) return [];
 
 	return Object.values(modelProperties)
 		.filter(p => p.type === 'point')
@@ -56,4 +56,11 @@ export function filterFieldsOnFind(ctx: {
 			as: mapsTo,
 		}
 	});
+}
+
+/**
+ * @description for point from sqlite, which stored as text actually
+ */
+export function unwrapQuote(stringVal: string) {
+    return stringVal.replace(/(?:^\'|\'$)/g, '')
 }

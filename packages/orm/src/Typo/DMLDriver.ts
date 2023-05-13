@@ -108,7 +108,8 @@ export namespace FxOrmDMLDriver {
         }
 
         find: {
-            <T=FxOrmDMLDriver.QueryDataPayload[]>(selectFields: FxSqlQueryColumns.SelectInputArgType[], table: string, conditions: FxSqlQuerySubQuery.SubQueryConditions, opts: DMLDriver_FindOptions, cb?: FxOrmCommon.GenericCallback<T>): T
+            // <T=FxOrmDMLDriver.QueryDataPayload[]>(selectFields: FxSqlQueryColumns.SelectInputArgType[], table: string, conditions: FxSqlQuerySubQuery.SubQueryConditions, opts: DMLDriver_FindOptions, cb?: FxOrmCommon.GenericCallback<T>): T
+            <T=FxOrmDMLDriver.QueryDataPayload[]>(selectFields: FxSqlQueryColumns.SelectInputArgType[], table: string, conditions: FxSqlQuerySubQuery.SubQueryConditions, opts: DMLDriver_FindOptions): T
         }
         count: {
             /**

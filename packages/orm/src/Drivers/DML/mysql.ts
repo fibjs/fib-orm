@@ -143,7 +143,7 @@ Driver.prototype.execSimpleQuery = function <T = any>(
 };
 
 Driver.prototype.find = function (
-	this: FxOrmDMLDriver.DMLDriver_MySQL, selectFields, table, conditions, opts, cb?
+	this: FxOrmDMLDriver.DMLDriver_MySQL, selectFields, table, conditions, opts
 ) {
 	const { from_tuple, pure_table, alias } = Utilities.parseTableInputForSelect(table);
 
@@ -180,7 +180,7 @@ Driver.prototype.find = function (
 	utils.buildMergeToQuery.apply(this, [q, opts.merge, conditions]);
 	utils.buildExistsToQuery.apply(this, [q, alias, opts.exists]);
 
-	const results = this.execSimpleQuery(q.build(), cb);
+	const results = this.execSimpleQuery(q.build());
 
 	if (__pointTypeMapsTo.length > 0 && Array.isArray(results)) {
 		results.forEach(item => {

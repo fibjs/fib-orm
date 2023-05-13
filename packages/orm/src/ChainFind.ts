@@ -30,7 +30,6 @@ const ChainFind = function (
 ) {
 	const merges = opts.merge = Utilities.combineMergeInfoToArray( opts.merge );
 
-	const isMySQL = opts.driver.db.type === 'mysql';
 	const chainRunSync = function (): FxOrmInstance.Instance[] {
 		let conditions: FxSqlQuerySubQuery.SubQueryConditions = util.omit(opts.conditions, Model.virtualProperties);
 
@@ -44,7 +43,7 @@ const ChainFind = function (
 		const vFields = Object.entries(Model.virtualProperties).map(([k, p]) => p.mapsTo || k);
 		const { tableConditions, topConditions } = Utilities.extractSelectTopConditions(conditions, vFields);
 		
-		const __pointTypeMapsTo = !isMySQL ? [] : pickPointTypeFields(opts.driver, Model.allProperties);
+		const __pointTypeMapsTo = pickPointTypeFields(opts.driver, Model.allProperties);
 
 		foundItems = opts.driver.find(opts.only, opts.table, tableConditions, {
 			limit  : Utilities.coercePositiveInt(opts.limit, undefined),

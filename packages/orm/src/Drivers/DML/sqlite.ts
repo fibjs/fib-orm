@@ -14,6 +14,7 @@ import type { FxDbDriverNS, IDbDriver } from '@fxjs/db-driver';
 import type { FxOrmDb } from '../../Typo/Db';
 import type { FxOrmCommon } from '../../Typo/_common';
 import type { FxOrmQuery } from '../../Typo/query';
+import { safeParseJson, unwrapQuote } from './_dml-helpers';
 
 export const Driver: FxOrmDMLDriver.DMLDriverConstructor_SQLite = function (
 	this: FxOrmDMLDriver.DMLDriver_SQLite,
@@ -118,9 +119,12 @@ Driver.prototype.execSimpleQuery = function (
 };
 
 Driver.prototype.find = function (
-	this: FxOrmDMLDriver.DMLDriver_SQLite, selectFields, table, conditions, opts, cb?
+	this: FxOrmDMLDriver.DMLDriver_SQLite, selectFields, table, conditions, opts
 ) {
 	const { from_tuple, pure_table, alias } = Utilities.parseTableInputForSelect(table);
+
+	const __pointTypeMapsTo = opts.__pointTypeMapsTo || [];
+	
 	const ctx = {
 		table,
 		fromTuple: from_tuple,
@@ -145,7 +149,17 @@ Driver.prototype.find = function (
 	utils.buildMergeToQuery.apply(this, [q, opts.merge]);
 	utils.buildExistsToQuery.apply(this, [q, alias, opts.exists]);
 
-	return this.execSimpleQuery(q.build(), cb);
+	const results = this.execSimpleQuery(q.build());
+
+	if (__pointTypeMapsTo.length > 0 && Array.isArray(results)) {
+		results.forEach(item => {
+			__pointTypeMapsTo.forEach(field => {
+				item[field] = safeParseJson(unwrapQuote(item[field]));
+			});
+		})
+	}
+
+	return results;
 };
 
 Driver.prototype.count = function (
