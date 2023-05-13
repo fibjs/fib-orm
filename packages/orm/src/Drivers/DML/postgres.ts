@@ -255,6 +255,13 @@ Driver.prototype.valueToProperty = function (
 				value = null;
 			}
 			break;
+		case "binary": {
+			// compat with standard behavior of `JSON.stringify`/`JSON.parse`
+			if (value && value.type === 'Buffer' && Array.isArray(value.data)) {
+				value = Buffer.from(value.data);
+			}
+			break;
+		}
 		case "point":
 			if (typeof value == "string") {
 				const m = value.match(/\((\-?[\d\.]+)[\s,]+(\-?[\d\.]+)\)/);
