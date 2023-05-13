@@ -294,6 +294,13 @@ Driver.prototype.valueToProperty = function (
 				value = null;
 			}
 			break;
+		case "binary": {
+			// compat with standard behavior of `JSON.stringify`/`JSON.parse`
+            if (value && value.type === 'Buffer' && Array.isArray(value.data)) {
+                value = Buffer.from(value.data);
+            }
+			break;
+		}
 		default:
 			customType = this.customTypes[property.type];
 			if (customType && 'valueToProperty' in customType) {
@@ -321,6 +328,9 @@ Driver.prototype.propertyToValue = function (
 			break;
 		case "point":
 			return function () { return 'POINT(' + value.x + ', ' + value.y + ')'; };
+		case "binary": {
+			break;
+		}
 		default:
 			const customType = this.customTypes[property.type];
 			if (customType && 'propertyToValue' in customType) {
