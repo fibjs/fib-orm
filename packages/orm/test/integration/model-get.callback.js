@@ -324,6 +324,11 @@ describe('Model.get() - callback', function () {
         assert.property(locPoint, 'y');
         assert.equal(locPoint.y, point.y);
     }
+    const PersonPhoto = new Buffer(1024) // fake photo
+    function assertPhoto(photoBuf) {
+        assert.isTrue(Buffer.isBuffer(photoBuf));
+        assert.equal(photoBuf.compare(PersonPhoto), 0);
+    }
 
     it('should deserialize the point to { x: number; y: number }', function (done) {
       db.settings.set('properties.primary_key', 'id')
@@ -351,6 +356,35 @@ describe('Model.get() - callback', function () {
             assert.equal(err, null);
 
             assertPoint(pulledPerson.location);
+
+            return done();
+          });
+        })
+      })
+    })
+
+    it('should deserialize the photo to Buffer', function (done) {
+      db.settings.set('properties.primary_key', 'id')
+
+      Person = db.define('person', {
+        name: String,
+        photo: { type: 'binary' }
+      })
+
+      ORM.singleton.clear()
+
+      return helper.dropSync(Person, function () {
+        Person.create({
+          name: 'John Doe',
+          photo: PersonPhoto,
+        }, function (err, person) {
+          assert.equal(err, null)
+          assertPhoto(person.photo);
+
+          Person.get(person.id, (err, pulledPerson) => {
+            assert.equal(err, null);
+
+            assertPhoto(pulledPerson.photo);
 
             return done();
           });

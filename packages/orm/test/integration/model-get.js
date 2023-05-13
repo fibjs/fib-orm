@@ -247,13 +247,18 @@ describe("Model.get()", function () {
             assert.property(locPoint, 'y');
             assert.equal(locPoint.y, point.y);
         }
+        const PersonPhoto = new Buffer(1024) // fake photo
+        function assertPhoto(photoBuf) {
+            assert.isTrue(Buffer.isBuffer(photoBuf));
+            assert.equal(photoBuf.compare(PersonPhoto), 0);
+        }
 
         it("should deserialize the point to { x: number; y: number }", function (done) {
             db.settings.set('properties.primary_key', 'id');
 
             Person = db.define("person", {
                 name: String,
-                location: { type: "point" }
+                location: { type: "point" },
             });
 
             ORM.singleton.clear();
@@ -277,6 +282,38 @@ describe("Model.get()", function () {
 
                 const pulledPerson = Person.getSync(person.id);
                 assertPoint(pulledPerson.location);
+
+                done();
+            });
+        });
+
+        it("should deserialize the photo to Buffer", function (done) {
+            db.settings.set('properties.primary_key', 'id');
+
+            Person = db.define("person", {
+                name: String,
+                photo: { type: 'binary' }
+            });
+
+            ORM.singleton.clear();
+
+            helper.dropSync(Person, function () {
+                let err = null;
+                let person = null;
+                try {
+                    person = Person.createSync({
+                        name: "John Doe",
+                        photo: PersonPhoto,
+                    });
+                } catch (error) {
+                    err = error;
+                }
+
+                assert.equal(err, null);
+                assertPhoto(person.photo)
+
+                const pulledPerson = Person.getSync(person.id);
+                assertPhoto(pulledPerson.photo)
 
                 done();
             });
