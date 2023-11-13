@@ -1,4 +1,3 @@
-/// <reference types="@fibjs/types" />
 import FxORMCore = require('@fxjs/orm-core');
 import { FxSqlQuery, FxSqlQuerySubQuery, FxSqlQuerySql, FxSqlQueryDialect } from '@fxjs/sql-query';
 import type { FxOrmInstance } from './Typo/instance';
@@ -108,7 +107,7 @@ export declare function ucfirst(text: string): string;
 export declare function formatNameFor(key: 'assoc:hasMany' | 'assoc:hasOne' | 'findBy:common' | 'findBy:hasOne' | 'assoc:extendsTo' | 'findBy:extendsTo' | 'field:lazyload' | 'syncify:assoc', name: string): string;
 export declare function combineMergeInfoToArray(merges: FxOrmQuery.ChainFindOptions['merge']): FxOrmQuery.ChainFindMergeInfo[];
 export declare function parseTableInputForSelect(ta_str: string): {
-    pure_table: string | FxSqlQuerySql.SqlFromTableInput | `(${string})`;
+    pure_table: string | FxSqlQuerySql.SqlFromTableInput;
     alias: string;
     from_tuple: FxSqlQuerySql.SqlTableTuple;
 };

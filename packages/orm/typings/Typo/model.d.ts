@@ -1,5 +1,6 @@
 /// <reference types="@fibjs/types" />
 /// <reference types="@fibjs/enforce" />
+/// <reference types="@fibjs/types" />
 import type { FxOrmSqlDDLSync } from "@fxjs/sql-ddl-sync";
 import { FxOrmAssociation } from "./assoc";
 import { FxOrmInstance } from "./instance";

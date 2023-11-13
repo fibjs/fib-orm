@@ -1,4 +1,5 @@
 /// <reference types="@fibjs/types" />
+/// <reference types="@fibjs/types" />
 import type { FxOrmCommon } from '../../Typo/_common';
 import type { FxOrmDb } from '../../Typo/Db';
 declare const Driver: typeof import("@fxjs/db-driver/typings/built-ins/driver-postgresql").default;

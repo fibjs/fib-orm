@@ -1,4 +1,6 @@
 /// <reference types="@fibjs/types" />
+/// <reference types="@fibjs/types" />
+/// <reference types="@fibjs/types" />
 import { FxDbDriverNS, IDbDriver } from "@fxjs/db-driver";
 import type { FxOrmCommon } from "./_common";
 export declare namespace FxOrmDb {
