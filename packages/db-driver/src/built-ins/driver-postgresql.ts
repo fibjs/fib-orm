@@ -5,7 +5,7 @@ import db = require('db')
 import { FxDbDriverNS } from '../Typo';
 import { FxOrmCoreCallbackNS } from '@fxjs/orm-core';
 import { SQLDriver } from "./base.class";
-import { logDebugSQL, detectWindowsCodePoints } from '../utils';
+import { logDebugSQL, detectWindowsCodePoints, filterPSQLSearchPath } from '../utils';
 
 type CodePointItem = {
     codepoint: string
@@ -67,7 +67,17 @@ export default class PostgreSQLDriver extends SQLDriver<Class_DbConnection> impl
     trans<T = any> (cb: FxOrmCoreCallbackNS.ExecutionCallback<T>): boolean { return this.connection.trans(cb); }
     rollback (): void { return this.connection.rollback() }
 
-    getConnection (): Class_DbConnection { return db.openPSQL(this.uri) }
+    getConnection (): Class_DbConnection { 
+        const conn = db.openPSQL(this.uri);
+
+        let searchPath = this.config.query?.search_path || this.config.query?.searchPath || '';
+        if(searchPath) {
+            searchPath = filterPSQLSearchPath(searchPath);
+            searchPath && conn.execute(`SET search_path TO ${searchPath}`);
+        };
+
+        return conn;
+    }
 
     dbExists (dbname: string): boolean {
         return this.execute(`SELECT datname FROM pg_database WHERE datname = '${dbname}'`).length > 0;
