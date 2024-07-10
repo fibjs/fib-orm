@@ -28,6 +28,7 @@ import { FxOrmSqlDDLSync } from '@fxjs/sql-ddl-sync';
 import { FxOrmDMLDriver } from './Typo/DMLDriver';
 import { FxOrmError } from './Typo/Error';
 import { FxOrmQuery } from './Typo/query';
+const fc = require('fib-cache');
 
 import type {
     FxSqlQuerySubQuery,
@@ -229,10 +230,10 @@ export const Model = function (
 	Utilities.addUnwritableProperty(model, 'properties', m_opts.properties, { configurable: false })
 	Utilities.addUnwritableProperty(model, 'settings', m_opts.settings, { configurable: false })
 	Utilities.addUnwritableProperty(model, 'keys', m_opts.keys, { configurable: false })
-	Utilities.addUnwritableProperty(model, 'caches', new util.LruCache(
-		m_opts.instanceCacheSize > 0 && Number.isInteger(m_opts.instanceCacheSize) ? m_opts.instanceCacheSize : m_opts.settings.get('instance.defaultCacheSize'),
-		(typeof m_opts.identityCache === 'number' ? m_opts.identityCache : 1) * 1000
-	), { configurable: false })
+	Utilities.addUnwritableProperty(model, 'caches', new fc.LRU({
+		max: m_opts.instanceCacheSize > 0 && Number.isInteger(m_opts.instanceCacheSize) ? m_opts.instanceCacheSize : m_opts.settings.get('instance.defaultCacheSize'),
+		ttl: (typeof m_opts.identityCache === 'number' ? m_opts.identityCache : 1) * 1000
+	}), { configurable: false })
 
 	model.dropSync = function (
 		this: FxOrmModel.Model,
