@@ -9,7 +9,7 @@
     "bootstrap": "lerna bootstrap --no-hoist",
     "bootstrap:noci": "lerna bootstrap --no-hoist --no-ci",
     "build": "lerna run build",
-    "publish": "lerna run publish",
+    "publish": "lerna publish",
     "ci": "lerna run ci",
     "update-pkg": "fibjs ./scripts/write-pkg-manifest.js",
     "postinstall": "rm -rf node_modules/@type/node"
