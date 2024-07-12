@@ -4,24 +4,24 @@ This is one mono-style fibjs lib starter.
 
 ### Get Started
 
-Make sure you have installed `lerna` globally.
+Make sure you have installed `lerna` in this repo.
 
 ```bash
-npm i -g lerna
+npm i
 ```
 
 Then, run
 
 ```bash
 # bootstrap development
-lerna bootstrap
+npm run bootstrap
 ```
 
 Then try to run `ci` script in each package like below:
 
 
 ```bash
-lerna run ci
+npm run ci
 ```
 
 Finally, start your development, change code and test it.
