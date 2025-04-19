@@ -221,6 +221,9 @@ function colInfoToProperty(colInfo: ColumnInfoMySQL) {
         case "TEXT":
             property.type = "text";
             break;
+        case "LONGTEXT":
+            property.type = "longtext";
+            break;
         case "POINT":
             property.type = "point";
             break;
