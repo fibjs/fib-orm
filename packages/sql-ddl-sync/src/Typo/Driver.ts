@@ -55,8 +55,8 @@ export namespace FxOrmSqlDDLSync__Driver {
     }
 
     export interface DbIndexInfo_PostgreSQL extends FxOrmSqlDDLSync__DbIndex.DbIndexInfo {
-        indisprimary: "1" | "0"
-        indisunique: "1" | "0"
+        indisprimary: "1" | "0" | boolean
+        indisunique: "1" | "0" | boolean
         relname: string
         attname: string
     }
