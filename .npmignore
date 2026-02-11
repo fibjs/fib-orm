@@ -4,10 +4,6 @@ test.db*
 package-lock.json
 
 src
-build
 test
 
-/lib.ts
 /tsconfig.json
-
-packages

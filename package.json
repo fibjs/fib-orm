@@ -1,33 +1,74 @@
 {
-  "name": "fxjs-modules-orm-mono",
-  "mono": {
-    "scope": "fxjs",
-    "git_path": "fxjs-modules/orm"
-  },
-  "private": true,
-  "scripts": {
-    "bootstrap": "lerna bootstrap --no-hoist",
-    "bootstrap:noci": "lerna bootstrap --no-hoist --no-ci",
-    "build": "lerna run build",
-    "publish": "lerna publish",
-    "ci": "lerna run ci",
-    "update-pkg": "fibjs ./scripts/write-pkg-manifest.js",
-    "postinstall": "rm -rf node_modules/@type/node"
-  },
-  "devDependencies": {
-    "@fibjs/ci": "^2.6.0",
-    "@fibjs/fs-readdir-recursive": "^1.0.2",
-    "@fibjs/mkdirp": "^1.0.1",
-    "@fibjs/types": "^0.34.1",
-    "ejs": "^3.0.2",
-    "lerna": "^5.1.0"
-  },
-  "ci": {
-    "type": "actions",
-    "version": [
-      "0.33.0",
-      "0.34.0",
-      "0.35.0"
-    ]
-  }
+	"name": "fib-orm",
+	"version": "2.0.0",
+	"description": "ORM for fibjs - unified package",
+	"main": "lib/orm/index.js",
+	"types": "lib/orm/index.d.ts",
+	"exports": {
+		".": "./lib/orm/index.js",
+		"./cli": "./lib/cli/index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/fibjs/fib-orm.git"
+	},
+	"author": "fibjs",
+	"homepage": "https://github.com/fibjs/fib-orm",
+	"license": "ISC",
+	"keywords": [
+		"orm",
+		"database",
+		"fibjs",
+		"mysql",
+		"sqlite",
+		"postgres",
+		"redis"
+	],
+	"scripts": {
+		"build": "rm -rf ./lib && ftsc $(find src -name '*.ts' ! -name '*.d.ts' ! -path '*/plugins/*' | sort) --outDir ./lib && cp src/codepoints-map.json lib/codepoints-map.json && cp -r src/knex/deps lib/knex/deps",
+		"test": "fibjs test",
+		"ci": "npm run ci-sqlite",
+		"ci-mysql": "npm run build && cross-env ORM_PROTOCOL=mysql npm run test",
+		"ci-sqlite": "npm run build && cross-env ORM_PROTOCOL=sqlite npm run test",
+		"ci-postgres": "npm run build && cross-env ORM_PROTOCOL=postgres npm run test"
+	},
+	"dependencies": {
+		"@fibjs/enforce": "^0.1.1",
+		"@fibcli/make-cli": "^0.1.6",
+		"@fibcli/ora": "^0.1.0",
+		"@fibjs/chalk": "^1.0.0",
+		"@types/knex": "^0.16.1",
+		"fib-cache": "^1.1.0",
+		"fib-kv": "^1.3.1",
+		"knex": "^2.5.1",
+		"lodash.clonedeep": "^4.5.0",
+		"lodash.flatten": "^4.4.0",
+		"lodash.merge": "^4.6.1",
+		"parse-querystring-dotkey": "^1.0.3",
+		"rxjs": "^6.5.2",
+		"@types/diff": "^5.0.2",
+		"@types/semver": "^7.3.10",
+		"diff": "^5.1.0",
+		"semver": "^7.3.7"
+	},
+	"devDependencies": {
+		"@fibjs/types": "^0.35.0",
+		"@types/lodash.clonedeep": "^4.5.6",
+		"@types/lodash.flatten": "^4.4.6",
+		"@types/lodash.merge": "^4.6.6",
+		"cross-env": "^5.2.0",
+		"fib-typify": "^0.11.3",
+		"rimraf": "^3.0.2",
+		"ts-expect": "^1.3.0"
+	},
+	"engines": {
+		"fibjs": ">= 0.33.0"
+	},
+	"private": false,
+	"files": [
+		"lib"
+	],
+	"publishConfig": {
+		"access": "public"
+	}
 }

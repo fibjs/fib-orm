@@ -21,5 +21,4 @@ esac
 cd $PWD;
 
 npm install;
-npm run bootstrap:noci;
 npm run ci;
