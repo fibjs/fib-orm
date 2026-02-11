@@ -61,7 +61,7 @@ function useRunner (options) {
                         "(select `age` as `_age`, count(*) as `same_age_count` from `person` group by `age`) as `same_ages`"
                     ],
                     wheres: { 'person.age': db.comparators.eq('same_ages._age', { asIdentifier: true }) },
-                } : db.driver.sqlDriver.type === 'psql' ? {
+                } : (db.driver.sqlDriver.type === 'psql' || db.driver.sqlDriver.type === 'dm') ? {
                     from: [
                         `"person" as "person"`,
                         `(select "age" as "_age", count(*) as "same_age_count" from "person" group by "age") as "same_ages"`
@@ -95,6 +95,13 @@ function useRunner (options) {
                                 'age as _age', // alias to avoid conflict with `age` column
                                 knex.raw('count(*) as ??', ['same_age_count']),
                             ).groupBy(['_age'])
+                            break;
+                        }
+                        case 'dm': {
+                            subquery.select(
+                                'age as _age',
+                                knex.raw('count(*) as ??', ['same_age_count']),
+                            ).groupBy('age')
                             break;
                         }
                         case 'sqlite': {

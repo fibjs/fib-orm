@@ -4,3 +4,4 @@ export import sqlite = require('./sqlite')
 
 export import postgresql = require('./postgresql');
 export const mssql = null as FxOrmSqlDDLSync__Dialect.Dialect<Class_DbConnection>
+export import dm = require('./dm')

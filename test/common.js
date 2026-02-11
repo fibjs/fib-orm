@@ -86,6 +86,7 @@ common.getConnectionString = function (opts) {
     case 'postgres':
     case 'redshift':
     case 'mongodb':
+    case 'dm':
       if (common.isTravis()) {
         if (dbType == 'redshift') dbType = 'postgres';
       }

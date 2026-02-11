@@ -48,7 +48,7 @@ export function dateToString (
 	const second = zeroPad(dt.getSeconds());
 	const milli  = zeroPad(dt.getMilliseconds(), 3);
 
-	if (opts.dialect == 'mysql' || timeZone == 'local') {
+	if (opts.dialect == 'mysql' || opts.dialect == 'dm' || timeZone == 'local') {
 		return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second + '.' + milli;
 	} else {
 		return year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second + '.' + milli + 'Z';
@@ -90,6 +90,8 @@ export function get_table_alias (
 function unwrapIdentifier (identifier: string = '', dialect: FxSqlQueryDialect.DialectType): string {
 	switch (dialect) {
 		case 'postgresql':			
+			return identifier.replace(/^"|"$/g, '')
+		case 'dm':
 			return identifier.replace(/^"|"$/g, '')
 		case 'sqlite':
 		case 'mysql':			
@@ -152,8 +154,6 @@ export function defaultTableAliasNameRule (idx: number) {
 	return `t${idx}`
 }
 
-export const DialectTypes: FxSqlQueryDialect.DialectType[] = ['mysql', 'sqlite', 'mssql', 'postgresql']
-
 export function ucfirst (str: string = '') {
 	if (str.length <= 1)
 		return str.toUpperCase()
@@ -174,6 +174,8 @@ export function ensureNumber (num: any) {
 
 export function bufferToString (buffer: Class_Buffer | string, dialect: FxSqlQueryDialect.DialectType) {
 	switch (dialect) {
+		case 'dm':
+			return "HEXTORAW('" + buffer.toString('hex') + "')";
 		case 'mssql':
 			return "X'" + buffer.toString('hex') + "'";
 		case 'mysql':
@@ -184,6 +186,7 @@ export function bufferToString (buffer: Class_Buffer | string, dialect: FxSqlQue
 			return "'\\x" + buffer.toString('hex') + "'";
 	}
 }
+export const DialectTypes: FxSqlQueryDialect.DialectType[] = ['mysql', 'sqlite', 'mssql', 'postgresql', 'dm']
 
 export function escapeValForKnex (val: any, Dialect: FxSqlQueryDialect.Dialect, opts: FxSqlQueryChainBuilder.ChainBuilderOptions) {
 	// no escape for `knex.raw(...)`, `knex.ref(...)` and subquery
@@ -199,7 +202,7 @@ export function escapeValForKnex (val: any, Dialect: FxSqlQueryDialect.Dialect, 
 	else if (_type === 'symbol')
 		return val = null;
 	else if (_type === 'boolean') {
-		if (Dialect.DataTypes.isSQLITE)
+		if (Dialect.DataTypes.isSQLITE || Dialect.type === 'dm')
 			return val ? 1 : 0;
 
 		return val;
@@ -210,7 +213,9 @@ export function escapeValForKnex (val: any, Dialect: FxSqlQueryDialect.Dialect, 
 		// TODO: how to suppor timezone?
 		return val;
 	else if (Buffer.isBuffer(val)) {
-		return Dialect.type === 'postgresql' ? Dialect.knex.raw( bufferToString(val, Dialect.type) ) : val;
+		return (Dialect.type === 'postgresql' || Dialect.type === 'dm')
+			? Dialect.knex.raw(bufferToString(val, Dialect.type))
+			: val;
 	} else if (val instanceof Array)
 		return val;
 	else if (val === null)

@@ -541,6 +541,8 @@ describe("Validations", function () {
                 assert.equal(errMsg, 'NOT NULL constraint failed: person.name');
             } else if (db.driver.dialect === 'postgresql') {
                 assert.ok(errMsg.indexOf('null value in column "name"') >= 0 || errMsg.indexOf("null value in column \"name\"") >= 0);
+            } else if (db.driver.dialect === 'dm') {
+                assert.ok(!!errMsg);
             } else {
                 throw new Error(`Unknown dialect: ${db.driver.dialect}`);
             }

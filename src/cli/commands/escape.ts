@@ -6,7 +6,7 @@ import { wrapSubcommand } from '@fibcli/make-cli';
 
 import { Query, FxSqlQueryDialect } from '../../sql-query/Query';
 
-const VALID_DIALECTS = ['mysql', 'sqlite', 'postgresql', 'mssql'] as const;
+const VALID_DIALECTS = ['mysql', 'sqlite', 'postgresql', 'mssql', 'dm'] as const;
 const VALID_TYPES = ['sql', 'val', 'id'] as const;
 
 const cmd = wrapSubcommand({

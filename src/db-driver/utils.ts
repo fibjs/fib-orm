@@ -26,6 +26,8 @@ export function filterDriverType (protocol: any): FxDbDriverNS.DriverType {
         case 'pg:':
         case 'psql:':
             return 'psql';
+        case 'dm:':
+            return 'dm';
         case 'redis:':
             return 'redis';
         // case 'mongodb:':

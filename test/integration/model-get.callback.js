@@ -63,6 +63,8 @@ describe('Model.get() - callback', function () {
 
       if (dbType == 'sqlite') {
         sql = 'PRAGMA table_info(?)'
+      } else if (dbType == 'dm') {
+        sql = 'SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = UPPER(?) AND OWNER = USER'
       } else {
         sql = 'SELECT column_name FROM information_schema.columns WHERE table_name = ?'
       }
@@ -71,6 +73,9 @@ describe('Model.get() - callback', function () {
         assert.notExist(err)
 
         if (dbType === 'mysql') { // support mysql 8.0+
+          data = data.map(col => lowerCaseColumn(col));
+        }
+        if (dbType === 'dm') {
           data = data.map(col => lowerCaseColumn(col));
         }
         var names = _.map(data, dbType == 'sqlite' ? 'name' : 'column_name')

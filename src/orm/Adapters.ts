@@ -22,6 +22,7 @@ export function addAdapter(name: string, constructor: FxOrmDMLDriver.DMLDriverCo
 addAdapter('mysql', DMLs.mysql.Driver);
 addAdapter('sqlite', DMLs.sqlite.Driver);
 addAdapter('postgres', DMLs.postgres.Driver);
+addAdapter('dm', DMLs.dm.Driver);
 
 export function getAdapter(name: string): FxOrmDMLDriver.DMLDriverConstructor {
 	switch (name) {
@@ -33,6 +34,8 @@ export function getAdapter(name: string): FxOrmDMLDriver.DMLDriverConstructor {
 		case 'postgres':
 		case 'postgresql':
 			name = 'postgres';
+			break;
+		case 'dm':
 			break;
 	}
 	

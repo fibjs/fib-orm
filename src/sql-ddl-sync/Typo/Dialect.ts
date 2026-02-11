@@ -9,7 +9,7 @@ import { FxOrmSqlDDLSync__DbIndex } from "./DbIndex"
 import { FxOrmSqlDDLSync } from "./_common"
 
 export namespace FxOrmSqlDDLSync__Dialect{
-    export type DialectType = 'mysql' | 'mssql' | 'sqlite' | 'postgresql'
+    export type DialectType = 'mysql' | 'mssql' | 'sqlite' | 'postgresql' | 'dm'
 
     export type PurposeToGetRawType = 'alter_table' | 'create_table' | 'add_column' | 'alter_column'
 

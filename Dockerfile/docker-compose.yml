@@ -2,7 +2,6 @@ version: "3.7"
 services:
   mysql5.6:
     image: mysql:5.6
-    platform: linux/x86_64
     restart: always
     ports:
       - "3356:3306"
@@ -13,7 +12,6 @@ services:
       - MYSQL_DATABASE=fxjs-orm-test
   mysql5.7:
     image: mysql:5.7
-    platform: linux/x86_64
     restart: always
     ports:
       - "3357:3306"
@@ -26,7 +24,6 @@ services:
     # options `--default-authentication-plugin` has been deprecated since mysql server 8.0.27
     # it works on mysql 8.0.29 still, but for robust, we specify the image as mysql:8.0.26
     image: mysql:8.0.26
-    platform: linux/x86_64
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
@@ -51,6 +48,17 @@ services:
     # Uncomment this if you want to persist the data.
     volumes:
       - "./dbdata_pg14:/var/lib/postgresql/data"
+  dm8:
+    image: sizx/dm8
+    restart: always
+    ports:
+      - "5236:5236"
+    environment:
+      - SYSDBA_PWD=123456789
+      - PAGE_SIZE=32
+      - CHARSET=1
+      - LENGTH_IN_CHAR=1
+      - CASE_SENSITIVE=0
   redis:
     image: 'redis:6.0'
     restart: always

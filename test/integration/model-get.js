@@ -65,12 +65,23 @@ describe("Model.get()", function () {
                 case 'postgres':
                     sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND table_catalog = ?";
                     break;
+                case 'dm':
+                    sql = "SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = UPPER(?) AND OWNER = USER";
+                    break;
                 default:
                     throw new Error('unsupported dbType: ' + dbType);
             }
 
-            var data = db.driver.execQuerySync(sql, [Person.table, db.driver.config.database]);
+            var params = [Person.table, db.driver.config.database];
+            if (dbType === 'sqlite' || dbType === 'dm') {
+                params = [Person.table];
+            }
+
+            var data = db.driver.execQuerySync(sql, params);
             if (dbType === 'mysql') { // support mysql 8.0+
+                data = data.map(col => lowerCaseColumn(col));
+            }
+            if (dbType === 'dm') {
                 data = data.map(col => lowerCaseColumn(col));
             }
             var names = _.map(data, dbType == 'sqlite' ? 'name' : 'column_name')

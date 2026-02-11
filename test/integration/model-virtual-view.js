@@ -71,8 +71,9 @@ describe("Model - virtual view & property", function () {
         }, {
             virtualView: db.driver.sqlDriver.type === 'sqlite' ? "(select `class_no` as `s_class_no`, count(stu_no) as `students_count`, count(gender) as `male_count`, avg(grade) as `avg_grade`, avg(height) as `avg_height` from `students_info` group by `class_no`)"
             : db.driver.sqlDriver.type === 'mysql' ? "(select `class_no` as `s_class_no`, count(stu_no) as `students_count`, count(gender) as `male_count`, avg(grade) as `avg_grade`, avg(height) as `avg_height` from `students_info` group by `class_no`)"
-            : db.driver.sqlDriver.type === 'psql' ? `(select "class_no" as "s_class_no", count(stu_no) as "students_count", count(gender) as "male_count", avg(grade) as "avg_grade", avg(height) as "avg_height" from "students_info" group by "class_no")`
-            : null,
+            : db.driver.sqlDriver.type === 'psql' || db.driver.sqlDriver.type === 'dm'
+                ? `(select "class_no" as "s_class_no", count(stu_no) as "students_count", count(gender) as "male_count", avg(grade) as "avg_grade", avg(height) as "avg_height" from "students_info" group by "class_no")`
+                : null,
 
             // // elegant way to define virtual view, uncomment it to test with it
             // virtualView: knex.table('students_info').select(

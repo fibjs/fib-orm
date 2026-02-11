@@ -35,6 +35,7 @@ export function dialect (name: FxOrmSqlDDLSync__Dialect.DialectType | 'psql') {
 		case 'sqlite':
 		case 'mssql':
 		case 'mysql':
+			case 'dm':
 			return Dialects[name];
 		default:
 			throw new Error(`no dialect with name '${name}'`)
@@ -60,7 +61,7 @@ function updateColumnsComment<T extends IDbDriver.ISQLConn = IDbDriver.ISQLConn>
 	dbdriver: IDbDriver.ITypedDriver<T>,
 	remote_properties: FxOrmSqlDDLSync__Collection.Collection['properties'],
 ) {
-	if (dbdriver.type !== 'psql') return ;
+	if (dbdriver.type !== 'psql' && dbdriver.type !== 'dm') return ;
 
 	// TODO: support mysql also
 	const dialect = getSqlQueryDialect(dbdriver.type);

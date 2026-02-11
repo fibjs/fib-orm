@@ -775,6 +775,8 @@ describe("hasMany - callback", function () {
 
         if (dbType == 'sqlite') {
           sql = "PRAGMA table_info(?)";
+        } else if (dbType == 'dm') {
+          sql = "SELECT COLUMN_NAME, DATA_TYPE FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = UPPER(?) AND OWNER = USER ORDER BY COLUMN_ID";
         } else {
           sql = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ? ORDER BY data_type";
         }
@@ -798,6 +800,17 @@ describe("hasMany - callback", function () {
             assert.equal(cols[0].data_type,   'integer');
             assert.equal(cols[1].column_name, 'emails_text');
             assert.equal(cols[1].data_type,   'text');
+          } else if (dbType == 'dm') {
+            cols = cols.map(col => lowerCaseColumn(col));
+            const byName = cols.reduce((acc, col) => {
+              const name = String(col.column_name || '').toLowerCase();
+              acc[name] = col;
+              return acc;
+            }, {});
+            assert.equal(String(byName.account_id.column_name).toLowerCase(), 'account_id');
+            assert.ok(['int', 'integer'].includes(String(byName.account_id.data_type).toLowerCase()));
+            assert.equal(String(byName.emails_text.column_name).toLowerCase(), 'emails_text');
+            assert.ok(['varchar', 'varchar2', 'text', 'clob'].includes(String(byName.emails_text.data_type).toLowerCase()));
           }
 
           done();
@@ -825,6 +838,25 @@ describe("hasMany - callback", function () {
             assert.equal(data.length, 2);
             assert.equal(data[0].column_name, 'account_id');
             assert.equal(data[1].column_name, 'emails_text');
+
+            done()
+          });
+        } else if (dbType == 'dm') {
+          sql = "" +
+            "SELECT col.COLUMN_NAME " +
+            "FROM ALL_CONSTRAINTS con " +
+            "JOIN ALL_CONS_COLUMNS col ON con.CONSTRAINT_NAME = col.CONSTRAINT_NAME AND con.OWNER = col.OWNER " +
+            "WHERE con.CONSTRAINT_TYPE = 'P' AND con.TABLE_NAME = UPPER(?) AND con.OWNER = USER " +
+            "ORDER BY col.COLUMN_NAME";
+
+          db.driver.execQuery(sql, ['account_emails'], function (err, data) {
+            assert.notExist(err);
+
+            data = data.map(col => lowerCaseColumn(col));
+            const names = data.map(col => String(col.column_name).toLowerCase());
+            assert.equal(data.length, 2);
+            assert.ok(names.includes('account_id'));
+            assert.ok(names.includes('emails_text'));
 
             done()
           });

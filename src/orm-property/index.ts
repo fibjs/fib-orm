@@ -8,11 +8,14 @@ export function transformer(type: 'mysql'): typeof Transformers['mysql']
 export function transformer(type: 'psql'): typeof Transformers['postgresql']
 export function transformer(type: 'postgresql'): typeof Transformers['postgresql']
 export function transformer(type: 'sqlite'): typeof Transformers['sqlite']
+export function transformer(type: 'dm'): typeof Transformers['dm']
 export function transformer(type: string) {
     switch (type) {
         case 'psql':
         case 'postgres':
             return Transformers['postgresql'];
+        case 'dm':
+            return Transformers['dm'];
         case 'postgresql':
         case 'mysql':
         case 'sqlite':

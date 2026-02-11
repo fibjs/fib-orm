@@ -9,3 +9,6 @@ export { sqlite }
 
 import * as mssql from './mssql'
 export { mssql }
+
+import * as dm from './dm'
+export { dm }

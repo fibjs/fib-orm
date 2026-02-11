@@ -32,7 +32,7 @@ export function pickPointTypeFields(
 	dmlDriver: FxOrmDMLDriver.DMLDriver,
 	modelProperties: Record<string, FxOrmProperty.NormalizedProperty>
 ): string[] {
-	if (!['mysql', 'sqlite'].includes(dmlDriver.db.type)) return [];
+	if (!['mysql', 'sqlite', 'dm'].includes(dmlDriver.db.type)) return [];
 
 	return Object.values(modelProperties)
 		.filter(p => p.type === 'point')

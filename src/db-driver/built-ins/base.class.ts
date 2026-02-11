@@ -10,9 +10,12 @@ function getDriver (name: 'mysql'): typeof import('./driver-mysql').default
 function getDriver (name: 'psql' | 'postgresql' | 'pg'): typeof import('./driver-postgresql').default
 function getDriver (name: 'sqlite'): typeof import('./driver-sqlite').default
 function getDriver (name: 'redis'): typeof import('./driver-redis').default
+function getDriver (name: 'dm'): typeof import('./driver-dm').default
 // function getDriver (name: 'mongodb'): typeof import('./driver-mongodb').default
 function getDriver (name: FxDbDriverNS.DriverType | string) {
     switch (name) {
+        case 'dm':
+            return require('./driver-dm').default
         case 'mysql':
             return require('./driver-mysql').default
         case 'postgresql':
@@ -108,6 +111,7 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
 			(p === 'mysql:')
 			|| (p === 'mssql:')
 			|| (p === 'psql:')
+            || (p === 'dm:')
 			|| (p.startsWith('sqlite:'))
 		)
 	}
@@ -141,6 +145,7 @@ export class Driver<CONN_TYPE extends Driver.IConnTypeEnum = Driver.IConnTypeEnu
             case 'mysql:':
             case 'mssql:':
             case 'postgresql:':
+        	        case 'dm:':
 		        assert.ok(!!this.config.host || !!this.config.hostname, '[driver.config] host or hostname required')
                 break;
         } 

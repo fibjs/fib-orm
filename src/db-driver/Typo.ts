@@ -5,6 +5,7 @@ export namespace FxDbDriverNS {
         'mysql'
         | 'sqlite'
         | 'psql'
+        | 'dm'
         // | 'mssql'
         | 'redis'
         // | 'mongodb'

@@ -29,6 +29,12 @@ describe('ORM Prepare', function () {
                 dbdriver = makeDriver();
                 dbdriver.execute(`SELECT 'CREATE DATABASE ${config.database}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${config.database}');`);
                 break;
+            case 'dm':
+                dbdriver = makeDriver();
+                try {
+                    dbdriver.execute(`CREATE SCHEMA ${config.database}`);
+                } catch (e) {}
+                break;
         }
     })
 

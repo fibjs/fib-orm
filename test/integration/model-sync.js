@@ -27,6 +27,15 @@ describe("Model.sync", function () {
             );
     
             return result[0].TABLE_COMMENT;
+        } else if (dbdriver.type === 'dm') {
+            var result = dbdriver.execute(
+                db.driver.query.Dialect.escape(
+                    "SELECT COMMENTS FROM ALL_TAB_COMMENTS WHERE TABLE_NAME = UPPER(?) AND OWNER = USER",
+                    [table]
+                )
+            );
+
+            return result[0] && result[0].COMMENTS;
         } else if (dbdriver.type === 'sqlite') {
         }
     }

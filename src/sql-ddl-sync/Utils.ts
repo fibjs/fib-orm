@@ -51,6 +51,7 @@ export function getSqlQueryDialect (type: FxDbDriverNS.DriverType | 'postgresql'
             return sqlQueryDialects['postgresql'];
         case 'sqlite':
         case 'mysql':
+        case 'dm':
         // case 'mssql':
 	        return sqlQueryDialects[type];
     }

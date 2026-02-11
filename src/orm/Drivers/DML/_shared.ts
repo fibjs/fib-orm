@@ -48,7 +48,7 @@ export function eagerQuery<T = any> (
 }
 
 export const poolQuery: FxOrmDMLDriver.DMLDriver['poolQuery'] = function (
-	this: FxOrmDMLDriver.DMLDriver, query, cb?
+	this: FxOrmDMLDriver.DMLDriver, query: string, cb?: FxOrmCommon.GenericCallback<any>
 ) {
 	return this.db.query(query, cb);
 };

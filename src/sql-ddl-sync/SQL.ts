@@ -35,6 +35,9 @@ export function ALTER_TABLE_COMMENT (
 		case 'psql': {
 			return `COMMENT ON TABLE ${getSqlQueryDialect(db_type).escapeId(table)} IS ${comment ? getSqlQueryDialect(db_type).escapeVal(comment) : 'null'}`;
 		}
+		case 'dm': {
+			return `COMMENT ON TABLE ${getSqlQueryDialect(db_type).escapeId(table)} IS ${comment ? getSqlQueryDialect(db_type).escapeVal(comment) : 'null'}`;
+		}
 		case 'sqlite':
 		default: {
 			throw new Error(`[SQL] ALTER_TABLE_COMMENT: not supported db_type: ${db_type}!`)
@@ -60,6 +63,8 @@ export function CHECK_TABLE_HAS_COLUMN (
 	const sql = [
 		db_type === 'mysql'
 		? `SHOW FULL COLUMNS FROM ${eid(options.name)} LIKE ${evalue(options.column)}`
+		: db_type === 'dm'
+		? `SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = UPPER(${evalue(options.name)}) AND COLUMN_NAME = UPPER(${evalue(options.column)}) AND OWNER = USER`
 		: `SHOW COLUMNS FROM ${eid(options.name)} LIKE ${evalue(options.column)}`
 	].filter(x => x).join('')
 
@@ -73,8 +78,8 @@ export function ALTER_TABLE_ADD_COLUMN (
 	const sql = [
 		"ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name),
 		" ADD " + options.column,
-		options.after && " AFTER " + getSqlQueryDialect(db_type).escapeId(options.after),
-		options.first && " FIRST",
+		db_type !== 'dm' && options.after && " AFTER " + getSqlQueryDialect(db_type).escapeId(options.after),
+		db_type !== 'dm' && options.first && " FIRST",
 	].filter(x => x).join('')
 
 	return sql;
@@ -106,7 +111,7 @@ export function ALTER_TABLE_DROP_COLUMN (
 	db_type: FxDbDriverNS.DriverType,
 ) {
 	const sql = "ALTER TABLE " + getSqlQueryDialect(db_type).escapeId(options.name) +
-	          " DROP " + getSqlQueryDialect(db_type).escapeId(options.column);
+	          (db_type === 'dm' ? " DROP COLUMN " : " DROP ") + getSqlQueryDialect(db_type).escapeId(options.column);
 
 	return sql;
 };
@@ -126,8 +131,10 @@ export function DROP_INDEX (
 	options: FxOrmSqlDDLSync__SQL.IndexOptions,
 	db_type: FxDbDriverNS.DriverType,
 ) {
-	const sql = "DROP INDEX " + getSqlQueryDialect(db_type).escapeId(options.name) +
-	          " ON " + getSqlQueryDialect(db_type).escapeId(options.collection);
+	const sql = db_type === 'dm'
+		? "DROP INDEX " + getSqlQueryDialect(db_type).escapeId(options.name)
+		: "DROP INDEX " + getSqlQueryDialect(db_type).escapeId(options.name) +
+		  " ON " + getSqlQueryDialect(db_type).escapeId(options.collection);
 
 	return sql;
 };

@@ -51,3 +51,15 @@ exports.sqlite = {
 }; // uses in-memory database
 if (Boolean(process.env.FX_ORM_TEST_DEBUG))
   exports.mysql.query.debug = true;
+
+exports.dm = {
+  protocol : "dm:",
+  hostname : "localhost",
+  username : "SYSDBA",
+  port     : 5236,
+  password : "123456789",
+  database : "fxjs-orm-test",
+  query    : {
+    pool   : Boolean(process.env.FX_ORM_TEST_POOL),
+  }
+};

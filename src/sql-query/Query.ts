@@ -24,13 +24,17 @@ function mountDialect (
 	Dialect: Query['Dialect']
 ) {
 	const FKnex = require('../knex/knex');
+	const knexClientMap: Record<string, string> = {
+		dm: 'pg'
+	};
 	Object.defineProperty(this, 'Dialect', {
 		value: util.extend({}, Dialect),
 		writable: false,
 		configurable: false
 	})
 
-	const knexInst = FKnex({ client: this.Dialect.type, useNullAsDefault: true });
+	const knexClient = knexClientMap[this.Dialect.type] || this.Dialect.type;
+	const knexInst = FKnex({ client: knexClient, useNullAsDefault: true });
 
 	Object.defineProperty(this.Dialect, 'knex', {
 		value: knexInst,
