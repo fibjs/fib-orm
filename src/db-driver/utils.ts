@@ -158,8 +158,8 @@ export function logDebugSQL (dbtype: string, sql: string, is_sync = true) {
 	let fmt: string;
 
 	if (tty.isatty(process.stdout.fd)) {
-		fmt = "\033[32;1m(orm/%s) \033[34m%s\033[0m\n";
-		sql = sql.replace(/`(.+?)`/g, function (m) { return "\033[31m" + m + "\033[34m"; });
+		fmt = "\x1b[32;1m(orm/%s) \x1b[34m%s\x1b[0m\n";
+		sql = sql.replace(/`(.+?)`/g, function (m) { return "\x1b[31m" + m + "\x1b[34m"; });
 	} else {
 		fmt = "[SQL/%s] %s\n";
 	}

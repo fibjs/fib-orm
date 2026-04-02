@@ -994,7 +994,7 @@ export function makeHandlerDecorator(
 			return ;
 		}
 		
-		finishOnce === true;
+		finishOnce = true;
 
 		if (err)
 			throw err;

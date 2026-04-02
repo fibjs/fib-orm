@@ -83,13 +83,16 @@ export const Model = function (
 	const initialHooks = Object.assign({}, m_opts.hooks)
 	
 	const createInstanceSync = function (
-		data: FxOrmInstance.InstanceDataPayload,
+		_data: FxOrmInstance.InstanceDataPayload,
 		inst_opts: FxOrmInstance.CreateOptions,
 		cb?: FxOrmCommon.GenericCallback<FxOrmInstance.Instance>
 	): FxOrmInstance.Instance {
 		if (!inst_opts) {
 			inst_opts = {};
 		}
+
+		// shallow copy to ensure properties are configurable (deletable)
+		const data = { ..._data } as FxOrmInstance.InstanceDataPayload;
 
 		let found_assoc = false;
 

@@ -3,7 +3,6 @@
 		"target": "es6",
 		"module": "commonjs",
 		"noImplicitAny": true,
-		"noImplicitUseStrict": true,
 		"inlineSourceMap": false,
 		"allowJs": true,
 		"lib": [
@@ -11,6 +10,7 @@
 			"es2015",
 			"es2016"
 		],
+		"rootDir": "src",
 		"declaration": true,
 		"declarationDir": "lib",
 		"outDir": "lib",
